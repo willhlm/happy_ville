@@ -1,6 +1,5 @@
 from gameplay.states.gameplay.gameplay import Gameplay
-from gameplay.entities.cosmetics.cosmetics import Spawneffect, Spawneffect
-from gameplay.entities.enemies.enemies import Reindeer, Cultist_warrior, Cultist_rogue
+from gameplay.entities.cosmetics import SpawnEffect
 
 from engine.utils import read_files
 from engine.system import animation
@@ -143,7 +142,7 @@ class Deer_encounter(Cutscene_engine):#first deer encounter in light forest by w
     def __init__(self,game):
         super().__init__(game)
         pos = [2992, 848]
-        self.entity = Reindeer(pos, game.game_objects)
+        self.entity = game.game_objects.registry.fetch('enemies', 'reindeer')(pos, game.game_objects)
         game.game_objects.enemies.add(self.entity)
         self.game.game_objects.camera_manager.set_camera('Deer_encounter')
         self.game.game_objects.player.currentstate.enter_state('Run_pre')#should only enter these states once
@@ -189,7 +188,7 @@ class Boss_deer_encounter(Cutscene_engine):#boss fight cutscene
     def __init__(self, game):
         super().__init__(game)
         pos = [5888, 600]
-        self.entity = Reindeer(pos, game.game_objects)
+        self.entity = game.game_objects.registry.fetch('enemies', 'reindeer')(pos, game.game_objects)
         game.game_objects.enemies.add(self.entity)
         self.entity.dir[0] = -1
 
@@ -312,7 +311,7 @@ class Cultist_encounter(Cutscene_engine):#intialised from cutscene trigger
         self.game.game_objects.quests_events.initiate_quest('cultist_encounter', kill = 2)
 
         pos = [1420, 500]
-        self.entity1 = Cultist_warrior(pos, game.game_objects)
+        self.entity1 = game.game_objects.registry.fetch('enemies', 'cultist_warrior')(pos, game.game_objects)
         self.game.game_objects.enemies.add(self.entity1)
         
         self.stage = 0
@@ -338,7 +337,7 @@ class Cultist_encounter(Cutscene_engine):#intialised from cutscene trigger
             if self.timer > 200:#sapawn cultist_rogue
 
                 spawn_pos = self.game.game_objects.player.rect.topright  
-                self.entity2 = Cultist_rogue(spawn_pos, self.game.game_objects)                               
+                self.entity2 = game.game_objects.registry.fetch('enemies', 'cultist_rogue')(spawn_pos, self.game.game_objects)
                 self.entity2.dir[0] = -1
                 self.entity2.currentstate.enter_state('Ambush_pre')    
                 self.game.game_objects.enemies.add(self.entity2)

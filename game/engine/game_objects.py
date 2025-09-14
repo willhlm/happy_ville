@@ -10,6 +10,8 @@ from gameplay.ui import ui
 from gameplay.entities.states import states_gameplay#handles the rendering protocols: better suited in game_play state perhaos. But need to be here because the nheritance of states wouild break
 from gameplay.narrative import quests_events
 
+from gameplay.registery.registry_manager import RegistryManager
+
 from time import perf_counter
 
 class Game_Objects():
@@ -36,6 +38,7 @@ class Game_Objects():
         self.input_interpreter = input_interpreter.InputInterpreter(self)
         self.time_manager = time_manager.Time_manager(self)
         self.post_process = post_process.PostProcess(self)
+        self.registry = RegistryManager()
 
     def create_groups(self):#define all sprite groups
         self.enemies = groups.Group()#enemies

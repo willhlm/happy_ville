@@ -2,7 +2,8 @@ import pygame, sys
 from gameplay.ui import ui_loader
 from gameplay.states.gameplay.gameplay import Gameplay
 from gameplay.ui.elements import entities_ui
-from gameplay.entities.items.items import Heart_container, Spirit_container
+from gameplay.entities.items.heart_container import HeartContainer
+from gameplay.entities.items.spirit_container import SpiritContainer
 
 class BaseUI(Gameplay):
     def __init__(self, game, **kwarg):
@@ -389,13 +390,13 @@ class Soul_essence(BaseUI):#called from inorinoki
         if self.pointer_index[1] == 0:#if we select health
             if self.game.game_objects.player.backpack.inventory.get_quantity('soul_essence') >= self.cost:
                 pos = [self.game.game_objects.player.rect[0],-100]
-                heart = Heart_container(pos,self.game.game_objects)
+                heart = HeartContainer(pos,self.game.game_objects)
                 self.game.game_objects.loot.add(heart)
                 self.game.game_objects.player.backpack.inventory.remove('soul_essence', self.cost)
         elif self.pointer_index[1] == 1:#if we select spirit
             if self.game.game_objects.player.backpack.inventory.get_quantity('soul_essence') >= self.cost:
                 pos = [self.game.game_objects.player.rect[0],-100]
-                spirit = Spirit_container(pos,self.game.game_objects)
+                spirit = SpiritContainer(pos,self.game.game_objects)
                 self.game.game_objects.loot.add(spirit)
                 self.game.game_objects.player.backpack.inventory.remove('soul_essence', self.cost)
         else:#select cancel

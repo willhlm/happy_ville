@@ -3,22 +3,21 @@ from engine.utils import read_files
 from gameplay.narrative import dialogue
 
 from gameplay.entities.base.character import Character
-from gameplay.entities.states import states_NPC
-from gameplay.entities.cosmetics.cosmetics import InteractableIndicator, ConversationBubbles
+from gameplay.entities.npc import states_npc
+from gameplay.entities.cosmetics import InteractableIndicator, ConversationBubbles
 
 class NPC(Character):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
         self.group = game_objects.npcs
         self.pause_group = game_objects.entity_pause
-        self.name = str(type(self).__name__)#the name of the npc
         self.load_sprites()
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],18,40)
         self.rect.bottom = self.hitbox.bottom   #match bottom of sprite to hitbox
 
-        self.currentstate = states_NPC.Idle(self)
+        self.currentstate = states_npc.Idle(self)
         self.dialogue = dialogue.Dialogue(self)#handles dialoage and what to say
         self.define_conversations()
         self.collided = False
@@ -39,9 +38,10 @@ class NPC(Character):
         self.event = ['aslat']#normal events to say
         self.quest = []
 
-    def load_sprites(self):
-        self.sprites = read_files.load_sprites_dict("assets/sprites/enteties/npc/" + self.name + "/animation/", self.game_objects)
-        img = pygame.image.load('assets/sprites/enteties/npc/' + self.name +'/potrait.png').convert_alpha()
+    def load_sprites(self, name):
+        self.name = name
+        self.sprites = read_files.load_sprites_dict("assets/sprites/enteties/npc/" + name + "/animation/", self.game_objects)
+        img = pygame.image.load('assets/sprites/enteties/npc/' + name +'/potrait.png').convert_alpha()
         self.portrait = self.game_objects.game.display.surface_to_texture(img)#need to save in memoery
 
     def update(self, dt):

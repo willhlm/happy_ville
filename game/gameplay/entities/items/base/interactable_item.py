@@ -1,7 +1,7 @@
 import random
 from gameplay.entities.items.base.item import Item
 from engine.utils import read_files
-from gameplay.entities.states import interactale_item_states
+from . import interactale_item_states
 
 class InteractableItem(Item):#need to press Y to pick up - #key items: need to pick up instead of just colliding
     def __init__(self, pos, game_objects, **kwarg):

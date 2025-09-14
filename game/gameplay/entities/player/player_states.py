@@ -4,7 +4,7 @@ from gameplay.visuals.effects.effects import FadeEffect
 from engine import constants as C
 
 from gameplay.ui.overlay.point_arrow import PointArrow
-from gameplay.entities.cosmetics.cosmetics import Player_Soul, Pray_effect, ThunderBall, ThunderSpark, Dusts
+from gameplay.entities.cosmetics import PlayerSoul, PrayEffect, ThunderBall, ThunderSpark, Dusts
 
 def sign(number):
     if number > 0: return 1
@@ -1798,7 +1798,7 @@ class DeathPre(PhaseBase):
 
     def enter(self, **kwarg):
         self.entity.animation.play('death_pre')
-        self.entity.game_objects.cosmetics.add(entities.Player_Soul([self.entity.rect[0],self.entity.rect[1]],self.entity.game_objects))
+        self.entity.game_objects.cosmetics.add(entities.PlayerSoul([self.entity.rect[0],self.entity.rect[1]],self.entity.game_objects))
 
     def update(self, dt):
         self.timeout -= dt
@@ -1912,7 +1912,7 @@ class CrouchPre(PhaseBase):#used when saving and picking up interactable items
         self.entity.acceleration[0] = 0
         
         #effect
-        effect = entities.Pray_effect(self.entity.rect.center,self.entity.game_objects)
+        effect = entities.PrayEffect(self.entity.rect.center,self.entity.game_objects)
         effect.rect.bottom = self.entity.rect.bottom
         self.entity.game_objects.cosmetics.add(effect)
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['pray'][0])        

@@ -833,7 +833,7 @@
                                 {
                                  "name":"interactable_item",
                                  "type":"string",
-                                 "value":"Half_dmg"
+                                 "value":"half_damage"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -1703,7 +1703,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Mygga"
+                                 "value":"mygga"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -1721,7 +1721,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Mygga"
+                                 "value":"mygga"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -1739,7 +1739,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Mygga"
+                                 "value":"mygga"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -1757,7 +1757,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Astrid"
+                                 "value":"astrid"
                                 }],
                          "rotation":0,
                          "type":"",

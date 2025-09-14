@@ -1,7 +1,6 @@
 import random
 from gameplay.entities.base.character import Character
-from gameplay.entities.states import states_enemy
-from gameplay.entities.items import items
+from gameplay.entities.enemies.ground import states_enemy
 
 def sign(number):
     if number > 0: return 1
@@ -55,7 +54,7 @@ class Enemy(Character):
     def loots(self):#called when dead
         for key in self.inventory.keys():#go through all loot
             for i in range(0,self.inventory[key]):#make that many object for that specific loot and add to gorup
-                obj = getattr(items, key)(self.hitbox.midtop, self.game_objects)#make a class based on the name of the key       
+                obj = self.game_objects.registery.fetch('items', key)(self.hitbox.midtop, self.game_objects) 
                 obj.spawn_position()                                         
                 self.game_objects.loot.add(obj)
             self.inventory[key] = 0

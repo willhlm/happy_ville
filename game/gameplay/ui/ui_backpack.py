@@ -1,7 +1,6 @@
 import pygame, sys
 from gameplay.ui import ui_loader
 from gameplay.ui.elements.entities_ui import InventoryPointer
-from gameplay.entities.enemies import enemies#used for journal
 
 class BaseUI():
     def __init__(self, game_objects, **kwarg):
@@ -360,7 +359,8 @@ class JournalUI(BaseUI):
 
     def define_enemies(self):
         for enemy in self.game_objects.world_state.statistics['kill']:
-            self.enemies.append(getattr(sys.modules[enemies.__name__], enemy.capitalize())([0,0],self.game_objects))#make the object based on the string
+            enemy = self.game_objects.registry.fetch('enemies', enemy)([0,0],self.game_objects)
+            self.enemies.append(enemy)
 
     def select_enemies(self):
         self.selected_enemies = self.enemies[self.enemy_index[0]:self.enemy_index[0]+self.number:1]
