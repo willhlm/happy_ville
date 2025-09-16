@@ -1,6 +1,6 @@
 from engine.system import animation
 from gameplay.entities.platforms.texture.base_texture import BaseTexture
-from gameplay.entities.states import states_time_collision
+from . import states_time_collision
 
 class BaseTimer(BaseTexture):#collision block that dissapears if aila stands on it
     def __init__(self, pos, game_objects):

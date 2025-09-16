@@ -1,7 +1,7 @@
 from gameplay.entities.enviroment import Leaves, Droplet, FallingRock
-from gameplay.ui.elements import entities_ui
+from gameplay.ui.elements import MenuArrow
 from gameplay.visuals.particles import particles, screen_particles
-from gameplay.world import weather
+from gameplay.world.weather import weather
 from gameplay.states.facilities import facilities
 from gameplay.states.menus import menus
 from gameplay.entities.projectiles import seeds
@@ -71,7 +71,7 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         SlamAttack.pool(game_objects)
 
         #UI
-        entities_ui.MenuArrow.pool(game_objects)
+        MenuArrow.pool(game_objects)
         point_arrow.PointArrow.pool(game_objects)
 
         Leaves.pool(game_objects)

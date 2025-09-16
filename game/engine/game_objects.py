@@ -1,13 +1,14 @@
 import pygame
 from engine.utils import read_files
-from engine.system import collisions, sound, camera, save_load, groups, object_pool, controller, lights, timer, signals, time_manager, alphabet, input_interpreter
+from engine.system import collisions, sound, save_load, groups, object_pool, controller, lights, timer, signals, time_manager, alphabet, input_interpreter
 from gameplay.entities.player.base import player
 from engine.render import post_process
+from engine.system.camera import camera
 
-from gameplay.world import map_loader, weather, world_state
+from gameplay.world import map_loader, world_state
+from gameplay.world.weather import weather
 from engine import constants as C
 from gameplay.ui import ui
-from gameplay.entities.states import states_gameplay#handles the rendering protocols: better suited in game_play state perhaos. But need to be here because the nheritance of states wouild break
 from gameplay.narrative import quests_events
 
 from gameplay.registery.registry_manager import RegistryManager
@@ -32,7 +33,6 @@ class Game_Objects():
         self.world_state = world_state.World_state(self)#save/handle all world state stuff here
         self.ui = ui.UI_manager(self)        
         self.save_load = save_load.Save_load(self)#contains save and load attributes to load and save game
-        self.render_state = states_gameplay.Idle(self)
         self.quests_events = quests_events.Quests_events(self)        
         self.signals = signals.Signals()
         self.input_interpreter = input_interpreter.InputInterpreter(self)

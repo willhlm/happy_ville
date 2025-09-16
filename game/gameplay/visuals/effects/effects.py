@@ -1,6 +1,6 @@
 import pygame
 from gameplay.entities.base.static_entity import StaticEntity
-from gameplay.entities.states import states_shader
+from gameplay.entities.shared.states import states_shader
 
 class ShadeScreen(StaticEntity):#a screen that can be put on each layer to make it e.g. dark or light
     def __init__(self, game_objects, parallax, colour):

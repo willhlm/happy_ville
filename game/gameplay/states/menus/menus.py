@@ -1,7 +1,7 @@
 import pygame, sys
 from gameplay.ui import ui_loader
 from engine.utils import read_files
-from gameplay.ui.elements import entities_ui
+from gameplay.ui.elements import MenuArrow
 from gameplay.states.base.game_state import GameState
 
 class BaseUI(GameState):
@@ -243,7 +243,7 @@ class Option_menu_sounds(BaseUI):
         self.buttons = ['overall', 'SFX','music']
         self.current_button = 0
         self.initiate_buttons()
-        self.arrow = entities_ui.MenuArrow(self.button_rects[self.buttons[self.current_button]].topleft, game.game_objects)
+        self.arrow = MenuArrow(self.button_rects[self.buttons[self.current_button]].topleft, game.game_objects)
 
     def initiate_buttons(self):
         y_pos = 90
@@ -329,7 +329,7 @@ class Option_menu_display(BaseUI):
         self.buttons = ['vsync', 'fullscreen','resolution']
         self.current_button = 0
         self.initiate_buttons()
-        self.arrow = entities_ui.MenuArrow(self.button_rects[self.buttons[self.current_button]].topleft, game.game_objects)
+        self.arrow = MenuArrow(self.button_rects[self.buttons[self.current_button]].topleft, game.game_objects)
 
     def initiate_buttons(self):
         y_pos = 90

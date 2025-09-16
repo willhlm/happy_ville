@@ -1,5 +1,5 @@
 from engine.utils import read_files
-from gameplay.entities.states import states_blur
+from gameplay.entities.shared.states import states_blur
 from gameplay.entities.base.animated_entity import AnimatedEntity
 
 class LayeredObjects(AnimatedEntity):#objects in tiled that goes to different layers

@@ -1,5 +1,5 @@
 import random, sys
-from gameplay.entities.states import states_centraliser
+from . import states_centraliser
 
 class Camera_manager():
     def __init__(self, game_objects):

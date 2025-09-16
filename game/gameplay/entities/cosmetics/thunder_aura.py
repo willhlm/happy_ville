@@ -1,7 +1,7 @@
 import pygame
 from engine.utils import read_files
 from gameplay.entities.base.animated_entity import AnimatedEntity
-from gameplay.entities.states import states_basic
+from gameplay.entities.shared.states import states_basic
 
 class ThunderAura(AnimatedEntity):#the auro around aila when doing the thunder attack
     def __init__(self,pos,game_objects):

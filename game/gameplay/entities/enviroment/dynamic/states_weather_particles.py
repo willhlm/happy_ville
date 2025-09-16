@@ -1,14 +1,21 @@
-import sys, math, random
-from gameplay.entities.states.states_entity import Entity_States
+import sys, random
 
-class Weather_States(Entity_States):
+class WeatherStates():
     def __init__(self,entity):
-        super().__init__(entity)
+        self.entity = entity
+        self.entity.animation.play(type(self).__name__.lower())#the name of the class       
+        #self.dir = self.entity.dir.copy()
+
+    def update(self, dt):
+        pass
+
+    def increase_phase(self):
+        pass
 
     def enter_state(self,newstate):
         self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
 
-class Idle(Weather_States):
+class Idle(WeatherStates):
     def __init__(self,entity):
         super().__init__(entity)
 
@@ -17,7 +24,7 @@ class Idle(Weather_States):
         if rand==1:
             self.enter_state('Flip')
 
-class Flip(Weather_States):
+class Flip(WeatherStates):
     def __init__(self,entity):
         super().__init__(entity)
         #self.entity.velocity[1]=self.entity.velocity[1]*0.8#slow down

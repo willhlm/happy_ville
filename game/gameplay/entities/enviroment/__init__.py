@@ -23,8 +23,8 @@ from .dynamic.leaves import Leaves
 
 from .grass.cave_grass import CaveGrass 
 
-from .sources.droplet_source import DropletSource 
-from .sources.falling_rock_source import FallingRockSource 
+from .sources.droplet.droplet_source import DropletSource 
+from .sources.falling_rock.falling_rock_source import FallingRockSource 
 from .sources.light_source import LightSource 
 
 from .trees.nordveden_tree_1 import NordvedenTree_1 

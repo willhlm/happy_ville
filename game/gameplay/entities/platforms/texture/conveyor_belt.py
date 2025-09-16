@@ -2,7 +2,7 @@ import pygame
 from .base_texture import BaseTexture
 from engine.system import animation
 from engine.utils import read_files
-from gameplay.entities.states import states_basic
+from gameplay.entities.shared.states import states_basic
 
 class ConveyorBelt(BaseTexture):
     def __init__(self, pos, game_objects, size, **kwarg):

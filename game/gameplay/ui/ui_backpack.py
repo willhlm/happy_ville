@@ -1,6 +1,6 @@
 import pygame, sys
 from gameplay.ui import ui_loader
-from gameplay.ui.elements.entities_ui import InventoryPointer
+from gameplay.ui.elements import InventoryPointer
 
 class BaseUI():
     def __init__(self, game_objects, **kwarg):

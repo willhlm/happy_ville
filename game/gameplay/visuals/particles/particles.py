@@ -1,7 +1,7 @@
 import pygame, math, random
 from engine.system import animation
 from engine.utils import read_files
-from gameplay.entities.states import states_particles
+from . import states_particles
 
 class Particles(pygame.sprite.Sprite):
     def __init__(self, pos, game_objects, **kwarg):

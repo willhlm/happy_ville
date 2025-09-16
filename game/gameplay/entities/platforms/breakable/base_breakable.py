@@ -1,6 +1,6 @@
 from engine.system import animation
 from engine.utils import read_files
-from gameplay.entities.states import states_basic
+from gameplay.entities.shared.states import states_basic
 from gameplay.entities.platforms.texture.base_texture import BaseTexture
 
 class BaseBreakable(BaseTexture):#breakable collision blocks

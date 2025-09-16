@@ -1,5 +1,5 @@
 from gameplay.entities.base.animated_entity import AnimatedEntity
-from gameplay.entities.states import states_shader
+from gameplay.entities.shared.states import states_shader
 
 class Interactables(AnimatedEntity):#interactables
     def __init__(self, pos, game_objects, sfx = None):

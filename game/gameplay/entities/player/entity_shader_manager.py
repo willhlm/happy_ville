@@ -1,4 +1,4 @@
-from gameplay.entities.states import shader_states
+from . import shader_states
 from engine.render.post_process import PostProcess
 
 class EntityShaderManager():

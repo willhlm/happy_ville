@@ -1,5 +1,5 @@
 import pygame
-from gameplay.ui.elements import entities_ui
+from gameplay.ui.elements import HealthFrame, Health, SpiritFrame, Spirit, MovementHud, MoneyFrame
 
 class HUD():
     def __init__(self,game_objects):
@@ -16,22 +16,22 @@ class HUD():
 
     def init_hearts(self):
         self.hearts = []
-        self.hearts.append(entities_ui.Health_frame(self.game_objects))
+        self.hearts.append(HealthFrame(self.game_objects))
         for i in range(0,self.game_objects.player.max_health - 1):#make hearts
-            self.hearts.append(entities_ui.Health(self.game_objects))
+            self.hearts.append(Health(self.game_objects))
         self.update_hearts()
 
     def init_spirits(self):
         self.spirits = []
-        self.spirits.append(entities_ui.Spirit_frame(self.game_objects))
+        self.spirits.append(SpiritFrame(self.game_objects))
         for i in range(0,self.game_objects.player.max_spirit - 1):#make hearts
-            self.spirits.append(entities_ui.Spirit(self.game_objects))
+            self.spirits.append(Spirit(self.game_objects))
         self.update_spirits()
 
     def init_ability(self):
         self.ability_hud = []#the hud
         #for i in range(0,self.game_objects.player.abilities.number):
-        self.ability_hud.append(entities_ui.Movement_hud(self.game_objects.player))#the ability object
+        self.ability_hud.append(MovementHud(self.game_objects.player))#the ability object
 
         #self.ability_hud = entities_ui.Movement_hud(self.game_objects.player)
 
@@ -42,7 +42,7 @@ class HUD():
                 break
 
     def init_money(self):
-        self.money_frame = entities_ui.Money_frame(self.game_objects.player)
+        self.money_frame = MoneyFrame(self.game_objects.player)
 
         string = '0'
         self.money_image = self.game_objects.font.render((50,20),string)

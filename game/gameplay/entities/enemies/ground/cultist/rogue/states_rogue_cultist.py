@@ -1,20 +1,30 @@
 import sys
-from gameplay.entities.states.states_entity import Entity_States
 
-class Enemy_states(Entity_States):
+class Enemy_states():
     def __init__(self,entity):
-        super().__init__(entity)
+        self.entity = entity
+        self.entity.animation.play(type(self).__name__.lower())#the name of the class       
+        #self.dir = self.entity.dir.copy()
         self.phases=['main']
         self.phase=self.phases[0]
 
     def enter_state(self,newstate):
         self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
 
+    def update(self, dt):
+        pass
+    
+    def handle_input(self, input):
+        pass
+
+    def increase_phase(self):
+        pass
+
 class Idle(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update(self):
+    def update(self, dt):
         if abs(self.entity.velocity[0]) > 0.2:
             self.enter_state('Walk')
 
@@ -28,7 +38,7 @@ class Walk(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update(self):
+    def update(self, dt):
         if abs(self.entity.velocity[0]) <= 0.2:
             self.enter_state('Idle')
 
@@ -57,7 +67,7 @@ class Stun(Enemy_states):
         super().__init__(entity)
         self.lifetime=duration
 
-    def update(self):
+    def update(self, dt):
         self.lifetime-=1
         if self.lifetime<0:
             self.enter_state('Idle')

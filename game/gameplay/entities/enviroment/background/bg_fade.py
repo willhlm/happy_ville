@@ -1,7 +1,7 @@
 import pygame
 from engine.utils import read_files
 from .bg_block import BgBlock
-from gameplay.entities.states import states_shader
+from gameplay.entities.shared.states import states_shader
 
 class BgFade(BgBlock):
     def __init__(self, pos, game_objects, img, parallax, positions, ID):

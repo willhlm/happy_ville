@@ -1,7 +1,7 @@
 import pygame, random, math
 from engine.utils import read_files
 from .base_dynamic import BaseDynamic
-from gameplay.entities.states import states_weather_particles
+from . import states_weather_particles
 
 class Leaves(BaseDynamic):#leaves from trees
     def __init__(self, pos, game_objects, parallax, size, layer_name, kill = False, live_blur = False):

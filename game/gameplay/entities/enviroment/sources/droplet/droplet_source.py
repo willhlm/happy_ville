@@ -1,6 +1,6 @@
 import pygame
 from gameplay.entities.enviroment.base.layered_objects import LayeredObjects
-from gameplay.entities.states import states_droplet_source
+from . import states_droplet_source
 
 class DropletSource(LayeredObjects):
     animations = {}    

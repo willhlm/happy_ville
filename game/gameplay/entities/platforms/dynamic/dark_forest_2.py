@@ -1,7 +1,7 @@
 from engine.system import animation
 from engine.utils import read_files
 from .base_dynamic import BaseDynamic
-from gameplay.entities.states import states_moving_platform
+from . import states_moving_platform
 
 class DarkForest_2(BaseDynamic):#dynamic one: #shoudl be added to platforms and dynamic_platforms groups
     def __init__(self, pos, game_objects, **prop):

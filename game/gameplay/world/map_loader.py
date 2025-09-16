@@ -5,7 +5,7 @@ from gameplay.visuals.particles import screen_particles
 from engine.utils import read_files
 from gameplay.states.cutscenes import cutscenes
 from engine import constants as C
-from gameplay.world import weather
+from gameplay.world.weather import weather
 from gameplay.entities.items import SoulEssence
 from gameplay.world.camera.stop import Stop
 

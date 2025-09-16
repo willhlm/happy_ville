@@ -1,9 +1,10 @@
 import sys, random
-from gameplay.entities.states.states_entity import Entity_States
 
-class Basic_states(Entity_States):
+class Basic_states():
     def __init__(self,entity):
-        super().__init__(entity)
+        self.entity = entity
+        self.entity.animation.play(type(self).__name__.lower())#the name of the class       
+        #self.dir = self.entity.dir.copy()
 
     def enter_state(self,newstate,**kwarg):
         self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity,**kwarg)#make a class based on the name of the newstate: need to import sys
@@ -12,6 +13,12 @@ class Basic_states(Entity_States):
         pass
 
     def handle_input(self,input):
+        pass
+    
+    def handle_input(self, input):
+        pass
+
+    def increase_phase(self):
         pass
 
 class Idle(Basic_states):

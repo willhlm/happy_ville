@@ -1,4 +1,4 @@
-from gameplay.entities.states import states_wind_objects
+from . import states_wind_objects
 from gameplay.entities.enviroment.base.layered_objects import LayeredObjects
 from gameplay.entities.enviroment import Leaves
 

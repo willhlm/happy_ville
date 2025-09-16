@@ -1,6 +1,6 @@
 import pygame
 from engine.utils import read_files
-from gameplay.ui.elements import entities_ui
+from gameplay.ui.elements import *
 
 class UI_loader():#for map, omamori, ability, journal etc: json file should have same name as class and folder, tsx file should end with _UI
     def __init__(self, game_objects):
@@ -68,7 +68,7 @@ class Radna(UI_loader):
             id = obj['gid'] - self.map_data['UI_firstgid']
 
             if id == 0:#inventory
-                self.items['hand'] = entities_ui.Hand(topleft_object_position,self.game_objects)
+                self.items['hand'] = Hand(topleft_object_position,self.game_objects)
 
             elif id == 1:#Container
                 item = str(obj['id'])
@@ -77,9 +77,9 @@ class Radna(UI_loader):
                         item = property['value']
                 
                 if item in ['index', 'long', 'ring', 'small']:#name of the fingers
-                    self.equipped_containers[item] = entities_ui.InventoryContainer(topleft_object_position, self.game_objects, item)
+                    self.equipped_containers[item] = InventoryContainer(topleft_object_position, self.game_objects, item)
                 else:
-                    self.containers.append(entities_ui.InventoryContainer(topleft_object_position, self.game_objects, item))
+                    self.containers.append(InventoryContainer(topleft_object_position, self.game_objects, item))
 
             elif id == 2:#haöf_dmg
                 self.items['half_dmg'] = topleft_object_position
@@ -144,6 +144,7 @@ class Inventory(UI_loader):
         super().__init__(game_objects)
         self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('assets/ui_layouts/backpack/inventory/BG.png').convert_alpha())                    
         path = 'assets/ui_layouts/backpack/inventory/inventory.json'
+        self.registry = {'playstation': Playstation, 'keyboard': Keyboard, 'xbox': Xbox}
         self.load_UI_data(path, 'inventory')
         self.load_data()
 
@@ -158,19 +159,19 @@ class Inventory(UI_loader):
             id = obj['gid'] - self.map_data['UI_firstgid']
 
             if id == 0:#sword
-                self.items['sword'] = entities_ui.Sword(topleft_object_position,self.game_objects)
+                self.items['sword'] = Sword(topleft_object_position,self.game_objects)
 
             elif id == 4:#a button
-                new_button = getattr(entities_ui, self.game_objects.controller.controller_type[-1].capitalize())(topleft_object_position,self.game_objects,'a')
+                new_button = self.registry[self.game_objects.controller.controller_type[-1]](topleft_object_position,self.game_objects,'a')
                 self.buttons['a'] = new_button
             elif id == 5:#b button
-                new_button = getattr(entities_ui, self.game_objects.controller.controller_type[-1].capitalize())(topleft_object_position,self.game_objects,'b')
+                new_button = self.registry[self.game_objects.controller.controller_type[-1]](topleft_object_position,self.game_objects,'b')
                 self.buttons['b'] = new_button
             elif id == 6:#lb button
-                new_button = getattr(entities_ui, self.game_objects.controller.controller_type[-1].capitalize())(topleft_object_position,self.game_objects,'lb')
+                new_button = self.registry[self.game_objects.controller.controller_type[-1]](topleft_object_position,self.game_objects,'lb')
                 self.buttons['lb'] = new_button
             elif id == 7:#rb button
-                new_button = getattr(entities_ui, self.game_objects.controller.controller_type[-1].capitalize())(topleft_object_position,self.game_objects,'rb')
+                new_button = self.registry[self.game_objects.controller.controller_type[-1]](topleft_object_position,self.game_objects,'rb')
                 self.buttons['rb'] = new_button
 
             elif id == 10:#Container
@@ -178,7 +179,7 @@ class Inventory(UI_loader):
                 for property in properties:
                     if property['name'] == 'item':
                         item = property['value']
-                self.containers.append(entities_ui.InventoryContainer(topleft_object_position, self.game_objects, item))
+                self.containers.append(InventoryContainer(topleft_object_position, self.game_objects, item))
 
             elif id == 11:#money
                 self.items['amber_droplet'] = topleft_object_position
@@ -212,13 +213,13 @@ class TitleMenu(UI_loader):
                         button = property['value']
 
                 text = (self.game_objects.font.render(text = button))
-                self.buttons.append(entities_ui.Button(self.game_objects, image = text, position = topleft_object_position, center = True))
+                self.buttons.append(Button(self.game_objects, image = text, position = topleft_object_position, center = True))
 
             elif id == 1:#arrows
-                self.arrows.append(entities_ui.MenuArrow(topleft_object_position, self.game_objects, flip = True))
+                self.arrows.append(MenuArrow(topleft_object_position, self.game_objects, flip = True))
 
             elif id == 4:#arrows
-                self.arrows.append(entities_ui.MenuArrow(topleft_object_position, self.game_objects))
+                self.arrows.append(MenuArrow(topleft_object_position, self.game_objects))
 
 class LoadMenu(UI_loader):
     def __init__(self, game_objects):
@@ -244,13 +245,13 @@ class LoadMenu(UI_loader):
                         button = property['value']
 
                 text = (self.game_objects.font.render(text = button))
-                self.buttons.append(entities_ui.Button(self.game_objects, image = text, position = topleft_object_position, center = True))
+                self.buttons.append(Button(self.game_objects, image = text, position = topleft_object_position, center = True))
 
             elif id == 1:#arrows
-                self.arrows.append(entities_ui.MenuArrow(topleft_object_position, self.game_objects, flip = True))
+                self.arrows.append(MenuArrow(topleft_object_position, self.game_objects, flip = True))
 
             elif id == 4:#arrows
-                self.arrows.append(entities_ui.MenuArrow(topleft_object_position, self.game_objects))
+                self.arrows.append(MenuArrow(topleft_object_position, self.game_objects))
 
 class OptionMenu(UI_loader):
     def __init__(self, game_objects):
@@ -276,13 +277,13 @@ class OptionMenu(UI_loader):
                         button = property['value']
 
                 text = (self.game_objects.font.render(text = button))
-                self.buttons.append(entities_ui.Button(self.game_objects, image = text, position = topleft_object_position, center = True))
+                self.buttons.append(Button(self.game_objects, image = text, position = topleft_object_position, center = True))
 
             elif id == 1:#arrows
-                self.arrows.append(entities_ui.MenuArrow(topleft_object_position, self.game_objects, flip = True))
+                self.arrows.append(MenuArrow(topleft_object_position, self.game_objects, flip = True))
 
             elif id == 4:#arrows
-                self.arrows.append(entities_ui.MenuArrow(topleft_object_position, self.game_objects))
+                self.arrows.append(MenuArrow(topleft_object_position, self.game_objects))
 
 class PauseMenu(UI_loader):
     def __init__(self, game_objects):
@@ -306,13 +307,13 @@ class PauseMenu(UI_loader):
                         button = property['value']
 
                 text = (self.game_objects.font.render(text = button))
-                self.buttons.append(entities_ui.Button(self.game_objects, image = text, position = topleft_object_position, center = True))
+                self.buttons.append(Button(self.game_objects, image = text, position = topleft_object_position, center = True))
 
             elif id == 1:#arrows
-                self.arrows.append(entities_ui.MenuArrow(topleft_object_position, self.game_objects, flip = True))
+                self.arrows.append(MenuArrow(topleft_object_position, self.game_objects, flip = True))
 
             elif id == 4:#arrows
-                self.arrows.append(entities_ui.MenuArrow(topleft_object_position, self.game_objects))
+                self.arrows.append(MenuArrow(topleft_object_position, self.game_objects))
 
 class WorldMap(UI_loader):
     def __init__(self, game_objects):
@@ -331,13 +332,13 @@ class WorldMap(UI_loader):
             id = obj['gid'] - self.map_data['UI_firstgid']
 
             if id == 0:
-                new_banner = entities_ui.Banner(topleft_object_position,self.game_objects,str(1),properties[0]['value'])
+                new_banner = Banner(topleft_object_position,self.game_objects,str(1),properties[0]['value'])
                 self.objects.append(new_banner)
             elif id == 1:
-                new_banner = entities_ui.Banner(topleft_object_position,self.game_objects,str(2),properties[0]['value'])
+                new_banner = Banner(topleft_object_position,self.game_objects,str(2),properties[0]['value'])
                 self.objects.append(new_banner)
             elif id == 2:
-                new_banner = entities_ui.Banner(topleft_object_position,self.game_objects,str(3),properties[0]['value'])
+                new_banner = Banner(topleft_object_position,self.game_objects,str(3),properties[0]['value'])
                 self.objects.append(new_banner)
 
 class NordvedenMap(UI_loader):
@@ -364,7 +365,7 @@ class NordvedenMap(UI_loader):
                     elif property['name'] == 'map':
                         map = property['value']
 
-                new_arrow = entities_ui.MapArrow(topleft_object_position, self.game_objects, map, direction)
+                new_arrow = MapArrow(topleft_object_position, self.game_objects, map, direction)
                 self.objects.append(new_arrow)
 
 class DarkforestMap(UI_loader):
@@ -391,7 +392,7 @@ class DarkforestMap(UI_loader):
                     elif property['name'] == 'map':
                         map = property['value']
 
-                new_arrow = entities_ui.MapArrow(topleft_object_position, self.game_objects, map, direction)
+                new_arrow = MapArrow(topleft_object_position, self.game_objects, map, direction)
                 self.objects.append(new_arrow)
 
 class HlifblomMap(UI_loader):

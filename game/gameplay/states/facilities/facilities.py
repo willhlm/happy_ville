@@ -1,7 +1,7 @@
 import pygame, sys
 from gameplay.ui import ui_loader
 from gameplay.states.gameplay.gameplay import Gameplay
-from gameplay.ui.elements import entities_ui
+from gameplay.ui.elements import MenuBox, MenuArrow
 from gameplay.entities.items.heart_container import HeartContainer
 from gameplay.entities.items.spirit_container import SpiritContainer
 
@@ -32,7 +32,7 @@ class Fast_travel_unlock(BaseUI):
         self.bg_size = [152,48]
         self.bg = self.game.game_objects.font.fill_text_bg(self.bg_size)
         self.define_pos()
-        self.pointer = entities_ui.Menu_Box(self.game.game_objects)
+        self.pointer = MenuBox(self.game.game_objects)
 
     def define_pos(self):
         self.pos = []
@@ -96,7 +96,7 @@ class Fast_travel_menu(BaseUI):
         self.travel_UI = UI_loader.UI_loader(self.game.game_objects,'fast_travel')
         self.index = [0,0]
         self.define_destination()
-        self.pointer = entities_ui.Menu_Box(self.game.game_objects)
+        self.pointer = MenuBox(self.game.game_objects)
 
     def define_destination(self):
         self.destinations = []
@@ -146,7 +146,7 @@ class Smith(BaseUI):#called from mr smith
     def __init__(self, game, npc):
         super().__init__(game)
         self.npc = npc
-        self.pointer = entities_ui.Menu_Arrow([0, 0], self.game.game_objects)
+        self.pointer = MenuArrow([0, 0], self.game.game_objects)
         self.init()#depends on frame
         self.pointer_index = [0,0]#position of box
         self.set_response('')
@@ -215,7 +215,7 @@ class Bank(BaseUI):#caled from mr banks
     def __init__(self, game, npc):
         super().__init__(game)
         self.npc = npc
-        self.pointer = entities_ui.Menu_Arrow([0,0], self.game.game_objects)        
+        self.pointer = MenuArrow([0,0], self.game.game_objects)        
         self.pointer_index = [0,0]#position of box        
         self.surf = Bank.surf
         self.bg = Bank.bg
@@ -345,7 +345,7 @@ class Soul_essence(BaseUI):#called from inorinoki
     def __init__(self, game):
         super().__init__(game)
         self.actions=['health','spirit','cancel']
-        self.pointer = entities_ui.Menu_Box(self.game.game_objects)
+        self.pointer = MenuBox(self.game.game_objects)
         self.cost = 4
         self.pointer_index = [0,0]
         self.init_canvas()
@@ -412,7 +412,7 @@ class Vendor(BaseUI):#called from Astrid
         self.init()
         self.letter_frame = 0
         self.pointer_index = [0,0]
-        self.pointer = entities_ui.Menu_Box(self.game.game_objects)
+        self.pointer = MenuBox(self.game.game_objects)
         self.item_index = [0,0]#pointer of item
 
     def init(self):

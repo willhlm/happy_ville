@@ -6,8 +6,8 @@ from gameplay.entities.player.entity_shader_manager import EntityShaderManager
 from gameplay.entities.player.player_states import PlayerStates
 from gameplay.entities.player import states_death
 from gameplay.entities.player.backpack import backpack
-from gameplay.entities.modifiers import modifier_damage, modifier_movement
-from gameplay.entities.modifiers import modifier_damage, modifier_movement
+from gameplay.entities.shared.modifiers import modifier_damage, modifier_movement
+from gameplay.entities.shared.modifiers import modifier_damage, modifier_movement
 from gameplay.entities.player.sword import Sword
 from gameplay.entities.player.abilities.ability_manager import AbilityManager
 from gameplay.entities.status.wet import Wet

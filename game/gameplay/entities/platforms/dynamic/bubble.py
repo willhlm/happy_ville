@@ -1,7 +1,7 @@
 import random
 from engine.utils import read_files
 from engine.system import animation
-from gameplay.entities.states import states_basic
+from gameplay.entities.shared.states import states_basic
 from .base_dynamic import BaseDynamic
 
 class Bubble(BaseDynamic):#dynamic one: #shoudl be added to platforms and dynamic_platforms groups

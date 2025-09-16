@@ -1,7 +1,7 @@
 from engine.system import animation
 
 from gameplay.entities.base.static_entity import StaticEntity
-from gameplay.entities.states import states_basic
+from gameplay.entities.shared.states import states_basic
 
 class AnimatedEntity(StaticEntity):#animated stuff, i.e. cosmetics
     def __init__(self,pos,game_objects):

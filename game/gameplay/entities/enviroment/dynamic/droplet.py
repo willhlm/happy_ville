@@ -1,7 +1,7 @@
 import pygame
 from engine.utils import read_files
 from .base_dynamic import BaseDynamic
-from gameplay.entities.states import states_shader
+from gameplay.entities.shared.states import states_shader
 
 class Droplet(BaseDynamic):#cosmetic droplet   
     def __init__(self,pos, game_objects, parallax, layer_name, live_blur = False):

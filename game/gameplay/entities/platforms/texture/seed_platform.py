@@ -2,7 +2,7 @@
 from engine.utils import read_files
 from engine.system import animation
 from .base_texture import BaseTexture
-from gameplay.entities.states import states_basic
+from gameplay.entities.shared.states import states_basic
 
 class SeedPlatform(BaseTexture):
     def __init__(self, arrow, game_objects, dir):

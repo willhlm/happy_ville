@@ -1,18 +1,28 @@
 import sys, random
-from gameplay.entities.states.states_entity import Entity_States
 
-class Vatt_states(Entity_States):
+class Vatt_states():
     def __init__(self,entity):
-        super().__init__(entity)
+        self.entity = entity
+        self.entity.animation.play(type(self).__name__.lower())#the name of the class       
+        #self.dir = self.entity.dir.copy()
 
     def enter_state(self, newstate, **kwarg):
         self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity, **kwarg)#make a class based on the name of the newstate: need to import sys
+
+    def update(self, dt):
+        pass
+    
+    def handle_input(self, input):
+        pass
+
+    def increase_phase(self):
+        pass
 
 class Idle(Vatt_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update(self):
+    def update(self, dt):
         if abs(self.entity.velocity[0]) > 0.2:
             self.enter_state('Run')        
         elif not self.entity.collision_types['bottom']:
@@ -34,7 +44,7 @@ class Idle_aggro(Vatt_states):
         super().__init__(entity)
         self.entity.velocity = [0,0]
 
-    def update(self):
+    def update(self, dt):
         if abs(self.entity.velocity[0]) > 0.2:
             self.enter_state('Run_aggro')        
         elif not self.entity.collision_types['bottom']:
@@ -100,7 +110,7 @@ class Run(Vatt_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update(self):
+    def update(self, dt):
         if abs(self.entity.velocity[0]) < 0.2:
             self.enter_state('Idle')
 
@@ -114,7 +124,7 @@ class Run_aggro(Vatt_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update(self):
+    def update(self, dt):
         if abs(self.entity.velocity[0]) < 0.2:
             self.enter_state('Idle_aggro')
 
@@ -161,8 +171,8 @@ class Stun(Vatt_states):
         super().__init__(entity)
         self.lifetime = duration
 
-    def update(self):
-        self.lifetime-=1
+    def update(self, dt):
+        self.lifetime-= dt
         if self.lifetime<0:
             self.enter_state('Idle')
 
@@ -172,9 +182,9 @@ class Javelin_pre(Vatt_states):
         self.counter = 0
         self.pre_pos_increment = [-3,-2,-1,-1,-1,-1]
 
-    def update(self):
+    def update(self, dt):
         self.entity.velocity = [0,0]
-        self.counter += 1
+        self.counter += dt
         if int(self.counter/4) >= len(self.pre_pos_increment):
             pass
         elif self.counter%4 == 0:
@@ -188,9 +198,9 @@ class Javelin_main(Javelin_pre):
         super().__init__(entity)
         self.dir = self.entity.dir.copy()
 
-    def update(self):
+    def update(self, dt):
         self.entity.velocity = [3.5* self.dir[0],0]
-        self.counter += 1
+        self.counter += dt
         if self.counter > 24:
             self.enter_state('Javelin_post')
 
@@ -201,7 +211,7 @@ class Javelin_post(Javelin_pre):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
 
-    def update(self):
+    def update(self, dt):
         pass
 
     def increase_phase(self):

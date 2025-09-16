@@ -1,5 +1,5 @@
 from engine.system import animation
-from gameplay.entities.states import states_basic
+from gameplay.entities.shared.states import states_basic
 
 class Ability():#aila abilities
     def __init__(self,entity):

@@ -1,5 +1,5 @@
 from gameplay.entities.base.static_entity import StaticEntity
-from gameplay.entities.states import states_blur
+from gameplay.entities.shared.states import states_blur
 
 class BgBlock(StaticEntity):
     def __init__(self, pos, game_objects, img, parallax, live_blur = False):
