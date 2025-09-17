@@ -1,0 +1,11 @@
+{
+    "state_1" : {
+        "0" : "What is this? Well, this is what YOU wished for isn't it? It seems I've failed...",
+        "1" : "I will leave it to you, like so have our kind in the past.",
+        "2" : "Do not worry, I will abide you, like so have our kind in the past."
+    },
+    "state_2" : {
+        "0" : "Mr pink did what? Oh, my poor dear. What happened to him. You better seek out Aslat.",
+        "1" : "Could you seek out Aslat?"
+    }
+}

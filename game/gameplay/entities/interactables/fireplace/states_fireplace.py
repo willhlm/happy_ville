@@ -12,7 +12,7 @@ class Basic_states():
     def increase_phase(self):#called when animation is finished
         pass
 
-    def handle_input(self,input):
+    def update(self, dt):
         pass
     
     def handle_input(self, input):

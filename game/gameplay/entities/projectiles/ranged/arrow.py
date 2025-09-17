@@ -1,8 +1,8 @@
-import pygame
+import pygame, math
 from gameplay.entities.projectiles.base.projectiles import Projectiles
 from engine.utils import read_files
 from gameplay.entities.projectiles import seeds
-from gameplay.visuals.particles import particles
+from gameplay.entities.visuals.particles import particles
 
 class Arrow(Projectiles):#should it be called seed?
     def __init__(self, pos, game_objects, **kwarg):

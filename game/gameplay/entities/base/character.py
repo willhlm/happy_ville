@@ -2,7 +2,7 @@ from engine import constants as C
 from gameplay.entities.shared.states import hitstop_states, states_shader
 
 from gameplay.entities.base.platform_entity import PlatformEntity
-from gameplay.visuals.particles import particles
+from gameplay.entities.visuals.particles import particles
 
 class Character(PlatformEntity):#enemy, NPC,player
     def __init__(self,pos,game_objects):

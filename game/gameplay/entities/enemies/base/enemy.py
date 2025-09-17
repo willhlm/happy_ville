@@ -18,7 +18,7 @@ class Enemy(Character):
 
         self.currentstate = states_enemy.Idle(self)
 
-        self.inventory = {'Amber_droplet':random.randint(1,3)}#thigs to drop wgen killed
+        self.inventory = {'amber_droplet':random.randint(1,3)}#thigs to drop wgen killed
         self.spirit = 10
         self.health = 3
 
@@ -53,8 +53,8 @@ class Enemy(Character):
 
     def loots(self):#called when dead
         for key in self.inventory.keys():#go through all loot
-            for i in range(0,self.inventory[key]):#make that many object for that specific loot and add to gorup
-                obj = self.game_objects.registery.fetch('items', key)(self.hitbox.midtop, self.game_objects) 
+            for i in range(0, self.inventory[key]):#make that many object for that specific loot and add to gorup
+                obj = self.game_objects.registry.fetch('items', key)(self.hitbox.midtop, self.game_objects) 
                 obj.spawn_position()                                         
                 self.game_objects.loot.add(obj)
             self.inventory[key] = 0

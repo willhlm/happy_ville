@@ -1,4 +1,4 @@
-
+import pygame
 from engine.utils import read_files
 from engine.system import animation
 from .base_texture import BaseTexture

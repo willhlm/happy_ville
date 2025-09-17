@@ -5,17 +5,17 @@ class Movement_manager():
     def __init__(self):
         self.modifiers = {}
         self._sorted_modifiers = []
+        self.registry = {'two_d_liquid': TwoDLiquid, 'wall_glide' : WallGlide, 'dash_jump': DashJump, 'dash': Dash,'up_stream': UpStream, 'tjasolmais_embrace': TjasolmaisEmbrace }
 
     def add_modifier(self, modifier, priority = 0, **kwarg):
-        new_modifier = getattr(sys.modules[__name__], modifier.capitalize())(priority, **kwarg)
-        self.modifiers[modifier] = new_modifier
+        self.modifiers[modifier] = self.registry[modifier](priority, **kwarg)
         self._sort_modifiers()
 
     def remove_modifier(self, modifier):
         del self.modifiers[modifier]
         self._sort_modifiers()
 
-    def clear_modifiers(self):
+    def clear_modifiers(self): 
         self.modifiers.clear()
         self._sort_modifiers()
 
@@ -61,14 +61,14 @@ class Movement_modifier():
     def handle_input(self, input):
         pass
 
-class Wall_glide(Movement_modifier):#should it instead be a general driction modifier?
+class WallGlide(Movement_modifier):#should it instead be a general driction modifier?
     def __init__(self, priority):
         super().__init__(priority)
 
     def apply(self, context):
         context.friction[1] = 0.4
 
-class TwoD_liquid(Movement_modifier):#should it instead be a general driction modifier?
+class TwoDLiquid(Movement_modifier):#should it instead be a general driction modifier?
     def __init__(self, priority):
         super().__init__(priority)
 
@@ -76,7 +76,7 @@ class TwoD_liquid(Movement_modifier):#should it instead be a general driction mo
         context.friction[0] *= 2
         context.friction[1] *= 2
 
-class Dash_jump(Movement_modifier):#should it instead be a general driction modifier?
+class DashJump(Movement_modifier):#should it instead be a general driction modifier?
     def __init__(self, priority, **kwarg):
         super().__init__(priority)
         self.entity = kwarg['entity']
@@ -125,7 +125,7 @@ class Dash(Movement_modifier):#should it instead be a general driction modifier?
         context.gravity = 0
         context.velocity[0] += self.dash_speed * self.entity.dir[0]
 
-class Up_stream(Movement_modifier):
+class UpStream(Movement_modifier):
     def __init__(self, priority, **kwarg):
         super().__init__(priority)
         self.speed = kwarg.get('speed', [0, 0])  # Default force if not provided
@@ -135,14 +135,14 @@ class Up_stream(Movement_modifier):
         context.velocity[0] += self.speed[0]
         context.velocity[1] += self.speed[1]
 
-class Up_stream_vertical(Up_stream):
+class Up_stream_vertical(UpStream):
     """Vertical"""
 
-class Up_stream_horizontal(Up_stream):
+class Up_stream_horizontal(UpStream):
     """Horizontal"""
 
 
-class Tjasolmais_embrace(Movement_modifier):#added from ability
+class TjasolmaisEmbrace(Movement_modifier):#added from ability
     def __init__(self, priority, **kwarg):
         super().__init__(priority)
         self.entity = kwarg['entity']

@@ -1,0 +1,10 @@
+{
+  "state_1" : {
+      "0" : "Hej",
+      "1" : "Zup"
+  },
+    "state_2" : {
+        "0" : "yolo",
+        "1" : "nice weather"
+    }
+}

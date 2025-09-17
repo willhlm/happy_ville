@@ -2,6 +2,7 @@ from engine.system import animation
 from engine.utils import read_files
 from gameplay.entities.shared.states import states_basic
 from gameplay.entities.platforms.texture.base_texture import BaseTexture
+from engine import constants as C
 
 class BaseBreakable(BaseTexture):#breakable collision blocks
     def __init__(self, pos, game_objects):

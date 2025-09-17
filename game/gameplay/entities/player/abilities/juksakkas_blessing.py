@@ -1,6 +1,6 @@
 from gameplay.entities.player.base.ability import Ability
 from engine.utils import read_files
-from gameplay.entities.projectiles.projectiles import Arrow
+from gameplay.entities.projectiles import Arrow
 
 class JuksakkasBlessing(Ability):#arrow -> fetillity god
     def __init__(self, entity):

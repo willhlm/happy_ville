@@ -1,5 +1,4 @@
 from engine.system import animation
-
 from gameplay.entities.base.static_entity import StaticEntity
 from gameplay.entities.shared.states import states_basic
 

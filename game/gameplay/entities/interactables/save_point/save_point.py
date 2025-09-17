@@ -2,6 +2,7 @@ import pygame
 from engine.utils import read_files
 from gameplay.entities.interactables.base.interactables import Interactables
 from . import states_savepoint
+from gameplay.entities.visuals.cosmetics.logo_loading import LogoLoading
 
 class SavePoint(Interactables):#save point
     def __init__(self, pos, game_objects, map):
@@ -18,5 +19,5 @@ class SavePoint(Interactables):#save point
         self.game_objects.player.currentstate.enter_state('crouch')
         self.game_objects.player.backpack.map.save_savepoint(map =  self.map, point = self.init_cord)
         self.currentstate.handle_input('active')
-        self.game_objects.cosmetics.add(Logo_loading(self.game_objects))
+        self.game_objects.cosmetics.add(LogoLoading(self.game_objects))
 

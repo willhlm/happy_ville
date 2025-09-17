@@ -5,7 +5,7 @@ from engine.utils import read_files
 from gameplay.entities.player import states_sword
 from engine import constants as C
 from gameplay.entities.projectiles import hit_effects
-from gameplay.visuals.particles import particles
+from gameplay.entities.visuals.particles import particles
 
 class Sword(Melee):
     def __init__(self, entity):

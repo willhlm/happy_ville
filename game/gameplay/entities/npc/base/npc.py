@@ -4,7 +4,7 @@ from gameplay.narrative import dialogue
 
 from gameplay.entities.base.character import Character
 from gameplay.entities.npc import states_npc
-from gameplay.entities.cosmetics import InteractableIndicator, ConversationBubbles
+from gameplay.entities.visuals.cosmetics import InteractableIndicator, ConversationBubbles
 
 class NPC(Character):
     def __init__(self, pos, game_objects):

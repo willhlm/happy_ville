@@ -19,7 +19,7 @@ class Game():
         #initiate game related values
         self.game_loop = GameLoop(self)
         self.game_objects = game_objects.Game_Objects(self)
-        self.state_manager = state_manager.State_manager(self, 'Title_menu')
+        self.state_manager = state_manager.State_manager(self, 'title_menu')
 
         #debug flags
         self.DEBUG_MODE = True

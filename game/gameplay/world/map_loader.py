@@ -1,7 +1,7 @@
 import pygame, math, sys
 
 from engine.system import event_triggers, groups
-from gameplay.visuals.particles import screen_particles
+from gameplay.entities.visuals.particles import screen_particles
 from engine.utils import read_files
 from gameplay.states.cutscenes import cutscenes
 from engine import constants as C
@@ -11,7 +11,7 @@ from gameplay.world.camera.stop import Stop
 
 from gameplay.entities.interactables import *
 from gameplay.entities.platforms import *
-from gameplay.entities.enviroment import *
+from gameplay.entities.visuals.enviroment import *
 
 class Level():
     def __init__(self, game_objects):
@@ -280,17 +280,8 @@ class Level():
                 else:
                     self.game_objects.all_bgs.add(self.layer, new_shader_screen(self.game_objects, parallax, 20))
 
-            elif id == 16:#scren shade
-                for property in properties:
-                    if property['name'] == 'colour':
-                        colour = property['value']
-                
-                new_shade = entities.Shade_Screen(self.game_objects,parallax,pygame.Color(colour))
-                self.references['shade'].append(new_shade)
-                if self.layer.startswith('fg'):
-                    self.game_objects.all_fgs.add(self.layer,new_shade)
-                else:
-                    self.game_objects.all_bgs.add(self.layer,new_shade)
+            elif id == 16:
+                print(object_position)
 
             #elif id == 17:#leaves
             #    information = [object_position,object_size]
@@ -418,7 +409,7 @@ class Level():
                         colour= list(pygame.Color(property['value']))
                         prop['line_color'] = [colour[1]/255,colour[2]/255,colour[3]/255,colour[0]/255]
 
-                water = entities.TwoD_liquid(object_position, self.game_objects, object_size, self.layer, **prop)
+                water = TwoDLiquid(object_position, self.game_objects, object_size, self.layer, **prop)
                 self.game_objects.interactables_fg.add(water)#cosmetics
 
             elif id == 27:#sky
@@ -437,7 +428,7 @@ class Level():
                 self.game_objects.cosmetics.add(platform)
 
             elif id == 31:#rainbow
-                explosion = entities.Rainbow(object_position, self.game_objects, object_size, parallax)
+                explosion = Rainbow(object_position, self.game_objects, object_size, parallax)
                 self.game_objects.all_bgs.add(self.layer,explosion)
 
             elif id == 32:#smoke
@@ -479,11 +470,11 @@ class Level():
 
                 prop['vertical'] = up + down
                 prop['horizontal'] = left + right
-                upstream = entities.Up_stream(object_position, self.game_objects, object_size, **prop)
+                upstream = UpStream(object_position, self.game_objects, object_size, **prop)
                 self.game_objects.interactables_fg.add(upstream)
 
             elif id == 34:#waterfall object
-                waterfall = entities.Waterfall(object_position, self.game_objects, parallax, object_size, self.layer)
+                waterfall = Waterfall(object_position, self.game_objects, parallax, object_size, self.layer)
 
                 if self.layer.startswith('fg'):
                     self.game_objects.all_fgs.add(self.layer,waterfall)

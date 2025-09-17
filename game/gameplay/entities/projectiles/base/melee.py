@@ -1,5 +1,10 @@
 from gameplay.entities.projectiles.base.projectiles import Projectiles
 
+def sign(number):
+    if number == 0: return 0
+    elif number > 0: return 1
+    else: return -1
+
 class Melee(Projectiles):
     def __init__(self, entity, **kwarg):
         super().__init__([0,0], entity.game_objects, **kwarg)

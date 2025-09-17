@@ -1,6 +1,6 @@
 from gameplay.entities.player.base.ability import Ability
 from engine.utils import read_files
-from gameplay.entities.projectiles.projectiles import Wind
+from gameplay.entities.projectiles import Wind
 
 class BieggsBreath(Ability):#force push
     def __init__(self, entity):

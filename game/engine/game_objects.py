@@ -71,7 +71,7 @@ class Game_Objects():
     def load_map(self, previous_state, map_name, spawn = '1', fade = True):#called from path_col
         if fade:#for cutscenes
             kwarg = {'previous_state': previous_state, 'map_name': map_name,'spawn':spawn, 'fade': fade }
-            self.game.state_manager.enter_state('Fadeout', **kwarg)
+            self.game.state_manager.enter_state('fade_out', **kwarg)
         else:
             self.load_map2(map_name, spawn, fade)
 
@@ -83,7 +83,7 @@ class Game_Objects():
         print(t1_stop-t1_start)
 
         if fade:#for cutscenes
-            self.game.state_manager.enter_state('Fadein')        
+            self.game.state_manager.enter_state('fade_in')        
 
     def clean_groups(self):#called wgen changing map
         self.npcs.empty()

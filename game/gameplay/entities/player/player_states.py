@@ -1,10 +1,10 @@
 import random, math
-from gameplay.visuals.effects.effects import FadeEffect
+from gameplay.entities.visuals.effects.fade_effect import FadeEffect
 
 from engine import constants as C
 
 from gameplay.ui.overlay.point_arrow import PointArrow
-from gameplay.entities.cosmetics import PlayerSoul, PrayEffect, ThunderBall, ThunderSpark, Dusts
+from gameplay.entities.visuals.cosmetics import PlayerSoul, PrayEffect, ThunderBall, ThunderSpark, Dusts
 
 def sign(number):
     if number > 0: return 1
@@ -1798,7 +1798,7 @@ class DeathPre(PhaseBase):
 
     def enter(self, **kwarg):
         self.entity.animation.play('death_pre')
-        self.entity.game_objects.cosmetics.add(entities.PlayerSoul([self.entity.rect[0],self.entity.rect[1]],self.entity.game_objects))
+        self.entity.game_objects.cosmetics.add(PlayerSoul([self.entity.rect[0],self.entity.rect[1]],self.entity.game_objects))
 
     def update(self, dt):
         self.timeout -= dt
@@ -1912,7 +1912,7 @@ class CrouchPre(PhaseBase):#used when saving and picking up interactable items
         self.entity.acceleration[0] = 0
         
         #effect
-        effect = entities.PrayEffect(self.entity.rect.center,self.entity.game_objects)
+        effect = PrayEffect(self.entity.rect.center,self.entity.game_objects)
         effect.rect.bottom = self.entity.rect.bottom
         self.entity.game_objects.cosmetics.add(effect)
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['pray'][0])        
@@ -1978,7 +1978,7 @@ class ThunderPre(PhaseBase):
 
     def enter(self, **kwarg):
         #self.entity.animation.play('thunder_pre')
-        self.ball = entities.ThunderBall(self.entity.rect.topleft, self.entity.game_objects)#will be aila since aila will be swirlying
+        self.ball = ThunderBall(self.entity.rect.topleft, self.entity.game_objects)#will be aila since aila will be swirlying
         self.entity.game_objects.cosmetics.add(self.ball)
 
         self.duration = 100
@@ -2053,7 +2053,7 @@ class ThunderPost(PhaseBase):
         self.entity.animation.play('thunder_post')
         self.entity.game_objects.time_manager.modify_time(time_scale = 0, duration = 7, callback = lambda: self.entity.game_objects.camera_manager.camera_shake(amplitude = 30, duration = 30, scale = 0.9))#freeze
 
-        sparks = entities.ThunderSpark(self.entity.rect.topleft, self.entity.game_objects)
+        sparks = ThunderSpark(self.entity.rect.topleft, self.entity.game_objects)
         sparks.rect.midbottom = [self.entity.hitbox.midbottom[0], self.entity.hitbox.midbottom[1] + 16]#adjust the position
         self.entity.game_objects.cosmetics.add(sparks)
 

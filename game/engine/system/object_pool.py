@@ -1,6 +1,6 @@
-from gameplay.entities.enviroment import Leaves, Droplet, FallingRock
+from gameplay.entities.visuals.enviroment import Leaves, Droplet, FallingRock
 from gameplay.ui.elements import MenuArrow
-from gameplay.visuals.particles import particles, screen_particles
+from gameplay.entities.visuals.particles import particles, screen_particles
 from gameplay.world.weather import weather
 from gameplay.states.facilities import facilities
 from gameplay.states.menus import menus
@@ -9,8 +9,8 @@ from gameplay.entities.enemies import Reindeer, CultistWarrior, CultistRogue
 from gameplay.entities.platforms import Bubble, SeedPlatform
 from gameplay.entities.items import *
 from gameplay.entities.projectiles import *
-from gameplay.entities.cosmetics import *
-from gameplay.visuals.effects import effects
+from gameplay.entities.visuals.cosmetics import *
+from gameplay.entities.visuals.effects.fade_effect import FadeEffect
 from gameplay.ui.overlay import point_arrow
 
 class Object_pool():#a class that contains the objecte one may one to spawn duirng the game: it preloads stiff that needs to be loaded from file
@@ -49,7 +49,7 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         InteractableIndicator.pool(game_objects)
 
         #effects
-        effects.FadeEffect.pool(game_objects)
+        FadeEffect.pool(game_objects)
 
         #enemies
         Reindeer.pool(game_objects)

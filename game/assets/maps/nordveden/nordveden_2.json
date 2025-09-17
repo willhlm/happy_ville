@@ -16,35 +16,6 @@
                  "width":330,
                  "x":0,
                  "y":0
-                }, 
-                {
-                 "draworder":"topdown",
-                 "id":77,
-                 "name":"statics",
-                 "objects":[
-                        {
-                         "gid":17,
-                         "height":16,
-                         "id":595,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"colour",
-                                 "type":"color",
-                                 "value":"#ffffffff"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":1040,
-                         "y":496
-                        }],
-                 "opacity":1,
-                 "type":"objectgroup",
-                 "visible":true,
-                 "x":0,
-                 "y":0
                 }],
          "name":"bg10",
          "offsetx":-400,
@@ -69,17 +40,6 @@
                  "type":"tilelayer",
                  "visible":true,
                  "width":330,
-                 "x":0,
-                 "y":0
-                }, 
-                {
-                 "draworder":"topdown",
-                 "id":96,
-                 "name":"statics",
-                 "objects":[],
-                 "opacity":1,
-                 "type":"objectgroup",
-                 "visible":true,
                  "x":0,
                  "y":0
                 }],
@@ -108,17 +68,6 @@
                  "width":330,
                  "x":0,
                  "y":0
-                }, 
-                {
-                 "draworder":"topdown",
-                 "id":95,
-                 "name":"statics",
-                 "objects":[],
-                 "opacity":1,
-                 "type":"objectgroup",
-                 "visible":true,
-                 "x":0,
-                 "y":0
                 }],
          "name":"bg8",
          "offsetx":-300,
@@ -143,17 +92,6 @@
                  "type":"tilelayer",
                  "visible":true,
                  "width":330,
-                 "x":0,
-                 "y":0
-                }, 
-                {
-                 "draworder":"topdown",
-                 "id":94,
-                 "name":"statics",
-                 "objects":[],
-                 "opacity":1,
-                 "type":"objectgroup",
-                 "visible":true,
                  "x":0,
                  "y":0
                 }],
@@ -191,17 +129,6 @@
                  "type":"tilelayer",
                  "visible":true,
                  "width":330,
-                 "x":0,
-                 "y":0
-                }, 
-                {
-                 "draworder":"topdown",
-                 "id":76,
-                 "name":"statics",
-                 "objects":[],
-                 "opacity":1,
-                 "type":"objectgroup",
-                 "visible":true,
                  "x":0,
                  "y":0
                 }],
@@ -1510,7 +1437,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Mygga"
+                                 "value":"mygga"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -1528,7 +1455,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Mygga"
+                                 "value":"mygga"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -1546,7 +1473,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Mygga"
+                                 "value":"mygga"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -1564,7 +1491,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Larv"
+                                 "value":"larv"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -1582,7 +1509,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Larv"
+                                 "value":"larv"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -1600,7 +1527,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Larv"
+                                 "value":"larv"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -1618,7 +1545,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Rav"
+                                 "value":"rav"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -1636,7 +1563,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Mygga"
+                                 "value":"mygga"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -1654,7 +1581,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Rav"
+                                 "value":"rav"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -2044,7 +1971,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Mygga"
+                                 "value":"mygga"
                                 }],
                          "rotation":0,
                          "type":"",

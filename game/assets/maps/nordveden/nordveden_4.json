@@ -901,7 +901,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Mygga"
+                                 "value":"mygga"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -919,7 +919,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Rav"
+                                 "value":"rav"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -937,7 +937,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Mygga"
+                                 "value":"mygga"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -955,7 +955,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Mygga"
+                                 "value":"mygga"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -973,14 +973,14 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Larv"
+                                 "value":"larv"
                                 }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":16,
                          "x":1344,
-                         "y":768
+                         "y":767
                         }, 
                         {
                          "gid":3,
@@ -991,7 +991,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Larv"
+                                 "value":"larv"
                                 }],
                          "rotation":0,
                          "type":"",

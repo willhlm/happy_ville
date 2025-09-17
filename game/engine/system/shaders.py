@@ -174,7 +174,7 @@ class Zoom(Shaders):#only zoom in?
     def draw_to_composite(self, temp_layer, composite_screen):
         self.draw( temp_layer, composite_screen)
 
-class Speed_lines(Shaders):#TODO, should jusu be a cosmetic, not a screen shader
+class Speed_lines(Shaders):
     def __init__(self, post_process, **kwarg):
         super().__init__(post_process)
         self.noise_layer = post_process.game_objects.game.display.make_layer(post_process.game_objects.game.window_size)#TODO

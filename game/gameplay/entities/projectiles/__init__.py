@@ -1,5 +1,6 @@
 from .melee.explosion import Explosion
 from .melee.sword import Sword
+from .melee.hurt_box import HurtBox
 
 from .ranged.bouncy_balls import BouncyBalls
 from .ranged.poison_cloud import PoisonCloud

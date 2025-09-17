@@ -1,5 +1,6 @@
 import pygame
 from gameplay.entities.interactables.base.interactables import Interactables
+from engine import constants as C
 
 class PathCollision(Interactables):
     def __init__(self, pos, game_objects, size, destination, spawn):

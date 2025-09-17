@@ -1,6 +1,6 @@
 from gameplay.entities.player.base.ability import Ability
 from engine.utils import read_files
-from gameplay.entities.projectiles.projectiles import Shield
+from gameplay.entities.projectiles import Shield
 
 class TjasolmaisEmbrace(Ability):#makes the shield, water god
     def __init__(self, entity):

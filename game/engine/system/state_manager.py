@@ -1,24 +1,14 @@
-from gameplay.states.gameplay import gameplay
-from gameplay.states.facilities import facilities
-from gameplay.states.cutscenes import cutscenes
-from gameplay.states.menus import menus
+from gameplay.states import *
 
 class State_manager():
-    def __init__(self, game, initial_state = 'Title_menu'):
+    def __init__(self, game, initial_state = 'title_menu'):
         self.game = game
-        self.state_stack = [getattr(menus, initial_state)(self.game)]  # Initialize with the first state
-        self.category_map = {
-            'gameplay': gameplay,
-            'facility': facilities,
-            'cutscene': cutscenes,
-            'menu': menus
-        }
+        self.state_stack = [REGISTERY[initial_state](self.game)]  # Initialize with the first state
 
-    def enter_state(self, state_name, category = 'gameplay', **kwarg):
+    def enter_state(self, state_name, **kwarg):
         """Push a new state onto the stack."""
         # Get the state class dynamically and instantiate it
-        module = self.category_map[category]
-        state = getattr(module, state_name)(self.game, **kwarg)
+        state = REGISTERY[state_name](self.game, **kwarg)        
         self.state_stack.append(state)        
 
     def exit_state(self):
@@ -42,3 +32,47 @@ class State_manager():
     def handle_events(self, input):
         """Handle events in the current active state."""
         self.state_stack[-1].handle_events(input)
+
+REGISTERY = {
+    # Menus
+    "load_menu": LoadMenu,
+    "option_menu_display": OptionMenuDisplay,
+    "option_menu_sounds": OptionMenuSounds,
+    "option_menu": OptionMenu,
+    "pause_menu": PauseMenu,
+    "title_menu": TitleMenu,
+
+    # Gameplay
+    "gameplay": Gameplay,
+    "ability_select": AbilitySelect,
+    "blit_image_text": BlitImageText,
+    "conversation": Conversation,
+    "fade_in": FadeIn,
+    "fade_out": FadeOut,
+    "safe_spawn_1": SafeSpawn_1,
+    "safe_spawn_2": SafeSpawn_2,
+    "uis": UIs,
+
+    # Facilities
+    "bank_deposite": BankDeposite,
+    "bank_widthdraw": BankWidthdraw,
+    "bank": Bank,
+    "fast_travel_menu": FastTravelMenu,
+    "fast_travel_unlock": FastTravelUnlock,
+    "smith": Smith,
+    "soul_essence": SoulEssence,
+    "vendor_2": Vendor_2,
+    "vendor": Vendor,
+
+    # Cutscenes
+    "boss_deer_encounter": BossDeerEncounter,
+    "butterfly_encounter": ButterflyEncounter,
+    "cultist_encounter": CultistEncounter,
+    "death": Death,
+    "deer_encounter": DeerEncounter,
+    "defeated_boss": DefeatedBoss,
+    "new_game": NewGame,
+    "rhoutta_encounter_defeat": RhouttaEncounterDefeat,
+    "rhoutta_encounter": RhouttaEncounter,
+    "title_screen": TitleScreen
+}

@@ -2,6 +2,7 @@ import pygame
 from gameplay.entities.enemies.base.enemy import Enemy
 from engine.utils import read_files
 from . import rav_states
+from gameplay.entities.projectiles import HurtBox
 
 class Rav(Enemy):
     def __init__(self,pos,game_objects):
@@ -20,5 +21,5 @@ class Rav(Enemy):
         self.currentstate = rav_states.Patrol(self)
 
     def attack(self):#called from states, attack main
-        attack = Hurt_box(self, lifetime = 10, dir = self.dir, size = [32, 32])#make the object
+        attack = HurtBox(self, lifetime = 10, dir = self.dir, size = [32, 32])#make the object
         self.projectiles.add(attack)#add to group but in main phase

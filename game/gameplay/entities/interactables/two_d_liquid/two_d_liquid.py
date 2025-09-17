@@ -1,4 +1,6 @@
 import pygame
+from engine import constants as C
+from gameplay.entities.visuals.particles import particles
 from gameplay.entities.base.static_entity import StaticEntity
 from . import states_two_d_liquid
 
@@ -7,6 +9,9 @@ class TwoDLiquid(StaticEntity):#inside interactables_fg group. fg because in fro
         super().__init__(pos, game_objects)
         self.empty = game_objects.game.display.make_layer(size)
         self.noise_layer = game_objects.game.display.make_layer(size)
+        if layer_name == 'bg1':
+            layer_name = 'player'
+        
         self.layer_name = layer_name
 
         self.hitbox = pygame.Rect(pos, size)#for player collision
@@ -56,7 +61,7 @@ class TwoDLiquid(StaticEntity):#inside interactables_fg group. fg because in fro
 
     def player_collision(self, player):#player collision
         if self.interacted: return
-        player.movement_manager.add_modifier('TwoD_liquid')
+        player.movement_manager.add_modifier('two_d_liquid')
         vel_scale = player.velocity[1] / C.max_vel[1]
         self.splash(player.hitbox.midbottom, lifetime = 100, dir = [0,1], colour = [self.currentstate.liquid_tint[0]*255, self.currentstate.liquid_tint[1]*255, self.currentstate.liquid_tint[2]*255, 255], vel = {'gravity': [7 * vel_scale, 14 * vel_scale]}, fade_scale = 0.3, gradient=0)
         player.timer_jobs['wet'].deactivate()#stop dropping if inside the water again
@@ -65,7 +70,7 @@ class TwoDLiquid(StaticEntity):#inside interactables_fg group. fg because in fro
 
     def player_noncollision(self):
         if not self.interacted: return
-        self.game_objects.player.movement_manager.remove_modifier('TwoD_liquid')
+        self.game_objects.player.movement_manager.remove_modifier('two_d_liquid')
         self.game_objects.player.timer_jobs['wet'].activate(self.currentstate.liquid_tint)#water when player leaves
         vel_scale = abs(self.game_objects.player.velocity[1] / C.max_vel[1])
         self.splash(self.game_objects.player.hitbox.midbottom, lifetime = 100, dir = [0,1], colour = [self.currentstate.liquid_tint[0]*255, self.currentstate.liquid_tint[1]*255, self.currentstate.liquid_tint[2]*255, 255], vel = {'gravity': [10 * vel_scale, 14 * vel_scale]}, fade_scale = 0.3, gradient=0)

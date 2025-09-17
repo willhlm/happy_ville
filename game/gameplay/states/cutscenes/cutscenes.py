@@ -1,9 +1,9 @@
 from gameplay.states.gameplay.gameplay import Gameplay
-from gameplay.entities.cosmetics import SpawnEffect
+from gameplay.entities.visuals.cosmetics import SpawnEffect
 
 from engine.utils import read_files
 from engine.system import animation
-from gameplay.visuals.particles import particles
+from gameplay.entities.visuals.particles import particles
 
 #file based
 class Cutscene_file():#cutscneens that will run based on file. The name of the file should be the same as the class name
