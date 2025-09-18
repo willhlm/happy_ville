@@ -1,6 +1,6 @@
 import sys
 
-class Damage_manager():
+class DamageManager():
     def __init__(self, entity):
         self.entity = entity
         self.modifiers = {}

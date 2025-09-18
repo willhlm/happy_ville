@@ -14,5 +14,5 @@ class Spiritorb(Item):#the thing that gives spirit
         player.add_spirit(1)
         self.kill()
 
-    def update_vel(self):
+    def update_vel(self, dt):
         pass

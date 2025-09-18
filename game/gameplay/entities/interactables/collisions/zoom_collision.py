@@ -1,4 +1,5 @@
 import pygame
+from engine import constants as C
 from gameplay.entities.interactables.base.interactables import Interactables
 
 class ZoomCollision(Interactables):

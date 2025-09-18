@@ -23,7 +23,7 @@ class Idle(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update(self):
+    def update(self, dt):
         self.player_distance = [self.entity.game_objects.player.rect.centerx-self.entity.rect.centerx,self.entity.game_objects.player.rect.centery-self.entity.rect.centery]#check plater distance
         if abs(self.player_distance[0]) < self.entity.aggro_distance[0]:
             self.enter_state('Birth')

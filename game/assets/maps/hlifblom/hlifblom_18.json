@@ -636,7 +636,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Flower_butterfly"
+                                 "value":"flower_butterfly"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -654,7 +654,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"MsButterfly"
+                                 "value":"ms_butterfly"
                                 }],
                          "rotation":0,
                          "type":"",

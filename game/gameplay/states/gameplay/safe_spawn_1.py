@@ -13,7 +13,7 @@ class SafeSpawn_1(Gameplay):#basically fade. Uses it when collising a hole
         self.count += dt
         if self.count > self.fade_length:
             self.game.state_manager.exit_state()
-            self.game.state_manager.enter_state('Safe_spawn_2')
+            self.game.state_manager.enter_state('safe_spawn_2')
 
     def render(self):
         super().render()#gameplay render

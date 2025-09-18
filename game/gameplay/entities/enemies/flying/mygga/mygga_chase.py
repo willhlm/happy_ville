@@ -1,6 +1,11 @@
-import pygame 
+import pygame, math
 from gameplay.entities.enemies.base.flying_enemy import FlyingEnemy
 from engine.utils import read_files
+
+def sign(number):
+    if number == 0: return 0
+    elif number > 0: return 1
+    else: return -1
 
 class MyggaChase(FlyingEnemy):
     def __init__(self,pos,game_objects):

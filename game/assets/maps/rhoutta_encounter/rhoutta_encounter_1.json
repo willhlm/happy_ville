@@ -21,25 +21,7 @@
                  "draworder":"topdown",
                  "id":49,
                  "name":"statics",
-                 "objects":[
-                        {
-                         "gid":17,
-                         "height":16,
-                         "id":1683,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"colour",
-                                 "type":"color",
-                                 "value":"#ff000000"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":720,
-                         "y":480
-                        }],
+                 "objects":[],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -76,25 +58,7 @@
                  "draworder":"topdown",
                  "id":48,
                  "name":"statics",
-                 "objects":[
-                        {
-                         "gid":17,
-                         "height":16,
-                         "id":1682,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"colour",
-                                 "type":"color",
-                                 "value":"#ff000000"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":736,
-                         "y":512
-                        }],
+                 "objects":[],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -131,25 +95,7 @@
                  "draworder":"topdown",
                  "id":47,
                  "name":"statics",
-                 "objects":[
-                        {
-                         "gid":17,
-                         "height":16,
-                         "id":1681,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"colour",
-                                 "type":"color",
-                                 "value":"#ff000000"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":752,
-                         "y":480
-                        }],
+                 "objects":[],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -186,25 +132,7 @@
                  "draworder":"topdown",
                  "id":46,
                  "name":"statics",
-                 "objects":[
-                        {
-                         "gid":17,
-                         "height":16,
-                         "id":1680,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"colour",
-                                 "type":"color",
-                                 "value":"#ff000000"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":832,
-                         "y":592
-                        }],
+                 "objects":[],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -241,25 +169,7 @@
                  "draworder":"topdown",
                  "id":45,
                  "name":"statics",
-                 "objects":[
-                        {
-                         "gid":17,
-                         "height":16,
-                         "id":1679,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"colour",
-                                 "type":"color",
-                                 "value":"#ff000000"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":496,
-                         "y":144
-                        }],
+                 "objects":[],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -294,25 +204,7 @@
                  "draworder":"topdown",
                  "id":44,
                  "name":"statics",
-                 "objects":[
-                        {
-                         "gid":17,
-                         "height":16,
-                         "id":1678,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"colour",
-                                 "type":"color",
-                                 "value":"#ff000000"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":768,
-                         "y":432
-                        }],
+                 "objects":[],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -349,43 +241,7 @@
                  "draworder":"topdown",
                  "id":43,
                  "name":"statics",
-                 "objects":[
-                        {
-                         "gid":17,
-                         "height":16,
-                         "id":1677,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"colour",
-                                 "type":"color",
-                                 "value":"#ff000000"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":720,
-                         "y":384
-                        }, 
-                        {
-                         "gid":16,
-                         "height":16,
-                         "id":1694,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"particle",
-                                 "type":"string",
-                                 "value":"Fog"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":720,
-                         "y":368
-                        }],
+                 "objects":[],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -423,60 +279,6 @@
                  "id":35,
                  "name":"statics",
                  "objects":[
-                        {
-                         "gid":16,
-                         "height":16,
-                         "id":1668,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"particle",
-                                 "type":"string",
-                                 "value":"Rain"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":768,
-                         "y":352
-                        }, 
-                        {
-                         "gid":17,
-                         "height":16,
-                         "id":1676,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"colour",
-                                 "type":"color",
-                                 "value":"#ff000000"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":784,
-                         "y":352
-                        }, 
-                        {
-                         "gid":16,
-                         "height":16,
-                         "id":1693,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"particle",
-                                 "type":"string",
-                                 "value":"Fog"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":816,
-                         "y":400
-                        }, 
                         {
                          "gid":16,
                          "height":16,
@@ -535,60 +337,6 @@
                         {
                          "gid":16,
                          "height":16,
-                         "id":1667,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"particle",
-                                 "type":"string",
-                                 "value":"Rain"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":736,
-                         "y":320
-                        }, 
-                        {
-                         "gid":17,
-                         "height":16,
-                         "id":1675,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"colour",
-                                 "type":"color",
-                                 "value":"#ff000000"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":768,
-                         "y":320
-                        }, 
-                        {
-                         "gid":16,
-                         "height":16,
-                         "id":1692,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"particle",
-                                 "type":"string",
-                                 "value":"Fog"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":800,
-                         "y":320
-                        }, 
-                        {
-                         "gid":16,
-                         "height":16,
                          "id":1697,
                          "name":"",
                          "properties":[
@@ -601,7 +349,7 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":816,
+                         "x":768,
                          "y":336
                         }],
                  "opacity":1,
@@ -1128,26 +876,8 @@
                          "y":624
                         }, 
                         {
-                         "gid":16,
-                         "height":16,
-                         "id":1666,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"particle",
-                                 "type":"string",
-                                 "value":"Rain"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":912,
-                         "y":416
-                        }, 
-                        {
                          "gid":17,
-                         "height":16,
+                         "height":0,
                          "id":1674,
                          "name":"",
                          "properties":[
@@ -1159,9 +889,9 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":16,
-                         "x":896,
-                         "y":416
+                         "width":0,
+                         "x":912,
+                         "y":400
                         }, 
                         {
                          "gid":15,
@@ -1287,24 +1017,6 @@
                                  "name":"particle",
                                  "type":"string",
                                  "value":"Ominous_circles"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":928,
-                         "y":416
-                        }, 
-                        {
-                         "gid":16,
-                         "height":16,
-                         "id":1691,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"particle",
-                                 "type":"string",
-                                 "value":"Fog"
                                 }],
                          "rotation":0,
                          "type":"",

@@ -1,9 +1,10 @@
 import pygame
 from engine.utils import read_files
-from gameplay.entities.interactables.cocoon import Cocoon
+from gameplay.entities.interactables import InteractableCocoon
 from . import states_cocoon
+from gameplay.entities.items import Tungsten
 
-class CocoonBoss(Cocoon):#boss cocoon in light forest
+class CocoonBoss(InteractableCocoon):#boss cocoon in light forest
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
         self.sprites = read_files.load_sprites_dict('assets/sprites/animations/cocoon_boss/',game_objects)

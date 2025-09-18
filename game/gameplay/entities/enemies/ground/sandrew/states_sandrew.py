@@ -22,7 +22,7 @@ class Idle(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update(self):
+    def update(self, dt):
         if abs(self.entity.velocity[0]) > 0.2:
             self.enter_state('Walk')
 
@@ -38,7 +38,7 @@ class Walk(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update(self):
+    def update(self, dt):
         if abs(self.entity.velocity[0]) <= 0.2:
             self.enter_state('Idle')
 
@@ -70,8 +70,8 @@ class Stun(Enemy_states):
         self.stay_still()
         self.lifetime = duration
 
-    def update(self):
-        self.lifetime-=1
+    def update(self, dt):
+        self.lifetime -= dt
         if self.lifetime<0:
             self.enter_state('Idle')
 
@@ -90,8 +90,8 @@ class Attack_main(Enemy_states):
         self.attack_box = self.entity.attack(self.entity, size = hitbox, lifetime = 300, charge_blocks = True)
         self.entity.game_objects.eprojectiles.add(self.attack_box)
 
-    def update(self):
-        self.entity.velocity[0] += self.entity.dir[0] * 2
+    def update(self, dt):
+        self.entity.velocity[0] += dt * self.entity.dir[0] * 2
         self.attack_box.hitbox[0] = self.entity.hitbox[0]
         self.attack_box.hitbox[1] = self.entity.hitbox[1]
 

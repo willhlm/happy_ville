@@ -1,4 +1,4 @@
-import pygame 
+import pygame, math
 from engine.utils import read_files
 from gameplay.entities.interactables.base.interactables import Interactables
 from . import states_grind
@@ -30,7 +30,7 @@ class Grind(Interactables):#trap
     def update(self, dt):
         super().update(dt)
         self.time += dt
-        self.currentstate.update()
+        self.currentstate.update(dt)
         self.update_vel()
         self.update_pos(dt)
 

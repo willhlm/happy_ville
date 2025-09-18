@@ -1,6 +1,8 @@
 import pygame
 from engine.utils import read_files
 from gameplay.entities.interactables.statues.quests.base.statues import Statues
+from gameplay.narrative import dialogue
+from gameplay.entities.shared.states import states_shader
 
 class StoneWood(Statues):#the stone "statue" to initiate the lumberjacl quest
     def __init__(self, pos, game_objects, quest, item):

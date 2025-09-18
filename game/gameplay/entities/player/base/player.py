@@ -45,8 +45,8 @@ class Player(Character):
         self.timers = []#a list where timers are append whe applicable, e.g. wet status
         self.timer_jobs = {'wet': Wet(self, 60)}#these timers are activated when promt and a job is appeneded to self.timer.
 
-        self.damage_manager = modifier_damage.Damage_manager(self)
-        self.movement_manager = modifier_movement.Movement_manager()
+        self.damage_manager = modifier_damage.DamageManager(self)
+        self.movement_manager = modifier_movement.MovementManager()
         self.reset_movement()                
 
         self.colliding_platform = None#save the last collising platform

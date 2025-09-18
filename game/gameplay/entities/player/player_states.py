@@ -1009,7 +1009,7 @@ class WallGlide(PhaseBase):
         self.entity.animation.play(self.animation_name)#the name of the class
         self.entity.flags['ground'] = True#used for jumping: sets to false in cayote timer and in jump state
         self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
-        self.entity.movement_manager.add_modifier('Wall_glide')
+        self.entity.movement_manager.add_modifier('wall_glide')
         if self.entity.collision_types['right']:
             self.dir = [1,0]
         else:
@@ -1061,7 +1061,7 @@ class WallGlide(PhaseBase):
             self.enter_state('run')
 
     def enter_state(self, input, **kwarg):#reset friction before exiting this state
-        self.entity.movement_manager.remove_modifier('Wall_glide')
+        self.entity.movement_manager.remove_modifier('wall_glide')
         super().enter_state(input, **kwarg)
 
 class BeltGlide(PhaseBase):#same as wall glide but only jump if wall_glide has been unlocked
@@ -1073,7 +1073,7 @@ class BeltGlide(PhaseBase):#same as wall glide but only jump if wall_glide has b
         self.entity.animation.play(self.animation_name)#the name of the class
         self.entity.flags['ground'] = True#used for jumping: sets to false in cayote timer and in jump state
         self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
-        self.entity.movement_manager.add_modifier('Wall_glide')
+        self.entity.movement_manager.add_modifier('wall_glide')
         if self.entity.collision_types['right']:
             self.dir = [1,0]
         else:
@@ -1127,7 +1127,7 @@ class BeltGlide(PhaseBase):#same as wall glide but only jump if wall_glide has b
             self.enter_state('run')
 
     def enter_state(self,input):#reset friction before exiting this state
-        self.entity.movement_manager.remove_modifier('Wall_glide')
+        self.entity.movement_manager.remove_modifier('wall_glide')
         super().enter_state(input)
 
 class DashGroundPre(PhaseBase):
@@ -1253,7 +1253,7 @@ class DashJumpPre(PhaseBase):#enters from ground dash pre
         self.dash_length = C.dash_jump_length
 
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0])
-        self.entity.movement_manager.add_modifier('Dash_jump', entity = self.entity)
+        self.entity.movement_manager.add_modifier('dash_jump', entity = self.entity)
         self.entity.shader_state.handle_input('motion_blur')
         self.entity.flags['ground'] = False
 

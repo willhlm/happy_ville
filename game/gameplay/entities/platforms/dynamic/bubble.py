@@ -1,4 +1,4 @@
-import random
+import random, math
 from engine.utils import read_files
 from engine.system import animation
 from gameplay.entities.shared.states import states_basic

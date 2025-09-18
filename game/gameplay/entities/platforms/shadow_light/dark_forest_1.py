@@ -15,3 +15,6 @@ class DarkForest_1(BaseShadowLight):#a platform which dissapears when there is n
 
     def update(self, dt):
         self.check_light()
+
+    def update_render(self, dt):                
+        pass        

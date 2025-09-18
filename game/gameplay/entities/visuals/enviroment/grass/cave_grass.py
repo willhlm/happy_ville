@@ -1,7 +1,7 @@
 import pygame
 from gameplay.entities.visuals.enviroment.base.layered_objects import LayeredObjects
 
-class CaveGrass(LayeredObjects):
+class BackgroundCaveGrass(LayeredObjects):
     animations = {}    
     def __init__(self,pos,game_objects,parallax, layer_name,live_blur = False):
         super().__init__(pos,game_objects,parallax, layer_name,live_blur)

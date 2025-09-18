@@ -3,10 +3,10 @@ from engine.utils import read_files
 from .base_dynamic import BaseDynamic
 from gameplay.entities.shared.states import states_shader
 
-class Droplet(BaseDynamic):#cosmetic droplet   
+class BackgroundDroplet(BaseDynamic):#cosmetic droplet   
     def __init__(self,pos, game_objects, parallax, layer_name, live_blur = False):
         super().__init__(pos, game_objects, parallax, layer_name, live_blur)
-        self.sprites = Droplet.sprites
+        self.sprites = BackgroundDroplet.sprites
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)        
         self.lifetime = 100
@@ -33,7 +33,7 @@ class Droplet(BaseDynamic):#cosmetic droplet
         self.velocity[1] = min(7,self.velocity[1])
 
     def pool(game_objects):
-        Droplet.sprites = read_files.load_sprites_dict('assets/sprites/animations/droplet/droplet/', game_objects)
+        BackgroundDroplet.sprites = read_files.load_sprites_dict('assets/sprites/animations/droplet/droplet/', game_objects)
 
     def draw(self,target):
         self.shader_state.draw()

@@ -11,10 +11,13 @@ class Shader_states():
     def handle_input(self,input):
         pass
 
-    def update(self):#called in update loop
+    def update(self, dt):#called in update loop
         pass
 
     def draw(self):#called just before draw
+        pass
+
+    def update_render(self, dt):
         pass
 
 class Idle(Shader_states):
@@ -28,8 +31,8 @@ class Teleport(Shader_states):
         self.time = 0
         self.entity.shader = self.entity.game_objects.shaders['bloom']
 
-    def update(self):
-        self.time += 0.005*self.entity.game_objects.game.dt
+    def update(self, dt):#called in update loop
+        self.time += 0.005*dt
         if self.time >= 1:
             self.enter_state('Transparent')
 
@@ -46,8 +49,8 @@ class Transparent(Shader_states):#guide NPC uses it
         self.time = 80#put a number so that it matches the animations
         self.entity.shader = self.entity.game_objects.shaders['alpha']
 
-    def update(self):
-        self.time -= self.entity.game_objects.game.dt
+    def update(self, dt):
+        self.time -= dt
         if self.time < 0:
             self.entity.give_light()
             self.entity.kill()

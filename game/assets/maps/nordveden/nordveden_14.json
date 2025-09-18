@@ -593,7 +593,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Larv_jr"
+                                 "value":"larv_jr"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -707,7 +707,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Mygga"
+                                 "value":"mygga"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -725,7 +725,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Mygga"
+                                 "value":"mygga"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -1127,7 +1127,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Larv_jr"
+                                 "value":"larv_jr"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -1145,7 +1145,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Larv_jr"
+                                 "value":"larv_jr"
                                 }],
                          "rotation":0,
                          "type":"",

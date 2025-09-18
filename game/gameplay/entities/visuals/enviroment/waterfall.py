@@ -57,7 +57,7 @@ class Waterfall(StaticEntity):
         self.game_objects.shaders['waterfall']['section'] = [blit_pos[0],blit_pos[1],self.size[0],self.size[1]]
 
         if self.parallax[0] == 1:#TODO, blue state #don't blur if there is no parallax
-            self.game_objects.game.display.render(self.empty.texture, self.game_objects.game.screen, position = blit_pos, shader = self.game_objects.shaders['waterfall'])
+            self.game_objects.game.display.render(self.empty.texture, target, position = blit_pos, shader = self.game_objects.shaders['waterfall'])
         else:
             self.blur_layer.clear(0, 0, 0, 0)
             self.game_objects.shaders['blur']['blurRadius'] = 1/self.parallax[0]#set the blur redius

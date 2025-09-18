@@ -13,6 +13,7 @@ class Particles(pygame.sprite.Sprite):
         self.lifetime = kwarg.get('lifetime', 60)
         self.angle_spread = kwarg.get('angle_spread', [30, 30])
         self.colour = list(kwarg.get('colour', [255, 255, 255, 255]))#make a copy of the list by list()
+        self.fade_scale = kwarg.get('fade_scale', 1)
         dir = kwarg.get('dir', 'isotropic')
         angle = self.define_angle(dir)
 
@@ -206,11 +207,11 @@ class Spark(Particles):#a general one
         Spark.image = game_objects.game.display.make_layer((50,50)).texture
 
 #texture particles: use a texture as a reference
-class Floaty_particles(Particles):#particles with a texture
+class FloatyParticles(Particles):#particles with a texture
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
         self.animation = animation.Animation(self, framerate = 0.7)
-        self.sprites = Floaty_particles.sprites
+        self.sprites = FloatyParticles.sprites
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.rect.center = self.true_pos
@@ -220,7 +221,7 @@ class Floaty_particles(Particles):#particles with a texture
         random_value = random.uniform(0.7,1)
         self.colour1 = (0,0.5*random_value,1*random_value,1)#main colour
         self.colour2 = (1,1,1,1)#seond
-        self.colour3 = (1,0,0,1)#third9
+        self.colour3 = (1,0,0,1)#third9        
 
     def update(self, dt):
         self.animation.update(dt)
@@ -244,7 +245,7 @@ class Floaty_particles(Particles):#particles with a texture
         self.velocity[1] += dt*0.01
 
     def pool(game_objects):#save the stuff in memory for later use
-        Floaty_particles.sprites = read_files.load_sprites_dict('Sprites/GFX/particles/floaty/', game_objects)
+        FloatyParticles.sprites = read_files.load_sprites_dict('assets/sprites/gfx/particles/floaty/', game_objects)
 
 class Offset(Particles):#not implemented fully -> need angular motion
     def __init__(self, pos, game_objects, **kwarg):

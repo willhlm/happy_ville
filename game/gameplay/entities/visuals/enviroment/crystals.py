@@ -1,7 +1,8 @@
-import pygame
+import pygame, random
 from gameplay.entities.visuals.enviroment.base.layered_objects import LayeredObjects
 
 class Crystals(LayeredObjects):
+    animations={}
     def __init__(self, pos, game_objects, parallax, layer_name, crystal_name, live_blur = False):
         super().__init__(pos, game_objects, parallax, layer_name,live_blur)  
         self.init_sprites('assets/sprites/animations/crystals/' + crystal_name + '/')#blur or lead from memory

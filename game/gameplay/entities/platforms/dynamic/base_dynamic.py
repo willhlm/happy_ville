@@ -12,12 +12,12 @@ class BaseDynamic(BaseTexture):
         self.update_true_pos_x(dt)
         self.update_true_pos_y(dt)
 
-    def update_true_pos_x(self):
+    def update_true_pos_x(self, dt):
         self.true_pos[0] += dt*self.velocity[0]
         self.rect.left = int(self.true_pos[0])#should be int
         self.hitbox.left = self.rect.left
 
-    def update_true_pos_y(self):
+    def update_true_pos_y(self, dt):
         self.true_pos[1] += dt*self.velocity[1]
         self.rect.top = int(self.true_pos[1])#should be int
         self.hitbox.top = self.rect.top

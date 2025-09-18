@@ -1,4 +1,4 @@
-from gameplay.entities.visuals.enviroment import Leaves, Droplet, FallingRock
+from gameplay.entities.visuals.enviroment import Leaves, BackgroundDroplet
 from gameplay.ui.elements import MenuArrow
 from gameplay.entities.visuals.particles import particles, screen_particles
 from gameplay.world.weather import weather
@@ -67,7 +67,7 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         Arrow.pool(game_objects)
         Wind.pool(game_objects)
         Shield.pool(game_objects)
-        Droplet.pool(game_objects)
+        ProjectileDroplet.pool(game_objects)
         SlamAttack.pool(game_objects)
 
         #UI
@@ -75,13 +75,12 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         point_arrow.PointArrow.pool(game_objects)
 
         Leaves.pool(game_objects)
-        Droplet.pool(game_objects)
-        FallingRock.pool(game_objects)
+        BackgroundDroplet.pool(game_objects)
 
         particles.Circle.pool(game_objects)
         particles.Spark.pool(game_objects)
         particles.Goop.pool(game_objects)
-        particles.Floaty_particles.pool(game_objects)
+        particles.FloatyParticles.pool(game_objects)
 
         weather.FlashFX.pool(game_objects)
 

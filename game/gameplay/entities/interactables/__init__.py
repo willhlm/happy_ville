@@ -4,7 +4,7 @@ from .chests.amber_tree import AmberTree
 
 from .chests.chest import Chest
 
-from .cocoon import Cocoon
+from .cocoon import InteractableCocoon
 from .collisions.hole import Hole
 from .collisions.path_collision import PathCollision
 from .collisions.path_interact import PathInteract
@@ -18,7 +18,7 @@ from .doors.door import Door
 from .fast_travel import FastTravel
 from .fireplace.fireplace import Fireplace
 
-from .grass.cave_grass import CaveGrass
+from .grass.cave_grass import InteractableCaveGrass
 
 from .inorinoki import Inorinoki
 from .lever.lever import Lever
@@ -32,6 +32,8 @@ from .shadow_light_lantern import ShadowLightLantern
 from .sign.sign import Sign
 from .sources.bubble_source import BubbleSource
 from .sources.crystal_source import CrystalSource
+from .sources.falling_rock.falling_rock_source import FallingRockSource
+from .sources.droplet.droplet_source import DropletSource 
 
 from .statues.abilities.air_dash_statue import AirDashStatue
 from .statues.abilities.thunder_dive_statue import ThunderDiveStatue

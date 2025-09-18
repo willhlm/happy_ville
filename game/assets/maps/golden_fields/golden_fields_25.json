@@ -929,7 +929,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Sandrew"
+                                 "value":"sandrew"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -1161,7 +1161,7 @@
                                 {
                                  "name":"interactable_item",
                                  "type":"string",
-                                 "value":"Red_infinity_stone"
+                                 "value":"red_infinity_stone"
                                 }],
                          "rotation":0,
                          "type":"",

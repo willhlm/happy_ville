@@ -1,7 +1,7 @@
 import sys, math
 from engine import constants as C
 
-class Movement_manager():
+class MovementManager():
     def __init__(self):
         self.modifiers = {}
         self._sorted_modifiers = []
@@ -20,7 +20,7 @@ class Movement_manager():
         self._sort_modifiers()
 
     def resolve(self):
-        context = Movement_context()  # Default values
+        context = MovementContext()  # Default values
         modifiers = self._sorted_modifiers.copy()
         for mod in modifiers:
             mod.apply(context)
@@ -39,7 +39,7 @@ class Movement_manager():
     def _sort_modifiers(self):#sort modifiers by priority
         self._sorted_modifiers = sorted(self.modifiers.values(), key = lambda m: m.priority, reverse = True)
 
-class Movement_context():
+class MovementContext():
     def __init__(self):
         self.gravity = C.acceleration[1]
         self.velocity = [0, 0]
@@ -48,7 +48,7 @@ class Movement_context():
         self.air_timer = C.air_timer
         self.upstream = 1#a scale for upstream movement: sampled during upsteram collision
 
-class Movement_modifier():
+class MovementModifier():
     def __init__(self, priority, **kwarg):
         self.priority = priority
 
@@ -61,14 +61,14 @@ class Movement_modifier():
     def handle_input(self, input):
         pass
 
-class WallGlide(Movement_modifier):#should it instead be a general driction modifier?
+class WallGlide(MovementModifier):#should it instead be a general driction modifier?
     def __init__(self, priority):
         super().__init__(priority)
 
     def apply(self, context):
         context.friction[1] = 0.4
 
-class TwoDLiquid(Movement_modifier):#should it instead be a general driction modifier?
+class TwoDLiquid(MovementModifier):#should it instead be a general driction modifier?
     def __init__(self, priority):
         super().__init__(priority)
 
@@ -76,11 +76,11 @@ class TwoDLiquid(Movement_modifier):#should it instead be a general driction mod
         context.friction[0] *= 2
         context.friction[1] *= 2
 
-class DashJump(Movement_modifier):#should it instead be a general driction modifier?
+class DashJump(MovementModifier):#should it instead be a general driction modifier?
     def __init__(self, priority, **kwarg):
         super().__init__(priority)
         self.entity = kwarg['entity']
-        self.target = Movement_context().friction[0]
+        self.target = MovementContext().friction[0]
         self.friction_x = 0.15
         self.friction_y = 0.00
         self.ref_y = self.friction_y * (0.0001  + 1)
@@ -102,7 +102,7 @@ class DashJump(Movement_modifier):#should it instead be a general driction modif
 
     def handle_input(self, input):
         if input in ['ground', 'wall']:
-            self.entity.movement_manager.remove_modifier('Dash_jump')
+            self.entity.movement_manager.remove_modifier('dash_jump')
 
     def update(self, dt):
         if self.inc_fric:
@@ -113,9 +113,9 @@ class DashJump(Movement_modifier):#should it instead be a general driction modif
         self.friction_y -= dt * 0.0015
         self.friction_y = max(0, self.friction_y)
         if self.target - self.friction_x < 0.0003:
-            self.entity.movement_manager.remove_modifier('Dash_jump')
+            self.entity.movement_manager.remove_modifier('dash_jump')
 
-class Dash(Movement_modifier):#should it instead be a general driction modifier?
+class Dash(MovementModifier):#should it instead be a general driction modifier?
     def __init__(self, priority, **kwarg):
         super().__init__(priority)
         self.entity = kwarg['entity']
@@ -125,7 +125,7 @@ class Dash(Movement_modifier):#should it instead be a general driction modifier?
         context.gravity = 0
         context.velocity[0] += self.dash_speed * self.entity.dir[0]
 
-class UpStream(Movement_modifier):
+class UpStream(MovementModifier):
     def __init__(self, priority, **kwarg):
         super().__init__(priority)
         self.speed = kwarg.get('speed', [0, 0])  # Default force if not provided
@@ -142,7 +142,7 @@ class Up_stream_horizontal(UpStream):
     """Horizontal"""
 
 
-class TjasolmaisEmbrace(Movement_modifier):#added from ability
+class TjasolmaisEmbrace(MovementModifier):#added from ability
     def __init__(self, priority, **kwarg):
         super().__init__(priority)
         self.entity = kwarg['entity']

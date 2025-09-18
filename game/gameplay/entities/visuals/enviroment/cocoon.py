@@ -1,7 +1,7 @@
 import pygame
 from gameplay.entities.visuals.enviroment.base.layered_objects import LayeredObjects
 
-class Cocoon(LayeredObjects):#larv cocoon in light forest
+class BackgroundCocoon(LayeredObjects):#larv cocoon in light forest
     animations = {}
     def __init__(self, pos, game_objects, parallax, layer_name,live_blur = False):
         super().__init__(pos, game_objects,parallax,layer_name, live_blur)

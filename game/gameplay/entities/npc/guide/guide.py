@@ -1,4 +1,5 @@
 from gameplay.entities.npc.base.npc import NPC
+from . import states_shader_guide
 
 class Guide(NPC):
     def __init__(self, pos,game_objects):

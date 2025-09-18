@@ -25,8 +25,8 @@ class Idle(Basic_states):
         self.entity.hitbox[3] = 0
         self.time = 0
 
-    def update(self):
-        self.time += self.entity.game_objects.game.dt
+    def update(self, dt):
+        self.time += dt
         if self.time > self.entity.frequency:
             self.enter_state('Active')
 
@@ -41,8 +41,8 @@ class Active(Basic_states):
         self.entity.hitbox[3] = 32
         self.time = 0
 
-    def update(self):
-        self.time += self.entity.game_objects.game.dt
+    def update(self, dt):
+        self.time += dt
         if self.time > self.entity.frequency:
             if self.entity.frequency < 0: return
             self.enter_state('Idle')

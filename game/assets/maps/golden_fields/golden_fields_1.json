@@ -481,24 +481,6 @@
                          "y":592
                         }, 
                         {
-                         "gid":25,
-                         "height":16,
-                         "id":211,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"name",
-                                 "type":"string",
-                                 "value":"Bridge"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":2144,
-                         "y":576
-                        }, 
-                        {
                          "gid":10,
                          "height":32,
                          "id":224,
@@ -745,7 +727,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"MrCarpenter"
+                                 "value":"mr_carpenter"
                                 }],
                          "rotation":0,
                          "type":"",

@@ -779,7 +779,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Larv_poison"
+                                 "value":"larv_poison"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -797,7 +797,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Mygga_roaming"
+                                 "value":"mygga"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -815,7 +815,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Mygga_roaming"
+                                 "value":"mygga"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -833,7 +833,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Mygga_roaming"
+                                 "value":"mygga"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -851,7 +851,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Mygga_roaming"
+                                 "value":"mygga"
                                 }],
                          "rotation":0,
                          "type":"",

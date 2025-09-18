@@ -2,6 +2,7 @@ import pygame
 from gameplay.entities.enemies.base.enemy import Enemy
 from engine.utils import read_files
 from . import states_sandrew
+from gameplay.entities.projectiles import HurtBox
 
 class Sandrew(Enemy):
     def __init__(self,pos,game_objects):
@@ -14,4 +15,4 @@ class Sandrew(Enemy):
         self.health = 3
         self.attack_distance = [200, 25]
         self.aggro_distance = [250, 25]#at which distance to the player when you should be aggro. Negative value make it no going aggro
-        self.attack = Hurt_box
+        self.attack = HurtBox

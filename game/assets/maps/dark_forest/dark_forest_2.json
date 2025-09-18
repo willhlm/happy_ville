@@ -408,18 +408,6 @@
                          "width":32,
                          "x":2032,
                          "y":704
-                        }, 
-                        {
-                         "gid":40328,
-                         "height":16,
-                         "id":355,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":1408,
-                         "y":768
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -464,8 +452,8 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":1152,
-                         "y":752
+                         "x":1136,
+                         "y":736
                         }, 
                         {
                          "gid":11,
@@ -713,7 +701,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Rav"
+                                 "value":"rav"
                                 }],
                          "rotation":0,
                          "type":"",

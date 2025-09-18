@@ -3,7 +3,7 @@ import pygame
 from engine.utils import read_files
 from gameplay.entities.interactables.base.interactables import Interactables
 
-class Cocoon(Interactables):#larv cocoon in light forest
+class InteractableCocoon(Interactables):#larv cocoon in light forest
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
         self.sprites = read_files.load_sprites_dict('assets/sprites/animations/cocoon/',game_objects)

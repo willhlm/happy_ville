@@ -15,5 +15,5 @@ class DarkForest_2(BaseDynamic):#dynamic one: #shoudl be added to platforms and 
         self.animation = animation.Animation(self)
         self.currentstate = states_moving_platform.Off(self)#
 
-    def update_vel(self):
+    def update_vel(self, dt):
         pass

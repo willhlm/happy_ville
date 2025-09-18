@@ -183,7 +183,7 @@ class Level():
                 for property in properties:
                     if property['name'] == 'class':
                         enemy_name = property['value']
-                
+
                 new_enemy = self.game_objects.registry.fetch('enemies', enemy_name)(object_position, self.game_objects)
                 self.game_objects.enemies.add(new_enemy)
 
@@ -274,7 +274,8 @@ class Level():
                     if property['name'] == 'particle':
                         particle_type = property['value']
 
-                new_shader_screen = getattr(screen_particles, particle_type)
+                print(parallax)
+                new_shader_screen = getattr(screen_particles, particle_type)                
                 if self.layer.startswith('fg'):
                     self.game_objects.all_fgs.add(self.layer, new_shader_screen(self.game_objects, parallax, 20))
                 else:
@@ -305,7 +306,7 @@ class Level():
                          colour= list(pygame.Color(property['value']))
                          prop['colour'] = [colour[1]/255,colour[2]/255,colour[3]/255,colour[0]/255]
 
-                god_rays = entities.God_rays(object_position, self.game_objects, parallax, object_size, **prop)
+                god_rays = GodRays(object_position, self.game_objects, parallax, object_size, **prop)
                 if self.layer.startswith('fg'):
                     self.game_objects.all_fgs.add(self.layer,god_rays)
                 else:
@@ -337,7 +338,7 @@ class Level():
                     elif property['name'] == 'water_texture_on':
                         prop['water_texture_on'] = property['value']                                      
 
-                reflection = entities.Reflection(object_position, self.game_objects, parallax, object_size, self.layer, **prop)
+                reflection = WaterReflection(object_position, self.game_objects, parallax, object_size, self.layer, **prop)
 
                 if self.layer.startswith('fg'):
                     self.game_objects.all_fgs.add(self.layer,reflection)
@@ -368,7 +369,7 @@ class Level():
                 self.game_objects.interactables.add(new_interacable)
 
             elif id == 24:#deadth fog
-                new_fog = entities.Death_fog(object_position, self.game_objects, object_size)
+                new_fog = DeathFog(object_position, self.game_objects, object_size)
                 self.game_objects.cosmetics.add(new_fog)
 
             elif id  == 25:#light sourde
@@ -413,7 +414,7 @@ class Level():
                 self.game_objects.interactables_fg.add(water)#cosmetics
 
             elif id == 27:#sky
-                sky = entities.Sky(object_position, self.game_objects, parallax, object_size)
+                sky = Sky(object_position, self.game_objects, parallax, object_size)
 
                 if self.layer.startswith('fg'):
                     self.game_objects.all_fgs.add(self.layer,sky)
@@ -452,7 +453,7 @@ class Level():
                             string = property['value'].strip('()')  # Remove parentheses
                             prop['spawn_position'] = [float(x) for x in string.split(',')]
 
-                smoke = entities.Smoke(object_position, self.game_objects, object_size, **prop)
+                smoke = Smoke(object_position, self.game_objects, object_size, **prop)
                 self.game_objects.cosmetics.add(smoke)
 
             elif id == 33:#upsteam
@@ -930,18 +931,18 @@ class Nordveden(Biome):
 
             elif id == 7:#cocoon
                 if parallax == [1,1]:#if BG1 layer
-                    new_cocoon = entities.Cocoon(object_position, self.level.game_objects)
+                    new_cocoon = InteractableCocoon(object_position, self.level.game_objects)
                     self.level.game_objects.interactables.add(new_cocoon)
                 else:#if in parallax layers
-                    new_cocoon = Cocoon(object_position, self.level.game_objects, parallax)
+                    new_cocoon = BackgroundCocoon(object_position, self.level.game_objects, parallax)
                     if self.level.layer.startswith('fg'):
                         self.level.game_objects.all_fgs.add(self.level.layer,new_cocoon)
                     else:
                         self.level.game_objects.all_bgs.add(self.level.layer,new_cocoon)
 
             elif id == 8:#cocoon
-                new_cocoon = CocoonBoss(object_position, self.level.game_objects)
-                self.level.game_objects.interactables.add(new_cocoon)
+                new_boss = self.level.game_objects.registry.fetch('enemies', 'cocoon_boss')(object_position, self.level.game_objects)
+                self.level.game_objects.interactables.add(new_boss)
 
             elif id == 9:#one side brakable
                 for property in properties:
@@ -982,8 +983,7 @@ class Rhoutta_encounter(Biome):
 
     def set_camera(self):
         if self.level.level_name == 'rhoutta_encounter_1' and self.level.spawn == '1':#if it a new game
-            new_state = cutscenes.New_game(self.level.game_objects.game)
-            new_state.enter_state()
+            self.level.game_objects.game.state_manager.enter_state('new_game')
 
     def load_objects(self,data,parallax,offset):
         for obj in data['objects']:
@@ -1001,96 +1001,6 @@ class Rhoutta_encounter(Biome):
 
                 new_platofrm = RhouttaEncounter_1( self.level.game_objects, object_position, types)
                 self.level.game_objects.platforms.add(new_platofrm)
-
-class Light_forest_cave(Biome):
-    def __init__(self, level):
-        super().__init__(level)
-
-    def play_music(self):
-        super().play_music()
-        sounds = read_files.load_sounds_dict('assets/audio/sfx/environment/ambient/light_forest_cave/')
-        #self.level.game_objects.sound.play_priority_sound(sounds['idle'][0], index = 1, loop = -1, fade = 1000, vol = 0.1)
-
-    def room(self, room = 1):
-        self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [255/255,255/255,255/255,255/255], normal_interact = False)
-        self.level.game_objects.lights.ambient = (30/255,30/255,30/255,170/255)
-
-    def load_objects(self,data,parallax,offset):
-        for obj in data['objects']:
-            new_map_diff = [-self.level.PLAYER_CENTER[0],-self.level.PLAYER_CENTER[1]]
-            object_size = [int(obj['width']),int(obj['height'])]
-            object_position = [int(obj['x']) - math.ceil((1-parallax[0])*new_map_diff[0]) + offset[0], int(obj['y']) - math.ceil((1-parallax[1])*new_map_diff[1]) + offset[1]-object_size[1]]
-            properties = obj.get('properties',[])
-            id = obj['gid'] - self.level.map_data['objects_firstgid']
-
-            if id == 0:#cave grass
-                if parallax == [1,1]:#if BG1 layer
-                    new_grass = CaveGrass(object_position, self.level.game_objects)
-                    self.level.game_objects.interactables.add(new_grass)
-                else:#if in parallax layers
-                    new_grass = CaveGrass(object_position, self.level.game_objects, parallax, self.level.layer)
-                    if self.level.layer.startswith('fg'):
-                        self.level.game_objects.all_fgs.add(self.level.layer,new_grass)
-                    else:
-                        self.level.game_objects.all_bgs.add(self.level.layer,new_grass)
-
-            elif id == 1:#ljusmaksar
-                new_grass = LjusMaskar(object_position, self.level.game_objects, parallax, self.level.layer)
-                if self.level.layer.startswith('fg'):
-                    self.level.game_objects.all_fgs.add(self.level.layer, new_grass)
-                else:
-                    self.level.game_objects.all_bgs.add(self.level.layer, new_grass)
-
-            elif id == 2:#droplet
-                if self.level.layer.startswith('fg'):
-                    group = self.level.game_objects.all_fgs
-                else:
-                    group = self.level.game_objects.all_bgs
-
-                new_drop = DropletSource(object_position, self.level.game_objects, parallax, self.level.layer, group)
-                group.add(self.level.layer, new_drop)
-
-            elif id == 3:#falling rock trap
-                new_rock = FallingRockSource(object_position, self.level.game_objects, parallax, self.level.layer)
-                if self.level.layer.startswith('fg'):
-                    self.level.game_objects.all_fgs.add(self.level.layer,new_rock)
-                else:
-                    self.level.game_objects.all_bgs.add(self.level.layer,new_rock)
-
-            elif id == 4:#vines
-                new_vine = Vines_2(object_position, self.level.game_objects, parallax, self.level.layer)
-                if self.level.layer.startswith('fg'):
-                    self.level.game_objects.all_fgs.add(self.level.layer,new_vine)
-                else:
-                    self.level.game_objects.all_bgs.add(self.level.layer,new_vine)
-
-            elif id == 5:#bubble source
-                prop = {}
-                for property in properties:
-                    if property['name'] == 'lifetime':
-                        prop['lifetime'] = property['value']
-                    elif property['name'] == 'state':
-                        state = property['value']#horizontal or vertical movement #TODO
-
-                bubble_source = BubbleSource(object_position, self.level.game_objects, platforms.Bubble, **prop)
-                self.level.game_objects.interactables.add(bubble_source)
-
-            elif id == 6:#spieks
-                spikes = Spikes(object_position, self.level.game_objects)
-                self.level.game_objects.interactables.add(spikes)
-
-            elif id == 7:#bubble
-                prop = {}
-                for property in properties:
-                    if property['name'] == 'lifetime':
-                        prop['lifetime'] = property['value']
-
-                new_bubble = BubbleStatic(object_position, self.level.game_objects, **prop)
-                self.level.game_objects.platforms.add(new_bubble)
-
-            elif id == 8:#ball challange
-                new_challange = entities.Challenge_ball(object_position, self.level.game_objects)
-                self.level.game_objects.interactables.add(new_challange)
 
 class Hlifblom(Biome):
     def __init__(self, level):
@@ -1115,10 +1025,10 @@ class Hlifblom(Biome):
 
             if id == 0:#cave grass
                 if parallax == [1,1]:#if BG1 layer
-                    new_grass = CaveGrass(object_position, self.level.game_objects)
+                    new_grass = InteractableCaveGrass(object_position, self.level.game_objects)
                     self.level.game_objects.interactables.add(new_grass)
                 else:#if in parallax layers
-                    new_grass = CaveGrass(object_position, self.level.game_objects, parallax, self.level.layer)
+                    new_grass = BackgroundCaveGrass(object_position, self.level.game_objects, parallax, self.level.layer)
                     if self.level.layer.startswith('fg'):
                         self.level.game_objects.all_fgs.add(self.level.layer,new_grass)
                     else:
@@ -1168,7 +1078,7 @@ class Hlifblom(Biome):
                     elif property['name'] == 'state':
                         state = property['value']#horizontal or vertical movement #TODO
 
-                bubble_source =  BubbleSource(object_position, self.level.game_objects, platforms.Bubble, **prop)
+                bubble_source =  BubbleSource(object_position, self.level.game_objects, **prop)
                 self.level.game_objects.interactables.add(bubble_source)
 
             elif id == 6:#spieks
@@ -1185,7 +1095,7 @@ class Hlifblom(Biome):
                 self.level.game_objects.platforms.add(new_bubble)
 
             elif id == 8:#ball challange
-                new_challange = entities.Challenge_ball(object_position, self.level.game_objects)
+                new_challange = ChallengeBall(object_position, self.level.game_objects)
                 self.level.game_objects.interactables.add(new_challange)
 
 class Golden_fields(Biome):
@@ -1210,8 +1120,8 @@ class Golden_fields(Biome):
                 else:
                     group = self.level.game_objects.all_bgs
 
-                new_drop = DropletSource(object_position, self.level.game_objects, parallax, group)
-                group.add(new_drop)
+                new_drop = DropletSource(object_position, self.level.game_objects, parallax, self.level.layer, group)
+                group.add(self.level.layer, new_drop)
 
 class Crystal_mines(Biome):
     def __init__(self, level):
@@ -1254,7 +1164,7 @@ class Crystal_mines(Biome):
                         kwarg['distance'] = property['value']
 
                 new_smacker = Smacker(object_position, self.level.game_objects, **kwarg)
-                self.level.game_objects.dynamic_platforms.add(new_smacker)
+                #self.level.game_objects.dynamic_platforms.add(new_smacker)
                 self.level.game_objects.platforms.add(new_smacker)
 
             elif id == 9:#platform
@@ -1367,7 +1277,7 @@ class Dark_forest(Biome):
                         kwarg['erect'] = property['value']
 
                 new_platform = DarkForest_2(object_position, self.level.game_objects, **kwarg)
-                self.level.game_objects.dynamic_platforms.add(new_platform)
+                #self.level.game_objects.dynamic_platforms.add(new_platform)
                 self.level.game_objects.platforms.add(new_platform)
                 self.level.references['platforms'].append(new_platform)
 

@@ -1,6 +1,7 @@
 import pygame 
 from gameplay.entities.enemies.base.flying_enemy import FlyingEnemy
 from engine.utils import read_files
+from gameplay.entities.visuals.particles import particles
 
 class FlowerButterfly(FlyingEnemy):#peaceful ones
     def __init__(self,pos,game_objects):
@@ -17,5 +18,5 @@ class FlowerButterfly(FlyingEnemy):#peaceful ones
 
     def update(self, dt):
         super().update(dt)
-        obj1 = particles.Floaty_particles(self.rect.center, self.game_objects, distance = 0, vel = {'linear':[0.1,-1]}, dir = 'isotropic')
-        self.game_objects.cosmetics2.add(obj1)
+        obj1 = particles.FloatyParticles(self.rect.center, self.game_objects, distance = 0, vel = {'linear':[0.1,-1]}, dir = 'isotropic')
+        self.game_objects.cosmetics_bg.add(obj1)

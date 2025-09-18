@@ -144,7 +144,7 @@ class Cutscenes(Camera):
 
     def update_stop(self):
         for stop in self.game_objects.camera_blocks:
-            stop.update()
+            stop.update(1)
 
     def exit_state(self):#called from cutscenes
         self.game_objects.camera_manager.set_camera('Camera')
@@ -156,7 +156,7 @@ class Deer_encounter(Cutscenes):
     def update(self, dt):
         self.center[0] -= 5*dt
         self.center[0] = max(100,self.center[0])
-        super().update()
+        super().update(dt)
 
 class Cultist_encounter(Cutscenes):
     def __init__(self, game_objects, scroll):
@@ -165,7 +165,7 @@ class Cultist_encounter(Cutscenes):
     def update(self, dt):
         self.center[0] += 2*dt
         self.center[0] = min(500,self.center[0])
-        super().update()
+        super().update(dt)
 
 class New_game(Cutscenes):#initialised in New_game state
     def __init__(self, game_objects, scroll):
@@ -177,7 +177,7 @@ class New_game(Cutscenes):#initialised in New_game state
     def update(self, dt):
         self.center[1] -= 2*dt
         self.center[1] = max(230,self.center[1])
-        super().update()
+        super().update(dt)
 
 class Title_screen(Cutscenes):
     def __init__(self, game_objects, scroll):
