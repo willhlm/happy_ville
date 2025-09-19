@@ -17,5 +17,5 @@ class Tungsten(InteractableItem):
 
     @classmethod
     def pool(cls, game_objects):
-        cls.sprites = read_files.load_sprites_dict('assets/sprites/enteties/items/tungsten/',game_objects)
+        cls.sprites = read_files.load_sprites_dict('assets/sprites/entities/items/tungsten/',game_objects)
         super().pool(game_objects)

@@ -17,4 +17,4 @@ class Twinkle(AnimatedEntity):
         pass
 
     def pool(game_objects):
-        Twinkle.sprites = read_files.load_sprites_dict('assets/sprites/GFX/twinkle/', game_objects)
+        Twinkle.sprites = read_files.load_sprites_dict('assets/sprites/entities/visuals/cosmetics/twinkle/', game_objects)

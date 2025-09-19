@@ -14,7 +14,7 @@ class GreenInfinityStone(InfinityStones):#faster slash (changing framerate)
 
     @classmethod
     def pool(cls, game_objects):
-        cls.sprites = read_files.load_sprites_dict('assets/sprites/enteties/items/infinity_stones/green/',game_objects)#for inventory
+        cls.sprites = read_files.load_sprites_dict('assets/sprites/entities/items/infinity_stones/green/',game_objects)#for inventory
         super().pool(game_objects)
 
     def attach(self, player):

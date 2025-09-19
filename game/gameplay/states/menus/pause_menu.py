@@ -66,7 +66,7 @@ class PauseMenu(BaseUI):#when pressing ESC duing gameplay
             self.game.state_manager.exit_state()
 
         elif self.current_button == 1:
-            self.game.state_manager.enter_state('Option_menu', category = 'menu')
+            self.game.state_manager.enter_state('option_menu')
 
         elif self.current_button == 2:#exit to main menu
             for state in self.game.state_manager.state_stack[1:]:#except the first one

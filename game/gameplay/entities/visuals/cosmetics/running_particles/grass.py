@@ -14,7 +14,7 @@ class Grass(RunningParticles):#should make for grass, dust, water etc
         self.kill()
 
     def pool(game_objects):#all things that should be saved in object pool
-        Grass.sprites = read_files.load_sprites_dict('assets/sprites/animations/running_particles/grass/', game_objects)
+        Grass.sprites = read_files.load_sprites_dict('assets/sprites/entities/visuals/cosmetics/running_particles/grass/', game_objects)
 
     def release_texture(self):#stuff that have pool shuold call this
         pass

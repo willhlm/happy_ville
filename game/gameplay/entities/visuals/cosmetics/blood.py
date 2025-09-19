@@ -15,7 +15,7 @@ class Blood(AnimatedEntity):
         self.kill()
 
     def pool(game_objects):#all things that should be saved in object pool
-        Blood.sprites = read_files.load_sprites_dict('assets/sprites/GFX/blood/death/', game_objects)
+        Blood.sprites = read_files.load_sprites_dict('assets/sprites/entities/visuals/cosmetics/blood/death/', game_objects)
 
     def release_texture(self):#stuff that have pool shuold call this
         pass

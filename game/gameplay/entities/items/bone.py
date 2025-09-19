@@ -22,8 +22,8 @@ class Bone(EnemyDrop):
         self.game_objects.player.currentstate.enter_state('Plant_bone_main')
 
     def pool(game_objects):#all things that should be saved in object pool
-        Bone.sprites = read_files.load_sprites_dict('assets/sprites/enteties/items/bone/',game_objects)
-        Bone.sounds = read_files.load_sounds_dict('assets/audio/sfx/audio/sfx/enteties/items/bone/')
+        Bone.sprites = read_files.load_sprites_dict('assets/sprites/entities/items/bone/',game_objects)
+        Bone.sounds = read_files.load_sounds_dict('assets/audio/sfx/audio/sfx/entities/items/bone/')
 
     def release_texture(self):#stuff that have pool shuold call this
         pass

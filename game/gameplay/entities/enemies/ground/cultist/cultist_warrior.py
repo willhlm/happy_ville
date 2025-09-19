@@ -13,7 +13,7 @@ class CultistWarrior(Enemy):
         self.attack_distance = [80,10]
 
     def pool(game_objects):
-        CultistWarrior.sprites = read_files.load_sprites_dict('assets/sprites/enteties/enemies/cultist_warrior/',game_objects)
+        CultistWarrior.sprites = read_files.load_sprites_dict('assets/sprites/entities/enemies/cultist_warrior/',game_objects)
 
     def release_texture(self):
         pass

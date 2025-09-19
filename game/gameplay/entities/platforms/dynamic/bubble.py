@@ -83,7 +83,7 @@ class Bubble(BaseDynamic):#dynamic one: #shoudl be added to platforms and dynami
         pass
 
     def pool(game_objects):#all things that should be saved in object pool
-        Bubble.sprites = read_files.load_sprites_dict('assets/sprites/block/collision_time/bubble/', game_objects)
+        Bubble.sprites = read_files.load_sprites_dict('assets/sprites/entities/platforms/timer/bubble/', game_objects)
 
     def take_dmg(self, projectile):
         self.deactivate()

@@ -12,7 +12,7 @@ class ThunderBall(AnimatedEntity):#for thunder dive
         self.currentstate = states_basic.Once(self, next_state = 'Idle', animation_name='once')
 
     def pool(game_objects):
-        ThunderBall.sprites = read_files.load_sprites_dict('assets/sprites/enteties/soul/', game_objects)
+        ThunderBall.sprites = read_files.load_sprites_dict('assets/sprites/entities/visuals/cosmetics/soul/', game_objects)
 
     def release_texture(self):
         pass

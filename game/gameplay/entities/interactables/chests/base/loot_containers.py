@@ -6,7 +6,7 @@ from . import loot_container_states
 class LootContainers(Interactables):
     def __init__(self, pos, game_objects, state, ID_key):
         super().__init__(pos, game_objects)
-        self.sprites = read_files.load_sprites_dict('assets/sprites/animations/loot_containers/' + type(self).__name__.lower() + '/', game_objects)
+        self.sprites = read_files.load_sprites_dict('assets/sprites/entities/interactables/chests/' + type(self).__name__.lower() + '/', game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)

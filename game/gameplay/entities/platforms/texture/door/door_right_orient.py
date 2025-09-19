@@ -8,4 +8,4 @@ class DoorRightOrient(Door):
         self.hitbox.bottomright = self.rect.bottomright
 
     def init(self):
-        self.sprites = read_files.load_sprites_dict('assets/sprites/animations/door_right/', self.game_objects)
+        self.sprites = read_files.load_sprites_dict('assets/sprites/entities/interactables/doors/door_right/', self.game_objects)

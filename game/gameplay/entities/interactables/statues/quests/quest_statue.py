@@ -7,7 +7,7 @@ from gameplay.entities.shared.states import states_shader
 class QuestStatue(Statues):#the status spawning a portal, balls etc - challange rooms
     def __init__(self, pos, game_objects, ID):
         super().__init__(pos, game_objects)
-        self.sprites = read_files.load_sprites_dict('assets/sprites/animations/challenges/challenge_monument/', game_objects)
+        self.sprites = read_files.load_sprites_dict('assets/sprites/entities/interactables/statues/quests/challenge_monument/', game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = self.rect.copy()

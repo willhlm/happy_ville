@@ -19,7 +19,7 @@ class Dusts(AnimatedEntity):#dust particles when doing things
         self.kill()
 
     def pool(game_objects):#all things that should be saved in object pool
-        Dusts.sprites = read_files.load_sprites_dict('assets/sprites/GFX/dusts/', game_objects, flip_x = True)
+        Dusts.sprites = read_files.load_sprites_dict('assets/sprites/entities/visuals/cosmetics/dusts/', game_objects, flip_x = True)
 
     def release_texture(self):#stuff that have pool shuold call this
         pass

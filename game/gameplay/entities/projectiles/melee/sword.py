@@ -10,7 +10,7 @@ class Sword(Melee):
         self.hitbox = self.rect.copy()
 
     def pool(game_objects):
-        Sword.sprites = read_files.load_sprites_dict('assets/sprites/attack/sword/', game_objects)
+        Sword.sprites = read_files.load_sprites_dict('assets/sprites/entities/projectiles/sword/', game_objects)
 
     def init(self):
         self.sprites = Sword.sprites

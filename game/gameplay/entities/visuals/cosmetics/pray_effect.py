@@ -11,7 +11,7 @@ class PrayEffect(AnimatedEntity):#the thing when aila pray
         self.rect.center = pos
 
     def pool(game_objects):
-        PrayEffect.sprites = read_files.load_sprites_dict('assets/sprites/animations/pray_effect/', game_objects)
+        PrayEffect.sprites = read_files.load_sprites_dict('assets/sprites/entities/visuals/cosmetics/pray_effect/', game_objects)
 
     def spawn(self):
         pass

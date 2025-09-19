@@ -6,8 +6,8 @@ from . import states_fireplace
 class Fireplace(Interactables):
     def __init__(self, pos, game_objects, on = False):
         super().__init__(pos, game_objects)
-        self.sounds = read_files.load_sounds_dict('assets/audio/sfx/enteties/interactables/fireplace/')
-        self.sprites = read_files.load_sprites_dict('assets/sprites/animations/fireplace/', game_objects)
+        self.sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/interactables/fireplace/')
+        self.sprites = read_files.load_sprites_dict('assets/sprites/entities/interactables/fireplace/', game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)

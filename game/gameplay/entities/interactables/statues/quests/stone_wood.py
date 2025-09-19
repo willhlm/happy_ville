@@ -7,7 +7,7 @@ from gameplay.entities.shared.states import states_shader
 class StoneWood(Statues):#the stone "statue" to initiate the lumberjacl quest
     def __init__(self, pos, game_objects, quest, item):
         super().__init__(pos, game_objects)
-        self.sprites = read_files.load_sprites_dict('assets/sprites/animations/challenges/stone_wood/', game_objects)
+        self.sprites = read_files.load_sprites_dict('assets/sprites/entities/interactables/statues/quests/stone_wood/', game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = self.rect.copy()

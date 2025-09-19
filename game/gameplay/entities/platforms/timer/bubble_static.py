@@ -4,7 +4,7 @@ from gameplay.entities.platforms.timer.base_timer import BaseTimer
 class BubbleStatic(BaseTimer):#static bubble
     def __init__(self, pos, game_objects, **prop):
         super().__init__(pos, game_objects)
-        self.sprites = read_files.load_sprites_dict('assets/sprites/block/collision_time/bubble/', game_objects)
+        self.sprites = read_files.load_sprites_dict('assets/sprites/entities/platforms/timer/bubble/', game_objects)
         self.image = self.sprites['idle'][0]
         self.rect[2], self.rect[3] = self.image.width, self.image.height
         self.hitbox = self.rect.copy()

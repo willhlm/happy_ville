@@ -1,7 +1,7 @@
 import pygame
 from engine.utils import read_files
 from engine.system import collisions, sound, save_load, groups, object_pool, controller, lights, timer, signals, time_manager, alphabet, input_interpreter
-from gameplay.entities.player.base import player
+from gameplay.entities.player import player
 from engine.render import post_process
 from engine.system.camera import camera
 

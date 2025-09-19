@@ -18,5 +18,5 @@ class BossHP(Radna):
 
     @classmethod
     def pool(cls, game_objects):
-        cls.sprites = read_files.load_sprites_dict('assets/sprites/enteties/radna/boss_HP/',game_objects)#for inventor
+        cls.sprites = read_files.load_sprites_dict('assets/sprites/entities/radna/boss_HP/',game_objects)#for inventor
         super().pool(game_objects)

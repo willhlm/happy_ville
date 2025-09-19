@@ -21,8 +21,8 @@ class HealItem(EnemyDrop):
         self.game_objects.player.heal(1)
 
     def pool(game_objects):#all things that should be saved in object pool: #obj = cls.__new__(cls)#creatate without runing initmethod
-        HealItem.sprites = read_files.load_sprites_dict('assets/sprites/enteties/items/heal_item/',game_objects)
-        HealItem.sounds = read_files.load_sounds_dict('assets/audio/sfx/enteties/items/heal_item/')
+        HealItem.sprites = read_files.load_sprites_dict('assets/sprites/entities/items/heal_item/',game_objects)
+        HealItem.sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/items/heal_item/')
 
     def release_texture(self):#stuff that have pool shuold call this
         pass

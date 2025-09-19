@@ -338,7 +338,7 @@ class Level():
                     elif property['name'] == 'water_texture_on':
                         prop['water_texture_on'] = property['value']                                      
 
-                reflection = WaterReflection(object_position, self.game_objects, parallax, object_size, self.layer, **prop)
+                reflection = River(object_position, self.game_objects, parallax, object_size, self.layer, **prop)
 
                 if self.layer.startswith('fg'):
                     self.game_objects.all_fgs.add(self.layer,reflection)
@@ -865,7 +865,7 @@ class Nordveden(Biome):
 
     def play_music(self):
         #super().play_music()
-        sounds = read_files.load_sounds_dict('assets/audio/sfx/environment/ambient/nordveden/')
+        sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/visuals/enviroments/ambient/nordveden/')
         self.level.game_objects.sound.play_priority_sound(sounds['idle'][0], index = 1, loop = -1, fade = 1000, vol = 0.2)
 
     def room(self, room):#called wgen a new room is loaded
@@ -950,7 +950,7 @@ class Nordveden(Biome):
                         ID_key = property['value']
 
                 if not self.level.game_objects.world_state.state[self.level.level_name]['breakable_platform'].get(str(ID_key), False):
-                    platform = BreakableOnesideLeft(object_position, self.level.game_objects, str(ID_key), 'assets/sprites/block/breakable/nordveden/type2/')
+                    platform = BreakableOnesideLeft(object_position, self.level.game_objects, str(ID_key), 'assets/sprites/entitites/platforms/breakable/nordveden/type2/')
                     self.level.game_objects.platforms.add(platform)
 
             elif id == 10:#dissapera when standing on it
@@ -968,7 +968,7 @@ class Nordveden(Biome):
                         ID_key = property['value']
 
                 if not self.level.game_objects.world_state.state[self.level.level_name]['breakable_platform'].get(str(ID_key), False):
-                    platform = BreakableOnesideRight(object_position, self.level.game_objects, str(ID_key), 'assets/sprites/block/breakable/nordveden/type3/')
+                    platform = BreakableOnesideRight(object_position, self.level.game_objects, str(ID_key), 'assets/sprites/entities/platforms/breakable/nordveden/type3/')
                     self.level.game_objects.platforms.add(platform)                                                           
 
 class Rhoutta_encounter(Biome):
@@ -1008,7 +1008,7 @@ class Hlifblom(Biome):
 
     def play_music(self):
         super().play_music()
-        sounds = read_files.load_sounds_dict('assets/audio/sfx/environment/ambient/light_forest_cave/')
+        sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/visuals/enviroments/ambient/light_forest_cave/')
         #self.level.game_objects.sound.play_priority_sound(sounds['idle'][0], index = 1, loop = -1, fade = 1000, vol = 0.1)
 
     def room(self, room = 1):
@@ -1129,7 +1129,7 @@ class Crystal_mines(Biome):
 
     def play_music(self):
         super().play_music()
-        sounds = read_files.load_sounds_dict('assets/audio/sfx/environment/ambient/crystal_mines')
+        sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/visuals/enviroments/ambient/crystal_mines')
         self.level.game_objects.sound.play_priority_sound(sounds['idle'][0], index = 1, loop = -1, fade = 1000, vol = 0.2)
 
     def room(self, room = 1):
@@ -1315,7 +1315,7 @@ class Tall_trees(Biome):
                         ID_key = property['value']
 
                 if not self.level.game_objects.world_state.state[self.level.level_name]['breakable_platform'].get(str(ID_key), False):
-                    platform = BreakableOnesideRight(object_position, self.level.game_objects, str(ID_key), 'assets/sprites/block/breakable/nordveden/type2/')
+                    platform = BreakableOnesideRight(object_position, self.level.game_objects, str(ID_key), 'assets/sprites/entities/platforms/breakable/nordveden/type2/')
                     self.level.game_objects.platforms.add(platform)      
 
             elif id == 12:#one side brakable
@@ -1324,5 +1324,5 @@ class Tall_trees(Biome):
                         ID_key = property['value']
 
                 if not self.level.game_objects.world_state.state[self.level.level_name]['breakable_platform'].get(str(ID_key), False):
-                    platform = BreakableOnesideLeft(object_position, self.level.game_objects, str(ID_key), 'assets/sprites/block/breakable/nordveden/type3/')
+                    platform = BreakableOnesideLeft(object_position, self.level.game_objects, str(ID_key), 'assets/sprites/entities/platforms/breakable/nordveden/type3/')
                     self.level.game_objects.platforms.add(platform)                       

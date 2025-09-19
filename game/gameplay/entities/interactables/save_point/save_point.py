@@ -7,7 +7,7 @@ from gameplay.entities.visuals.cosmetics.logo_loading import LogoLoading
 class SavePoint(Interactables):#save point
     def __init__(self, pos, game_objects, map):
         super().__init__(pos, game_objects)
-        self.sprites=read_files.load_sprites_dict('assets/sprites/animations/savepoint/',game_objects)
+        self.sprites=read_files.load_sprites_dict('assets/sprites/entities/interactables/savepoint/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()

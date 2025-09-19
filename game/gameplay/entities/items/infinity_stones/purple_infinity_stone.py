@@ -14,7 +14,7 @@ class PurpleInfinityStone(InfinityStones):#reflect projectile -> crystal caves
 
     @classmethod
     def pool(cls, game_objects):
-        cls.sprites = read_files.load_sprites_dict('assets/sprites/enteties/items/infinity_stones/purple/',game_objects)#for inventory
+        cls.sprites = read_files.load_sprites_dict('assets/sprites/entities/items/infinity_stones/purple/',game_objects)#for inventory
         super().pool(game_objects)
 
     def attach(self, player):

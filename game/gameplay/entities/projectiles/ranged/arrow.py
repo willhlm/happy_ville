@@ -49,7 +49,7 @@ class Arrow(Projectiles):#should it be called seed?
         self.game_objects.game.display.render(self.image, target, position = self.blit_pos, angle = self.angle, flip = self.dir[0] > 0)#shader render
 
     def pool(game_objects):
-        Arrow.sprites = read_files.load_sprites_dict('assets/sprites/attack/arrow/', game_objects)
+        Arrow.sprites = read_files.load_sprites_dict('assets/sprites/entities/projectiles/arrow/', game_objects)
 
     def collision_projectile(self, eprojectile):#fprojecticle proectile collision with eprojecitile: called from collisions
         self.kill()

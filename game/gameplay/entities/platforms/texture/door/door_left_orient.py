@@ -6,4 +6,4 @@ class DoorLeftOrient(Door):
         super().__init__(pos, game_objects, **kwarg)        
 
     def init(self):
-        self.sprites = read_files.load_sprites_dict('assets/sprites/animations/door_left/', self.game_objects)
+        self.sprites = read_files.load_sprites_dict('assets/sprites/entities/interactables/doors/door_left/', self.game_objects)

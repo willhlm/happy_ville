@@ -9,7 +9,7 @@ class BgFade(BgBlock):
         self.shader_state = states_shader.Idle(self)
         self.make_hitbox(positions, pos)
         self.interacted = False
-        self.sounds = read_files.load_sounds_list('assets/audio/sfx/bg_fade/')
+        self.sounds = read_files.load_sounds_list('assets/audio/sfx/entities/visuals/enviroments/bg_fade/')
         self.children = []#will append overlapping bg_fade to make "one unit"
         self.id = str(ID)
 

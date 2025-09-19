@@ -15,7 +15,6 @@ class RegistryManager():
             "npcs": REGISTER_NPCS,
             "enemies": REGISTER_ENEMIES,
             #"interactables": REGISTER_INTERACTABLES,
-            #"enemies": REGISTER_ENEMIES,
         }
 
     def fetch(self, category, key):

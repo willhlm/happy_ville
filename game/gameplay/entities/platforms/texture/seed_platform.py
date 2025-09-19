@@ -26,7 +26,7 @@ class SeedPlatform(BaseTexture):
         pass
 
     def pool(game_objects):
-        SeedPlatform.sprites = read_files.load_sprites_dict('assets/sprites/animations/seeds/platform/', game_objects)
+        SeedPlatform.sprites = read_files.load_sprites_dict('assets/sprites/entites/projectiles/seeds/platform/', game_objects)
 
     def get_hitbox(self, arrow, dir):
         if dir == [-1, 0]:#left

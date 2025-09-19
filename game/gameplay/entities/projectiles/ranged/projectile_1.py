@@ -17,7 +17,7 @@ class Projectile_1(Projectiles):
         self.velocity = [amp[0] * self.dir[0], amp[1] * self.dir[1]]
 
     def pool(game_objects):
-        Projectile_1.sprites = read_files.load_sprites_dict('assets/sprites/attack/projectile_1/',game_objects)
+        Projectile_1.sprites = read_files.load_sprites_dict('assets/sprites/entities/projectiles/projectile_1/',game_objects)
 
     def update(self, dt):
         super().update(dt)

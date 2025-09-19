@@ -6,8 +6,8 @@ from gameplay.entities.platforms import Bubble
 class BubbleSource(Interactables):#the thng that spits out bubbles in cave HAWK TUAH!
     def __init__(self, pos, game_objects, **prop):
         super().__init__(pos, game_objects)
-        self.sprites = read_files.load_sprites_dict('assets/sprites/animations/bubble_source/', game_objects)
-        self.sounds = read_files.load_sounds_dict('assets/audio/sfx/enteties/interactables/bubble_source/')
+        self.sprites = read_files.load_sprites_dict('assets/sprites/entities/interactables/sources/bubble/', game_objects)
+        self.sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/interactables/sources/bubble/')
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.center = pos

@@ -45,5 +45,5 @@ class Rings(InteractableItem):#ring in which to attach radnas
 
     @classmethod
     def pool(cls, game_objects):
-        cls.sprites = read_files.load_sprites_dict('assets/sprites/enteties/radna/rings/',game_objects)
+        cls.sprites = read_files.load_sprites_dict('assets/sprites/entities/radna/rings/',game_objects)
         super().pool(game_objects)

@@ -6,7 +6,7 @@ from . import states_grind
 class Grind(Interactables):#trap
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects)
-        self.sprites = read_files.load_sprites_dict('assets/sprites/animations/traps/grind/',game_objects)
+        self.sprites = read_files.load_sprites_dict('assets/sprites/entities/interactables/traps/grind/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = self.rect.copy()

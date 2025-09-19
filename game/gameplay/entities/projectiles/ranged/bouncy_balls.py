@@ -15,7 +15,7 @@ class BouncyBalls(Projectiles):#for ball challange room
         self.velocity = [random.uniform(-10,10),random.uniform(-10,-4)]
 
     def pool(game_objects):
-        BouncyBalls.sprites = read_files.load_sprites_dict('assets/sprites/attack/projectile_1/',game_objects)
+        BouncyBalls.sprites = read_files.load_sprites_dict('assets/sprites/entities/projectiles/projectile_1/',game_objects)
 
     def release_texture(self):
         pass

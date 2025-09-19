@@ -32,4 +32,4 @@ class PoisonBlob(Projectiles):
         self.currentstate.handle_input('Death')
 
     def pool(game_objects):
-        PoisonBlob.sprites = read_files.load_sprites_dict('assets/sprites/attack/poisonblobb/', game_objects)
+        PoisonBlob.sprites = read_files.load_sprites_dict('assets/sprites/entities/projectiles/poisonblobb/', game_objects)

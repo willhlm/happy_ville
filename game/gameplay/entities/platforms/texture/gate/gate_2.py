@@ -6,4 +6,4 @@ class Gate_2(Gate_1):#a gate. The ones that are owned by the lever will handle i
         super().__init__(pos, game_objects, **kwarg)
 
     def init(self):
-        self.sprites = read_files.load_sprites_dict('assets/sprites/animations/gates/gate_2/', self.game_objects)
+        self.sprites = read_files.load_sprites_dict('assets/sprites/entities/platforms/gates/gate_2/', self.game_objects)

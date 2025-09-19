@@ -14,7 +14,7 @@ from .rainbow import Rainbow
 from .sky import Sky 
 from .small_tree import SmallTree_1
 from .thor_mountain import ThorMountain 
-from .water_reflection import WaterReflection 
+from .river import River 
 from .waterfall import Waterfall 
 from .light_source import LightSource 
 

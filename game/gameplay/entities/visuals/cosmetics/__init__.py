@@ -5,7 +5,6 @@ from .thunder_spark import ThunderSpark
 from .spawn_effect import SpawnEffect
 from .slash import Slash
 from .rune_symbol import RuneSymbol
-from .thunder_aura import ThunderAura
 from .pray_effect import PrayEffect
 from .health_bar import HealthBar
 from .logo_loading import LogoLoading

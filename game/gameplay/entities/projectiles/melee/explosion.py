@@ -14,7 +14,7 @@ class Explosion(Melee):
         self.dmg = 1
 
     def pool(game_objects):
-        Explosion.sprites = read_files.load_sprites_dict('assets/sprites/attack/explosion/', game_objects)
+        Explosion.sprites = read_files.load_sprites_dict('assets/sprites/entities/projectiles/explosion/', game_objects)
 
     def reset_timer(self):
         self.kill()

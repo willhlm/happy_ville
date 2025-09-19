@@ -40,8 +40,8 @@ class NPC(Character):
 
     def load_sprites(self, name):
         self.name = name
-        self.sprites = read_files.load_sprites_dict("assets/sprites/enteties/npc/" + name + "/animation/", self.game_objects)
-        img = pygame.image.load('assets/sprites/enteties/npc/' + name +'/potrait.png').convert_alpha()
+        self.sprites = read_files.load_sprites_dict("assets/sprites/entities/npc/" + name + "/animation/", self.game_objects)
+        img = pygame.image.load('assets/sprites/entities/npc/' + name +'/potrait.png').convert_alpha()
         self.portrait = self.game_objects.game.display.surface_to_texture(img)#need to save in memoery
 
     def update(self, dt):

@@ -15,7 +15,7 @@ class PlayerSoul(AnimatedEntity):#the thing that popps out when player dies
         self.velocity = [0,0]
 
     def pool(game_objects):
-        PlayerSoul.sprites = read_files.load_sprites_dict('assets/sprites/enteties/soul/', game_objects)
+        PlayerSoul.sprites = read_files.load_sprites_dict('assets/sprites/entities/visuals/cosmetics/soul/', game_objects)
 
     def update(self, dt):
         super().update(dt)

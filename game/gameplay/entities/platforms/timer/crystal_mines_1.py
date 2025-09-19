@@ -5,7 +5,7 @@ from gameplay.entities.platforms.timer.base_timer import BaseTimer
 class CrystalMines_1(BaseTimer):
     def __init__(self, game_objects, pos):
         super().__init__(pos, game_objects)
-        self.sprites = read_files.load_sprites_dict('assets/sprites/block/collision_time/crystal_mines_1/',game_objects)
+        self.sprites = read_files.load_sprites_dict('assets/sprites/entities/platforms/timer/crystal_mines_1/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect[2], self.rect[3] = self.image.width, self.image.height
         self.hitbox = pygame.Rect(pos[0], pos[1], self.rect[2], self.rect[3]*0.4)

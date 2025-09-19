@@ -5,7 +5,7 @@ from gameplay.entities.base.animated_entity import AnimatedEntity
 class HealthBar(AnimatedEntity):
     def __init__(self,entity):
         super().__init__(entity.rect.center,entity.game_objects)
-        self.sprites = read_files.load_sprites_dict('assets/sprites/animations/health_bar/',entity.game_objects)
+        self.sprites = read_files.load_sprites_dict('assets/sprites/ui/hud/health_bar/',entity.game_objects)
         self.entity = entity#the boss
         self.max_health = entity.health
         self.image = self.sprites['idle'][0]

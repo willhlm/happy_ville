@@ -7,7 +7,7 @@ from gameplay.entities.projectiles import HurtBox
 class Rav(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = read_files.load_sprites_dict('assets/sprites/enteties/enemies/rav/',game_objects, flip_x = True)
+        self.sprites = read_files.load_sprites_dict('assets/sprites/entities/enemies/rav/',game_objects, flip_x = True)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1], 32, 32)

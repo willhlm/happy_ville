@@ -23,4 +23,4 @@ class Gate_1(BaseTexture):#a gate. The ones that are owned by the lever will han
         self.currentstate = {'erect': states_gate.Erect, 'down': states_gate.Down}[state](self)
 
     def init(self):
-        self.sprites = read_files.load_sprites_dict('assets/sprites/animations/gates/gate_1/', self.game_objects)
+        self.sprites = read_files.load_sprites_dict('assets/sprites/entities/platforms/gates/gate_1/', self.game_objects)

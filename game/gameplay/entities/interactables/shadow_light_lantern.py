@@ -5,7 +5,7 @@ from gameplay.entities.interactables.base.interactables import Interactables
 class ShadowLightLantern(Interactables):#emits a shadow light upon interaction. Shadow light inetracts with dark forest enemy and platofrm
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects)
-        self.sprites = read_files.load_sprites_dict('assets/sprites/animations/shadow_light_lantern/', game_objects)
+        self.sprites = read_files.load_sprites_dict('assets/sprites/entities/interactables/shadow_light_lantern/', game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()

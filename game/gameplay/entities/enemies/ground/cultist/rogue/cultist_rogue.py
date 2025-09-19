@@ -15,7 +15,7 @@ class CultistRogue(Enemy):
         self.currentstate = states_rogue_cultist.Idle(self)
 
     def pool(game_objects):
-        CultistRogue.sprites = read_files.load_sprites_dict('assets/sprites/enteties/enemies/cultist_rogue/',game_objects)
+        CultistRogue.sprites = read_files.load_sprites_dict('assets/sprites/entities/enemies/cultist_rogue/',game_objects)
 
     def release_texture(self):
         pass

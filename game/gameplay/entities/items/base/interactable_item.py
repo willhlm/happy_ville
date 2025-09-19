@@ -43,4 +43,4 @@ class InteractableItem(Item):#need to press Y to pick up - #key items: need to p
 
     @classmethod
     def pool(cls, game_objects):
-        cls.sprites['wild'] = read_files.load_sprites_list('assets/sprites/enteties/items/interactables_items/',game_objects)#the sprite to render when they are in the wild   
+        cls.sprites['wild'] = read_files.load_sprites_list('assets/sprites/entities/items/interactables_items/',game_objects)#the sprite to render when they are in the wild   

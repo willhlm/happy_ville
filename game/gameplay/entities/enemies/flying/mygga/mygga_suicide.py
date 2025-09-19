@@ -5,8 +5,8 @@ from engine.utils import read_files
 class MyggaSuicide(FlyingEnemy):#torpedo and explode
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sounds = read_files.load_sounds_dict('assets/audio/sfx/enteties/enemies/mygga/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
-        self.sprites = read_files.load_sprites_dict('assets/sprites/enteties/enemies/mygga_torpedo/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/enemies/mygga/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.sprites = read_files.load_sprites_dict('assets/sprites/entities/enemies/mygga_torpedo/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)

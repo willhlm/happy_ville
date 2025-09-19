@@ -7,7 +7,7 @@ from . import states_bridge
 class Bridge(BaseTexture):#bridge twoards forest path
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
-        self.sprites = read_files.load_sprites_dict('assets/sprites/block/bridge/', game_objects)
+        self.sprites = read_files.load_sprites_dict('assets/sprites/entities/platforms/bridge/', game_objects)
 
         if game_objects.world_state.events.get('reindeer', False):#if reindeer has been deafeated
             state = 'erect'

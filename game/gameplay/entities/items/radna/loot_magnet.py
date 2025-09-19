@@ -17,5 +17,5 @@ class LootMagnet(Radna):
 
     @classmethod
     def pool(cls, game_objects):
-        cls.sprites = read_files.load_sprites_dict('assets/sprites/enteties/radna/loot_magnet/',game_objects)#for inventory
+        cls.sprites = read_files.load_sprites_dict('assets/sprites/entities/radna/loot_magnet/',game_objects)#for inventory
         super().pool(game_objects)

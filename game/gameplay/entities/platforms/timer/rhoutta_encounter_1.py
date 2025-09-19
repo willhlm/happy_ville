@@ -4,7 +4,7 @@ from gameplay.entities.platforms.timer.base_timer import BaseTimer
 class RhouttaEncounter_1(BaseTimer):
     def __init__(self, game_objects, pos, particle):
         super().__init__(pos, game_objects)
-        self.sprites = read_files.load_sprites_dict('assets/sprites/block/collision_time/rhoutta_encounter_1/',game_objects)
+        self.sprites = read_files.load_sprites_dict('assets/sprites/entities/platforms/timer/rhoutta_encounter_1/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect[2], self.rect[3] = self.image.width, self.image.height
         self.hitbox = self.rect.copy()

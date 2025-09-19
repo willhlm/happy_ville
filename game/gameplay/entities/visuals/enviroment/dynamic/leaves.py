@@ -31,7 +31,7 @@ class Leaves(BaseDynamic):#leaves from trees
         super().draw(target)
 
     def pool(game_objects):#save the texture in memory for later use
-        Leaves.sprites = read_files.load_sprites_dict('assets/sprites/animations/weather/leaf'+str(random.randint(1,1))+'/', game_objects)#randomly choose a leaf type
+        Leaves.sprites = read_files.load_sprites_dict('assets/sprites/entities/visuals/enviroments/weather/leaf'+str(random.randint(1,1))+'/', game_objects)#randomly choose a leaf type
 
     def update(self, dt):
         super().update(dt)

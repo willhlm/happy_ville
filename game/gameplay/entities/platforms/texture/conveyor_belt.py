@@ -39,7 +39,7 @@ class ConveyorBelt(BaseTexture):
         self.hitbox.center = self.rect.center
 
     def make_belt(self, size, angle = 0):#the spits are divided into left, middle and right. Merge them here
-        sprites = read_files.load_sprites_dict('Sprites/block/conveyor_belt/', self.game_objects)
+        sprites = read_files.load_sprites_dict('assets/sprites/entities/platforms/conveyor_belt/', self.game_objects)
 
         self.sprites = {'idle' : []}
         self.layers = []#store each layer so that it can be released

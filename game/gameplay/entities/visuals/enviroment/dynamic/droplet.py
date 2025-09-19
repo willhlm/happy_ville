@@ -33,7 +33,7 @@ class BackgroundDroplet(BaseDynamic):#cosmetic droplet
         self.velocity[1] = min(7,self.velocity[1])
 
     def pool(game_objects):
-        BackgroundDroplet.sprites = read_files.load_sprites_dict('assets/sprites/animations/droplet/droplet/', game_objects)
+        BackgroundDroplet.sprites = read_files.load_sprites_dict('assets/sprites/entities/visuals/envriroments/droplet/droplet/', game_objects)
 
     def draw(self,target):
         self.shader_state.draw()

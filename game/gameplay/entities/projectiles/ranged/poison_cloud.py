@@ -13,7 +13,7 @@ class PoisonCloud(Projectiles):
         self.lifetime=400
 
     def pool(game_objects):
-        PoisonCloud.sprites = read_files.load_sprites_dict('assets/sprites/attack/poisoncloud/',game_objects)
+        PoisonCloud.sprites = read_files.load_sprites_dict('assets/sprites/entities/projectiles/poisoncloud/',game_objects)
 
     def collision_ene(self,collision_ene):
         pass

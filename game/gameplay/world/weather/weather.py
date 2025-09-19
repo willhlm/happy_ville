@@ -46,7 +46,7 @@ class WindManager(WeatherManagers):#will handle winds in all layers, and common 
         super().__init__(game_objects)
         self.velocity = [0, 0]
         self.lifetime = 0
-        self.sounds = read_files.load_sounds_dict('assets/audio/sfx/environment/wind/')
+        self.sounds = read_files.load_sounds_dict('assets/audio/entities/visuals/sfx/environment/wind/')
         self.currentstate = weather_states.IdleWind(self)
 
     def start_wind(self, velocity, lifetime):#called from weather_states

@@ -10,8 +10,8 @@ from gameplay.entities.visuals.particles import particles
 class Sword(Melee):
     def __init__(self, entity):
         super().__init__(entity)
-        self.sprites = read_files.load_sprites_dict('assets/sprites/attack/aila_slash/',self.entity.game_objects)
-        self.sounds = read_files.load_sounds_dict('assets/audio/sfx/enteties/projectiles/aila_sword/')
+        self.sprites = read_files.load_sprites_dict('assets/sprites/entities/projectiles/aila_slash/',self.entity.game_objects)
+        self.sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/projectiles/aila_sword/')
         self.image = self.sprites['slash_1'][0]
         self.animation.play('slash_1')
         self.rect = pygame.Rect(0, 0, self.image.width, self.image.height)

@@ -6,7 +6,7 @@ from . import states_moving_platform
 class DarkForest_2(BaseDynamic):#dynamic one: #shoudl be added to platforms and dynamic_platforms groups
     def __init__(self, pos, game_objects, **prop):
         super().__init__(pos, game_objects)
-        self.sprites = read_files.load_sprites_dict('assets/sprites/block/moving_platform/dark_forest_2/', game_objects)
+        self.sprites = read_files.load_sprites_dict('assets/sprites/entities/platforms/dynamic/dark_forest_2/', game_objects)
         self.image = self.sprites['off'][0]
         self.rect[2], self.rect[3] = self.image.width, self.image.height
         self.hitbox = self.rect.copy()

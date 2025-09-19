@@ -13,7 +13,7 @@ class Slash(AnimatedEntity):#thing that pop ups when take dmg or give dmg: GFX
         self.rect.center = pos
 
     def pool(game_objects):#all things that should be saved in object pool
-        Slash.sprites = read_files.load_sprites_dict('assets/sprites/GFX/slash/',game_objects)
+        Slash.sprites = read_files.load_sprites_dict('assets/sprites/entities/visuals/cosmetics/slash/',game_objects)
 
     def reset_timer(self):
         self.kill()

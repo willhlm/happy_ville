@@ -15,7 +15,7 @@ class SlamAttack(Projectiles):
         self.dmg = 1
 
     def pool(game_objects):
-        SlamAttack.sprites = read_files.load_sprites_dict('assets/sprites/attack/slam/', game_objects, flip_x = True)
+        SlamAttack.sprites = read_files.load_sprites_dict('assets/sprites/entities/projectiles/slam/', game_objects, flip_x = True)
 
     def collision_enemy(self, collision_enemy):#projecticle enemy collision (including player)
         collision_enemy.take_dmg(dmg = self.dmg, effects = [lambda: collision_enemy.knock_back(amp = [50, 0], dir = self.dir)])

@@ -12,7 +12,7 @@ class ThunderSpark(AnimatedEntity):#when landing thunder dive
         self.currentstate = states_basic.Death(self)
 
     def pool(game_objects):
-        ThunderSpark.sprites = read_files.load_sprites_dict('assets/sprites/animations/thunder_spark/', game_objects)
+        ThunderSpark.sprites = read_files.load_sprites_dict('assets/sprites/entities/visuals/cosmetics/thunder_spark/', game_objects)
 
     def release_texture(self):
         pass

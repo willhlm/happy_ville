@@ -23,8 +23,8 @@ class AmberDroplet(EnemyDrop):
         self.game_objects.ui.hud.update_money(tot_amber)
 
     def pool(game_objects):#all things that should be saved in object pool
-        AmberDroplet.sprites = read_files.load_sprites_dict('assets/sprites/enteties/items/amber_droplet/',game_objects)
-        AmberDroplet.sounds = read_files.load_sounds_dict('assets/audio/sfx/enteties/items/amber_droplet/')
+        AmberDroplet.sprites = read_files.load_sprites_dict('assets/sprites/entities/items/amber_droplet/',game_objects)
+        AmberDroplet.sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/items/amber_droplet/')
 
     def set_ui(self):#called from backpask
         self.animation.play('ui')
