@@ -4,7 +4,7 @@ from engine.utils import read_files
 class BeaivisTime(Ability):#slow motion -> sun god: Beaiviáigi in sami
     def __init__(self, entity):
         super().__init__(entity)
-        self.sprites = read_files.load_sprites_dict('assets/sprites/attack/UI/beaivis_time/', entity.game_objects)
+        self.sprites = read_files.load_sprites_dict('assets/sprites/ui/elements/abilities/beaivis_time/', entity.game_objects)
         self.duration = 200#slow motion duration, in time [whatever units]
         self.rate = 0.5#slow motion rate
         self.description = ['slow motion','longer slow motion','slow motion but aila','imba']

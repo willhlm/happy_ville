@@ -1,6 +1,6 @@
 import pygame
 from engine.utils import read_files
-from gameplay.ui.elements import *
+from gameplay.ui.components import *
 
 class UI_loader():#for map, omamori, ability, journal etc: json file should have same name as class and folder, tsx file should end with _UI
     def __init__(self, game_objects):

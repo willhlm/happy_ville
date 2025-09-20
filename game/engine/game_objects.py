@@ -8,7 +8,7 @@ from engine.system.camera import camera
 from gameplay.world import map_loader, world_state
 from gameplay.world.weather import weather
 from engine import constants as C
-from gameplay.ui import ui
+from gameplay.ui.managers import ui
 from gameplay.narrative import quests_events
 
 from gameplay.registery.registry_manager import RegistryManager

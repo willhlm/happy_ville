@@ -1,5 +1,5 @@
 import pygame, sys
-from gameplay.ui import ui_loader
+from gameplay.ui.managers import ui_loader
 from .base.base_ui import BaseUI
 
 class LoadMenu(BaseUI):

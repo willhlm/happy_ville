@@ -1,7 +1,7 @@
 import pygame, sys
 from engine.utils import read_files
-from gameplay.ui import ui_loader
-from gameplay.ui.elements import MenuArrow
+from gameplay.ui.managers import ui_loader
+from gameplay.ui.components import MenuArrow
 from .base.base_ui import BaseUI
 
 class OptionMenuSounds(BaseUI):

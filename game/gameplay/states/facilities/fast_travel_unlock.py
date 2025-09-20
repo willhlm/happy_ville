@@ -1,5 +1,5 @@
 from .base.base_ui import BaseUI
-from gameplay.ui.elements import MenuBox
+from gameplay.ui.components import MenuBox
 
 class FastTravelUnlock(BaseUI):
     def __init__(self, game, fast_travel):

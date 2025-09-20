@@ -5,7 +5,7 @@ from gameplay.entities.projectiles import Wind
 class BieggsBreath(Ability):#force push
     def __init__(self, entity):
         super().__init__(entity)
-        self.sprites = read_files.load_sprites_dict('assets/sprites/attack/UI/bieggs_breath/',entity.game_objects)
+        self.sprites = read_files.load_sprites_dict('assets/sprites/ui/elements/abilities//bieggs_breath/',entity.game_objects)
         self.health = 1
         self.description = ['wind','hard wind']
 

@@ -1,5 +1,5 @@
 from gameplay.entities.visuals.enviroment import Leaves, BackgroundDroplet
-from gameplay.ui.elements import MenuArrow
+from gameplay.ui.components import MenuArrow, LogoLoading
 from gameplay.entities.visuals.particles import particles, screen_particles
 from gameplay.world.weather import weather
 from gameplay.states import Bank, OptionMenu
@@ -10,7 +10,7 @@ from gameplay.entities.items import *
 from gameplay.entities.projectiles import *
 from gameplay.entities.visuals.cosmetics import *
 from gameplay.entities.visuals.effects.fade_effect import FadeEffect
-from gameplay.ui.overlay import point_arrow
+from gameplay.ui.components.overlay import point_arrow
 
 class Object_pool():#a class that contains the objecte one may one to spawn duirng the game: it preloads stiff that needs to be loaded from file
     def __init__(self, game_objects):
@@ -37,8 +37,7 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         Dust.pool(game_objects)
         Dusts.pool(game_objects)
         Slash.pool(game_objects)
-        Twinkle.pool(game_objects)
-        LogoLoading.pool(game_objects)
+        Twinkle.pool(game_objects)        
         Blood.pool(game_objects)
         PlayerSoul.pool(game_objects)
         PrayEffect.pool(game_objects)        
@@ -71,6 +70,7 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
 
         #UI
         MenuArrow.pool(game_objects)
+        LogoLoading.pool(game_objects)        
         point_arrow.PointArrow.pool(game_objects)
 
         Leaves.pool(game_objects)

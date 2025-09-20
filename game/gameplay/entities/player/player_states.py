@@ -3,7 +3,7 @@ from gameplay.entities.visuals.effects.fade_effect import FadeEffect
 
 from engine import constants as C
 
-from gameplay.ui.overlay.point_arrow import PointArrow
+from gameplay.ui.components.overlay.point_arrow import PointArrow
 from gameplay.entities.visuals.cosmetics import PlayerSoul, PrayEffect, ThunderBall, ThunderSpark, Dusts
 
 def sign(number):
