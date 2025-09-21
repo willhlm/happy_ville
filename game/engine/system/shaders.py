@@ -55,12 +55,12 @@ class Chromatic_aberration(Shaders):
 
     def draw(self, temp_layer, composite_screen):#needs the screen
         self.post_process.game_objects.game.display.render(composite_screen.texture, temp_layer, shader = self.post_process.game_objects.shaders['chromatic_aberration'])#shader render
-        return  temp_layer
+        return temp_layer
 
     def draw_to_composite(self, temp_layer, composite_screen):
         self.post_process.game_objects.game.display.render(composite_screen.texture, temp_layer)#copy the screen
         #composite_screen.clear(0,0,0,0)
-        self.post_process.game_objects.game.display.render(temp_layer.texture, composite_screen, shader=self.post_process.game_objects.shaders['chromatic_aberration']      )
+        self.post_process.game_objects.game.display.render(temp_layer.texture, composite_screen, shader=self.post_process.game_objects.shaders['chromatic_aberration'])
 
 class Bloom(Shaders):
     def __init__(self, post_process, **kwarg):

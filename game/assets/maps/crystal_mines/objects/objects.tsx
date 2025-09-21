@@ -8,17 +8,17 @@
    <property name="up" type="bool" value="false"/>
    <property name="vertical" type="bool" value="false"/>
   </properties>
-  <image width="16" height="16" source="../../../Sprites/block/conveyor_belt/middle/middle01.png"/>
+  <image width="16" height="16" source="../../../sprites/entities/platforms/conveyor_belt/middle/middle01.png"/>
  </tile>
  <tile id="8">
   <properties>
    <property name="distance" value=""/>
    <property name="frequency" value=""/>
   </properties>
-  <image width="64" height="48" source="../../../Sprites/animations/traps/smacker/idle/idle2.png"/>
+  <image width="64" height="48" source="../../../sprites/entities/interactables/traps/smacker/idle/idle2.png"/>
  </tile>
  <tile id="9">
-  <image width="112" height="64" source="../../../Sprites/block/collision_time/crystal_mines_1/idle/rhoutta_encounter1.png"/>
+  <image width="112" height="64" source="../../../sprites/entities/platforms/timer/crystal_mines_1/idle/rhoutta_encounter1.png"/>
  </tile>
  <tile id="10">
   <properties>
@@ -27,21 +27,21 @@
    <property name="lifetime" value=""/>
    <property name="velocity" value=""/>
   </properties>
-  <image width="32" height="32" source="../../../Sprites/animations/crystal_source/idle/idle.png"/>
+  <image width="32" height="32" source="../../../sprites/entities/interactables/sources/crystal/idle/idle.png"/>
  </tile>
  <tile id="11">
-  <image width="48" height="208" source="../../../Sprites/animations/crystals/crystal_1/idle/crystal_1.png"/>
+  <image width="48" height="208" source="../../../sprites/entities/visuals/enviroments/crystals/crystal_mines/crystal_1/idle/crystal_1.png"/>
  </tile>
  <tile id="12">
-  <image width="96" height="192" source="../../../Sprites/animations/crystals/crystal_2/idle/Sprite-0002.png"/>
+  <image width="96" height="192" source="../../../sprites/entities/visuals/enviroments/crystals/crystal_mines/crystal_2/idle/Sprite-0002.png"/>
  </tile>
  <tile id="13">
-  <image width="64" height="272" source="../../../Sprites/animations/crystals/crystal_3/idle/Sprite-0003.png"/>
+  <image width="64" height="272" source="../../../sprites/entities/visuals/enviroments/crystals/crystal_mines/crystal_3/idle/Sprite-0003.png"/>
  </tile>
  <tile id="14">
-  <image width="96" height="208" source="../../../Sprites/animations/crystals/crystal_4/idle/Sprite-0004.png"/>
+  <image width="96" height="208" source="../../../sprites/entities/visuals/enviroments/crystals/crystal_mines/crystal_4/idle/Sprite-0004.png"/>
  </tile>
  <tile id="15">
-  <image width="48" height="240" source="../../../Sprites/animations/crystals/crystal_5/idle/Sprite-0005.png"/>
+  <image width="48" height="240" source="../../../sprites/entities/visuals/enviroments/crystals/crystal_mines/crystal_5/idle/Sprite-0005.png"/>
  </tile>
 </tileset>

@@ -782,7 +782,7 @@ class Biome():
     def release_textures(self):
         pass
 
-class Village_ola2(Biome):
+class Village(Biome):
     def __init__(self, level):
         super().__init__(level)
 
