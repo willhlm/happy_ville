@@ -1,9 +1,9 @@
 import pygame
 from engine.utils import read_files
 
-class MoneyFrame(): #HJORTRON!!!!
+class MovementHud():#gameplay UI
     def __init__(self,entity):
-        self.sprites = read_files.load_sprites_dict('assets/sprites/ui/gameplay/money/',entity.game_objects)
+        self.sprites = read_files.load_sprites_dict('assets/sprites/ui/hud/ability/frame/',entity.game_objects)
         self.entity = entity
         self.game_objects = entity.game_objects#animation need it
         self.image = self.sprites['idle'][0]
@@ -13,4 +13,3 @@ class MoneyFrame(): #HJORTRON!!!!
     def update(self, dt):
         pass
 
-#utilities

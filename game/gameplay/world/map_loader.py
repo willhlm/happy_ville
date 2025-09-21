@@ -274,7 +274,6 @@ class Level():
                     if property['name'] == 'particle':
                         particle_type = property['value']
 
-                print(parallax)
                 new_shader_screen = getattr(screen_particles, particle_type)                
                 if self.layer.startswith('fg'):
                     self.game_objects.all_fgs.add(self.layer, new_shader_screen(self.game_objects, parallax, 20))
@@ -843,19 +842,20 @@ class Nordveden(Biome):
             },
             "fog": {
                 "layers": {
-                    "bg1": { "intensity": 0.5 },
-                    "bg2": { "intensity": 1.0 },
-                    "bg3": { "intensity": 0.3 },
-                    "bg4": { "intensity": 0.5 },
-                    "bg5": { "intensity": 1.0 }
+                    "bg1": { "intensity": 0.5, 'colour': (1,1,1,1) },
+                    "bg2": { "intensity": 1.0, 'colour': (1,1,1,1) },
+                    "bg3": { "intensity": 0.3, 'colour': (1,1,1,1) },
+                    "bg4": { "intensity": 0.5, 'colour': (1,1,1,1) },
+                    "bg5": { "intensity": 1.0, 'colour': (1,1,1,1) }
                 }
             }
         }        
 
     def congigure_weather(self, group, parallax):        
         for weather_type in self.weather_config.keys():#wind, rain, for etc.
-            if self.weather_config[weather_type]['layers'].get(group, False):                     
-                new_weather = getattr(weather, self._weather_registry[weather_type]['fx_class'])(self.level.game_objects, parallax = parallax)
+            if self.weather_config[weather_type]['layers'].get(group, False):   
+                kwarg = self.weather_config[weather_type]['layers'][group]                 
+                new_weather = getattr(weather, self._weather_registry[weather_type]['fx_class'])(self.level.game_objects, parallax = parallax, **kwarg)
                 
                 self._weather_registry[weather_type]['manager'].add_fx(new_weather)
                 if group.startswith('fg'):
@@ -1228,6 +1228,36 @@ class Crystal_mines(Biome):
 class Dark_forest(Biome):
     def __init__(self, level):
         super().__init__(level)
+        self.weather_config = {
+            "rain": {
+                "layers": {
+                    "bg1": { "number_particles": 20}
+                }
+            },
+            "fog": {
+                "layers": {
+                    "bg1": { "intensity": 0.5, 'colour': (1,1,1,1) },
+                    "bg2": { "intensity": 1.0, 'colour': (1,1,1,1) },
+                    "bg3": { "intensity": 0.3, 'colour': (0,0,0,1) },
+                    "bg4": { "intensity": 0.5, 'colour': (0,0,0,1) },
+                    "bg5": { "intensity": 1.0, 'colour': (0,0,0,1) },
+                    "bg6": { "intensity": 1.0, 'colour': (0,0,0,1) },
+                    "bg7": { "intensity": 1.0, 'colour': (0,0,0,1) }
+                }
+            }
+        }      
+
+    def congigure_weather(self, group, parallax):        
+        for weather_type in self.weather_config.keys():#wind, rain, for etc.
+            if self.weather_config[weather_type]['layers'].get(group, False):   
+                kwarg = self.weather_config[weather_type]['layers'][group]                  
+                new_weather = getattr(weather, self._weather_registry[weather_type]['fx_class'])(self.level.game_objects, parallax = parallax, **kwarg)
+                
+                self._weather_registry[weather_type]['manager'].add_fx(new_weather)
+                if group.startswith('fg'):
+                    self.level.game_objects.all_fgs.add(group, new_weather)
+                else:
+                    self.level.game_objects.all_bgs.add(group, new_weather)
 
     def room(self, room = 1):
         #if room == '2':

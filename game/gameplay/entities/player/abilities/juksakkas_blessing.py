@@ -5,7 +5,7 @@ from gameplay.entities.projectiles import Arrow
 class JuksakkasBlessing(Ability):#arrow -> fetillity god
     def __init__(self, entity):
         super().__init__(entity)
-        self.sprites = read_files.load_sprites_dict('assets/sprites/attack/UI/juksakkas_blessing/', entity.game_objects)
+        self.sprites = read_files.load_sprites_dict('assets/sprites/ui/elements/abilities/juksakkas_blessing/', entity.game_objects)
         self.level = 1#upgrade pointer
         self.description = ['shoot arrow','charge arrows','charge for insta kill','imba']
 

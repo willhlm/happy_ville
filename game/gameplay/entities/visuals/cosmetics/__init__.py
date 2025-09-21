@@ -6,8 +6,6 @@ from .spawn_effect import SpawnEffect
 from .slash import Slash
 from .rune_symbol import RuneSymbol
 from .pray_effect import PrayEffect
-from .health_bar import HealthBar
-from .logo_loading import LogoLoading
 from .twinkle import Twinkle
 from .interactable_indicator import InteractableIndicator
 from .conversation_bubbles import ConversationBubbles

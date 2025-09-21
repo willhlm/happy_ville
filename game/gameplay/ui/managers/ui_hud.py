@@ -1,5 +1,5 @@
 import pygame
-from gameplay.ui.elements import HealthFrame, Health, SpiritFrame, Spirit, MovementHud, MoneyFrame
+from gameplay.ui.components import HealthFrame, Health, SpiritFrame, Spirit, MovementHud, MoneyFrame
 
 class HUD():
     def __init__(self,game_objects):

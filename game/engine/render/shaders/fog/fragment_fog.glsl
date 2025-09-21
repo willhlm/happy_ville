@@ -33,5 +33,9 @@ void main() {
     vec2 UV = fragmentTexCoord;
     vec2 shiftedUV = UV - scroll/resolution; // Apply shift only to noise texture sampling coordinates
     vec2 motion = vec2(rand(UV + TIME * starting_frequency * velocity));
-    COLOR = mix(vec4(1, 1, 1, 0), fog_color, rand(UV + motion)); // Use shiftedUV for noise texture sampling
+
+    float noise_value = rand(UV + motion);
+    COLOR = vec4(fog_color.rgb, fog_color.a * noise_value);
+
+//    COLOR = mix(vec4(1, 1, 1, 0), fog_color, rand(UV + motion)); // Use shiftedUV for noise texture sampling
 }

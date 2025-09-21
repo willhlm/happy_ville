@@ -4,7 +4,7 @@ from engine.utils import read_files
 class Counter(Ability):#just a counter abilty
     def __init__(self, entity):
         super().__init__(entity)
-        self.sprites = read_files.load_sprites_dict('assets/sprites/attack/UI/beaivis_time/',entity.game_objects)
+        self.sprites = read_files.load_sprites_dict('assets/sprites/ui/elements/abilities//beaivis_time/',entity.game_objects)
         self.sounds = read_files.load_sounds_dict('assets/audio/sfx/enteties/projectiles/beaivis_time/')
         self.duration = 10#slow motion duration, in time [whatever units]
         self.rate = 0.5#slow motion rate

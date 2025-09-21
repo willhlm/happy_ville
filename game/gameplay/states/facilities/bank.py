@@ -1,5 +1,5 @@
 from .base.base_ui import BaseUI
-from gameplay.ui.elements import MenuArrow
+from gameplay.ui.components import MenuArrow
 
 class Bank(BaseUI):#caled from mr banks
     def __init__(self, game, npc):

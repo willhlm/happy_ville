@@ -4,7 +4,7 @@ from engine.utils import read_files
 class HoragallesRage(Ability):#desolate dive:thunder god:
     def __init__(self, entity):
         super().__init__(entity)
-        self.sprites = read_files.load_sprites_dict('assets/sprites/attack/ui/horagalles_rage/',entity.game_objects)
+        self.sprites = read_files.load_sprites_dict('assets/sprites/ui/elements/abilities/horagalles_rage/',entity.game_objects)
         self.description = ['thunder','hits one additional target','one additional damage','imba']
 
     def initiate(self, enemy_rect):

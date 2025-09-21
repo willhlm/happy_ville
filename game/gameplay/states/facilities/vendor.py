@@ -1,6 +1,6 @@
 from .base.base_ui import BaseUI
-from gameplay.ui.elements import MenuBox
-from gameplay.ui.ui_loader import UI_loader
+from gameplay.ui.components import MenuBox
+from gameplay.ui.managers.ui_loader import UI_loader
 from gameplay.entities.items import AmberDroplet
 
 class Vendor(BaseUI):#called from Astrid

@@ -46,7 +46,7 @@ class WindManager(WeatherManagers):#will handle winds in all layers, and common 
         super().__init__(game_objects)
         self.velocity = [0, 0]
         self.lifetime = 0
-        self.sounds = read_files.load_sounds_dict('assets/audio/entities/visuals/sfx/environment/wind/')
+        self.sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/visuals/enviroments/wind/')
         self.currentstate = weather_states.IdleWind(self)
 
     def start_wind(self, velocity, lifetime):#called from weather_states
@@ -108,11 +108,12 @@ class WindFX(WeatherFX):#the shader that will draw things: will be added in all_
         self.noise_layer.release()
 
 class FogFX(WeatherFX):
-    def __init__(self, game_objects, parallax):
+    def __init__(self, game_objects, parallax, **kwarg):
         super().__init__(game_objects, parallax)
         self.image = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.noise_layer = game_objects.game.display.make_layer(game_objects.game.window_size)        
         self.time = 0
+        self.colour = kwarg.get('colour', (1,1,1,1))
 
     def update_render(self, dt):
         self.time += dt
@@ -125,8 +126,8 @@ class FogFX(WeatherFX):
 
         self.game_objects.game.display.render(self.image.texture, self.noise_layer, shader = self.game_objects.shaders['noise_perlin'])
         self.game_objects.shaders['fog']['noise'] = self.noise_layer.texture
-        self.game_objects.shaders['fog']['TIME'] = self.time*0.001
-        self.game_objects.shaders['fog']['fog_color'] = (1,1,1, 1)
+        self.game_objects.shaders['fog']['TIME'] = self.time * 0.001
+        self.game_objects.shaders['fog']['fog_color'] = self.colour
         self.game_objects.shaders['fog']['scroll'] = [self.game_objects.camera_manager.camera.scroll[0]*self.parallax[0],self.game_objects.camera_manager.camera.scroll[1]*self.parallax[1]]
         
         self.game_objects.game.display.render(self.image.texture, target, shader = self.game_objects.shaders['fog'])                    
