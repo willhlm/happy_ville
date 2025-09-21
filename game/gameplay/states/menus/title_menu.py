@@ -76,10 +76,14 @@ class TitleMenu(BaseUI):
 
             #load new game level
             #self.game.game_objects.load_map(self,'village_1','1')
-            #self.game.game_objects.load_map(self,'wakeup_forest_1','1')
+            self.game.game_objects.load_map(self,'wakeup_forest_1','1')
             #self.game.game_objects.load_map(self,'crystal_mines_1','1')
             #self.game.game_objects.load_map(self,'nordveden_1','1')
+<<<<<<< HEAD
+            #self.game.game_objects.load_map(self,'dark_forest_1','1')
+=======
             self.game.game_objects.load_map(self,'dark_forest_1','1')
+>>>>>>> c1c484a1af02a280ae27fd602966ebf940ddcba7
             #self.game.game_objects.load_map(self,'tall_trees_1','1')
             #self.game.game_objects.load_map(self,'hlifblom_43','1')
             #self.game.game_objects.load_map(self,'rhoutta_encounter_3','1')
