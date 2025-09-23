@@ -62,6 +62,26 @@ class Chromatic_aberration(Shaders):
         #composite_screen.clear(0,0,0,0)
         self.post_process.game_objects.game.display.render(temp_layer.texture, composite_screen, shader=self.post_process.game_objects.shaders['chromatic_aberration'])
 
+class Blur(Shaders):
+    def __init__(self, post_process, **kwarg):
+        super().__init__(post_process)
+        self.radius = kwarg.get('radius',1)
+
+    def set_radius(self, radius):
+        self.radius = radius
+
+    def draw(self, temp_layer, composite_screen):#needs the screen
+        self.post_process.game_objects.shaders['blur']['blurRadius'] = self.radius
+        self.post_process.game_objects.game.display.use_premultiplied_alpha_mode()
+        self.post_process.game_objects.game.display.render(composite_screen.texture, temp_layer, shader = self.post_process.game_objects.shaders['blur'])#shader render
+        self.post_process.game_objects.game.display.use_standard_alpha_mode()
+        return temp_layer
+
+    def draw_to_composite(self, temp_layer, composite_screen):
+        self.post_process.game_objects.shaders['blur']['blurRadius'] = self.radius
+        self.post_process.game_objects.game.display.render(composite_screen.texture, temp_layer)#copy the screen
+        self.post_process.game_objects.game.display.render(temp_layer.texture, composite_screen, shader=self.post_process.game_objects.shaders['blur'])    
+
 class Bloom(Shaders):
     def __init__(self, post_process, **kwarg):
         super().__init__(post_process)
@@ -142,23 +162,17 @@ class Zoom(Shaders):#only zoom in?
         self.center = kwarg.get('center', (0.5, 0.5))
         self.rate = kwarg.get('rate', 1)
         self.scale = kwarg.get('scale', 0.5)
-        self.method = 'zoom_in'
-        self.methods = {'zoom_out': self.zoom_out, 'zoom_in': self.zoom_in}
-        self.zoom_start_timer = C.fps
+
+    def zoom_out(self, **kwarg):
+        self.scale = kwarg.get('scale', 1)
+        self.rate = kwarg.get('rate', 1)
 
     def update_render(self, dt):
-        self.methods[self.method](dt)
-
-    def zoom_in(self, dt):
-        self.zoom_start_timer -= dt
-        if self.zoom_start_timer < 0:
-            self.zoom -= (self.zoom - self.scale)*self.rate
-            self.zoom = max(self.zoom, self.scale)
-
-    def zoom_out(self, dt):
-        self.zoom += (1 - self.zoom)*(2*self.rate)
-        self.zoom = min(self.zoom, 1)
-        if abs(self.zoom - 1) < 0.001:
+        """Smoothly interpolate zoom toward target."""
+        self.zoom += (self.scale - self.zoom) * self.rate
+        
+        if abs(self.zoom - self.scale) < 0.001:# Snap and cleanup if fully zoomed out
+            self.zoom = self.scale
             self.post_process.remove_shader('zoom')
 
     def set_uniforms(self):

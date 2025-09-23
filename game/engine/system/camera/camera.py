@@ -26,6 +26,9 @@ class Camera_manager():
     def update(self, dt):
         self.camera.update(dt)  
         
+    def zoom_out(self, **kwarg):
+        self.game_objects.post_process.shaders['zoom'].zoom_out(**kwarg)
+
     def zoom(self, scale = 1, center = (0.5, 0.5), rate = 1):
         self.game_objects.post_process.append_shader('zoom', scale = scale, center = center, rate = rate)
 

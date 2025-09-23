@@ -12,6 +12,7 @@ from gameplay.world.camera.stop import Stop
 from gameplay.entities.interactables import *
 from gameplay.entities.platforms import *
 from gameplay.entities.visuals.enviroment import *
+from engine.utils import functions
 
 class Level():
     def __init__(self, game_objects):
@@ -113,6 +114,10 @@ class Level():
             self.load_layers(self.map_data['groups'][group]['layers'],parallax,offset)
             self.load_objects(self.map_data['groups'][group]['objects'],parallax,offset,'front')#object infron of layers
             self.congigure_weather(group, parallax)#do this at the end so that it getis into the front of layers
+            self.post_process(group, parallax)
+
+    def post_process(self, group, parallax):
+        self.biome.post_process(group, parallax)
 
     def congigure_weather(self, group, parallax):
         self.biome.congigure_weather(group, parallax)
@@ -767,6 +772,9 @@ class Biome():
 
     def room(self, room):#called wgen a new room is loaded -> before load objects or configure weather
         pass
+    
+    def post_process(self, layer_name, parallax):
+        pass
 
     def play_music(self):
         try:#try laoding bg music
@@ -786,11 +794,22 @@ class Village(Biome):
     def __init__(self, level):
         super().__init__(level)
 
+    def post_process(self, layer_name, parallax):#called at the end of group loading
+        if self.live_blur:
+            if parallax[0] == 1: 
+                 radius = 0.01
+            else:                
+                radius = functions.blur_radius(parallax)
+            self.level.game_objects.game.screen_manager.append_shader('Blur', [layer_name], radius = radius)   
+            if layer_name == 'bg1':     
+                self.level.game_objects.game.screen_manager.append_shader('Blur', ['player'], radius = radius)   
+                self.level.game_objects.game.screen_manager.append_shader('Blur', ['player_fg'], radius = radius)   
+
     def room(self, room):#called wgen a new room is loaded
         if room in ['5']:
-            self.live_blur = True
+            self.live_blur = True            
 
-    def load_objects(self,data,parallax,offset):
+    def load_objects(self, data, parallax, offset):
         for obj in data['objects']:
             new_map_diff = [-self.level.PLAYER_CENTER[0],-self.level.PLAYER_CENTER[1]]
             object_size = [int(obj['width']),int(obj['height'])]
