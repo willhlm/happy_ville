@@ -34,7 +34,7 @@ class ProjectileDroplet(Projectiles):#droplet that can be placed, the source mak
         super().collision_platform(collision_plat)
 
     def pool(game_objects):
-        ProjectileDroplet.sprites = read_files.load_sprites_dict('assets/sprites/entities/visuals/enviroment/droplet/', game_objects)
+        ProjectileDroplet.sprites = read_files.load_sprites_dict('assets/sprites/entities/visuals/enviroments/droplet/', game_objects)
 
     def draw(self,target):
         self.shader_state.draw()

@@ -5,7 +5,7 @@ class Vines_2(LayeredObjects):#light forest cave
     animations = {}
     def __init__(self, pos, game_objects, parallax, layer_name,live_blur = False):
         super().__init__(pos, game_objects, parallax, layer_name,live_blur)
-        self.init_sprites('assets/sprites/animations/vines/vines_2/')#blur or lead from memory
+        self.init_sprites('assets/sprites/entities/visuals/enviroments/vines/vines_2/')#blur or lead from memory
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.true_pos = self.rect.topleft
