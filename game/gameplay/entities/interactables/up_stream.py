@@ -10,14 +10,14 @@ class UpStream(StaticEntity):#a draft that can lift enteties along a direction
         self.time = 0
         self.accel_y = 0.8
         self.accel_x = 0.8
-        self.max_speed = 7
+        self.max_speed = 5
 
         horizontal = kwarg.get('horizontal', 0)
         vertical = kwarg.get('vertical', 0)
         normalise = (horizontal**2 + vertical**2)**0.5
         self.dir = [horizontal/normalise, vertical/normalise]
 
-        sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/visuals/environment/up_stream/')
+        sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/visuals/enviroments/up_stream/')
         self.channel = game_objects.sound.play_sfx(sounds['idle'][0], loop = -1, vol = 0.5)
         self.interacted = False#for player collision
 
@@ -25,9 +25,9 @@ class UpStream(StaticEntity):#a draft that can lift enteties along a direction
         if self.interacted: return
         self.interacted = True
         if self.dir[0] != 0:
-            player.movement_manager.add_modifier('up_stream_horizontal', speed = [self.dir[0] * self.accel_x, self.dir[1] * self.accel_y])
+            player.movement_manager.add_modifier('up_stream_horizontal', speed = [self.dir[0] * self.accel_x, self.dir[1] * self.accel_y], max_speed = self.max_speed)
         elif self.dir[1] != 0:
-            player.movement_manager.add_modifier('up_stream_vertical', speed = [self.dir[0] * self.accel_x, self.dir[1] * self.accel_y])#add modifier to player movement manager
+            player.movement_manager.add_modifier('up_stream_vertical', speed = [self.dir[0] * self.accel_x, self.dir[1] * self.accel_y], max_speed = self.max_speed)#add modifier to player movement manager
 
         #context = player.movement_manager.resolve()
         #player.velocity[0] += self.dir[0] * self.accel_x * context.upstream
@@ -55,4 +55,4 @@ class UpStream(StaticEntity):#a draft that can lift enteties along a direction
         self.game_objects.shaders['up_stream']['dir'] = self.dir
         self.game_objects.shaders['up_stream']['time'] = self.time*0.1
         pos = (int(self.true_pos[0] - self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.game_objects.camera_manager.camera.scroll[1]))
-        self.game_objects.game.display.render(self.image.texture, target, position = pos, shader = self.game_objects.shaders['up_stream'])#shader render    
+        self.game_objects.game.display.render(self.image.texture, target, position = pos, shader = self.game_objects.shaders['up_stream'])#shader render

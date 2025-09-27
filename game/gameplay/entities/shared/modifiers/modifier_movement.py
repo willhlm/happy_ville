@@ -5,7 +5,9 @@ class MovementManager():
     def __init__(self):
         self.modifiers = {}
         self._sorted_modifiers = []
-        self.registry = {'two_d_liquid': TwoDLiquid, 'wall_glide' : WallGlide, 'dash_jump': DashJump, 'dash': Dash,'up_stream': UpStream, 'tjasolmais_embrace': TjasolmaisEmbrace }
+        self.registry = {'two_d_liquid': TwoDLiquid, 'wall_glide' : WallGlide, 'dash_jump': DashJump,
+                         'dash': Dash,'up_stream_horizontal': Up_stream_horizontal, 'up_stream_vertical': Up_stream_vertical,
+                         'tjasolmais_embrace': TjasolmaisEmbrace }
 
     def add_modifier(self, modifier, priority = 0, **kwarg):
         self.modifiers[modifier] = self.registry[modifier](priority, **kwarg)
@@ -15,7 +17,7 @@ class MovementManager():
         del self.modifiers[modifier]
         self._sort_modifiers()
 
-    def clear_modifiers(self): 
+    def clear_modifiers(self):
         self.modifiers.clear()
         self._sort_modifiers()
 
@@ -44,7 +46,7 @@ class MovementContext():
         self.gravity = C.acceleration[1]
         self.velocity = [0, 0]
         self.friction = C.friction_player.copy()#firction is sampled evey frame
-        
+
         self.air_timer = C.air_timer
         self.upstream = 1#a scale for upstream movement: sampled during upsteram collision
 
@@ -129,6 +131,8 @@ class UpStream(MovementModifier):
     def __init__(self, priority, **kwarg):
         super().__init__(priority)
         self.speed = kwarg.get('speed', [0, 0])  # Default force if not provided
+        self.max_speed = kwarg.get('max_speed', 7)
+        self.max_speed = 1
 
     def apply(self, context):
         # Push as extra acceleration
@@ -137,6 +141,14 @@ class UpStream(MovementModifier):
 
 class Up_stream_vertical(UpStream):
     """Vertical"""
+
+    def apply(self, context):
+        # Push as extra acceleration
+        context.velocity[1] += self.speed[1]
+        #self.speed[1] += 0.02
+        #self.speed[1] = min(0, self.speed[1])
+
+        #context.velocity[1] = -1*min(self.max_speed, abs(context.velocity[1]))
 
 class Up_stream_horizontal(UpStream):
     """Horizontal"""

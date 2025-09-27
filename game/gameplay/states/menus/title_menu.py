@@ -29,7 +29,7 @@ class TitleMenu(BaseUI):
 
         #blit arrow
         for arrow in self.menu_ui.arrows:
-            self.game.display.render(arrow.image, self.game.screen_manager.screen, position = arrow.true_pos, flip = arrow.flip)        
+            self.game.display.render(arrow.image, self.game.screen_manager.screen, position = arrow.true_pos, flip = arrow.flip)
 
         self.game.render_display(self.game.screen_manager.screen.texture)
 
@@ -38,9 +38,9 @@ class TitleMenu(BaseUI):
         bx, by, bw, bh = button.rect
 
         for arrow in self.menu_ui.arrows:
-            if arrow.flip:  
+            if arrow.flip:
                 arrow.set_pos((bx + bw + 10, by))  # +10 px padding
-            else:# left arrow, align to left edge of button                
+            else:# left arrow, align to left edge of button
                 arrow.set_pos((bx - arrow.rect.width - 10, by))  # -10 px padding
         arrow.play_SFX()
 
@@ -76,16 +76,12 @@ class TitleMenu(BaseUI):
 
             #load new game level
             #self.game.game_objects.load_map(self,'village_1','1')
-            self.game.game_objects.load_map(self,'wakeup_forest_1','1')
+            #self.game.game_objects.load_map(self,'wakeup_forest_1','1')
             #self.game.game_objects.load_map(self,'crystal_mines_1','1')
             #self.game.game_objects.load_map(self,'nordveden_1','1')
-<<<<<<< HEAD
-            #self.game.game_objects.load_map(self,'dark_forest_1','1')
-=======
-            self.game.game_objects.load_map(self,'dark_forest_1','1')
->>>>>>> c1c484a1af02a280ae27fd602966ebf940ddcba7
+            #self.game.game_objects.load_map(self,'nordveden_windtest','1')
+            self.game.game_objects.load_map(self,'hlifblom_1','1')
             #self.game.game_objects.load_map(self,'tall_trees_1','1')
-            #self.game.game_objects.load_map(self,'hlifblom_43','1')
             #self.game.game_objects.load_map(self,'rhoutta_encounter_3','1')
             #self.game.game_objects.load_map(self,'golden_fields_2','1')
             #self.game.game_objects.load_map(self,'collision_map_4','1')
@@ -101,4 +97,3 @@ class TitleMenu(BaseUI):
         elif self.current_button == 3:
             pygame.quit()
             sys.exit()
-
