@@ -16,8 +16,8 @@ class MenuArrow():
         else: self.phase = 0        
 
     def pool(game_objects):
-        MenuArrow.sounds = read_files.load_sounds_dict('assets/audio/sfx/ui/arrow/')
-        img = pygame.image.load("assets/sprites/utils/arrow/arrow_right.png").convert_alpha()
+        MenuArrow.sounds = read_files.load_sounds_dict('assets/audio/sfx/ui/elements/arrow/')
+        img = pygame.image.load("assets/sprites/ui/elements/arrow/arrow_right.png").convert_alpha()
         MenuArrow.image = game_objects.game.display.surface_to_texture(img)
 
     def update(self, dt):#note: sets pos to input, doesn't update with an increment of pos like other entities

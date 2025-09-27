@@ -6,7 +6,7 @@ from . import states_butterfly
 class Butterfly(FlyingEnemy):
     def __init__(self, pos, game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = read_files.load_sprites_dict('assets/sprites/entities/boss/butterfly/',game_objects)
+        self.sprites = read_files.load_sprites_dict('assets/sprites/entities/enemies/bosses/butterfly/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos,self.image.size)
         self.hitbox = self.rect.copy()

@@ -5,10 +5,10 @@ class DamageManager():
         self.entity = entity
         self.modifiers = {}
         self._sorted_modifiers = []        
+        self.registry = {'hald_dmg': HalfDamage, 'tjasolmais_embrace': TjasolmaisEmbrace, 'parry_window': ParryWindow }
 
     def add_modifier(self, modifier, priority=0, **kwarg):
-        new_modifier = getattr(sys.modules[__name__], modifier)(priority, **kwarg)
-        self.modifiers[modifier] = new_modifier
+        self.modifiers[modifier] = self.registry[modifier](priority, **kwarg)
         self._sort_modifiers()
 
     def remove_modifier(self, modifier):
@@ -46,14 +46,14 @@ class Modifier():
     def take_dmg(self, context):
         pass  
 
-class Half_dmg(Modifier):#appended when half damage omamori is equipped
+class HalfDamage(Modifier):#appended when half damage omamori is equipped
     def __init__(self, priority):
         super().__init__(priority)
 
     def take_dmg(self, context):
         context.damage *= 0.5
 
-class Tjasolmais_embrace(Modifier):#appended when tjasolmais embrace is equipped
+class TjasolmaisEmbrace(Modifier):#appended when tjasolmais embrace is equipped
     def __init__(self, priority, **kwarg):
         super().__init__(priority)
         self.entity = kwarg['entity']
@@ -62,7 +62,7 @@ class Tjasolmais_embrace(Modifier):#appended when tjasolmais embrace is equipped
         self.entity.abilities.spirit_abilities['Shield'].shield.take_dmg(context.damage)   #shieidl takes damage instead of entity     
         context.cancelled = True
 
-class Parry_window(Modifier):
+class ParryWindow(Modifier):
     def __init__(self, priority):
         super().__init__(priority)
         self.active_frames = 10
