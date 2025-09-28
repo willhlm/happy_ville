@@ -30,7 +30,7 @@ class GameAudio():
 
     #use music objects directly
     def play_sfx(self, sfx, loop = 0, vol = 1, fade = 0):
-        self.sound_player.play_sfx(sfx, loops = loop, volume = vol, fade_ms = fade)
+        return self.sound_player.play_sfx(sfx, loops = loop, volume = vol, fade_ms = fade)
 
     def get_sfx(self, weapon_type, material):
         return self.sfx_library.get_impact_sound(weapon_type, material)        
