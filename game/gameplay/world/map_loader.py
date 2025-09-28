@@ -784,7 +784,7 @@ class Biome():
             print("No BG music found")
 
     def clear_biome(self):#called when a new biome is about to load. need to clear the old stuff
-        self.level.game_objects.sound.fade_all_sounds(time = 2000)
+        self.level.game_objects.sound.fade_all_music(fade_time = 2000)
         self.release_textures()
 
     def release_textures(self):

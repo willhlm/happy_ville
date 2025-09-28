@@ -1,7 +1,7 @@
 import pygame
 pygame.mixer.init()#this one is needed to avoid a delay when playing the sounds
 from engine.utils import read_files
-from engine.system.sfx_manager import SFXManager
+from .sfx_manager import SFXManager
 
 class Sound():#class for organising sound and music playback
     def __init__(self):
@@ -19,6 +19,12 @@ class Sound():#class for organising sound and music playback
             channel.set_volume(self.volume['music'] * 0.1)
             pygame.mixer.set_reserved(i)
             self.channels.append(channel)
+
+    def play_background_sound(self, track, volume = 0.7, index = 0, loop = -1, fade = 300):
+        self.play_priority_sound(track, vol = volume, index=index, fade=fade, loop = loop)
+
+    def fade_all_music(self, fade_time=700):
+        self.fade_all_sounds(fade_time)
 
     def play_priority_sound(self, sfx, vol = 0.7, index = 0, loop = -1, fade = 300):
         if self.index == index:#look for an empty priority channel. If it doesn't exits, take the supplised index
@@ -82,5 +88,5 @@ class Sound():#class for organising sound and music playback
         self.volume['SFX'] = min(self.volume['SFX'], 10)
         self.volume['SFX'] = max(self.volume['SFX'], 0)
 
-    def get_weapon_hit(self, weapon, material):
+    def get_sfx(self, weapon, material):
         return self._sfx_manager.weapon_hit(weapon, material)

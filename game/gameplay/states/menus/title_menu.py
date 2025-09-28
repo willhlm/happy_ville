@@ -66,8 +66,8 @@ class TitleMenu(BaseUI):
                 sys.exit()
 
     def play_music(self):
-        self.channel = self.game.game_objects.sound.play_priority_sound(self.menu_ui.sounds['main'][0], index = 0, loop = -1, fade = 700, vol = 0.3)
-        self.channel = self.game.game_objects.sound.play_priority_sound(self.menu_ui.sounds['whisper'][0], index = 1, loop = -1, fade = 700, vol = 0.1)
+        self.channel = self.game.game_objects.sound.play_background_sound(self.menu_ui.sounds['main'][0], index = 0, loop = -1, fade = 700, volume = 0.3)
+        self.channel = self.game.game_objects.sound.play_background_sound(self.menu_ui.sounds['whisper'][0], index = 1, loop = -1, fade = 700, volume = 0.1)
 
     def change_state(self):
         if self.current_button == 0:#new game
