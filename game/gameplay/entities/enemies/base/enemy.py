@@ -22,7 +22,7 @@ class Enemy(Character):
         self.spirit = 10
         self.health = 3
 
-        self.flags = {'aggro': True, 'invincibility': False, 'attack_able': True, 'hurt_able': False}#'attack able': a flag used as a cooldown of attack
+        self.flags = {'aggro': True, 'invincibility': False, 'attack_able': True, 'hurt_able': True}#'attack able': a flag used as a cooldown of attack
         self.dmg = 1#projectile damage
 
         self.attack_distance = [0,0]#at which distance to the player to attack

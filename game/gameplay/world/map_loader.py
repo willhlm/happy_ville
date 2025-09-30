@@ -779,7 +779,7 @@ class Biome():
     def play_music(self):
         try:#try laoding bg music
             sound = read_files.load_single_sfx("audio/music/maps/" + self.level.biome_name + "/default.mp3" )
-            self.level.game_objects.sound.play_priority_sound(sound, index = 0, loop = -1, fade = 700, vol = 1.0)
+            self.level.game_objects.sound.play_background_sound(sound, index = 0, loop = -1, fade = 700, volume = 1.0)
         except FileNotFoundError:
             print("No BG music found")
 
@@ -885,7 +885,7 @@ class Nordveden(Biome):
     def play_music(self):
         #super().play_music()
         sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/visuals/enviroments/ambient/nordveden/')
-        self.level.game_objects.sound.play_priority_sound(sounds['idle'][0], index = 1, loop = -1, fade = 1000, vol = 0.2)
+        self.level.game_objects.sound.play_background_sound(sounds['idle'][0], index = 1, loop = -1, fade = 1000, volume = 0.2)
 
     def room(self, room):#called wgen a new room is loaded
         return
@@ -1028,7 +1028,7 @@ class Hlifblom(Biome):
     def play_music(self):
         super().play_music()
         sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/visuals/enviroments/ambient/light_forest_cave/')
-        #self.level.game_objects.sound.play_priority_sound(sounds['idle'][0], index = 1, loop = -1, fade = 1000, vol = 0.1)
+        #self.level.game_objects.sound.play_background_sound(sounds['idle'][0], index = 1, loop = -1, fade = 1000, volume = 0.1)
 
     def room(self, room = 1):
         self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [255/255,255/255,255/255,255/255], normal_interact = False)
@@ -1149,7 +1149,7 @@ class Crystal_mines(Biome):
     def play_music(self):
         super().play_music()
         sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/visuals/enviroments/ambient/crystal_mines')
-        self.level.game_objects.sound.play_priority_sound(sounds['idle'][0], index = 1, loop = -1, fade = 1000, vol = 0.2)
+        self.level.game_objects.sound.play_background_sound(sounds['idle'][0], index = 1, loop = -1, fade = 1000, volume = 0.2)
 
     def room(self, room = 1):
         self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [255/255,255/255,255/255,255/255], normal_interact = False)

@@ -4,8 +4,8 @@ from engine.utils import read_files
 class Alphabet():
     def __init__(self, game_objects, font_name = None, font_size = 12):
         self.game_objects = game_objects
-        self.font_atals = game_objects.game.display.make_font_atlas(font_path = 'assets/sprites/utils/fonts/8BitSnobbery.ttf', font_size=12)        
-        
+        self.font_atals = game_objects.game.display.make_font_atlas(font_path = 'assets/sprites/utils/fonts/8BitSnobbery.ttf', font_size = 12)        
+         
         self.font = pygame.font.Font('assets/sprites/utils/fonts/8BitSnobbery' + '.ttf', font_size)
         self.text_bg_dict = {'default':read_files.generic_sheet_reader("assets/sprites/utils/text_bg5.png",16,16,3,3), 'text_bubble':read_files.generic_sheet_reader("assets/sprites/utils/text_bg6.png",16,16,3,3)}
 

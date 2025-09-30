@@ -1523,7 +1523,6 @@ class SmashSideMain(Sword):
         self.entity.game_objects.timer_manager.start_timer(C.sword_time_player, self.entity.on_attack_timeout)
         self.entity.abilities.spirit_abilities['Shield'].sword()
         self.entity.sword.dir = self.entity.dir.copy()
-        self.entity.game_objects.sound.play_sfx(self.entity.swrod.sounds['sword'][0], vol = 0.7)
         self.entity.sword.currentstate.enter_state('Slash_1')
         self.entity.sword.use_sword()
         self.entity.projectiles.add(self.entity.sword)#add sword to group

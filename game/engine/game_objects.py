@@ -4,7 +4,7 @@ from engine.system import collisions, save_load, groups, object_pool, controller
 from engine.sound import game_audio
 from gameplay.entities.player import player
 from engine.render import post_process
-from engine.system.camera import camera
+from engine.camera import camera
 
 from gameplay.world import map_loader, world_state
 from gameplay.world.weather import weather

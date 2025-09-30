@@ -5,7 +5,7 @@ class MovementManager():
     def __init__(self):
         self.modifiers = {}
         self._sorted_modifiers = []
-        self.registry = {'two_d_liquid': TwoDLiquid, 'wall_glide' : WallGlide, 'dash_jump': DashJump, 'dash': Dash,'up_stream': UpStream, 'tjasolmais_embrace': TjasolmaisEmbrace }
+        self.registry = {'up_stream_horizontal': UpStreamHorizontal, 'up_stream_vertical': UpStreamVertical, 'two_d_liquid': TwoDLiquid, 'wall_glide' : WallGlide, 'dash_jump': DashJump, 'dash': Dash,'up_stream': UpStream, 'tjasolmais_embrace': TjasolmaisEmbrace }
 
     def add_modifier(self, modifier, priority = 0, **kwarg):
         self.modifiers[modifier] = self.registry[modifier](priority, **kwarg)
@@ -135,10 +135,10 @@ class UpStream(MovementModifier):
         context.velocity[0] += self.speed[0]
         context.velocity[1] += self.speed[1]
 
-class Up_stream_vertical(UpStream):
+class UpStreamVertical(UpStream):
     """Vertical"""
 
-class Up_stream_horizontal(UpStream):
+class UpStreamHorizontal(UpStream):
     """Horizontal"""
 
 

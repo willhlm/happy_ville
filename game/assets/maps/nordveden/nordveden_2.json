@@ -1437,14 +1437,14 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"mygga"
+                                 "value":"rav"
                                 }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":944,
-                         "y":624
+                         "x":1152,
+                         "y":672
                         }, 
                         {
                          "gid":3,
@@ -2018,7 +2018,7 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":1520,
+                         "width":752,
                          "x":-128,
                          "y":835
                         }],

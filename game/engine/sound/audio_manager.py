@@ -7,7 +7,7 @@ class AudioManager:
     
     def __init__(self, config):        
         self.config = config
-        self.volume_settings = read_files.read_json('saves/game_settings.json')['sounds']
+        self.volume_settings = read_files.read_json('config/game_settings.json')['sounds']
         
         pygame.mixer.set_num_channels(config['total_channels'])
         self._setup_reserved_channels()
