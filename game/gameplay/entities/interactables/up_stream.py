@@ -49,3 +49,6 @@ class UpStream(StaticEntity):#a draft that can lift enteties along a direction
         self.game_objects.shaders['up_stream']['time'] = self.time*0.1
         blit_pos = (int(self.true_pos[0]-self.game_objects.camera_manager.camera.interp_scroll[0]),int(self.true_pos[1]-self.game_objects.camera_manager.camera.interp_scroll[1]))
         self.game_objects.game.display.render(self.image.texture, target, position = blit_pos, shader = self.game_objects.shaders['up_stream'])#shader render    
+
+    def seed_collision(self, seed):
+        pass

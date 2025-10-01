@@ -29,7 +29,7 @@ class Sword(Melee):
         self.stone_states['slash'].slash_speed()
         self.entity.game_objects.sound.play_sfx(self.entity.sword.sounds['swing'][0])
         particle = {'dir': self.dir,'lifetime': 180,'scale': 5,'angle_spread': [13, 15],'angle_dist': 'normal','colour': C.spirit_colour,'gravity_scale': -0.1,'gradient': 1,'fade_scale': 2.2,'number_particles': 8,'vel': {'ejac': [13, 17]}}
-        self.effects = hit_effects.HitEffect(sound = self.entity.game_objects.sound.get_sfx('sword', 'flesh')[0], particles = particle, knockback = (25, 10), hitstop = 10)
+        self.effects = hit_effects.HitEffect(sound = self.entity.game_objects.sound.get_sfx('sword', 'flesh')[0], particles = particle, knockback = [25, 10], hitstop = 10)
         
     def update_hitbox(self):
         hitbox_attr, entity_attr = self.direction_mapping[tuple(self.dir)]#self.dir is set in states_sword

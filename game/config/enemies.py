@@ -5,9 +5,9 @@ All enemy stats defined here for easy balancing.
 
 ENEMY_CONFIGS = {
     'rav': {
-        'health': 3,
+        'health': 4,
         'speeds': {
-            'chase': 0.8,
+            'chase': 1,
             'patrol': 0.3
         },
         'distances': {
@@ -16,12 +16,12 @@ ENEMY_CONFIGS = {
             'jump': [100, 150]
         },
         'cooldowns': {
-            'melee_attack': 120,
+            'melee_attack': 80,
             'jump_attack': 200
         },
         'timers': {
             'patrol': 220,
-            'hurt_recovery': 200
+            'hurt_recovery': 250
         }
     },
     
