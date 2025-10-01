@@ -113,7 +113,7 @@ class Player(Character):
 
     def dead(self):#called when death animation is finished
         self.game_objects.world_state.update_statistcis('death')#count the number of times aila has died
-        self.game_objects.game.state_manager.enter_state(state_name = 'Death', category = 'game_states_cutscenes')
+        self.game_objects.game.state_manager.enter_state(state_name = 'death')
 
     def heal(self, health = 1):
         self.health += health

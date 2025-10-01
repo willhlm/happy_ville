@@ -49,4 +49,4 @@ class RavStateManager:
 
     def check_player_distance(self):
         player = self.entity.game_objects.player
-        self.player_distance = [player.rect.centerx - self.entity.rect.centerx,player.rect.centery - self.entity.rect.centery]
+        self.player_distance = [player.rect.centerx - self.entity.rect.centerx, player.rect.centery - self.entity.rect.centery]

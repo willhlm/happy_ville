@@ -22,7 +22,8 @@ class BaseState():
                 if not best or decision.score > best.score:
                     best = decision
 
-        if best:            
+        if best:  
+            self.exit_state()          
             self.enter_state(best.next_state, **best.params)
 
     def enter_state(self, state_name, **kwargs):
@@ -44,6 +45,10 @@ class BaseState():
         # Fetch from manager instead of storing locally
         return self.entity.currentstate.player_distance
 
+    def exit_state(self):
+        'called when exiting state through a decision'
+        pass
+
 class Idle(BaseState):#do nothing
     def __init__(self, entity):
         super().__init__(entity)
@@ -61,17 +66,21 @@ class Patrol(BaseState):
         self.entity.velocity[0] += self.entity.dir[0] * self.entity.patrol_speed
 
     def timeout(self):
-        self.enter_state("wait", time=50, next_state="patrol")
+        if random.random() < 0.5: 
+            dir = -1                    
+        else: 
+            dir = 1
+        self.enter_state("wait", time = 50, next_state="patrol", dir=dir)
 
-    def enter_state(self, newstate, **kwargs):
+    def exit_state(self):
         self.entity.game_objects.timer_manager.remove_timer(self.timer)
-        super().enter_state(newstate, **kwargs)
 
 class Wait(BaseState):
     def __init__(self, entity, **kwargs):
         super().__init__(entity)
         self.time = kwargs.get("time", 50)
         self.next_state = kwargs.get("next_state", "patrol")
+        self.dir = kwargs.get("dir", 1)        
         self.entity.animation.play("idle", 0.2)
 
     def update_logic(self, dt):
@@ -83,7 +92,11 @@ class Wait(BaseState):
             elif abs(self.player_distance[0]) < self.entity.aggro_distance[0] and abs(self.player_distance[1]) < self.entity.aggro_distance[1]:
                 self.enter_state("chase")
             else:
+                self.turn_around()
                 self.enter_state(self.next_state)
+
+    def turn_around(self):
+        self.entity.dir[0] *= self.dir
 
     def handle_input(self, input_type):
         if input_type == "Hurt":

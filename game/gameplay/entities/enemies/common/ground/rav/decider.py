@@ -51,8 +51,7 @@ class GroundDecider:
             x = self.entity.hitbox.right + 5
 
         if not self.entity.game_objects.collisions.check_ground([x, self.entity.hitbox.bottom + 5]):
-            print('fe')
-            results.append(Decision("wait", score=90, params={"time": 60, "next_state": "patrol"}))
+            results.append(Decision("wait", score=90, params={"time": 60, "next_state": "patrol", 'dir':-1}))
         return results
 
 class PatrolDecider:
@@ -80,7 +79,7 @@ class PatrolDecider:
             results.append(Decision(
                 next_state="wait",
                 score=90,
-                params={"time": 60, "next_state": "patrol"}
+                params={"time": 60, "next_state": "patrol", 'dir':-1}
             ))
 
         return results
