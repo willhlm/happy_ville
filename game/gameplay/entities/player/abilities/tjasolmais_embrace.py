@@ -10,8 +10,8 @@ class TjasolmaisEmbrace(Ability):#makes the shield, water god
         self.shield = None#-> higher level can reflect projectiles? or maybe hurt enemy?
 
     def shield_expire(self):#called when the shield is destroyed
-        self.entity.movement_manager.remove_modifier('Tjasolmais_embrace')
-        self.entity.damage_manager.remove_modifier('Tjasolmais_embrace')
+        self.entity.movement_manager.remove_modifier('tjasolmais_embrace')
+        self.entity.damage_manager.remove_modifier('tjasolmais_embrace')
         self.shield = None
 
     def sword(self):#called when aila swings the sword
@@ -20,8 +20,8 @@ class TjasolmaisEmbrace(Ability):#makes the shield, water god
     def initiate(self):#called when using the abilty
         if self.shield: self.shield.kill()    #kill the old one
         self.shield = Shield(self.entity)
-        self.entity.movement_manager.add_modifier('Tjasolmais_embrace', entity = self.entity)
-        self.entity.damage_manager.add_modifier('Tjasolmais_embrace', entity = self.entity)
+        self.entity.movement_manager.add_modifier('tjasolmais_embrace', entity = self.entity)
+        self.entity.damage_manager.add_modifier('tjasolmais_embrace', entity = self.entity)
 
         self.entity.projectiles.add(self.shield)
 

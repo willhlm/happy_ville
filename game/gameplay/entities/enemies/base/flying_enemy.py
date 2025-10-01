@@ -2,7 +2,7 @@ import random,  math
 from engine import constants as C
 
 from gameplay.entities.enemies.base.enemy import Enemy
-from gameplay.entities.enemies.flying import states_enemy_flying
+from gameplay.entities.enemies.common.flying import states_enemy_flying
 
 def sign(number):
     if number > 0: return 1

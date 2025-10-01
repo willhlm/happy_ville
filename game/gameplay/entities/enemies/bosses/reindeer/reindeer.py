@@ -24,7 +24,7 @@ class Reindeer(Boss):
         self.animation.framerate = 1/6
 
     def pool(game_objects):
-        Reindeer.sprites = read_files.load_sprites_dict('assets/sprites/entities/boss/reindeer/',game_objects)
+        Reindeer.sprites = read_files.load_sprites_dict('assets/sprites/entities/enemies/bosses/reindeer/',game_objects)
 
     def release_texture(self):
         pass

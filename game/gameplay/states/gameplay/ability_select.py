@@ -7,7 +7,7 @@ class AbilitySelect(Gameplay):#when pressing tab
         self.abilities = list(self.game.game_objects.player.abilities.spirit_abilities.keys())
         self.index = self.abilities.index(self.game.game_objects.player.abilities.equip)
 
-        self.sprites = read_files.load_sprites_list('assets/sprites/ui/ability_hud/', game.game_objects)#TODO
+        self.sprites = read_files.load_sprites_list('assets/sprites/ui/overlay/ability_hud/', game.game_objects)#TODO
         self.coordinates=[(40,0),(60,50),(30,60),(0,40),(20,0),(0,0)]
         self.surface = self.game.display.make_layer(self.game.window_size)#TODO
 

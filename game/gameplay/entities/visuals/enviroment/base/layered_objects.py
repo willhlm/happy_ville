@@ -1,6 +1,7 @@
 from engine.utils import read_files
 from gameplay.entities.shared.states import states_blur
 from gameplay.entities.base.animated_entity import AnimatedEntity
+from engine.utils import functions
 
 class LayeredObjects(AnimatedEntity):#objects in tiled that goes to different layers
     def __init__(self, pos, game_objects, parallax, layer_name, live_blur = False):
@@ -9,9 +10,7 @@ class LayeredObjects(AnimatedEntity):#objects in tiled that goes to different la
         self.group = game_objects.all_bgs.group_dict[layer_name]
         self.parallax = parallax
         self.layer_name = layer_name
-
         self.live_blur = live_blur
-        self.blurtstate = states_blur.Idle(self) 
 
     def update(self, dt):
         super().update(dt)
@@ -20,7 +19,6 @@ class LayeredObjects(AnimatedEntity):#objects in tiled that goes to different la
     def init_sprites(self, path):#save in memory. key (0,0) is reserved for none blurred images
         if self.live_blur:
             cache_key = (0,0)
-            self.blurtstate = states_blur.Blur(self)
         else:
             cache_key = tuple(self.parallax)
         
@@ -34,8 +32,8 @@ class LayeredObjects(AnimatedEntity):#objects in tiled that goes to different la
                 self.blur()                    
 
     def blur(self):#
-        shader = self.game_objects.shaders['blur']
-        shader['blurRadius'] = 1/self.parallax[0]
+        shader = self.game_objects.shaders['blur']        
+        shader['blurRadius'] = functions.blur_radius(self.parallax)
         for state in self.sprites.keys():
             for frame, image in enumerate(self.sprites[state]):     
                 self.game_objects.game.display.use_alpha_blending(False)#remove thr black outline           
@@ -45,9 +43,8 @@ class LayeredObjects(AnimatedEntity):#objects in tiled that goes to different la
                 self.sprites[state][frame] = empty_layer.texture    
 
     def draw(self, target):
-        self.blurtstate.set_uniform()#sets the blur radius
         pos = (int(self.true_pos[0] - self.parallax[0] * self.game_objects.camera_manager.camera.interp_scroll[0]),int(self.true_pos[1] - self.parallax[0] * self.game_objects.camera_manager.camera.interp_scroll[1]))               
-        self.game_objects.game.display.render(self.image, target, position = pos, shader = self.shader)#shader render      
+        self.game_objects.game.display.render(self.image, target, position = pos)#shader render      
 
     def release_texture(self):  # Called when .kill() and when emptying the group        
         pass  

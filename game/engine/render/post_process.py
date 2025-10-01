@@ -35,9 +35,26 @@ class PostProcess():#for screen-wide effects
         self.shaders = {}
         self.append_shader(shader_name, **kwargs)
         
-    def append_shader(self, shader_name, **kwargs):        
+    def append_shader(self, shader_name, **kwargs):     
         shader_class = getattr(shaders, shader_name.capitalize())
         self.shaders[shader_name] = shader_class(self, **kwargs)
 
     def remove_shader(self, shader):
         self.shaders.pop(shader, None)
+
+    def clear_shaders(self):
+        self.shaders = {}        
+
+class PostProcessLayer(PostProcess):#for per layer screen effects: the shaders need to respect the alpha (see e.g. chromatic abbrevation)
+    def __init__(self, game_objects, screen):
+        super().__init__(game_objects, None)    
+        self.screen = screen
+
+    def apply(self, source_layer, final_target):  
+        shader_items = list(self.shaders.items())
+        input_layer = source_layer        
+        for i, (key, shader_obj) in enumerate(shader_items):   
+            self.temp_layer.clear(0, 0, 0, 0)
+            input_layer = shader_obj.draw(self.temp_layer, input_layer)
+
+        self.screen.apply_pp(input_layer, final_target)        

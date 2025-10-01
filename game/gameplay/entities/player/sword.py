@@ -10,8 +10,8 @@ from gameplay.entities.visuals.particles import particles
 class Sword(Melee):
     def __init__(self, entity):
         super().__init__(entity)
-        self.sprites = read_files.load_sprites_dict('assets/sprites/entities/projectiles/aila_slash/',self.entity.game_objects)
-        self.sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/projectiles/aila_sword/')
+        self.sprites = read_files.load_sprites_dict('assets/sprites/entities/projectiles/aila_sword/',self.entity.game_objects)
+        self.sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/projectiles/sword/')
         self.image = self.sprites['slash_1'][0]
         self.animation.play('slash_1')
         self.rect = pygame.Rect(0, 0, self.image.width, self.image.height)
@@ -28,8 +28,8 @@ class Sword(Melee):
     def use_sword(self, swing = 'light'):#called from player stetas whenswing sword
         self.stone_states['slash'].slash_speed()
         particle = {'dir': self.dir,'lifetime': 180,'scale': 5,'angle_spread': [13, 15],'angle_dist': 'normal','colour': C.spirit_colour,'gravity_scale': -0.1,'gradient': 1,'fade_scale': 2.2,'number_particles': 8,'vel': {'ejac': [13, 17]}}
-        self.effects = hit_effects.HitEffect(sound = self.sounds['sword_hit_enemy'][0], particles = particle, knockback = (25, 10), hitstop = 10)
-
+        self.effects = hit_effects.HitEffect(sound = self.entity.game_objects.sound.get_weapon_hit('sword', 'flesh')[0], particles = particle, knockback = (25, 10), hitstop = 10)
+        
     def update_hitbox(self):
         hitbox_attr, entity_attr = self.direction_mapping[tuple(self.dir)]#self.dir is set in states_sword
         setattr(self.hitbox, hitbox_attr, getattr(self.entity.hitbox, entity_attr))

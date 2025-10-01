@@ -8,7 +8,7 @@ class SeedPlatform(BaseTexture):
     def __init__(self, arrow, game_objects, dir):
         super().__init__(arrow.hitbox.center, game_objects)
         self.lifetime = 200
-        self.sprites = SeedPlatform.sprites
+        self.sprites = SeedPlatform.sprites        
         self.image = self.sprites['grow'][0]
 
         self.animation = animation.Animation(self)        
@@ -26,7 +26,7 @@ class SeedPlatform(BaseTexture):
         pass
 
     def pool(game_objects):
-        SeedPlatform.sprites = read_files.load_sprites_dict('assets/sprites/entites/projectiles/seeds/platform/', game_objects)
+        SeedPlatform.sprites = read_files.load_sprites_dict('assets/sprites/entities/projectiles/seeds/platform/', game_objects)
 
     def get_hitbox(self, arrow, dir):
         if dir == [-1, 0]:#left

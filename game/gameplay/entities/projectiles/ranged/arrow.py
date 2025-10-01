@@ -1,7 +1,7 @@
 import pygame, math
 from gameplay.entities.projectiles.base.projectiles import Projectiles
 from engine.utils import read_files
-from gameplay.entities.projectiles import seeds
+from gameplay.entities.projectiles import seed_spawner
 from gameplay.entities.visuals.particles import particles
 
 class Arrow(Projectiles):#should it be called seed?
@@ -18,7 +18,7 @@ class Arrow(Projectiles):#should it be called seed?
         amp = min(amp, 1)#limit the max charge to 1
 
         self.velocity = [amp * self.dir[0] * 20 / normalise, amp * self.dir[1] * 20 / normalise]
-        self.seed_spawner = seeds.SeedSpawner(self)
+        self.seed_spawner = seed_spawner.SeedSpawner(self)
 
         self.once = False
 

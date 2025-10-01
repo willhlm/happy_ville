@@ -33,7 +33,7 @@ class Character(PlatformEntity):#enemy, NPC,player
         self.flags['invincibility'] = True
 
         try:#TODO add hurt sounds to all enteties
-            self.game_objects.sound.play_sfx(self.sounds['hit'][0], vol = 0.2)
+            self.game_objects.sound.play_sfx(self.sounds['hurt'][0], vol = 0.2)
         except:
             pass
 

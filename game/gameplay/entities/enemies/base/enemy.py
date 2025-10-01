@@ -1,6 +1,6 @@
 import random
 from gameplay.entities.base.character import Character
-from gameplay.entities.enemies.ground import states_enemy
+from gameplay.entities.enemies.common.ground import states_enemy
 
 def sign(number):
     if number > 0: return 1

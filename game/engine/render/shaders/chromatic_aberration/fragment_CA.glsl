@@ -17,5 +17,8 @@ void main()
 	float g = texture(imageTexture, fragmentTexCoord + vec2(TEXTURE_PIXEL_SIZE*g_displacement), 0.0).g;
 	float b = texture(imageTexture, fragmentTexCoord + vec2(TEXTURE_PIXEL_SIZE*b_displacement), 0.0).b;
 
-	COLOR = vec4(r, g, b, 1.0);
+	vec4 original = texture(imageTexture, fragmentTexCoord, 0.0);
+	COLOR = vec4(r, g, b, original.a);
+
+	//COLOR = vec4(r, g, b, 1.0);
 }

@@ -1,3 +1,5 @@
+from engine.render.post_process import PostProcessLayer
+
 class ScreenManager():
     def __init__(self, game):
         self.game = game
@@ -29,7 +31,8 @@ class ScreenManager():
         self.active_screens.remove(key)
         
     def clear_screens(self):#called from map loader, loading a new map
-        self.active_screens = []       
+        self.active_screens = []   
+        self.clear_shaders()    
 
     def render(self):#render multiple screen, for each parallax, with pp precision
         self.game.display.use_premultiplied_alpha_mode()
@@ -58,6 +61,14 @@ class ScreenManager():
         for screen in self.screens.values():
             screen.clear(0,0,0,0)
 
+    def append_shader(self, shader, layers, **kwarg):  #can append shaders to the screen (post process like stff)
+        for key in layers:     
+            self.screens[key].append_shader(shader, **kwarg)
+
+    def clear_shaders(self):
+        for key in self.screens.keys():
+            self.screens[key].clear_shaders()
+
 class ScreenLayer():
     def __init__(self, game, parallax = [1, 1]):
         """
@@ -71,6 +82,8 @@ class ScreenLayer():
         self.layer = self.game.display.make_layer(self.game.window_size)
         self.offset = [0, 0]
 
+        self.post_process = PostProcessLayer(game.game_objects, self)
+
     def calculate_offset(self):      
         camera_scroll_x = self.game.game_objects.camera_manager.camera.interp_scroll[0] * self.parallax[0]
         camera_scroll_y = self.game.game_objects.camera_manager.camera.interp_scroll[1] * self.parallax[1]
@@ -81,7 +94,7 @@ class ScreenLayer():
         
         self.offset = (-frac_x, frac_y )#fractional paty of the scroll
 
-    def render(self, target):
+    def apply_pp(self, input, target):
         """
         Render this layer onto the main screen with sub-pixel correction.
         """
@@ -89,7 +102,10 @@ class ScreenLayer():
         self.game.game_objects.shaders['pp']['u_camera_offset'] = self.offset
         self.game.game_objects.shaders['pp']['u_scale'] = self.game.scale
         self.game.game_objects.shaders['pp']['u_screen_size'] = self.game.window_size
-        self.game.display.render(self.layer.texture, target, scale = self.game.scale, shader = self.game.game_objects.shaders['pp'])      
+        self.game.display.render(input.texture, target, scale = self.game.scale, shader = self.game.game_objects.shaders['pp'])      
+
+    def render(self, composite_target):
+        self.post_process.apply(source_layer=self.layer,final_target=composite_target)
 
     def reset(self, parallax):
         self.parallax = parallax
@@ -97,6 +113,12 @@ class ScreenLayer():
 
     def __getattr__(self, attr):
         return getattr(self.layer, attr)
+
+    def append_shader(self, shader, **kwarg):        
+        self.post_process.append_shader(shader, **kwarg)
+
+    def clear_shaders(self):
+        self.post_process.clear_shaders()
 
 class ScreenLayerPlayer(ScreenLayer):
     def __init__(self, game):

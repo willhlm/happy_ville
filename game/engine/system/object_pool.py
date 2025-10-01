@@ -3,7 +3,6 @@ from gameplay.ui.components import MenuArrow, LogoLoading
 from gameplay.entities.visuals.particles import particles, screen_particles
 from gameplay.world.weather import weather
 from gameplay.states import Bank, OptionMenu
-from gameplay.entities.projectiles import seeds
 from gameplay.entities.enemies import Reindeer, CultistWarrior, CultistRogue
 from gameplay.entities.platforms import Bubble, SeedPlatform
 from gameplay.entities.items import *

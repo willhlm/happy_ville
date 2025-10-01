@@ -10,4 +10,3 @@ class ThorMountain(LayeredObjects):
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.topleft = pos
         self.true_pos = self.rect.topleft
-        self.blur_radius = 1/parallax[0]
