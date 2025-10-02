@@ -16,11 +16,11 @@ ENEMY_CONFIGS = {
             'jump': [100, 150]
         },
         'cooldowns': {
-            'melee_attack': 80,
-            'jump_attack': 200
+            'melee_attack': [50, 80],#min max
+            'jump_attack': [50, 150]#min max
         },
         'timers': {
-            'patrol': 220,
+            'patrol': [80, 220],#min max
             'hurt_recovery': 250
         }
     },
@@ -37,11 +37,11 @@ ENEMY_CONFIGS = {
             'jump': [120, 150]
         },
         'cooldowns': {
-            'melee_attack': 80,   # Faster attacks
-            'jump_attack': 150
+            'melee_attack': [50, 80],#min max
+            'jump_attack': [50, 150]#min max
         },
         'timers': {
-            'patrol': 180,
+            'patrol': [80, 220],#min max
             'hurt_recovery': 150
         }
     }

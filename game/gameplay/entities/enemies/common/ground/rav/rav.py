@@ -17,13 +17,13 @@ class Rav(Enemy):
 
         self.health = self.config['health']
         self.chase_speed = self.config['speeds']['chase']
-        self.patrol_speed = self.config['speeds']['patrol']
-        self.patrol_timer = self.config['timers']['patrol']
+        self.patrol_speed = self.config['speeds']['patrol']        
         
         self.aggro_distance = self.config['distances']['aggro']
         self.attack_distance = self.config['distances']['attack']
         self.jump_distance = self.config['distances']['jump']
-        self.flags['jump_attack_able'] = True
+
+        self.patrol_timer = self.config['timers']['patrol']
 
         self.currentstate = RavStateManager(self)
 

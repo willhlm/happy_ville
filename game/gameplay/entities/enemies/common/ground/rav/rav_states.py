@@ -12,19 +12,46 @@ class BaseState():
         self.check_transitions(dt)
 
     def update_logic(self, dt):
-        """Override in subclasses: movement, attack, animations, etc."""
+        """Override in subclasses: movement, attack, etc."""
         pass
 
     def check_transitions(self, dt):
-        best = None
-        for decider in self.deciders:
-            for decision in decider.choose(self.player_distance, dt):
-                if not best or decision.score > best.score:
-                    best = decision
+        """
+        Evaluate all deciders attached to this state and determine whether the enemy should transition into another state.
 
-        if best:  
-            self.exit_state()          
-            self.enter_state(best.next_state, **best.params)
+        Process:
+        1. Ask each decider for a list of possible decisions (with score/priority).
+        2. Collect all candidate decisions into a single list.
+        3. Find the highest priority among all candidates.
+        - This ensures that "safety" or "critical" decisions (like no ground) always override less important ones (like choosing an attack).
+        4. From the candidates in that priority tier, pick one using weighted randomness based on their score.
+        - Higher score → higher probability of being chosen.
+        5. If a best decision is found, exit the current state and enter the new one with any parameters provided.
+
+        Example:
+            - GroundDecider returns "wait" (priority 10, score 90).
+            - AttackDecider returns "jump_attack_pre" (priority 5, score 80).
+            => "wait" will be chosen, since it has higher priority.
+        """        
+        candidates = []
+        for decider in self.deciders:
+            results = decider.choose(self.player_distance, dt)
+            if results:
+                candidates.extend(results)
+
+        if not candidates:
+            return  # stay in current state
+
+        # --- select the highest priority tier ---
+        max_priority = max(d.priority for d in candidates)
+        filtered = [d for d in candidates if d.priority == max_priority]
+
+        # Weighted random choice within that tier
+        states = [d for d in filtered]
+        weights = [d.score for d in filtered]
+        best = random.choices(states, weights=weights, k=1)[0]
+
+        self.enter_state(best.next_state, **best.params)
 
     def enter_state(self, state_name, **kwargs):
         self.entity.currentstate.enter_state(state_name, **kwargs)
@@ -45,10 +72,6 @@ class BaseState():
         # Fetch from manager instead of storing locally
         return self.entity.currentstate.player_distance
 
-    def exit_state(self):
-        'called when exiting state through a decision'
-        pass
-
 class Idle(BaseState):#do nothing
     def __init__(self, entity):
         super().__init__(entity)
@@ -57,46 +80,18 @@ class Patrol(BaseState):
     def __init__(self, entity, **kwargs):
         super().__init__(entity)
         self.entity.animation.play("walk", 0.17)
-        self.entity.velocity = [self.entity.patrol_speed, self.entity.velocity[1]]
-        self.timer = self.entity.game_objects.timer_manager.start_timer(self.entity.patrol_timer, self.timeout)
-        # Use PatrolDecider here
+        self.entity.velocity = [self.entity.patrol_speed, self.entity.velocity[1]]        
         self.deciders = [PatrolDecider(entity)]
+        self.entity.dir[0] *= kwargs.get('dir', 1)
 
     def update_logic(self, dt):
         self.entity.velocity[0] += self.entity.dir[0] * self.entity.patrol_speed
 
-    def timeout(self):
-        if random.random() < 0.5: 
-            dir = -1                    
-        else: 
-            dir = 1
-        self.enter_state("wait", time = 50, next_state="patrol", dir=dir)
-
-    def exit_state(self):
-        self.entity.game_objects.timer_manager.remove_timer(self.timer)
-
 class Wait(BaseState):
     def __init__(self, entity, **kwargs):
-        super().__init__(entity)
-        self.time = kwargs.get("time", 50)
-        self.next_state = kwargs.get("next_state", "patrol")
-        self.dir = kwargs.get("dir", 1)        
+        super().__init__(entity)                
         self.entity.animation.play("idle", 0.2)
-
-    def update_logic(self, dt):
-        self.time -= dt
-        if self.time <= 0:
-            # player nearby? attack/chase, else next_state
-            if abs(self.player_distance[0]) < self.entity.attack_distance[0]:
-                self.enter_state("attack_pre")
-            elif abs(self.player_distance[0]) < self.entity.aggro_distance[0] and abs(self.player_distance[1]) < self.entity.aggro_distance[1]:
-                self.enter_state("chase")
-            else:
-                self.turn_around()
-                self.enter_state(self.next_state)
-
-    def turn_around(self):
-        self.entity.dir[0] *= self.dir
+        self.deciders = [WaitDecider(entity, **kwargs)]
 
     def handle_input(self, input_type):
         if input_type == "Hurt":
@@ -110,7 +105,7 @@ class Chase(BaseState):
         self.time = self.giveup
 
         cooldown = self.entity.config["cooldowns"]["jump_attack"]
-        self.entity.currentstate.cooldowns.set("jump_attack", random.randint(0, cooldown))
+        self.entity.currentstate.cooldowns.set("jump_attack", random.randint(cooldown[0], cooldown[1]))
 
         self.deciders = [AttackDecider(entity),ChaseGiveUpDecider(entity),GroundDecider(entity)]
 
@@ -178,7 +173,7 @@ class JumpAttackMain(BaseState):
         self.entity.velocity[1] = -5
 
         cooldown = self.entity.config["cooldowns"]["jump_attack"]
-        self.entity.currentstate.cooldowns.set("jump_attack", cooldown)
+        self.entity.currentstate.cooldowns.set("jump_attack", random.randint(cooldown[0], cooldown[1]))
 
     def update_logic(self, dt):
         self.entity.velocity[0] += self.entity.dir[0]
@@ -203,7 +198,7 @@ class Death(BaseState):
         self.entity.animation.play('death', 0.2)
 
     def update_logic(self, dt):
-        self.entity.velocity = [0, 0]
+        self.entity.velocity[0] = 0
 
     def enter_state(self, newstate, **kwarg):
         pass
@@ -229,7 +224,7 @@ class AttackMain(BaseState):
         self.entity.attack()
 
         cooldown = self.entity.config["cooldowns"]["melee_attack"]
-        self.entity.currentstate.cooldowns.set("melee_attack", cooldown)
+        self.entity.currentstate.cooldowns.set("melee_attack",  random.randint(cooldown[0], cooldown[1]))
 
     def increase_phase(self):
         self.enter_state("wait", time=10)
