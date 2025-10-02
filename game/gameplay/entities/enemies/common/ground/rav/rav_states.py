@@ -227,4 +227,4 @@ class AttackMain(BaseState):
         self.entity.currentstate.cooldowns.set("melee_attack",  random.randint(cooldown[0], cooldown[1]))
 
     def increase_phase(self):
-        self.enter_state("wait", time=10)
+        self.enter_state("wait", time=10, next_state="chase")
