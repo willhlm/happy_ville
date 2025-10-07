@@ -1,33 +1,22 @@
-from .rav_states import *
 from gameplay.entities.shared.cooldown_manager import CooldownManager
+from gameplay.entities.shared.states import SHARED_STATES
+from gameplay.entities.shared.deciders import SHARED_DECIDERS
 
-class RavStateManager:
-    def __init__(self, entity):
+class StateManager:
+    def __init__(self, entity, custom_states = None, custom_deciders = None):
         self.entity = entity
         self.cooldowns = CooldownManager()
         self.player_distance = [0, 0]
-        
-        self.states = {
-            'idle': Idle,
-            'patrol': Patrol,
-            'wait': Wait,
-            'chase': Chase,
-            'attack_pre': AttackPre,
-            'attack_main': AttackMain,
-            'jump_attack_pre': JumpAttackPre,
-            'jump_attack_main': JumpAttackMain,
-            'jump_attack_post': JumpAttackPost,
-            'hurt': Hurt,
-            'jump_back_pre': JumpBackPre,
-            'jump_back_main': JumpBackMain,
-            'death': Death,
-        }
 
+        self.states = {**SHARED_STATES, **(custom_states or {})}#merge and overwrite if overlap
+        self.deciders = {**SHARED_DECIDERS, **(custom_deciders or {})}#merge and overwrite if overlap
+        
         # Start in patrol state
-        self.enter_state('patrol')
+        initial_state = entity.config.get('initial_state', 'patrol')
+        self.enter_state(initial_state)
 
     def enter_state(self, state_name, **kwargs):                
-        self.state = self.states[state_name.lower()](self.entity, **kwargs)
+        self.state = self.states[state_name.lower()](self.entity, self.deciders, **kwargs)
 
     def update(self, dt):
         """Update cooldowns and current state"""
@@ -49,4 +38,4 @@ class RavStateManager:
 
     def check_player_distance(self):
         player = self.entity.game_objects.player
-        self.player_distance = [player.rect.centerx - self.entity.rect.centerx,player.rect.centery - self.entity.rect.centery]
+        self.player_distance = [player.rect.centerx - self.entity.rect.centerx, player.rect.centery - self.entity.rect.centery]

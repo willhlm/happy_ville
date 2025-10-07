@@ -2,12 +2,12 @@ import pygame, random
 from gameplay.entities.enemies.base.enemy import Enemy
 from engine.utils import read_files
 from .larv_jr import LarvJr
-from config.enemies import ENEMY_CONFIGS
+from config.enemies.rav import ENEMY_CONFIG as RAV_CONFIG
 
 class Larv(Enemy):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
-        self.config = ENEMY_CONFIGS['rav']
+        self.config = RAV_CONFIG['rav']
 
         self.sprites = read_files.load_sprites_dict('assets/sprites/entities/enemies/common/ground/larv/', game_objects)
         self.sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/enemies/common/ground/larv/')
