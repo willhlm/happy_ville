@@ -28,8 +28,8 @@ class MenuArrow():
         shift = 0.5 * math.sin(self.time + self.phase)
         self.true_pos = [self.true_pos[0] + shift, self.true_pos[1]]
 
-    def play_SFX(self, state = 'idle', frame = 0, vol = 0.8):        
-        self.game_objects.sound.play_sfx(self.sounds[state][frame], vol = vol)
+    def play_SFX(self, state = 'idle', frame = 0, volume = 0.8):        
+        self.game_objects.sound.play_sfx(self.sounds[state][frame], vol = volume)
 
     def set_pos(self, pos):
         self.rect.topleft = pos

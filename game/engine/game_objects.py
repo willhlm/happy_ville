@@ -1,9 +1,10 @@
 import pygame
 from engine.utils import read_files
-from engine.system import collisions, sound, save_load, groups, object_pool, controller, lights, timer, signals, time_manager, alphabet, input_interpreter
+from engine.system import collisions, save_load, groups, object_pool, controller, lights, timer, signals, time_manager, alphabet, input_interpreter
+from engine.sound import game_audio
 from gameplay.entities.player import player
 from engine.render import post_process
-from engine.system.camera import camera
+from engine.camera import camera
 
 from gameplay.world import map_loader, world_state
 from gameplay.world.weather import weather
@@ -22,7 +23,7 @@ class Game_Objects():
         self.shaders = read_files.load_shaders_dict(self)#load all shaders aavilable into a dict
         self.controller = controller.Controller()
         self.object_pool = object_pool.Object_pool(self)
-        self.sound = sound.Sound()
+        self.sound = game_audio.GameAudio()
         self.lights = lights.Lights(self)
         self.timer_manager = timer.Timer_manager(self)
         self.create_groups()

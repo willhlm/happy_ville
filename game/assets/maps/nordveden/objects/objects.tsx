@@ -31,7 +31,7 @@
   <image width="80" height="128" source="../../../sprites/entities/interactables/cocoon/idle/idle1.png"/>
  </tile>
  <tile id="8">
-  <image width="112" height="176" source="../../../sprites/entities/boss/cocoon_boss/idle/idle.png"/>
+  <image width="112" height="176" source="../../../sprites/entities/enemies/bosses/cocoon_boss/idle/idle.png"/>
  </tile>
  <tile id="9">
   <properties>

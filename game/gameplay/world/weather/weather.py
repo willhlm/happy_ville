@@ -59,7 +59,7 @@ class WindManager(WeatherManagers):#will handle winds in all layers, and common 
     def stop_wind(self):#stopped from weather_states
         self.velocity = [0, 0]
         self.lifetime = 0
-        self.game_objects.sound.fade_sound(self.channel)
+        self.game_objects.sound.fade_channel(self.channel)
         for windfx in self.fx_list:
             windfx.deactivate()      
 

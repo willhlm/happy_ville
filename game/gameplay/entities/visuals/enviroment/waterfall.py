@@ -14,7 +14,7 @@ class Waterfall(StaticEntity):
         self.time = 5*100#offset the time
 
         sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/visuals/enviroments/waterfall/')
-        self.channel = self.game_objects.sound.play_sfx(sounds['idle'][0], loop = -1)
+        self.channel = self.game_objects.sound.play_sfx(sounds['idle'][0], loop = -1, vol = 0.04)
         self.set_volume()
 
     def release_texture(self):
@@ -53,7 +53,7 @@ class Waterfall(StaticEntity):
         self.game_objects.shaders['waterfall']['TIME'] = self.time * 0.5
         self.game_objects.shaders['waterfall']['texture_size'] = self.size
 
-        blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
+        blit_pos = (int(self.true_pos[0]-self.parallax[0]*self.game_objects.camera_manager.camera.interp_scroll[0]),int(self.true_pos[1]-self.parallax[0]*self.game_objects.camera_manager.camera.interp_scroll[1]))
         self.game_objects.shaders['waterfall']['section'] = [blit_pos[0],blit_pos[1],self.size[0],self.size[1]]
 
         if self.parallax[0] == 1:#TODO, blue state #don't blur if there is no parallax

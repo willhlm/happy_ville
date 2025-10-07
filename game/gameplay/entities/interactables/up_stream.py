@@ -25,9 +25,9 @@ class UpStream(StaticEntity):#a draft that can lift enteties along a direction
         if self.interacted: return
         self.interacted = True
         if self.dir[0] != 0:
-            player.movement_manager.add_modifier('up_stream_horizontal', speed = [self.dir[0] * self.accel_x, self.dir[1] * self.accel_y], max_speed = self.max_speed)
+            player.movement_manager.add_modifier('UpStreamHorizontal', speed = [self.dir[0] * self.accel_x, self.dir[1] * self.accel_y], max_speed = self.max_speed)
         elif self.dir[1] != 0:
-            player.movement_manager.add_modifier('up_stream_vertical', speed = [self.dir[0] * self.accel_x, self.dir[1] * self.accel_y], max_speed = self.max_speed)#add modifier to player movement manager
+            player.movement_manager.add_modifier('UpStreamVertical', speed = [self.dir[0] * self.accel_x, self.dir[1] * self.accel_y], max_speed = self.max_speed)#add modifier to player movement manager
 
         #context = player.movement_manager.resolve()
         #player.velocity[0] += self.dir[0] * self.accel_x * context.upstream
@@ -37,11 +37,7 @@ class UpStream(StaticEntity):#a draft that can lift enteties along a direction
 
     def player_noncollision(self):
         if not self.interacted: return
-        if self.dir[0] != 0:
-            self.game_objects.player.movement_manager.remove_modifier('up_stream_horizontal')
-        elif self.dir[1] != 0:
-            self.game_objects.player.movement_manager.remove_modifier('up_stream_vertical')
-
+        self.game_objects.player.movement_manager.remove_modifier('up_stream')
         self.interacted = False
 
     def release_texture(self):
@@ -54,5 +50,8 @@ class UpStream(StaticEntity):#a draft that can lift enteties along a direction
     def draw(self, target):
         self.game_objects.shaders['up_stream']['dir'] = self.dir
         self.game_objects.shaders['up_stream']['time'] = self.time*0.1
-        pos = (int(self.true_pos[0] - self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.game_objects.camera_manager.camera.scroll[1]))
-        self.game_objects.game.display.render(self.image.texture, target, position = pos, shader = self.game_objects.shaders['up_stream'])#shader render
+        blit_pos = (int(self.true_pos[0]-self.game_objects.camera_manager.camera.interp_scroll[0]),int(self.true_pos[1]-self.game_objects.camera_manager.camera.interp_scroll[1]))
+        self.game_objects.game.display.render(self.image.texture, target, position = blit_pos, shader = self.game_objects.shaders['up_stream'])#shader render
+
+    def seed_collision(self, seed):
+        pass

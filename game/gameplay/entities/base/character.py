@@ -71,4 +71,4 @@ class Character(PlatformEntity):#enemy, NPC,player
         self.flags['attack_able'] = True
 
     def on_hurt_timeout(self):#starts when entering hurt state, and make sure that you don't eneter again until timer runs out
-        self.flags['hurt_able'] = False
+        self.flags['hurt_able'] = True

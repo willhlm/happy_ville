@@ -12,7 +12,7 @@ class Game():
         self.window_size = C.window_size.copy()
         self.scale = self.scale_size(2)#get the scale according to your display size
         self.display_size = [int(self.window_size[0] * self.scale), int(self.window_size[1] * self.scale)]
-        game_settings = read_files.read_json('saves/game_settings.json')['display']
+        game_settings = read_files.read_json('config/game_settings.json')['display']
         self.display = RenderEngine(self.display_size[0] - self.scale, self.display_size[1] - self.scale, fullscreen = game_settings['fullscreen'], vsync = game_settings['vsync']) #vsync -1 may be good for mac
         self.screen_manager = ScreenManager(self)
 
