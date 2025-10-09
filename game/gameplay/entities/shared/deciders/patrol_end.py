@@ -8,7 +8,7 @@ class PatrolEndDecider:
         self.reset_patrol_timer()
 
     def reset_patrol_timer(self):
-        self.time_left = random.randint(*self.cfg['time_range'])
+        self.time_left = random.randint(*self.cfg['patrol_time'])
 
     def choose(self, player_distance, dt):
         results = []
@@ -18,10 +18,10 @@ class PatrolEndDecider:
         if self.time_left <= 0:
             dir = random.choice([-1, 1])
             results.append(Decision(
-                next_state="wait",
+                next_state=self.cfg['next_state'],
                 score=self.cfg['score'],
                 priority=self.cfg['priority'],
-                kwargs={"time": 50, "next_state": "patrol", "dir": dir}
+                kwargs=self.cfg.get('kwargs', {})
             ))
             self.reset_patrol_timer()
 

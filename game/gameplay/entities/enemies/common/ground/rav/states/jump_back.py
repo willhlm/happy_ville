@@ -1,4 +1,4 @@
-from gameplay.entities.shared.states.base_state import BaseState
+from gameplay.entities.shared.states.enemy.base_state import BaseState
 
 class JumpBackPre(BaseState):
     def __init__(self, entity, deciders, **kwargs):

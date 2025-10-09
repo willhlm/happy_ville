@@ -38,6 +38,9 @@ class Enemy_states():
             self.enter_state('Death')#overrite any state and go to deat
         return True#return truw to show that damage was taken        
 
+    def modify_hit(self, effect):
+        return effect
+
 class Idle(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)

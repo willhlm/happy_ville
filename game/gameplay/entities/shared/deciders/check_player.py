@@ -9,10 +9,10 @@ class CheckPlayerDecider:
         results = []
         if abs(player_distance[0]) < self.entity.aggro_distance[0] and abs(player_distance[1]) < self.entity.aggro_distance[1]:
             results.append(Decision(
-                next_state="wait",
+                next_state=self.cfg['next_state'],
                 score=self.cfg['score'],
                 priority=self.cfg['priority'],
-                kwargs={"time": self.cfg.get('time',10), "next_state": "chase"}
+                kwargs=self.cfg['kwargs']
             ))
 
         return results

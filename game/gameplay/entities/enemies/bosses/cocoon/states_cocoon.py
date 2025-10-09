@@ -19,6 +19,9 @@ class Basic_states():
         if input == 'Hurt':
             self.enter_state('Hurt')
 
+    def modify_hit(self, effect):
+        return effect
+
 class Idle(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)

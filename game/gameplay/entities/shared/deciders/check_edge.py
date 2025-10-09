@@ -10,10 +10,10 @@ class CheckEdgeDecider:
         x = self.entity.hitbox.centerx + self.entity.dir[0] * (self.entity.hitbox.width // 2 + 5)
         if not self.entity.game_objects.collisions.check_ground([x, self.entity.hitbox.bottom + 5]):
             results.append(Decision(
-                next_state="wait",
+                next_state=self.cfg['next_state'],
                 score=self.cfg['score'],
                 priority=self.cfg['priority'],
-                kwargs={"time": self.cfg['time'], "next_state": self.cfg['next_state'], "dir": self.cfg['dir']}
+                kwargs=self.cfg.get('kwargs', {})
             ))
 
         return results

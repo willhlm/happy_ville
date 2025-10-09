@@ -1,4 +1,4 @@
-from gameplay.entities.visuals.enviroment import Leaves, BackgroundDroplet
+from gameplay.entities.visuals.environments import Leaves, BackgroundDroplet
 from gameplay.ui.components import MenuArrow, LogoLoading
 from gameplay.entities.visuals.particles import particles, screen_particles
 from gameplay.world.weather import weather

@@ -1,4 +1,4 @@
-from gameplay.entities.enemies.utils import register_state
+from gameplay.entities.enemies.bosses.utils import register_state
 
 #attack patterns
 PATTERNS = {
@@ -71,6 +71,9 @@ class Base_states():
 
     def increase_phase(self):
         pass
+
+    def modify_hit(self, effect):
+        return effect        
 
 @register_state(STATE_REGISTRY)
 class Idle(Base_states):

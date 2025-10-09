@@ -1,8 +1,7 @@
 import pygame 
 from gameplay.entities.enemies.base.boss import Boss
 from engine.utils import read_files
-from gameplay.entities.enemies import task_manager
-
+from gameplay.entities.enemies.bosses import task_manager
 
 class Reindeer(Boss):
     def __init__(self, pos, game_objects):

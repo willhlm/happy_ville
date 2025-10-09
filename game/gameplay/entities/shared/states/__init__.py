@@ -1,10 +1,10 @@
-from .patrol import Patrol
-from .chase import Chase
-from .idle import Idle
-from .wait import Wait
-from .hurt import Hurt
-from .death import Death
-from .attack import AttackPre, AttackMain
+from .enemy.patrol import Patrol
+from .enemy.chase import Chase
+from .enemy.idle import Idle
+from .enemy.wait import Wait
+from .enemy.hurt import Hurt
+from .enemy.death import Death
+from .enemy.attack import AttackPre, AttackMain
 
 SHARED_STATES = {
     'patrol': Patrol,

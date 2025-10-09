@@ -69,4 +69,5 @@ class Enemy(Character):
         self.velocity[0] += self.dir[0]*0.3
 
     def modify_hit(self, effect):
-        return effect
+        effect = self.currentstate.modify_hit(effect)
+        return effect        

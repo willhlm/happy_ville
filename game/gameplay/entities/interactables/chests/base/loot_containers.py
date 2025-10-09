@@ -1,5 +1,6 @@
-import pygame 
+import pygame, random
 from engine.utils import read_files
+from engine import constants as C
 from gameplay.entities.interactables.base.interactables import Interactables
 from . import loot_container_states
 
@@ -28,7 +29,7 @@ class LootContainers(Interactables):
     def loots(self):#this is called when the opening animation is finished
         for key in self.inventory.keys():#go through all loot
             for i in range(0,self.inventory[key]):#make that many object for that specific loot and add to gorup
-                obj = getattr(sys.modules[__name__], key)(self.hitbox.midtop, self.game_objects)#make a class based on the name of the key: need to import sys
+                obj = self.game_objects.registry.fetch('items', key)(self.hitbox.midtop, self.game_objects)
                 obj.spawn_position()
                 self.game_objects.loot.add(obj)
             self.inventory[key]=0

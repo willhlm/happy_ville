@@ -10,7 +10,7 @@ class JumpAttackDecider:
         if abs(player_distance[0]) < self.entity.jump_distance[0] and player_distance[1] < self.entity.jump_distance[1]:
             if self.entity.currentstate.cooldowns.get(self.dec_cfg['cooldown']) <= 0:
                 results.append(Decision(
-                    next_state="jump_attack_pre",
+                    next_state=self.dec_cfg['next_state'],
                     score= self.dec_cfg['score'],
                     priority= self.dec_cfg['priority']
                 ))

@@ -4,6 +4,7 @@ from .wait import WaitDecider
 from .patrol_end import PatrolEndDecider
 from .melee_attack import MeleeAttackDecider
 from .check_player import CheckPlayerDecider
+from .check_player_jump_over import CheckPlayerJumpOverDecider
 
 SHARED_DECIDERS = {
     "melee_attack": MeleeAttackDecider,    
@@ -12,4 +13,5 @@ SHARED_DECIDERS = {
     'check_player': CheckPlayerDecider,
     'patrol_end': PatrolEndDecider,
     "wait": WaitDecider,    
+    "check_player_jump_over": CheckPlayerJumpOverDecider,    
 }

@@ -24,7 +24,7 @@
          "parallaxx":0.04,
          "parallaxy":0.04,
          "type":"group",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }, 
@@ -50,7 +50,7 @@
          "parallaxx":0.2,
          "parallaxy":0.2,
          "type":"group",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }, 
@@ -88,7 +88,7 @@
          "parallaxx":0.3,
          "parallaxy":0.3,
          "type":"group",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }, 
@@ -114,7 +114,7 @@
          "parallaxx":0.4,
          "parallaxy":0.4,
          "type":"group",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }, 
@@ -152,7 +152,7 @@
          "parallaxx":0.5,
          "parallaxy":0.5,
          "type":"group",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }, 
@@ -190,7 +190,7 @@
          "parallaxx":0.6,
          "parallaxy":0.6,
          "type":"group",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }, 
@@ -228,7 +228,7 @@
          "parallaxx":0.7,
          "parallaxy":0.7,
          "type":"group",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }, 
@@ -266,7 +266,7 @@
          "parallaxx":0.8,
          "parallaxy":0.8,
          "type":"group",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }, 
@@ -304,7 +304,7 @@
          "parallaxx":0.9,
          "parallaxy":0.9,
          "type":"group",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }, 
@@ -342,7 +342,7 @@
          "parallaxx":0.95,
          "parallaxy":0.95,
          "type":"group",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }, 
@@ -356,7 +356,7 @@
                  "name":"bg1_back",
                  "opacity":1,
                  "type":"tilelayer",
-                 "visible":false,
+                 "visible":true,
                  "width":300,
                  "x":0,
                  "y":0
@@ -368,7 +368,7 @@
                  "name":"bg1_6",
                  "opacity":1,
                  "type":"tilelayer",
-                 "visible":false,
+                 "visible":true,
                  "width":300,
                  "x":0,
                  "y":0
@@ -380,7 +380,7 @@
                  "name":"bg1_5",
                  "opacity":1,
                  "type":"tilelayer",
-                 "visible":false,
+                 "visible":true,
                  "width":300,
                  "x":0,
                  "y":0
@@ -392,7 +392,7 @@
                  "name":"bg1_4",
                  "opacity":1,
                  "type":"tilelayer",
-                 "visible":false,
+                 "visible":true,
                  "width":300,
                  "x":0,
                  "y":0
@@ -404,7 +404,7 @@
                  "name":"bg1_3",
                  "opacity":1,
                  "type":"tilelayer",
-                 "visible":false,
+                 "visible":true,
                  "width":300,
                  "x":0,
                  "y":0
@@ -416,7 +416,7 @@
                  "name":"bg1_2",
                  "opacity":1,
                  "type":"tilelayer",
-                 "visible":false,
+                 "visible":true,
                  "width":300,
                  "x":0,
                  "y":0
@@ -428,7 +428,7 @@
                  "name":"bg1_1",
                  "opacity":1,
                  "type":"tilelayer",
-                 "visible":false,
+                 "visible":true,
                  "width":300,
                  "x":0,
                  "y":0
@@ -440,7 +440,7 @@
                  "name":"bg1_0",
                  "opacity":1,
                  "type":"tilelayer",
-                 "visible":false,
+                 "visible":true,
                  "width":300,
                  "x":0,
                  "y":0
@@ -1469,7 +1469,7 @@
                  "objects":[],
                  "opacity":1,
                  "type":"objectgroup",
-                 "visible":false,
+                 "visible":true,
                  "x":0,
                  "y":0
                 }],
@@ -1527,7 +1527,7 @@
          "name":"fg1",
          "opacity":1,
          "type":"group",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }],

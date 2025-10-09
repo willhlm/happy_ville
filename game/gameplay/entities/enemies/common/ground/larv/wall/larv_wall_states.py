@@ -16,6 +16,9 @@ class EnemyStates():
     def increase_phase(self):
         pass
 
+    def modify_hit(self, effect):
+        return effect        
+
 class Floor(EnemyStates):
     def __init__(self, entity, move_direction = [1 ,0], gravity_direction = [0, 1], sign = 1):
         super().__init__(entity)
