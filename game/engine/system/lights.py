@@ -137,29 +137,29 @@ class Light():#light source
             if properties.get(prop, False):
                 self.updates.append(func)
 
-    def expand(self):
-        self.radius += self.game_objects.game.dt*self.expand_speed
+    def expand(self, dt):
+        self.radius += dt*self.expand_speed
         self.radius = min(self.radius, self.max_radius)
         self.hitbox[2], self.hitbox[3] = 2*self.radius, 2*self.radius
 
-    def flicker(self):
+    def flicker(self, dt):
         flickerrange = 0.1
         self.colour[-1] += random.uniform(-flickerrange, flickerrange)
         self.colour[-1] = max(0, min(1, self.colour[-1]))#clamp it between 0 and 1
 
-    def fade(self, rate = 0.99):
+    def fade(self, dt, rate = 0.99):
         self.colour[-1] *= rate
 
-    def pulsating(self):#
-        self.time += self.game_objects.game.dt * 0.01
+    def pulsating(self, dt):#
+        self.time += dt * 0.01
         self.radius = 0.5 * self.init_radius * math.sin(self.time) + self.init_radius * 0.5
 
-    def lifetime(self):
+    def lifetime(self, dt):
         if self.colour[-1] < 0.01:
             self.game_objects.lights.remove_light(self)
             #self.target.state.handle_input('light_gone')
 
-    def follow_target(self):
+    def follow_target(self, dt):
         self.hitbox.center = self.target.hitbox.center
         self.position = [self.hitbox.center[0] - self.parallax[0] * self.game_objects.camera_manager.camera.scroll[0],self.hitbox.center[1] - self.parallax[1] * self.game_objects.camera_manager.camera.scroll[1]]#te shader needs tye position without the scroll (i.e. "on screen" values)
 
@@ -168,4 +168,4 @@ class Light():#light source
 
     def update_render(self, dt):#if they e.g. fade
         for update in self.updates:
-            update()
+            update(dt)

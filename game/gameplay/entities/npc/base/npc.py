@@ -52,7 +52,7 @@ class NPC(Character):
         self.game_objects.game.display.render(self.portrait, terget, position = (32,32))#shader render
 
     def interact(self):#when plater press t
-        self.game_objects.game.state_manager.enter_state('Conversation', npc = self)#pehrpame make a callback insted of "buissness"
+        self.game_objects.game.state_manager.enter_state('conversation', npc = self)#pehrpame make a callback insted of "buissness"
 
     def random_conversation(self, text):#can say stuff through a text bubble
         random_conv = ConversationBubbles(self.rect.topright,self.game_objects, text)

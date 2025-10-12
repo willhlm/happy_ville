@@ -76,7 +76,7 @@ class TitleMenu(BaseUI):
 
             #load new game level
             #self.game.game_objects.load_map(self,'village_1','1')
-            self.game.game_objects.load_map(self,'wakeup_forest_2','2')
+            self.game.game_objects.load_map(self,'wakeup_forest_1','1')
             #self.game.game_objects.load_map(self,'spirit_world_1','1')
             #self.game.game_objects.load_map(self,'crystal_mines_1','1')
             #self.game.game_objects.load_map(self,'nordveden_2','1')

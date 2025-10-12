@@ -38,7 +38,7 @@ class Particles(pygame.sprite.Sprite):
     def update_render(self, dt):
         self.update_pos(dt)
         self.lifetime -= dt
-        self.currentstate.update(dt)
+        self.currentstate.update_render(dt)
 
     def update_pos(self, dt):
         self.true_pos = [self.true_pos[0] + self.velocity[0]*dt, self.true_pos[1] + self.velocity[1]*dt]
