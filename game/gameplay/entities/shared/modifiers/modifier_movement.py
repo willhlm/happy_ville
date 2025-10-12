@@ -46,6 +46,7 @@ class MovementContext():
         self.gravity = C.acceleration[1]
         self.velocity = [0, 0]
         self.friction = C.friction_player.copy()#firction is sampled evey frame
+        self.max_vel = C.max_vel.copy()
 
         self.air_timer = C.air_timer
         self.upstream = 1#a scale for upstream movement: sampled during upsteram collision
@@ -121,7 +122,7 @@ class Dash(MovementModifier):#should it instead be a general driction modifier?
     def __init__(self, priority, **kwarg):
         super().__init__(priority)
         self.entity = kwarg['entity']
-        self.dash_speed = C.dash_vel * 0.5
+        self.dash_speed = C.dash_vel
 
     def apply(self, context):
         context.gravity = 0
@@ -132,7 +133,7 @@ class UpStream(MovementModifier):
         super().__init__(priority)
         self.speed = kwarg.get('speed', [0, 0])  # Default force if not provided
         self.max_speed = kwarg.get('max_speed', 7)
-        self.max_speed = 1
+        #self.max_speed = 1
 
     def apply(self, context):
         # Push as extra acceleration
@@ -145,6 +146,7 @@ class UpStreamVertical(UpStream):
     def apply(self, context):
         # Push as extra acceleration
         context.velocity[1] += self.speed[1]
+        context.max_vel[1] = self.max_speed
         #self.speed[1] += 0.02
         #self.speed[1] = min(0, self.speed[1])
 

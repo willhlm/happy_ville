@@ -9,16 +9,17 @@ friction = [0.5,0]#need to be less than 1
 friction_player = [0.24,0.01]
 jump_vel_player = -5.2
 dash_jump_vel_player = -3.7
-max_vel = [30,6]#[30,6]
+max_vel = [30,7]#[30,6]
 pogo_vel = -6
 dash_length = 4#how long  Aila dashes
 dash_jump_length = 10
-dash_vel = 8
+dash_vel = 3
 animation_framerate = 0.25#1/animation_framerate is the number of frames to blit before goging to next frame
 
 #timers
 jump_dash_wall_timer = 4#how many frames it should take before going into wall when doing dash jump
 jump_dash_timer = 3#how many frames from pressing jump/dash to pressing dash/jump one can do dash jump
+ground_dash_timer = 20
 cayote_timer_player = 4#how many frames from falling in which the player can still jump
 air_timer = 14#for how long one can press A and keep jumping
 

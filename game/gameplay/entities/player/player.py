@@ -36,7 +36,7 @@ class Player(Character):
         self.sword = Sword(self)
         self.abilities = AbilityManager(self)#spirit (thunder,migawari etc) and movement /dash, double jump and wall glide)
 
-        self.flags = {'ground': True, 'invincibility': False, 'shroompoline': False, 'attack_able': True}# flags to check if on ground (used for jumpåing), #a flag to make sure you can only swing sword when this is False
+        self.flags = {'ground': True, 'invincibility': False, 'shroompoline': False, 'attack_able': True, 'grounddash': True}# flags to check if on ground (used for jumpåing), #a flag to make sure you can only swing sword when this is False
         self.currentstate = PlayerStates(self)#states_player.Idle_main(self)
         self.death_state = states_death.Idle(self)#this one can call "normal die" or specifal death (for example cultist encounter)
 
@@ -47,7 +47,7 @@ class Player(Character):
 
         self.damage_manager = modifier_damage.DamageManager(self)
         self.movement_manager = modifier_movement.MovementManager()
-        self.reset_movement()                
+        self.reset_movement()
 
         self.colliding_platform = None#save the last collising platform
 
@@ -75,6 +75,9 @@ class Player(Character):
 
         self.velocity[1] += dt * (context.gravity - self.velocity[1] * context.friction[1]) + context.velocity[1]
         self.velocity[1] = min(self.velocity[1], self.max_vel[1])#set a y max speed#
+        if self.velocity[1] < 0:
+            self.velocity[1] = max(self.velocity[1], -context.max_vel[1])
+
         self.velocity[0] += dt * (self.dir[0] * self.acceleration[0] - self.velocity[0] * context.friction[0]) + context.velocity[0]
 
     def take_dmg(self, dmg = 1, effects = []):#called from collisions
@@ -133,7 +136,7 @@ class Player(Character):
         #self.movement_manager.clear_modifiers()#TODO probably not all should be cleared
 
     def update_render(self, dt):#called in group
-        self.hitstop_states.update_render(dt)        
+        self.hitstop_states.update_render(dt)
 
     def update(self, dt):
         self.prev_true_pos = self.true_pos.copy()#save previous position for interpolation
@@ -166,3 +169,6 @@ class Player(Character):
 
     def on_shroomjump_timout(self):
         self.flags['shroompoline'] = False
+
+    def on_grounddash_timout(self):
+        self.flags['grounddash'] = True

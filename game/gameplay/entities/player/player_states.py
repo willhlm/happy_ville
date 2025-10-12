@@ -50,10 +50,13 @@ class PlayerStates():
         self._state_factories = {'dash': [('dash_ground', DashGroundState), ('dash_jump', DashJumpState)],'bow': [('bow', BowState)]}#should contain all the states that can be created, so that they can be be appended to self.stataes when needed
 
     def enter_state(self, state_name, phase = None, **kwargs):
+        print(state_name)
         state = self.states.get(state_name)
         if state:#if the requested state is unlocked
-            self.composite_state = state
-            self.composite_state.enter_state(phase, **kwargs)#choose the phase
+            if not state.enter_state(phase, **kwargs):
+                self.composite_state.cleanup(**kwargs)
+                self.composite_state = state
+
 
     def update(self, dt):#called from player
         #print(self.composite_state.current_phase)
@@ -74,7 +77,7 @@ class PlayerStates():
     def increase_phase(self):#called when an animation is finished for that state
         self.composite_state.increase_phase()
 
-    def unlock_state(self, name):#should be called when unlocking a new state        
+    def unlock_state(self, name):#should be called when unlocking a new state
         for state_name, cls in self._state_factories[name]:
             self.states[state_name] = cls(self.entity)
 
@@ -84,6 +87,7 @@ class CompositeState():#will contain pre, main, post phases of a state
         self.phases = {}
 
     def enter_phase(self, phase_name, **kwarg):#called when entering a new phase
+        print(phase_name)
         self.current_phase = self.phases[phase_name]
         self.current_phase.enter(**kwarg)
 
@@ -91,6 +95,9 @@ class CompositeState():#will contain pre, main, post phases of a state
         if not phase_name: phase_name = next(iter(self.phases))#get the first phase from the dictionary if not specified
         self.common_values()
         self.enter_phase(phase_name, **kwarg) #enter the phase of the state
+
+    def cleanup(self, **kwarg): #called when exiting this state
+        pass
 
     def common_values(self):#set common values for the phases
         pass
@@ -156,6 +163,17 @@ class DashGroundState(CompositeState):
     def common_values(self):#called when entering this new state, and will not change during phase changes
         self.dir = self.entity.dir.copy()#copy the direction of the entity, and save it in the state across phases
 
+    def enter_state(self, phase_name, **kwarg):#called when entering a new state
+        if not self.entity.flags['grounddash']: return True
+        super().enter_state(phase_name, **kwarg)
+
+    def cleanup(self, **kwarg):
+        print(kwarg)
+        if kwarg.get('to_dash_jump', False):
+            return
+        self.entity.flags['grounddash'] = False#if fasle, sword cannot be swang. sets to true when timer runs out
+        self.entity.game_objects.timer_manager.start_timer(C.ground_dash_timer, self.entity.on_grounddash_timout)
+
 class WallGlideState(CompositeState):
     def __init__(self, entity):
         super().__init__(entity)
@@ -170,6 +188,14 @@ class DashJumpState(CompositeState):
     def __init__(self, entity):
         super().__init__(entity)
         self.phases = {'pre': DashJumpPre(entity)}#, 'main': DashJumpMain(entity), 'post': DashJumpPost(entity)}
+
+    def enter_state(self, phase_name, **kwarg):#called when entering a new state
+        if not self.entity.flags['grounddash']: return True
+        super().enter_state(phase_name, **kwarg)
+
+    def cleanup(self, **kwarg):
+        self.entity.flags['grounddash'] = False#if fasle, sword cannot be swang. sets to true when timer runs out
+        self.entity.game_objects.timer_manager.start_timer(C.ground_dash_timer, self.entity.on_grounddash_timout)
 
 class WallJumpState(CompositeState):
     def __init__(self, entity):
@@ -1143,9 +1169,9 @@ class DashGroundPre(PhaseBase):
         self.entity.flags['ground'] = True
         self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
         self.jump_dash_timer = C.jump_dash_timer
-        self.entity.movement_manager.add_modifier('dash', entity = self.entity)      
+        self.entity.movement_manager.add_modifier('dash', entity = self.entity)
         self.entity.velocity[1] *= 0
-          
+
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0], vol = 1)
         wall_dir = kwarg.get('wall_dir', False)
         if wall_dir:
@@ -1186,7 +1212,7 @@ class DashGroundPre(PhaseBase):
         event = input.output()
         if event[-1] == 'a':
             input.processed()
-            if self.jump_dash_timer > 0: self.enter_state('dash_jump')
+            if self.jump_dash_timer > 0: self.enter_state('dash_jump', to_dash_jump=True)
 
     def enter_state(self, state, **kwarg):
         self.entity.shader_state.handle_input('idle')
@@ -1339,7 +1365,7 @@ class Sword(PhaseBase):#main phases shold inheret this
     def enter(self, **kwarg):
         self.entity.flags['attack_able'] = False#if fasle, sword cannot be swang. sets to true when timer runs out
         self.entity.game_objects.timer_manager.start_timer(C.sword_time_player, self.entity.on_attack_timeout)
-        self.entity.abilities.spirit_abilities['Shield'].sword()        
+        self.entity.abilities.spirit_abilities['Shield'].sword()
         self.entity.sword.use_sword()
 
 class SwordAir(PhaseAirBase):
@@ -1349,7 +1375,7 @@ class SwordAir(PhaseAirBase):
     def enter(self, **kwarg):
         self.entity.flags['attack_able'] = False#if fasle, sword cannot be swang. sets to true when timer runs out
         self.entity.game_objects.timer_manager.start_timer(C.sword_time_player, self.entity.on_attack_timeout)
-        self.entity.abilities.spirit_abilities['Shield'].sword()        
+        self.entity.abilities.spirit_abilities['Shield'].sword()
         self.entity.sword.use_sword()
 
 class SwordStandPre(Sword):
@@ -1379,10 +1405,10 @@ class SwordStandMain(Sword):
         self.entity.flags['attack_able'] = False#if fasle, sword cannot be swang. sets to true when timer runs out
         self.entity.game_objects.timer_manager.start_timer(C.sword_time_player, self.entity.on_attack_timeout)
         self.entity.abilities.spirit_abilities['Shield'].sword()
-        
+
         self.entity.sword.dir = self.entity.dir.copy()
-        self.entity.sword.currentstate.enter_state('Slash_1')        
-        self.entity.sword.use_sword()            
+        self.entity.sword.currentstate.enter_state('Slash_1')
+        self.entity.sword.use_sword()
 
         self.entity.projectiles.add(self.entity.sword)#add sword to group
 
@@ -1426,7 +1452,7 @@ class SwordDownMain(SwordAir):
         self.entity.flags['attack_able'] = False#if fasle, sword cannot be swang. sets to true when timer runs out
         self.entity.game_objects.timer_manager.start_timer(C.sword_time_player, self.entity.on_attack_timeout)
         self.entity.abilities.spirit_abilities['Shield'].sword()
-        self.entity.sword.use_sword()        
+        self.entity.sword.use_sword()
         self.entity.sword.currentstate.enter_state('Slash_down')
         self.entity.projectiles.add(self.entity.sword)#add sword to group
 
@@ -1442,7 +1468,7 @@ class SwordUpMain(Sword):
         self.entity.flags['attack_able'] = False#if fasle, sword cannot be swang. sets to true when timer runs out
         self.entity.game_objects.timer_manager.start_timer(C.sword_time_player, self.entity.on_attack_timeout)
         self.entity.abilities.spirit_abilities['Shield'].sword()
-        self.entity.sword.use_sword()        
+        self.entity.sword.use_sword()
         self.entity.sword.currentstate.enter_state('Slash_up')
         self.entity.projectiles.add(self.entity.sword)#add sword to group
 
@@ -1618,7 +1644,7 @@ class SmashUpMain(Sword):
         self.entity.flags['attack_able'] = False#if fasle, sword cannot be swang. sets to true when timer runs out
         self.entity.game_objects.timer_manager.start_timer(C.sword_time_player, self.entity.on_attack_timeout)
         self.entity.abilities.spirit_abilities['Shield'].sword()
-        self.entity.sword.dir = self.entity.dir.copy()        
+        self.entity.sword.dir = self.entity.dir.copy()
         self.entity.sword.currentstate.enter_state('Slash_up')
         self.entity.sword.use_sword()
         self.entity.projectiles.add(self.entity.sword)#add sword to group
@@ -1683,7 +1709,7 @@ class DashAirPre(PhaseBase):
         self.entity.flags['ground'] = True
         self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
         self.jump_dash_timer = C.jump_dash_timer
-        self.entity.movement_manager.add_modifier('dash', entity = self.entity)   
+        self.entity.movement_manager.add_modifier('dash', entity = self.entity)
         self.entity.velocity[1] *= 0
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0], vol = 1)
         wall_dir = kwarg.get('wall_dir', False)
@@ -1722,10 +1748,11 @@ class DashAirPre(PhaseBase):
         self.enter_phase('main')
 
     def handle_press_input(self, input):#all states should inehrent this function, if it should be able to jump
-        event = input.output()
-        if event[-1] == 'a':
-            input.processed()
-            if self.jump_dash_timer > 0: self.enter_state('dash_jump')
+        pass
+        #event = input.output()
+        #if event[-1] == 'a':
+        #    input.processed()
+        #    if self.jump_dash_timer > 0: self.enter_state('dash_jump')
 
     def enter_state(self, state, **kwarg):
         self.entity.shader_state.handle_input('idle')
@@ -1902,12 +1929,12 @@ class CrouchPre(PhaseBase):#used when saving and picking up interactable items
     def enter(self, **kwarg):
         self.entity.animation.play('crouch_pre')
         self.entity.acceleration[0] = 0
-        
+
         #effect
         effect = PrayEffect(self.entity.rect.center,self.entity.game_objects)
         effect.rect.bottom = self.entity.rect.bottom
         self.entity.game_objects.cosmetics.add(effect)
-        self.entity.game_objects.sound.play_sfx(self.entity.sounds['pray'][0])        
+        self.entity.game_objects.sound.play_sfx(self.entity.sounds['pray'][0])
 
     def handle_movement(self,event):
         pass
