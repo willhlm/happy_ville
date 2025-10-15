@@ -24,7 +24,7 @@ class Idle(Basic_states):#the normal particles
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update(self, dt):
+    def update_render(self, dt):
         self.entity.set_velocity(dt)
         self.entity.fading(dt)
         self.entity.destroy()

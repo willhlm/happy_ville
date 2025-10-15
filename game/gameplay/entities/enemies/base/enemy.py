@@ -71,3 +71,6 @@ class Enemy(Character):
     def modify_hit(self, effect):
         effect = self.currentstate.modify_hit(effect)
         return effect        
+
+    def apply_hitstop(self, lifetime=10, call_back=None):#called from aila sword, hut_effect
+        self.hitstop_states.enter_state('Stop', lifetime=lifetime, call_back=(lambda: self.knock_back(**call_back['knock_back'])))

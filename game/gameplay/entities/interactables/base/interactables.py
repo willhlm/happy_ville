@@ -39,3 +39,12 @@ class Interactables(AnimatedEntity):#interactables
 
     def seed_collision(self, seed):#if seed hits
         pass
+
+    def modify_hit(self, effects):#called when aila sword hit it
+        return effects
+
+    def apply_hitstop(self, lifetime=10, call_back=None):#called when aila sword hit it
+        pass
+
+    def emit_particles(self, **kwargs):#called when aila sword hit it
+        pass        

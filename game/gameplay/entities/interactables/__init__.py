@@ -1,3 +1,5 @@
+from .ability_ball.ability_ball import AbilityBall
+
 from .chests.chest_3 import Chest_3 as Chest
 from .chests.amber_rock import AmberRock
 from .chests.amber_tree import AmberTree

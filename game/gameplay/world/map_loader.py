@@ -498,7 +498,7 @@ class Level():
             id = obj['gid'] - self.map_data['interactables_firstgid']
 
             if id == 2:#save point
-                new_int = SavePoint(object_position,self.game_objects,self.level_name)
+                new_int = SavePoint(object_position,self.game_objects,self.level_name)          
                 self.game_objects.interactables.add(new_int)
 
             elif id == 3:#runestones, colectable

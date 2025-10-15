@@ -51,6 +51,12 @@ class Sword(Melee):
             collision_enemy.currentstate.handle_input('sword')
             self.stone_states['enemy_collision'].enemy_collision()
 
+    def collision_interactables(self, collision_inetractables):
+        self.currentstate.sword_jump()
+        if collision_inetractables.take_dmg(dmg = self.dmg):
+            modified_effect = collision_inetractables.modify_hit(self.effects)
+            modified_effect.apply(self, collision_inetractables)
+
     def clash_particles(self, pos, number_particles=12):
         angle = random.randint(-180, 180)#the erection anglex
         color = [255, 255, 255, 255]
