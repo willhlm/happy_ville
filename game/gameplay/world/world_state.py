@@ -3,7 +3,8 @@ from engine.utils import read_files
 class World_state():
     def __init__(self, game_objects):
         self.game_objects = game_objects
-        self.state = read_files.read_json("saves/map_state/map_state.json")#save the state of each map (i.e. if chest has been opened, soul essence picoed up etc)
+        save = read_files.read_json("saves/slots/slot1/save.json")#save the state of each map (i.e. if chest has been opened, soul essence picoed up etc)
+        self.state = save['world_state']
         self.statistics = {'kill': {}, 'amber_droplet' : 0, 'death': 0}#collects stuff aila has done, number of deaths
         self.progress = 1#should tick everytime an event occures which modifies the happinies (e.g. a boss dies)
         self.events = {}#save events and put it to True when completed -> events, such as boss defeat
@@ -28,4 +29,3 @@ class World_state():
 
     def init_state_file(self, level_name):#make a state file if it is the first time loading this map, state of different interactables
         self.state[level_name] = {'loot_container': {}, 'lever': {}, 'soul_essence': {}, 'runestone': {}, 'interactable_items': {}, 'breakable_platform': {}, 'bg_fade': {}}#a place holder for things that should depend on map state
-        self.state.pop('placeholder_level', 0)#removes the placeholder tag

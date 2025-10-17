@@ -30,14 +30,7 @@ class Rav(Enemy):
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1], 32, 32)        
 
-        self.health = self.config['health']
-        self.chase_speed = self.config['speeds']['chase']
-        self.patrol_speed = self.config['speeds']['patrol']        
-        
-        self.aggro_distance = self.config['distances']['aggro']
-        self.attack_distance = self.config['distances']['attack']
-        self.jump_distance = self.config['distances']['jump']
-
+        self.health = self.config['health']    
         self.currentstate = StateManager(self, custom_states = RAV_STATES, custom_deciders = RAV_DECIDERS)
 
     def attack(self):#called from states, attack main

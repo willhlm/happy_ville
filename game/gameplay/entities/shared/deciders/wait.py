@@ -5,14 +5,12 @@ class WaitDecider:
         self.entity = entity
 
     def choose(self, player_distance, dt):
-        state = self.entity.currentstate.state
+        state = self.entity.currentstate.state#the wait state
         
-        # Decrement timer on the state
-        state.wait_time -= dt
-        
+        state.wait_time -= dt        
         if state.wait_time <= 0:
             kwargs = {}
-            kwargs['dir'] = state.dir
+            kwargs['dir'] = state.dir#pass the dir in wait state
             return [Decision(
                 next_state=state.next_state,
                 score=50,

@@ -29,6 +29,7 @@ from .common.ground.vatt.vatt import Vatt
 from .common.ground.wild_swine import WildSwine
 from .common.ground.maggot.maggot import Maggot
 from .common.ground.hedge.hedge import Hedge
+from .common.ground.tagg_mus.tagg_mus import TaggMus
 
 from .common.ground.cultist.rogue.cultist_rogue import CultistRogue
 from .common.ground.cultist.cultist_warrior import CultistWarrior

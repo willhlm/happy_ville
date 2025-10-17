@@ -8,7 +8,9 @@ class BaseState():
 
     def _load_deciders(self, deciders):
         state_name = type(self).__name__.lower()
-        decider_configs = self.entity.config['deciders'].get(state_name, {})
+        # Navigate to states -> state_name -> deciders
+        state_config = self.entity.config['states'].get(state_name, {})
+        decider_configs = state_config.get('deciders', {})        
         
         for decider_name, kwargs in decider_configs.items():
             decider_class = deciders[decider_name]   

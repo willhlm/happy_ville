@@ -34,7 +34,7 @@ class Interactables(AnimatedEntity):#interactables
     def player_noncollision(self):#when player doesn't collide: for grass
         self.shader_state.handle_input('idle')
 
-    def take_dmg(self, projectile):#when player hits with e.g. sword
+    def take_dmg(self, dmg = 1):#when player hits with e.g. sword
         pass
 
     def seed_collision(self, seed):#if seed hits

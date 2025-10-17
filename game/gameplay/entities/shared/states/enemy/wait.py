@@ -8,10 +8,7 @@ class Wait(BaseState):
         # Store wait parameters for decider
         self.dir = kwargs.get('dir', 1)        
         self.wait_time = kwargs.get('time', 50)
-        self.next_state = kwargs.get('next_state', 'patrol')
-        
-        # Create decider with access to these values
-        #self.deciders = [WaitDecider(entity)]
+        self.next_state = kwargs.get('next_state', 'patrol')    
 
     def handle_input(self, input_type):
         if input_type == "Hurt":

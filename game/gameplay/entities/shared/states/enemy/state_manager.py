@@ -10,12 +10,12 @@ class StateManager:
 
         self.states = {**SHARED_STATES, **(custom_states or {})}#merge and overwrite if overlap
         self.deciders = {**SHARED_DECIDERS, **(custom_deciders or {})}#merge and overwrite if overlap
-        
+
         # Start in patrol state
         initial_state = entity.config.get('initial_state', 'patrol')
         self.enter_state(initial_state)
 
-    def enter_state(self, state_name, **kwargs):                
+    def enter_state(self, state_name, **kwargs):                        
         self.state = self.states[state_name.lower()](self.entity, self.deciders, **kwargs)
 
     def update(self, dt):
