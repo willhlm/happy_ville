@@ -16,7 +16,7 @@ class LarvJr(Enemy):
         self.init_x = self.rect.x
 
         self.patrol_speed = self.config['speeds']['patrol']
-        self.patrol_timer = self.config['timers']['patrol']
+        self.patrol_timer = 100
 
         self.health = 3
         self.currentstate.enter_state('Patrol')

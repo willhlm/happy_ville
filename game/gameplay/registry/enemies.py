@@ -36,5 +36,8 @@ REGISTER_ENEMIES = {
     'shadow_warrior': ShadowWarrior,
     'hedge': Hedge,
     'tagg_mus': TaggMus,
+    'bee': Bee,
+    'bjorn': Bjorn,
+    'vertical_mygga_torpedo': VerticalMyggaTorpedo,
 
 }

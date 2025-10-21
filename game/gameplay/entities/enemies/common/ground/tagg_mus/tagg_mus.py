@@ -4,7 +4,7 @@ from engine.utils import read_files
 from .config import ENEMY_CONFIG 
 from gameplay.entities.projectiles import HurtBox
 
-from gameplay.entities.shared.states.enemy.state_manager import StateManager
+from gameplay.entities.enemies.common.shared.states.state_manager import StateManager
 
 from .states import HidePre, HideMain, HidePost
 from .deciders import CheckSafeDecider

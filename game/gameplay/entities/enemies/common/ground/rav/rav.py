@@ -2,7 +2,7 @@ import pygame
 from gameplay.entities.enemies.base.enemy import Enemy
 from engine.utils import read_files
 from gameplay.entities.projectiles import HurtBox
-from gameplay.entities.shared.states.enemy.state_manager import StateManager
+from gameplay.entities.enemies.common.shared.states.state_manager import StateManager
 from .config import ENEMY_CONFIG as RAV_CONFIG
 
 from .states import JumpAttackPre, JumpAttackMain, JumpAttackPost, JumpBackPre, JumpBackMain, Hurt
@@ -31,7 +31,7 @@ class Rav(Enemy):
         self.hitbox = pygame.Rect(pos[0],pos[1], 32, 32)        
 
         self.health = self.config['health']    
-        self.currentstate = StateManager(self, custom_states = RAV_STATES, custom_deciders = RAV_DECIDERS)
+        self.currentstate = StateManager(self, type = 'ground', custom_states = RAV_STATES, custom_deciders = RAV_DECIDERS)
 
     def attack(self):#called from states, attack main
         attack = HurtBox(self, lifetime = 10, dir = self.dir, size = [32, 32])#make the object

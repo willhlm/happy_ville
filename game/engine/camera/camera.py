@@ -170,7 +170,7 @@ class Cultist_encounter(Cutscenes):
         self.center[0] = min(500,self.center[0])
         super().update(dt)
 
-class New_game(Cutscenes):
+class Start_game(Cutscenes):
     def __init__(self, game_objects, scroll):
         super().__init__(game_objects, scroll)
         self.center = [self.game_objects.camera_manager.camera.center[0], 1000]

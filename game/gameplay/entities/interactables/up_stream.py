@@ -16,7 +16,7 @@ class UpStream(StaticEntity):#a draft that can lift enteties along a direction
         normalise = (horizontal**2 + vertical**2)**0.5
         self.dir = [horizontal/normalise, vertical/normalise]
 
-        sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/visuals/enviroments/up_stream/')
+        sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/visuals/environments/up_stream/')
         self.channel = game_objects.sound.play_sfx(sounds['idle'][0], loop = -1, vol = 0.5)
         self.interacted = False#for player collision
 

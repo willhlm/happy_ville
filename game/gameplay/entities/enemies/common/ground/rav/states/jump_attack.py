@@ -1,17 +1,17 @@
 import random
-from gameplay.entities.shared.states.enemy.base_state import BaseState
+from gameplay.entities.enemies.common.shared.states.base_state import BaseState
 
 class JumpAttackPre(BaseState):
-    def __init__(self, entity, deciders, **kwargs):
-        super().__init__(entity, deciders)
+    def __init__(self, entity, deciders, config_key, **kwargs):
+        super().__init__(entity, deciders, config_key)
         self.entity.animation.play("jump_attack_pre")
 
     def increase_phase(self):
         self.enter_state("jump_attack_main")
 
 class JumpAttackMain(BaseState):
-    def __init__(self, entity, deciders, **kwargs):
-        super().__init__(entity, deciders)
+    def __init__(self, entity, deciders, config_key, **kwargs):
+        super().__init__(entity, deciders, config_key)
         self.entity.animation.play("jump_attack_main")
         self.entity.velocity[1] = -5
 
@@ -28,8 +28,8 @@ class JumpAttackMain(BaseState):
         return effect
 
 class JumpAttackPost(BaseState):
-    def __init__(self, entity, deciders, **kwargs):
-        super().__init__(entity, deciders)
+    def __init__(self, entity, deciders,config_key, **kwargs):
+        super().__init__(entity, deciders, config_key)
         self.entity.animation.play("jump_attack_post")
 
     def increase_phase(self):

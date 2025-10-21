@@ -1,8 +1,5 @@
-from gameplay.states.gameplay.gameplay import Gameplay
-from gameplay.entities.visuals.cosmetics import SpawnEffect
 from engine.utils import read_files
 from engine.system import animation
-from gameplay.entities.visuals.particles import particles
 
 class CutsceneFile():#cutscneens that will run based on file. The name of the file should be the same as the class name
     def __init__(self, game_objects):

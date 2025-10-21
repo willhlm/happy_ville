@@ -1,9 +1,9 @@
 import random
-from gameplay.entities.shared.states.enemy.base_state import BaseState
+from gameplay.entities.enemies.common.shared.states.base_state import BaseState
 
 class Hurt(BaseState):
-    def __init__(self, entity, deciders, **kwargs):
-        super().__init__(entity, deciders)
+    def __init__(self, entity, deciders, config_key, **kwargs):
+        super().__init__(entity, deciders, config_key)
         self.entity.animation.play("hurt", 0.2)
         self.entity.flags["hurt_able"] = False
 
@@ -14,7 +14,6 @@ class Hurt(BaseState):
         pass
 
     def increase_phase(self):
-        # After hurt animation completes
         if random.random() < 0.5:
             self.enter_state("jump_back_pre")
         else:

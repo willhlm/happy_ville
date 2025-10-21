@@ -16,6 +16,7 @@ class Larv(Enemy):
         self.hitbox = pygame.Rect(pos[0], pos[1], 20, 30)
 
         self.patrol_speed = self.config['speeds']['patrol']
+        self.patrol_timer = 100
 
         self.attack_distance = [0,0]
         self.currentstate.enter_state('Patrol')

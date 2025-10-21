@@ -1,4 +1,4 @@
-from gameplay.entities.shared.states.enemy.base_state import BaseState
+from gameplay.entities.enemies.common.shared.states.base_state import BaseState
 
 class WakeUp(BaseState):
     def __init__(self, entity, deciders, **kwargs):

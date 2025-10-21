@@ -8,7 +8,7 @@ class ScreenManager():
         
         self.screen_copy = self.game.display.make_layer(self.game.window_size)#used to get a copy of the screen: mostly for shaders
         self.screen = self.game.display.make_layer(self.game.window_size)#the screen we can use to render things on
-        self.composite_screen = self.game.display.make_layer(self.game.display_size)#display size
+        self.composite_screen = self.game.display.make_layer(self.game.display_size)#display size: need to be large to do the pp camera
         
     def register_screen(self, key, parallax):#called from maploader when loading each layer in titled
         if self.screens.get(key):#already exist, just update parallax

@@ -1,4 +1,4 @@
-from gameplay.entities.shared.deciders.decision import Decision
+from gameplay.entities.enemies.common.shared.deciders.decision import Decision
 
 class JumpAttackDecider:
     def __init__(self, entity, **kwargs):

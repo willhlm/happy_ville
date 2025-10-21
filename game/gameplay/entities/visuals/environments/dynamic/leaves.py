@@ -8,23 +8,23 @@ class Leaves(BaseDynamic):#leaves from trees
         super().__init__(pos, game_objects, parallax, layer_name, live_blur)
         self.sprites = Leaves.sprites
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
-        self.currentstate = states_weather_particles.Idle(self)
-
+        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)        
         self.init_pos = [pos[0]+size[0]*0.5,pos[1]-size[1]*0.5]#center
         self.spawn_size = size
-        self.velocity[1] = random.randint(1, 3)
+        self.true_pos = [self.init_pos[0] + random.uniform(-self.spawn_size[0]*0.5, self.spawn_size[0]*0.5), self.init_pos[1] + random.uniform(-self.spawn_size[1]*0.5,self.spawn_size[1]*0.5)]
+        self.rect.topleft = self.true_pos.copy()             
+        self.velocity[1] = random.uniform(0.2,0.5)
 
         colours = [[60,179,113,255],[154,205,50,255],[34,139,34,255],[46,139,87,255]]#colourd of the leaves
+        
         self.colour = colours[random.randint(0, len(colours)-1)]
-
-        self.reset()
-        self.resetting = {False:self.reset,True:self.kill}[kill]
+        self.colour[-1] = random.uniform(255*self.parallax[0],255)        
         self.time = 0
         self.phase = random.randint(0, 100)#for velocity
         self.trans_prob = 100#the higher the number, the lwoer the probabillity for the leaf to flip (probabilty = 1/trans_prob). 0 is 0 %
 
         self.shader =  game_objects.shaders['colour']
+        self.currentstate = states_weather_particles.Idle(self)
 
     def draw(self, target):
         self.shader['colour'] = self.colour
@@ -37,7 +37,7 @@ class Leaves(BaseDynamic):#leaves from trees
         super().update(dt)
         self.time += dt
         self.update_vel(dt)
-        self.colour[-1] -= dt*0.2
+        self.colour[-1] -= dt
         self.colour[-1] = max(self.colour[-1],0)
 
     def update_vel(self, dt):
@@ -45,12 +45,9 @@ class Leaves(BaseDynamic):#leaves from trees
         self.velocity[1] += dt*(self.game_objects.weather.wind.velocity[1] * self.friction[1] - self.friction[1]*self.velocity[1])
 
     def boundary(self):
-        if self.colour[-1] < 5 or self.true_pos[1]-self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1] > self.game_objects.game.window_size[1]+50:
-            self.resetting()
+        if self.colour[-1] < 5:
+            self.kill()
 
-    def reset(self):
-        self.colour[-1] = random.uniform(255*self.parallax[0],255)
-        self.velocity[1] = random.uniform(0.2,0.5)
-        self.time = 0
-        self.true_pos = [self.init_pos[0] + random.uniform(-self.spawn_size[0]*0.5, self.spawn_size[0]*0.5), self.init_pos[1] + random.uniform(-self.spawn_size[1]*0.5,self.spawn_size[1]*0.5)]
-        self.rect.topleft = self.true_pos.copy()
+    def release_texture(self):  # Called when .kill() and when emptying the group        
+        pass              
+   

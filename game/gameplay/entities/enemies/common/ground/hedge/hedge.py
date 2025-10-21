@@ -1,7 +1,7 @@
 import pygame
 from gameplay.entities.enemies.base.enemy import Enemy
 from engine.utils import read_files
-from gameplay.entities.shared.states.enemy.state_manager import StateManager
+from gameplay.entities.enemies.common.shared.states.state_manager import StateManager
 from .config import ENEMY_CONFIG as HEDGE_CONFIG
 
 from .states import Sleep, WakeUp

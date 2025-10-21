@@ -1,3 +1,4 @@
+import random
 from . import states_wind_objects
 from gameplay.entities.visuals.environments.base.layered_objects import LayeredObjects
 from gameplay.entities.visuals.environments import Leaves
@@ -7,8 +8,14 @@ class BaseTree(LayeredObjects):
         super().__init__(pos, game_objects, parallax, layer_name, live_blur)
         self.currentstate = states_wind_objects.Idle(self)#
 
-    def create_leaves(self,number_particles = 3):#should we have colour as an argument?
-        for i in range(0,number_particles):
+    def update(self, dt):
+        super().update(dt)
+        value = random.randint(0, 600)
+        if value < 5:
+            self.create_leaves(1)        
+
+    def create_leaves(self, number_particles = 3):#should we have colour as an argument?
+        for i in range(0, number_particles):
             obj = Leaves(self.spawn_box[0],self.game_objects,self.parallax,self.spawn_box[1],self.layer_name)
             self.game_objects.all_bgs.add(self.layer_name, obj)       
 

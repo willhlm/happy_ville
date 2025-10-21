@@ -3,7 +3,6 @@ import pygame, math, sys
 from engine.system import event_triggers, groups
 from gameplay.entities.visuals.particles import screen_particles
 from engine.utils import read_files
-from gameplay.states.cutscenes import cutscenes
 from engine import constants as C
 from gameplay.world.weather import weather
 from gameplay.world.wrapping_manager import WrappingManager
@@ -498,7 +497,9 @@ class Level():
             id = obj['gid'] - self.map_data['interactables_firstgid']
 
             if id == 2:#save point
-                new_int = SavePoint(object_position,self.game_objects,self.level_name)     
+                #new_int = SavePoint(object_position,self.game_objects,self.level_name)  
+                new_int = AbilityBall(object_position,self.game_objects)     
+
                 self.game_objects.interactables.add(new_int)
 
             elif id == 3:#runestones, colectable
@@ -1022,7 +1023,7 @@ class Rhoutta_encounter(Biome):
 
     def set_camera(self):
         if self.level.level_name == 'rhoutta_encounter_1' and self.level.spawn == '1':#if it a new game
-            self.level.game_objects.game.state_manager.enter_state('new_game')
+            self.level.game_objects.game.state_manager.enter_state('start_game')
 
     def load_objects(self,data,parallax,offset):
         for obj in data['objects']:

@@ -7,14 +7,16 @@ from .animals.bird.bird import Bird
 
 from .common.flying.flower_butterfly import FlowerButterfly
 
-from .common.flying.mygga.mygga_chase import MyggaChase
-from .common.flying.mygga.mygga_colliding_projectile import MyggaCollidingProjectile
-from .common.flying.mygga.mygga_colliding import MyggaColliding
-from .common.flying.mygga.crystal.mygga_crystal import MyggaCrystal
-from .common.flying.mygga.exploding.mygga_exploding import MyggaExploding
-from .common.flying.mygga.mygga_suicide import MyggaSuicide
-from .common.flying.mygga.mygga_torpedo import MyggaTorpedo
-from .common.flying.mygga.mygga import Mygga
+from .common.flying.mygga_variants.mygga_chase import MyggaChase
+from .common.flying.mygga_variants.mygga_colliding_projectile import MyggaCollidingProjectile
+from .common.flying.mygga_variants.mygga_colliding import MyggaColliding
+from .common.flying.mygga_variants.crystal.mygga_crystal import MyggaCrystal
+from .common.flying.mygga_variants.exploding.mygga_exploding import MyggaExploding
+from .common.flying.mygga_variants.mygga_suicide import MyggaSuicide
+from .common.flying.mygga_variants.torpedo.torpedo import MyggaTorpedo
+from .common.flying.mygga_variants.vertical_torpedo.vertical_torpedo import VerticalMyggaTorpedo
+from .common.flying.mygga_variants.casual.mygga import Mygga
+from .common.flying.bee import Bee
 
 from .common.ground.crab_crystal.crab_crystal import CrabCrystal
 from .common.ground.egg import Egg
@@ -30,6 +32,7 @@ from .common.ground.wild_swine import WildSwine
 from .common.ground.maggot.maggot import Maggot
 from .common.ground.hedge.hedge import Hedge
 from .common.ground.tagg_mus.tagg_mus import TaggMus
+from .common.ground.bjorn.bjorn import Bjorn
 
 from .common.ground.cultist.rogue.cultist_rogue import CultistRogue
 from .common.ground.cultist.cultist_warrior import CultistWarrior

@@ -29,11 +29,7 @@ ENEMY_CONFIG = {
                     'chase_give_up': {'next_state':'wait','score':50,'priority':1,'give_up_time':400, 'kwargs': {'next_state':'patrol', 'time': 30}}, 
                     'check_edge': {'next_state':'wait', 'score':90, 'priority':2, 'kwargs': {'time':60, 'next_state':'patrol', 'dir':-1}}
                     },
-            },          
-            'wait': {
-                'deciders':{
-                    'wait': {}},
-            }
+            },                                            
         }
     }
 }

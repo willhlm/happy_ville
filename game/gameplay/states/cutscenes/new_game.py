@@ -1,25 +1,32 @@
-from .base.cutscene_engine import CutsceneEngine
+from engine.utils import read_files
+from gameplay.states.base.game_state import GameState
 
-class NewGame(CutsceneEngine):#first screen to be played when starying a new game -> needs to be called after that the map has loaded
-    def __init__(self,game):
-        super().__init__(game)
-        self.game.game_objects.camera_manager.set_camera('New_game')#when starting a new game, should be a cutscene
-        self.camera_stops = []#temporary remove the came stops
-        for camera_stop in self.game.game_objects.camera_blocks:
-            self.camera_stops.append(camera_stop)
-        self.game.game_objects.camera_blocks.empty()
+class NewGame(GameState):
+    def __init__(self, game):
+        self.game = game
+        self.sprites = read_files.load_sprites_list('assets/cutscene/new_game', game.game_objects)
+        self.frame = 0                    
 
-    def cinematic(self):
-        pass
+    def render(self):
+        self.game.display.render(self.sprites[self.frame], self.game.screen_manager.screen) 
+        self.game.render_display(self.game.screen_manager.screen.texture)
 
-    def update(self, dt):
-        super().update(dt)
-        self.timer += dt
-        if self.timer > 500:
-            self.game.state_manager.exit_state()
+    def handle_events(self,input):
+        event = input.output()
+        input.processed()
+
+        if event[0]:
+          if event[-1] == 'a':
+                self.frame+= 1
+                self.frame = min(self.frame, len(self.sprites) )
+                if self.frame == len(self.sprites) :                                          
+                    self.game.state_manager.exit_state()
 
     def on_exit(self):
-        for camera_stop in self.camera_stops:
-            self.game.game_objects.camera_blocks.add(camera_stop)
-        self.game.game_objects.camera_manager.camera.exit_state()
-        super().on_exit()
+        self.game.state_manager.enter_state('gameplay')
+        self.game.game_objects.load_map(self.game.state_manager.state_stack[-1], 'wakeup_forest_1', spawn = '1', fade = False)                                        
+
+
+                    
+
+

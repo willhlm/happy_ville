@@ -71,8 +71,9 @@ REGISTERY = {
     "death": Death,
     "deer_encounter": DeerEncounter,
     "defeated_boss": DefeatedBoss,
-    "new_game": NewGame,
+    "start_game": StartGame,
     "rhoutta_encounter_defeat": RhouttaEncounterDefeat,
     "rhoutta_encounter": RhouttaEncounter,
-    "title_screen": TitleScreen
+    "title_screen": TitleScreen,
+    "new_game": NewGame,
 }

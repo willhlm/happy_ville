@@ -3,10 +3,10 @@
  <grid orientation="orthogonal" width="1" height="1"/>
  <transformations hflip="1" vflip="0" rotate="0" preferuntransformed="0"/>
  <tile id="2">
-  <image width="202" height="318" source="../../../sprites/entities/visuals/enviroments/trees/nordveden/tree_1/idle/tree01.png"/>
+  <image width="202" height="318" source="../../../sprites/entities/visuals/environments/trees/nordveden/tree_1/idle/tree01.png"/>
  </tile>
  <tile id="3">
-  <image width="176" height="288" source="../../../sprites/entities/visuals/enviroments/trees/nordveden/tree_2/idle/tree01.png"/>
+  <image width="176" height="288" source="../../../sprites/entities/visuals/environments/trees/nordveden/tree_2/idle/tree01.png"/>
  </tile>
  <tile id="4">
   <image width="16" height="16" source="../../../sprites/entities/platforms/breakable/nordveden/type1/idle/Sprite-0001.png"/>
