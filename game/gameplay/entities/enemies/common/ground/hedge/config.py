@@ -48,11 +48,6 @@ ENEMY_CONFIG = {
                     }
                 }
             },
-            'wait': {
-                'deciders': {
-                    'wait': {}
-                }
-            }
         }
     }
 }

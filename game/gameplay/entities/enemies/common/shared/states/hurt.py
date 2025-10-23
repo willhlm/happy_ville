@@ -15,4 +15,4 @@ class Hurt(BaseState):
 
     def increase_phase(self):
         # After hurt animation completes
-        self.enter_state("ground_chase")    
+        self.enter_state("chase")    

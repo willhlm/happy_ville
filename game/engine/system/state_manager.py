@@ -73,7 +73,6 @@ REGISTERY = {
     "defeated_boss": DefeatedBoss,
     "start_game": StartGame,
     "rhoutta_encounter_defeat": RhouttaEncounterDefeat,
-    "rhoutta_encounter": RhouttaEncounter,
     "title_screen": TitleScreen,
     "new_game": NewGame,
 }

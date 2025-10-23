@@ -33,6 +33,5 @@ from .cutscenes.deer_encounter import DeerEncounter
 from .cutscenes.defeated_boss import DefeatedBoss
 from .cutscenes.start_game import StartGame
 from .cutscenes.rhoutta_encounter_defeat import RhouttaEncounterDefeat
-from .cutscenes.rhoutta_encounter import RhouttaEncounter
 from .cutscenes.title_screen import TitleScreen
 from .cutscenes.new_game import NewGame
