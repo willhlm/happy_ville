@@ -1,5 +1,6 @@
 from . import shader_states
 from engine.render.post_process import PostProcess
+from engine.system import shaders
 
 class EntityShaderManager():
     def __init__(self, entity, default = 'idle', **kwargs):

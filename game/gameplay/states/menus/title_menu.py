@@ -72,12 +72,12 @@ class TitleMenu(BaseUI):
     def change_state(self):
         if self.current_button == 0:#new game
             self.menu_ui.arrows[0].pressed('new')#if we want to make it e.g. glow or something
-            #self.game.state_manager.enter_state('gameplay')
-            self.game.state_manager.enter_state('new_game')
+            self.game.state_manager.enter_state('gameplay')
+            #self.game.state_manager.enter_state('new_game')
 
             #load new game level
             #self.game.game_objects.load_map(self,'village_1','1')
-            #self.game.game_objects.load_map(self,'wakeup_forest_1','1')
+            self.game.game_objects.load_map(self,'wakeup_forest_4','2')
             #self.game.game_objects.load_map(self,'spirit_world_1','1')
             #self.game.game_objects.load_map(self,'crystal_mines_1','1')
             #self.game.game_objects.load_map(self,'nordveden_6','1')
