@@ -8,12 +8,12 @@ acceleration = [0.72,0.32]
 friction = [0.5,0]#need to be less than 1
 friction_player = [0.24,0.01]
 jump_vel_player = -5.2
-dash_jump_vel_player = -3.7
 max_vel = [30,7]#[30,6]
 pogo_vel = -6
 dash_length = 4#how long  Aila dashes
-dash_jump_length = 10
+dash_jump_length = 4
 dash_vel = 3
+dash_jump_vel = -3
 animation_framerate = 0.25#1/animation_framerate is the number of frames to blit before goging to next frame
 
 #timers

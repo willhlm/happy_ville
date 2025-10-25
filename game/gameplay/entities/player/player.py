@@ -78,6 +78,9 @@ class Player(Character):
         if self.velocity[1] < 0:
             self.velocity[1] = max(self.velocity[1], -context.max_vel[1])
 
+        print(context.velocity[1])
+        print(context.gravity)
+
         self.velocity[0] += dt * (self.dir[0] * self.acceleration[0] - self.velocity[0] * context.friction[0]) + context.velocity[0]
 
     def take_dmg(self, dmg = 1, effects = []):#called from collisions
