@@ -1,4 +1,4 @@
-import pygame 
+import pygame
 from gameplay.entities.enemies.base.flying_enemy import FlyingEnemy
 from engine.utils import read_files
 

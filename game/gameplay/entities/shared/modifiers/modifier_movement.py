@@ -5,7 +5,9 @@ class MovementManager():
     def __init__(self):
         self.modifiers = {}
         self._sorted_modifiers = []
-        self.registry = {'up_stream_horizontal': UpStreamHorizontal, 'up_stream_vertical': UpStreamVertical, 'two_d_liquid': TwoDLiquid, 'wall_glide' : WallGlide, 'dash_jump': DashJump, 'dash': Dash,'up_stream': UpStream, 'tjasolmais_embrace': TjasolmaisEmbrace }
+        self.registry = {'up_stream_horizontal': UpStreamHorizontal, 'up_stream_vertical': UpStreamVertical,
+                         'two_d_liquid': TwoDLiquid, 'wall_glide' : WallGlide, 'dash_jump': DashJump, 'dash': Dash,
+                         'up_stream': UpStream, 'tjasolmais_embrace': TjasolmaisEmbrace, 'air_boost': AirBoost}
 
     def add_modifier(self, modifier, priority = 0, **kwarg):
         self.modifiers[modifier] = self.registry[modifier](priority, **kwarg)
@@ -15,7 +17,7 @@ class MovementManager():
         del self.modifiers[modifier]
         self._sort_modifiers()
 
-    def clear_modifiers(self): 
+    def clear_modifiers(self):
         self.modifiers.clear()
         self._sort_modifiers()
 
@@ -44,7 +46,8 @@ class MovementContext():
         self.gravity = C.acceleration[1]
         self.velocity = [0, 0]
         self.friction = C.friction_player.copy()#firction is sampled evey frame
-        
+        self.max_vel = C.max_vel.copy()
+
         self.air_timer = C.air_timer
         self.upstream = 1#a scale for upstream movement: sampled during upsteram collision
 
@@ -64,9 +67,12 @@ class MovementModifier():
 class WallGlide(MovementModifier):#should it instead be a general driction modifier?
     def __init__(self, priority):
         super().__init__(priority)
+        self.end_friction = 0.1
+        self.friction = 0.8
 
     def apply(self, context):
-        context.friction[1] = 0.4
+        self.friction -= 0.05
+        context.friction[1] = max(self.friction, self.end_friction)
 
 class TwoDLiquid(MovementModifier):#should it instead be a general driction modifier?
     def __init__(self, priority):
@@ -76,7 +82,32 @@ class TwoDLiquid(MovementModifier):#should it instead be a general driction modi
         context.friction[0] *= 2
         context.friction[1] *= 2
 
-class DashJump(MovementModifier):#should it instead be a general driction modifier?
+class Dash(MovementModifier):#should it instead be a general driction modifier?
+    def __init__(self, priority, **kwarg):
+        super().__init__(priority)
+        self.entity = kwarg['entity']
+        self.dash_vel = C.dash_vel
+
+    def apply(self, context):
+        context.gravity = 0
+        context.velocity[0] += self.dash_vel * self.entity.dir[0]
+
+class DashJump(MovementModifier):
+    def __init__(self, priority, **kwarg):
+        super().__init__(priority)
+        self.entity = kwarg['entity']
+        self.dash_vel = C.dash_vel
+        self.dash_jump_vel = C.dash_jump_vel
+        self.g_constant = 1
+
+    def apply(self, context):
+        self.dash_jump_vel += 0.5
+        self.dash_jump_vel = min(self.dash_jump_vel, 0)
+        context.gravity = C.acceleration[1]/self.g_constant
+        context.velocity[0] += self.dash_vel * self.entity.dir[0]
+        context.velocity[1] += self.dash_jump_vel
+
+class AirBoost(MovementModifier):#should it instead be a general driction modifier?
     def __init__(self, priority, **kwarg):
         super().__init__(priority)
         self.entity = kwarg['entity']
@@ -93,42 +124,30 @@ class DashJump(MovementModifier):#should it instead be a general driction modifi
     def set_fritction_y(self, friction):
         self.friction_y = friction
 
-    def increase_friction(self):
-        self.inc_fric = True
-
     def apply(self, context):
         context.friction[0] = self.friction_x
         context.friction[1] = self.friction_y
 
     def handle_input(self, input):
         if input in ['ground', 'wall']:
-            self.entity.movement_manager.remove_modifier('dash_jump')
+            self.entity.movement_manager.remove_modifier('air_boost')
 
     def update(self, dt):
-        if self.inc_fric:
-            self.friction_x += dt * 0.0008 #this is probably the best one
-            #self.friction_x += self.entity.game_objects.game.dt * 0.002 * math.pow(self.friction_x/self.target, 2)
-            #self.friction_x = self.friction_x * math.pow((2 - (self.target-self.friction_x)/(self.target-self.ref_x)), 0.5)
+        self.friction_x += dt * 0.0008 #this is probably the best one
+        #self.friction_x += self.entity.game_objects.game.dt * 0.002 * math.pow(self.friction_x/self.target, 2)
+        #self.friction_x = self.friction_x * math.pow((2 - (self.target-self.friction_x)/(self.target-self.ref_x)), 0.5)
 
         self.friction_y -= dt * 0.0015
         self.friction_y = max(0, self.friction_y)
         if self.target - self.friction_x < 0.0003:
-            self.entity.movement_manager.remove_modifier('dash_jump')
-
-class Dash(MovementModifier):#should it instead be a general driction modifier?
-    def __init__(self, priority, **kwarg):
-        super().__init__(priority)
-        self.entity = kwarg['entity']
-        self.dash_speed = C.dash_vel * 0.5
-
-    def apply(self, context):
-        context.gravity = 0
-        context.velocity[0] += self.dash_speed * self.entity.dir[0]
+            self.entity.movement_manager.remove_modifier('air_boost')
 
 class UpStream(MovementModifier):
     def __init__(self, priority, **kwarg):
         super().__init__(priority)
         self.speed = kwarg.get('speed', [0, 0])  # Default force if not provided
+        self.max_speed = kwarg.get('max_speed', 7)
+        #self.max_speed = 1
 
     def apply(self, context):
         # Push as extra acceleration
@@ -137,6 +156,15 @@ class UpStream(MovementModifier):
 
 class UpStreamVertical(UpStream):
     """Vertical"""
+
+    def apply(self, context):
+        # Push as extra acceleration
+        context.velocity[1] += self.speed[1]
+        context.max_vel[1] = self.max_speed
+        #self.speed[1] += 0.02
+        #self.speed[1] = min(0, self.speed[1])
+
+        #context.velocity[1] = -1*min(self.max_speed, abs(context.velocity[1]))
 
 class UpStreamHorizontal(UpStream):
     """Horizontal"""

@@ -8,8 +8,9 @@ class UpStream(StaticEntity):#a draft that can lift enteties along a direction
         self.image = game_objects.game.display.make_layer(size)
         self.hitbox = pygame.Rect(pos[0] + size[0]* 0.05, pos[1], size[0] * 0.9, size[1])#adjust the hitbox size based on texture
         self.time = 0
-        self.acceleration = [0.8, 0.8]
-        self.max_speed = 7
+        self.accel_y = 0.9
+        self.accel_x = 1.2
+        self.max_speed = 5.5
 
         horizontal = kwarg.get('horizontal', 0)
         vertical = kwarg.get('vertical', 0)
@@ -19,12 +20,14 @@ class UpStream(StaticEntity):#a draft that can lift enteties along a direction
         sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/visuals/environments/up_stream/')
         self.channel = game_objects.sound.play_sfx(sounds['idle'][0], loop = -1, vol = 0.5)
         self.interacted = False#for player collision
+        self.type = 'up_stream_vertical' if self.dir[1] != 0 else 'up_stream_horizontal'
 
     def player_collision(self, player):#player collision
         if self.interacted: return
         self.interacted = True
-        player.velocity[1] += self.dir[1] * int(player.collision_types['bottom'])#a small inital boost if on ground
-        player.movement_manager.add_modifier('up_stream', speed = [self.dir[0] * self.acceleration[0], self.dir[1] * self.acceleration[1]])
+        player.velocity[1] += self.dir[1] * int(player.collision_types['bottom'])#a small inital boost if on ground
+        player.movement_manager.add_modifier(self.type, speed = [self.dir[0] * self.accel_x, self.dir[1] * self.accel_y], max_speed = self.max_speed)
+
 
         #context = player.movement_manager.resolve()
         #player.velocity[0] += self.dir[0] * self.accel_x * context.upstream
@@ -33,8 +36,8 @@ class UpStream(StaticEntity):#a draft that can lift enteties along a direction
         #    player.velocity[1] = min(abs(player.velocity[1]), self.max_speed) * self.dir[1]
 
     def player_noncollision(self):
-        if not self.interacted: return        
-        self.game_objects.player.movement_manager.remove_modifier('up_stream')
+        if not self.interacted: return
+        self.game_objects.player.movement_manager.remove_modifier(self.type)
         self.interacted = False
 
     def release_texture(self):
@@ -48,7 +51,7 @@ class UpStream(StaticEntity):#a draft that can lift enteties along a direction
         self.game_objects.shaders['up_stream']['dir'] = self.dir
         self.game_objects.shaders['up_stream']['time'] = self.time*0.1
         blit_pos = (int(self.true_pos[0]-self.game_objects.camera_manager.camera.interp_scroll[0]),int(self.true_pos[1]-self.game_objects.camera_manager.camera.interp_scroll[1]))
-        self.game_objects.game.display.render(self.image.texture, target, position = blit_pos, shader = self.game_objects.shaders['up_stream'])#shader render    
+        self.game_objects.game.display.render(self.image.texture, target, position = blit_pos, shader = self.game_objects.shaders['up_stream'])#shader render
 
     def seed_collision(self, seed):
         pass

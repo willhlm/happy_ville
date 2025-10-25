@@ -13,7 +13,7 @@ class Waterfall(StaticEntity):
         self.blur_layer = game_objects.game.display.make_layer(size)
         self.time = 5*100#offset the time
 
-        sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/visuals/environments/waterfall/')
+        sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/visuals/enviroments/waterfall/')
         self.channel = self.game_objects.sound.play_sfx(sounds['idle'][0], loop = -1, vol = 0.04)
         self.set_volume()
 

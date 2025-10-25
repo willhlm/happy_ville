@@ -61,11 +61,12 @@ class PlayerStates():
     def enter_state(self, state_name, phase = None, **kwargs):
         state = self.states.get(state_name)
         if state:#if the requested state is unlocked
-            self.composite_state = state
-            self.composite_state.enter_state(phase, **kwargs)#choose the phase
+            if not state.enter_state(phase, **kwargs):
+                self.composite_state.cleanup(**kwargs)
+                self.composite_state = state
+
 
     def update(self, dt):#called from player
-        #print(self.composite_state.current_phase)
         self.composite_state.update(dt)#main state
 
     def handle_input(self, input, **kwargs):
@@ -83,7 +84,7 @@ class PlayerStates():
     def increase_phase(self):#called when an animation is finished for that state
         self.composite_state.increase_phase()
 
-    def unlock_state(self, name):#should be called when unlocking a new state        
+    def unlock_state(self, name):#should be called when unlocking a new state
         for state_name, cls in self._state_factories[name]:
             self.states[state_name] = cls(self.entity)
 
@@ -100,6 +101,9 @@ class CompositeState():#will contain pre, main, post phases of a state
         if not phase_name: phase_name = next(iter(self.phases))#get the first phase from the dictionary if not specified
         self.common_values()
         self.enter_phase(phase_name, **kwarg) #enter the phase of the state
+
+    def cleanup(self, **kwarg): #called when exiting this state
+        pass
 
     def common_values(self):#set common values for the phases
         pass
@@ -165,10 +169,21 @@ class DashGroundState(CompositeState):
     def common_values(self):#called when entering this new state, and will not change during phase changes
         self.dir = self.entity.dir.copy()#copy the direction of the entity, and save it in the state across phases
 
+    def enter_state(self, phase_name, **kwarg):#called when entering a new state
+        if not self.entity.flags['grounddash']: return True
+        super().enter_state(phase_name, **kwarg)
+
+    def cleanup(self, **kwarg):
+        print(kwarg)
+        if kwarg.get('to_dash_jump', False):
+            return
+        self.entity.flags['grounddash'] = False#if fasle, sword cannot be swang. sets to true when timer runs out
+        self.entity.game_objects.timer_manager.start_timer(C.ground_dash_timer, self.entity.on_grounddash_timout)
+
 class WallGlideState(CompositeState):
     def __init__(self, entity):
         super().__init__(entity)
-        self.phases = {'pre': WallGlide(entity, animation_name = 'wall_glide_pre'), 'main': WallGlide(entity, animation_name = 'wall_glide_main')}
+        self.phases = {'main': WallGlide(entity, animation_name = 'wall_glide_main')}#{'pre': WallGlide(entity, animation_name = 'wall_glide_pre'), 'main': WallGlide(entity, animation_name = 'wall_glide_main')}
 
 class BeltGlideState(CompositeState):
     def __init__(self, entity):
@@ -179,6 +194,14 @@ class DashJumpState(CompositeState):
     def __init__(self, entity):
         super().__init__(entity)
         self.phases = {'pre': DashJumpPre(entity)}#, 'main': DashJumpMain(entity), 'post': DashJumpPost(entity)}
+
+    def enter_state(self, phase_name, **kwarg):#called when entering a new state
+        if not self.entity.flags['grounddash']: return True
+        super().enter_state(phase_name, **kwarg)
+
+    def cleanup(self, **kwarg):
+        self.entity.flags['grounddash'] = False#if fasle, sword cannot be swang. sets to true when timer runs out
+        self.entity.game_objects.timer_manager.start_timer(C.ground_dash_timer, self.entity.on_grounddash_timout)
 
 class WallJumpState(CompositeState):
     def __init__(self, entity):
@@ -834,7 +857,6 @@ class JumpMain(PhaseAirBase):
         self.jump_dash_timer = C.jump_dash_timer
         #self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
         self.entity.flags['ground'] = False
-        self.wall_dir = kwarg.get('wall_dir', False)
         self.shroomboost = 1#if landing on shroompoline and press jump, this vakue is modified
         try:
             self.air_timer = self.entity.colliding_platform.jumped()#jump charactereistics is set from the platform
@@ -855,8 +877,7 @@ class JumpMain(PhaseAirBase):
         if event[-1]=='lb':
             input.processed()
             if self.jump_dash_timer > 0:
-                if self.wall_dir:
-                    self.entity.dir[0] = -self.wall_dir[0]#if the jmup came from wall glide, jump away
+                self.entity.velocity[1] = 0
                 self.enter_state('dash_jump')
             else:
                 self.enter_state('dash_air')
@@ -937,21 +958,20 @@ class FallPre(PhaseAirBase):
 
     def enter(self, **kwarg):
         self.entity.animation.play('fall_pre')
-        self.wall_dir = kwarg.get('wall_dir', False)
 
     def handle_press_input(self,input):
         event = input.output()
         if event[-1] == 'a':
             if self.entity.flags['ground']:
                 input.processed()
-                self.enter_state('jump', wall_dir = self.wall_dir)
+                self.enter_state('jump')
         elif event[-1]=='b':
             input.processed()
             self.do_ability()
         elif event[-1]=='lb':
             if self.entity.flags['ground']:
                 input.processed()
-                self.enter_state('Ground_dash_pre', wall_dir = self.wall_dir)
+                self.enter_state('Ground_dash_pre')
             else:
                 input.processed()
                 self.enter_state('dash_air')
@@ -1014,20 +1034,32 @@ class WallGlide(PhaseBase):
         super().__init__(entity)
         self.animation_name = kwarg['animation_name']
 
+
     def enter(self, **kwarg):
         self.entity.animation.play(self.animation_name)#the name of the class
-        self.entity.flags['ground'] = True#used for jumping: sets to false in cayote timer and in jump state
+        self.entity.flags['ground'] = False#used for jumping: sets to false in cayote timer and in jump state
         self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
         self.entity.movement_manager.add_modifier('wall_glide')
         if self.entity.collision_types['right']:
             self.dir = [1,0]
         else:
             self.dir = [-1,0]
+        self.timer_init = 6
+        self.timer = self.timer_init
+        self.count_timer = False
 
     def update(self, dt):#is needed
+        if self.count_timer:
+            self.timer -= dt
+            if self.timer <= 0:
+                self.fall()
         if not self.entity.collision_types['right'] and not self.entity.collision_types['left']:#non wall and not on ground
+            self.entity.velocity[0] = 0
             self.enter_state('fall', wall_dir = self.dir)
-            self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
+        else:
+            self.entity.velocity[0] += self.entity.dir[0] * 0.2
+
+
 
     def handle_press_input(self,input):
         event = input.output()
@@ -1046,24 +1078,17 @@ class WallGlide(PhaseBase):
 
     def handle_movement(self, event):
         value = event['l_stick']#the avlue of the press
-        self.entity.acceleration[0] = C.acceleration[0] * math.ceil(abs(value[0]*0.8))#always positive, add acceleration to entity
-        self.entity.dir[1] = -value[1]
-
         curr_dir = self.entity.dir[0]
-        if abs(value[0]) > 0.1:
-            self.entity.dir[0] = sign(value[0])
 
-        if value[0] * curr_dir < 0:#change sign
-            self.entity.velocity[0] = self.entity.dir[0]*2
-            self.enter_state('fall', wall_dir = self.dir)
-            self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
-        elif abs(value[0]) == 0:#release
-            self.entity.velocity[0] = -self.entity.dir[0]*2
-            self.enter_state('fall', wall_dir = self.dir)
-            self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
+        if value[0] * curr_dir < 0:
+            self.count_timer = True
+        elif value[0] * curr_dir > 0:
+            self.count_timer = False
+            self.timer = self.timer_init
 
-    def increase_phase(self):#called when an animation is finihed for that state
-        self.enter_phase('main')
+    def fall(self):
+        self.entity.velocity[0] = -self.entity.dir[0]*2
+        self.enter_state('fall', wall_dir = self.dir)
 
     def handle_input(self, input, **kwarg):
         if input == 'Ground':
@@ -1144,6 +1169,8 @@ class DashGroundPre(PhaseBase):
         super().__init__(entity)
 
     def enter(self, **kwarg):
+        #remove any air boosts
+
         self.entity.animation.play('dash_ground_pre')#the name of the class
 
         self.dash_length = C.dash_length
@@ -1152,13 +1179,10 @@ class DashGroundPre(PhaseBase):
         self.entity.flags['ground'] = True
         self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
         self.jump_dash_timer = C.jump_dash_timer
-        self.entity.movement_manager.add_modifier('dash', entity = self.entity)      
+        self.entity.movement_manager.add_modifier('dash', entity = self.entity)
         self.entity.velocity[1] *= 0
-          
+
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0], vol = 1)
-        wall_dir = kwarg.get('wall_dir', False)
-        if wall_dir:
-            self.entity.dir[0] = -wall_dir[0]
 
     def handle_movement(self, event):#all dash states should omit setting entity.dir
         self.entity.acceleration[0] = 0
@@ -1195,7 +1219,7 @@ class DashGroundPre(PhaseBase):
         event = input.output()
         if event[-1] == 'a':
             input.processed()
-            if self.jump_dash_timer > 0: self.enter_state('dash_jump')
+            if self.jump_dash_timer > 0: self.enter_state('dash_jump', to_dash_jump=True)
 
     def enter_state(self, state, **kwarg):
         self.entity.shader_state.handle_input('idle')
@@ -1260,19 +1284,15 @@ class DashJumpPre(PhaseBase):#enters from ground dash pre
     def enter(self, **kwarg):
         self.entity.animation.play('dash_jump_pre')#the name of the class
         self.dash_length = C.dash_jump_length
-
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0])
         self.entity.movement_manager.add_modifier('dash_jump', entity = self.entity)
         self.entity.shader_state.handle_input('motion_blur')
         self.entity.flags['ground'] = False
-
         self.buffer_time = C.jump_dash_wall_timer
 
     def exit_state(self):
         if self.dash_length < 0:
-            self.entity.acceleration[1] =  C.acceleration[1]
-            if 'Dash_jump' in self.entity.movement_manager.modifiers:
-                self.entity.movement_manager.modifiers['Dash_jump'].increase_friction()
+            self.entity.movement_manager.add_modifier('air_boost', entity = self.entity)
             self.enter_state('fall')
 
     def handle_movement(self, event):
@@ -1288,20 +1308,15 @@ class DashJumpPre(PhaseBase):#enters from ground dash pre
 
     def enter_state(self, state):
         self.entity.acceleration[1] =  C.acceleration[1]
+        self.entity.movement_manager.remove_modifier('dash_jump')
         super().enter_state(state)
         self.entity.shader_state.handle_input('idle')
 
-    def enter_phase(self, phase):
-        self.entity.acceleration[1] =  C.acceleration[1]
-        super().enter_phase(phase)
-        self.entity.shader_state.handle_input('idle')
-
     def update(self, dt):
-        self.entity.velocity[1] = C.dash_jump_vel_player
-        self.entity.velocity[0] = self.entity.dir[0]*max(C.dash_vel,abs(self.entity.velocity[0]))#max horizontal speed
+        self.entity.emit_particles(lifetime = 40, scale=3, colour = C.spirit_colour, gravity_scale = 0.5, gradient = 1, fade_scale = 7,  number_particles = 1, vel = {'wave': [-10*self.entity.dir[0], -2]})
         self.entity.game_objects.cosmetics.add(FadeEffect(self.entity, alpha = 100))
-        self.dash_length -= dt
         self.buffer_time -= dt
+        self.dash_length -= dt
         self.exit_state()
 
 class DashJumpMain(PhaseBase):
@@ -1348,7 +1363,7 @@ class Sword(PhaseBase):#main phases shold inheret this
     def enter(self, **kwarg):
         self.entity.flags['attack_able'] = False#if fasle, sword cannot be swang. sets to true when timer runs out
         self.entity.game_objects.timer_manager.start_timer(C.sword_time_player, self.entity.on_attack_timeout)
-        self.entity.abilities.spirit_abilities['Shield'].sword()        
+        self.entity.abilities.spirit_abilities['Shield'].sword()
         self.entity.sword.use_sword()
 
 class SwordAir(PhaseAirBase):
@@ -1358,7 +1373,7 @@ class SwordAir(PhaseAirBase):
     def enter(self, **kwarg):
         self.entity.flags['attack_able'] = False#if fasle, sword cannot be swang. sets to true when timer runs out
         self.entity.game_objects.timer_manager.start_timer(C.sword_time_player, self.entity.on_attack_timeout)
-        self.entity.abilities.spirit_abilities['Shield'].sword()        
+        self.entity.abilities.spirit_abilities['Shield'].sword()
         self.entity.sword.use_sword()
 
 class SwordStandPre(Sword):
@@ -1388,10 +1403,10 @@ class SwordStandMain(Sword):
         self.entity.flags['attack_able'] = False#if fasle, sword cannot be swang. sets to true when timer runs out
         self.entity.game_objects.timer_manager.start_timer(C.sword_time_player, self.entity.on_attack_timeout)
         self.entity.abilities.spirit_abilities['Shield'].sword()
-        
+
         self.entity.sword.dir = self.entity.dir.copy()
-        self.entity.sword.currentstate.enter_state('Slash_1')        
-        self.entity.sword.use_sword()            
+        self.entity.sword.currentstate.enter_state('Slash_1')
+        self.entity.sword.use_sword()
 
         self.entity.projectiles.add(self.entity.sword)#add sword to group
 
@@ -1435,7 +1450,7 @@ class SwordDownMain(SwordAir):
         self.entity.flags['attack_able'] = False#if fasle, sword cannot be swang. sets to true when timer runs out
         self.entity.game_objects.timer_manager.start_timer(C.sword_time_player, self.entity.on_attack_timeout)
         self.entity.abilities.spirit_abilities['Shield'].sword()
-        self.entity.sword.use_sword()        
+        self.entity.sword.use_sword()
         self.entity.sword.currentstate.enter_state('Slash_down')
         self.entity.projectiles.add(self.entity.sword)#add sword to group
 
@@ -1451,7 +1466,7 @@ class SwordUpMain(Sword):
         self.entity.flags['attack_able'] = False#if fasle, sword cannot be swang. sets to true when timer runs out
         self.entity.game_objects.timer_manager.start_timer(C.sword_time_player, self.entity.on_attack_timeout)
         self.entity.abilities.spirit_abilities['Shield'].sword()
-        self.entity.sword.use_sword()        
+        self.entity.sword.use_sword()
         self.entity.sword.currentstate.enter_state('Slash_up')
         self.entity.projectiles.add(self.entity.sword)#add sword to group
 
@@ -1627,7 +1642,7 @@ class SmashUpMain(Sword):
         self.entity.flags['attack_able'] = False#if fasle, sword cannot be swang. sets to true when timer runs out
         self.entity.game_objects.timer_manager.start_timer(C.sword_time_player, self.entity.on_attack_timeout)
         self.entity.abilities.spirit_abilities['Shield'].sword()
-        self.entity.sword.dir = self.entity.dir.copy()        
+        self.entity.sword.dir = self.entity.dir.copy()
         self.entity.sword.currentstate.enter_state('Slash_up')
         self.entity.sword.use_sword()
         self.entity.projectiles.add(self.entity.sword)#add sword to group
@@ -1692,7 +1707,7 @@ class DashAirPre(PhaseBase):
         self.entity.flags['ground'] = True
         self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
         self.jump_dash_timer = C.jump_dash_timer
-        self.entity.movement_manager.add_modifier('dash', entity = self.entity)   
+        self.entity.movement_manager.add_modifier('dash', entity = self.entity)
         self.entity.velocity[1] *= 0
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0], vol = 1)
         wall_dir = kwarg.get('wall_dir', False)
@@ -1731,10 +1746,11 @@ class DashAirPre(PhaseBase):
         self.enter_phase('main')
 
     def handle_press_input(self, input):#all states should inehrent this function, if it should be able to jump
-        event = input.output()
-        if event[-1] == 'a':
-            input.processed()
-            if self.jump_dash_timer > 0: self.enter_state('dash_jump')
+        pass
+        #event = input.output()
+        #if event[-1] == 'a':
+        #    input.processed()
+        #    if self.jump_dash_timer > 0: self.enter_state('dash_jump')
 
     def enter_state(self, state, **kwarg):
         self.entity.shader_state.handle_input('idle')
@@ -1911,12 +1927,12 @@ class CrouchPre(PhaseBase):#used when saving and picking up interactable items
     def enter(self, **kwarg):
         self.entity.animation.play('crouch_pre')
         self.entity.acceleration[0] = 0
-        
+
         #effect
         effect = PrayEffect(self.entity.rect.center,self.entity.game_objects)
         effect.rect.bottom = self.entity.rect.bottom
         self.entity.game_objects.cosmetics.add(effect)
-        self.entity.game_objects.sound.play_sfx(self.entity.sounds['pray'][0])        
+        self.entity.game_objects.sound.play_sfx(self.entity.sounds['pray'][0])
 
     def handle_movement(self,event):
         pass
