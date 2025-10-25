@@ -75,8 +75,8 @@ class Camera():#default camera
     def reset_player_center(self):#called when loading a map in maploader
         self.center = self.original_center.copy()
         self.game_objects.camera_manager.stop_handeler.reset()
-        for stop in self.game_objects.camera_blocks:#apply cameras stopp
-            stop.update(0)
+        for stop in self.game_objects.camera_blocks:#apply cameras stopp            
+            stop.update(0)            
             stop.currentstate.init_pos()
         self.set_camera_position()
 
@@ -170,16 +170,22 @@ class Cultist_encounter(Cutscenes):
         self.center[0] = min(500,self.center[0])
         super().update(dt)
 
-class New_game(Cutscenes):#initialised in New_game state
+class Start_game(Cutscenes):
     def __init__(self, game_objects, scroll):
         super().__init__(game_objects, scroll)
-        self.update_stop()
-        self.center = [self.game_objects.camera_manager.camera.center[0],1000]#[176,230]
+        self.center = [self.game_objects.camera_manager.camera.center[0], 1000]
         self.set_camera_position()
-
+        
+        # Let camera stops calculate the proper position
+        for stop in self.game_objects.camera_blocks:
+            stop.update(0)
+            stop.currentstate.init_pos()
+                
+        self.target_y = self.game_objects.camera_manager.camera.center[1] + 16*3# Now use the target they set
+        
     def update(self, dt):
-        self.center[1] -= 2*dt
-        self.center[1] = max(230,self.center[1])
+        self.center[1] -= 2 * dt
+        self.center[1] = max(self.target_y, self.center[1])
         super().update(dt)
 
 class Title_screen(Cutscenes):

@@ -18,6 +18,9 @@ class EnemyStates():
     def increase_phase(self):
         pass
 
+    def modify_hit(self, effect):
+        return effect
+
 class Idle(EnemyStates):
     def __init__(self, entity):
         super().__init__(entity)

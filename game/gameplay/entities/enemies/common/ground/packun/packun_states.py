@@ -17,6 +17,9 @@ class EnemyStates():
     def handle_input(self, input):
         pass
 
+    def modify_hit(self, effect):
+        return effect
+
 class Idle(EnemyStates):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)

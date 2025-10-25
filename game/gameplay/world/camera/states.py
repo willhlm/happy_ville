@@ -27,7 +27,7 @@ class Idle_right(Basic_states):
         distance = [self.entity.rect.left - self.entity.game_objects.player.true_pos[0],self.entity.rect.centery - self.entity.game_objects.player.true_pos[1]]
         if distance[0] < -self.entity.offset*16: return
 
-        if abs(distance[1]) < self.entity.size[1] and abs(distance[0]) < self.entity.game_objects.game.window_size[0]*0.5 +  self.entity.game_objects.player.rect[2]*0.5:#if on screen on y and coser than half screen on x
+        if abs(distance[1]) < self.entity.size[1] * 0.5 and abs(distance[0]) < self.entity.game_objects.game.window_size[0]*0.5 :#+  self.entity.game_objects.player.rect[2]*0.5:#if on screen on y and coser than half screen on x
             self.enter_state('Stop_right')
 
 class Stop_right(Basic_states):
@@ -50,10 +50,9 @@ class Idle_left(Basic_states):
 
     def update(self, dt):        
         distance = [self.entity.rect.right - self.entity.game_objects.player.true_pos[0] - self.entity.game_objects.player.rect[2]*0.5, self.entity.rect.centery - self.entity.game_objects.player.true_pos[1]]
+        if distance[0] > self.entity.offset*16: return    
 
-        if distance[0] > self.entity.offset*16: return        
-
-        if abs(distance[1]) < self.entity.size[1] and abs(distance[0]) < self.entity.game_objects.game.window_size[0]*0.5: #- self.entity.game_objects.player.rect[2]*0.5:#if on screen on y and coser than half screen on x
+        if abs(distance[1]) < self.entity.size[1] * 0.5 and abs(distance[0]) < self.entity.game_objects.game.window_size[0]*0.5: #- self.entity.game_objects.player.rect[2]*0.5:#if on screen on y and coser than half screen on x
             self.enter_state('Stop_left')
 
 class Stop_left(Basic_states):

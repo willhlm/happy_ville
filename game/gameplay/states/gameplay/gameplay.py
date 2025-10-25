@@ -65,7 +65,7 @@ class Gameplay(GameState):
 
             elif sum(event[2]['d_pad']) != 0:#d_pad was pressed
                 input.processed()
-                self.game.game_objects.player.abilities.handle_input(event[2]['d_pad'])#to change movement ability with d pad
+                pass
 
             else:
                 interpreted = self.game.game_objects.input_interpreter.interpret(input)

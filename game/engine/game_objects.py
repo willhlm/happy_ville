@@ -12,7 +12,7 @@ from engine import constants as C
 from gameplay.ui.managers import ui
 from gameplay.narrative import quests_events
 
-from gameplay.registery.registry_manager import RegistryManager
+from gameplay.registry.registry_manager import RegistryManager
 
 from time import perf_counter
 
@@ -251,19 +251,19 @@ class Game_Objects():
 
             for group in self.all_bgs.group_dict.values():
                 for obj in group:
-                    if type(obj).__name__ == 'Reflection':                        
-                        pygame.draw.rect(image, (0,0,255), (int(reflect.reflect_rect[0]),int(reflect.reflect_rect[1]),reflect.reflect_rect[2],reflect.reflect_rect[3]),1)#draw hitbox
-                        pygame.draw.rect(image, (255,0,0), (int(reflect.rect[0]-reflect.parallax[0]*self.camera_manager.camera.scroll[0]),int(reflect.rect[1]-reflect.parallax[1]*self.camera_manager.camera.scroll[1]),reflect.rect[2],reflect.rect[3]),1)#draw hitbox
+                    if type(obj).__name__ == 'River':                        
+                        pygame.draw.rect(image, (0,0,255), (int(obj.reflect_rect[0]),int(obj.reflect_rect[1]),obj.reflect_rect[2],obj.reflect_rect[3]),1)#draw hitbox
+                        pygame.draw.rect(image, (255,0,0), (int(obj.rect[0]-obj.parallax[0]*self.camera_manager.camera.scroll[0]),int(obj.rect[1]-obj.parallax[1]*self.camera_manager.camera.scroll[1]),obj.rect[2],obj.rect[3]),1)#draw hitbox
 
             for group in self.all_fgs.group_dict.values():
                 for obj in group:
-                    if type(obj).__name__ == 'Reflection':                        
+                    if type(obj).__name__ == 'River':                        
                         pygame.draw.rect(image, (0,0,255), (int(obj.reflect_rect[0]),int(obj.reflect_rect[1]),obj.reflect_rect[2],obj.reflect_rect[3]),1)#draw hitbox
                         pygame.draw.rect(image, (255,0,0), (int(obj.rect[0]-obj.parallax[0]*self.camera_manager.camera.scroll[0]),int(obj.rect[1]-obj.parallax[1]*self.camera_manager.camera.scroll[1]),obj.rect[2],obj.rect[3]),1)#draw hitbox
 
 
             for reflect in self.cosmetics:
-                if type(reflect).__name__ == 'Reflection':
+                if type(reflect).__name__ == 'River':
                     pygame.draw.rect(image, (0,0,255), (int(reflect.reflect_rect[0]),int(reflect.reflect_rect[1]),reflect.reflect_rect[2],reflect.reflect_rect[3]),1)#draw hitbox
                     pygame.draw.rect(image, (255,0,0), (int(reflect.rect[0]-reflect.parallax[0]*self.camera_manager.camera.scroll[0]),int(reflect.rect[1]-reflect.parallax[1]*self.camera_manager.camera.scroll[1]),reflect.rect[2],reflect.rect[3]),1)#draw hitbox
 

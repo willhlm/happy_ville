@@ -5,16 +5,19 @@ class EnemyStates():
     def handle_input(self,input,duration=100):
         pass
 
-    def update(self):
+    def update(self, dt):
         self.set_position()
-        self.set_velocity()
+        self.set_velocity(dt)
     
-    def set_velocity(self):
-        self.entity.velocity[0] += self.entity.slow_motion * self.entity.game_objects.game.dt * (self.entity.acceleration[0] - self.entity.friction[0] * self.entity.velocity[0])
-        self.entity.velocity[1] += self.entity.slow_motion * self.entity.game_objects.game.dt * (self.entity.acceleration[1] - self.entity.friction[1] * self.entity.velocity[1])
+    def set_velocity(self, dt):
+        self.entity.velocity[0] += dt * (self.entity.acceleration[0] - self.entity.friction[0] * self.entity.velocity[0])
+        self.entity.velocity[1] += dt * (self.entity.acceleration[1] - self.entity.friction[1] * self.entity.velocity[1])
 
     def increase_phase(self):
         pass
+
+    def modify_hit(self, effect):
+        return effect        
 
 class Floor(EnemyStates):
     def __init__(self, entity, move_direction = [1 ,0], gravity_direction = [0, 1], sign = 1):

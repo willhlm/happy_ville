@@ -18,6 +18,9 @@ class Vatt_states():
     def increase_phase(self):
         pass
 
+    def modify_hit(self, effect):
+        return effect
+
 class Idle(Vatt_states):
     def __init__(self,entity):
         super().__init__(entity)

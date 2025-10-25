@@ -34,8 +34,17 @@ class Interactables(AnimatedEntity):#interactables
     def player_noncollision(self):#when player doesn't collide: for grass
         self.shader_state.handle_input('idle')
 
-    def take_dmg(self, projectile):#when player hits with e.g. sword
+    def take_dmg(self, dmg = 1):#when player hits with e.g. sword
         pass
 
     def seed_collision(self, seed):#if seed hits
         pass
+
+    def modify_hit(self, effects):#called when aila sword hit it
+        return effects
+
+    def apply_hitstop(self, lifetime=10, call_back=None):#called when aila sword hit it
+        pass
+
+    def emit_particles(self, **kwargs):#called when aila sword hit it
+        pass        

@@ -8,5 +8,3 @@ class RhouttaEncounterDefeat(CutsceneFile):#play the first cutscene encountering
     def reset_timer(self):#called when cutscene is finshed
         self.game_objects.state_manager.exit_state()
         self.game_objects.state_manager.enter_state('Title_screen')
-
-#engine based

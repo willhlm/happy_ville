@@ -1,12 +1,12 @@
 import pygame 
 from engine.utils import read_files
 from gameplay.entities.enemies.base.enemy import Enemy
-from config.enemies.rav import ENEMY_CONFIG as RAV_CONFIG
+from config.enemy import ENEMY_CONFIG 
 
 class LarvJr(Enemy):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
-        self.config = RAV_CONFIG['rav']
+        self.config = ENEMY_CONFIG['base']
 
         self.sprites = read_files.load_sprites_dict('assets/sprites/entities/enemies/common/ground/larv_jr/', game_objects, True)
         self.image = self.sprites['idle'][0]
@@ -16,7 +16,7 @@ class LarvJr(Enemy):
         self.init_x = self.rect.x
 
         self.patrol_speed = self.config['speeds']['patrol']
-        self.patrol_timer = self.config['timers']['patrol']
+        self.patrol_timer = 100
 
         self.health = 3
         self.currentstate.enter_state('Patrol')

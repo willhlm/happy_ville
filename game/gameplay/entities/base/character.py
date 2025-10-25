@@ -27,7 +27,7 @@ class Character(PlatformEntity):#enemy, NPC,player
         self.velocity[1] = min(self.velocity[1], self.max_vel[1])#set a y max speed#
         self.velocity[0] += dt * (self.dir[0]*self.acceleration[0] - self.friction[0] * self.velocity[0])
 
-    def take_dmg(self, dmg = 1, effects = []):
+    def take_dmg(self, dmg = 1):
         if self.flags['invincibility']: return
         self.health -= dmg#take damage
         self.flags['invincibility'] = True
@@ -42,9 +42,7 @@ class Character(PlatformEntity):#enemy, NPC,player
             self.shader_state.handle_input('Hurt')#turn white and shake
             self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
             self.game_objects.camera_manager.camera_shake(amplitude = 10, duration = 15, scale = 0.9)
-            
-            for effect in effects:#e.g. knock back
-                effect()
+
         else:#if dead
             self.game_objects.camera_manager.camera_shake(amplitude = 15, duration = 15, scale = 0.9)
             self.flags['aggro'] = False
@@ -64,6 +62,9 @@ class Character(PlatformEntity):#enemy, NPC,player
         self.blit_pos = [int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1])]
         self.game_objects.game.display.render(self.image, target, position = self.blit_pos, flip = self.dir[0] > 0, shader = self.shader)#shader render        
 
+    def modify_hit(self, effects):
+        return effects
+
     def on_invincibility_timeout(self):#runs when sword timer runs out
         self.flags['invincibility'] = False
 
@@ -72,3 +73,4 @@ class Character(PlatformEntity):#enemy, NPC,player
 
     def on_hurt_timeout(self):#starts when entering hurt state, and make sure that you don't eneter again until timer runs out
         self.flags['hurt_able'] = True
+

@@ -6,7 +6,7 @@ from . import larv_wall_states
 class LarvWall(Enemy):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
-        self.sprites = read_files.load_sprites_dict('assets/sprites/enteties/enemies/common/ground/slime_wall/', game_objects, flip_x = True)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.sprites = read_files.load_sprites_dict('assets/sprites/entities/enemies/common/ground/slime_wall/', game_objects, flip_x = True)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1], self.image.width, self.image.height)
         self.hitbox = self.rect.copy()#pygame.Rect(pos[0],pos[1],16,16)
@@ -17,7 +17,7 @@ class LarvWall(Enemy):
         self.currentstate = larv_wall_states.Floor(self)
         self.dir[0] = -self.clockwise
 
-    def update_vel(self):
+    def update_vel(self, dt):
         pass
 
     def knock_back(self,dir):

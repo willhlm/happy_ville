@@ -1,8 +1,8 @@
 import pygame
-from gameplay.entities.visuals.enviroment.base.layered_objects import LayeredObjects
+from gameplay.entities.visuals.environments.base.layered_objects import LayeredObjects
 from . import states_droplet_source
 from gameplay.entities.projectiles import ProjectileDroplet
-from gameplay.entities.visuals.enviroment import BackgroundDroplet
+from gameplay.entities.visuals.environments import BackgroundDroplet
 from gameplay.entities.shared.states import states_shader
 
 class DropletSource(LayeredObjects):

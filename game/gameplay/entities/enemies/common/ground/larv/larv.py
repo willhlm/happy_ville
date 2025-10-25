@@ -2,12 +2,12 @@ import pygame, random
 from gameplay.entities.enemies.base.enemy import Enemy
 from engine.utils import read_files
 from .larv_jr import LarvJr
-from config.enemies.rav import ENEMY_CONFIG as RAV_CONFIG
+from config.enemy import ENEMY_CONFIG 
 
 class Larv(Enemy):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
-        self.config = RAV_CONFIG['rav']
+        self.config = ENEMY_CONFIG['base']
 
         self.sprites = read_files.load_sprites_dict('assets/sprites/entities/enemies/common/ground/larv/', game_objects)
         self.sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/enemies/common/ground/larv/')
@@ -16,7 +16,7 @@ class Larv(Enemy):
         self.hitbox = pygame.Rect(pos[0], pos[1], 20, 30)
 
         self.patrol_speed = self.config['speeds']['patrol']
-        self.patrol_timer = self.config['timers']['patrol']
+        self.patrol_timer = 100
 
         self.attack_distance = [0,0]
         self.currentstate.enter_state('Patrol')

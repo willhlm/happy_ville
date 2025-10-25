@@ -45,9 +45,18 @@ class PlayerStates():
             'slow_motion': SlowMotionState(entity),
             'bow': BowState(entity),
         }
+
         self.composite_state = self.states['idle']
         self.composite_state.enter_phase('main')
-        self._state_factories = {'dash': [('dash_ground', DashGroundState), ('dash_jump', DashJumpState)],'bow': [('bow', BowState)]}#should contain all the states that can be created, so that they can be be appended to self.stataes when needed
+        self._state_factories = {'dash_air': [('dash_air', DashAirState)], 
+                                'smash_up': [('smash_up', SmashUpState)], 
+                                'wall': [('wall_jump', WallJumpState), ('wall_glide', WallGlideState), ('belt_glide', BeltGlideState)], 
+                                'dash': [('dash_ground', DashGroundState), ('dash_jump', DashJumpState)],
+                                'bow': [('bow', BowState)], 
+                                'thunder': [('thunder', ThunderState)], 
+                                'shield': [('shield', ShieldState)], 
+                                'wind': [('wind', WindState)], 
+                                'slow_motion': [('slow_motion', SlowMotionState)]}#should contain all the states that can be created, so that they can be be appended to self.stataes when needed
 
     def enter_state(self, state_name, phase = None, **kwargs):
         state = self.states.get(state_name)

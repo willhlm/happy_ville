@@ -8,7 +8,6 @@ class HoragallesRage(Ability):#desolate dive:thunder god:
         self.description = ['thunder','hits one additional target','one additional damage','imba']
 
     def initiate(self, enemy_rect):
-        print('fe')
         thunder = Thunder(enemy_rect, self.entity.game_objects, lifetime =  1000)
         thunder.rect.midbottom = enemy_rect.midbottom
         thunder.hitbox = thunder.rect.copy()

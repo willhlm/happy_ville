@@ -1,5 +1,6 @@
-import pygame 
+import pygame, random
 from engine.utils import read_files
+from engine import constants as C
 from gameplay.entities.interactables.base.interactables import Interactables
 from . import loot_container_states
 
@@ -28,7 +29,7 @@ class LootContainers(Interactables):
     def loots(self):#this is called when the opening animation is finished
         for key in self.inventory.keys():#go through all loot
             for i in range(0,self.inventory[key]):#make that many object for that specific loot and add to gorup
-                obj = getattr(sys.modules[__name__], key)(self.hitbox.midtop, self.game_objects)#make a class based on the name of the key: need to import sys
+                obj = self.game_objects.registry.fetch('items', key)(self.hitbox.midtop, self.game_objects)
                 obj.spawn_position()
                 self.game_objects.loot.add(obj)
             self.inventory[key]=0
@@ -36,10 +37,10 @@ class LootContainers(Interactables):
     def on_invincibility_timeout(self):
         self.flags['invincibility'] = False
 
-    def take_dmg(self,projectile):
+    def take_dmg(self, dmg = 1):
         if self.flags['invincibility']: return
         self.game_objects.sound.play_sfx(self.sounds['hit'][0], vol = 0.2)
-        projectile.clash_particles(self.hitbox.center)
+
         self.health -= 1
         self.flags['invincibility'] = True
         self.shader_state.handle_input('Hurt', colour = [1,1,1,1], direction = [1,0.5])
@@ -56,3 +57,5 @@ class LootContainers(Interactables):
             obj = Amber_droplet(self.hitbox.midtop, self.game_objects)
             self.game_objects.loot.add(obj)
 
+    def modify_hit(self, effects):#called when aila sword hit it
+        return effects

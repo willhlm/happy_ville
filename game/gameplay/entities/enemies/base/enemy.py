@@ -69,4 +69,8 @@ class Enemy(Character):
         self.velocity[0] += self.dir[0]*0.3
 
     def modify_hit(self, effect):
-        return effect
+        effect = self.currentstate.modify_hit(effect)
+        return effect        
+
+    def apply_hitstop(self, lifetime=10, call_back=None):#called from aila sword, hut_effect
+        self.hitstop_states.enter_state('Stop', lifetime=lifetime, call_back=(lambda: self.knock_back(**call_back['knock_back'])))

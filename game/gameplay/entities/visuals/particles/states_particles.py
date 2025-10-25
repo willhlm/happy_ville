@@ -9,9 +9,12 @@ class Basic_states():
         self.entity = entity
 
     def enter_state(self,newstate,**kwarg):
-        self.entity.state = getattr(sys.modules[__name__], newstate)(self.entity,**kwarg)#make a class based on the name of the newstate: need to import sys
+        self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity,**kwarg)#make a class based on the name of the newstate: need to import sys
 
     def update(self, dt):
+        pass
+
+    def update_render(self, dt):
         pass
 
     def handle_input(self, input):
@@ -21,7 +24,7 @@ class Idle(Basic_states):#the normal particles
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update(self, dt):
+    def update_render(self, dt):
         self.entity.set_velocity(dt)
         self.entity.fading(dt)
         self.entity.destroy()
@@ -32,13 +35,13 @@ class Circle_converge(Basic_states):
         self.time = 200#the time when they shoudl converge to aila
         self.sign = [sign(self.entity.velocity[0]),sign(self.entity.velocity[1])]
 
-    def update(self, dt):
+    def update_render(self, dt):
         self.time -= dt
         self.update_velocity(dt)
         if self.time < 0:
             self.enter_state('Circle_converge_2')
 
-    def update_velocity(self):
+    def update_velocity(self, dt):
         distance = ((self.entity.true_pos[0] - self.entity.spawn_point[0])**2+(self.entity.true_pos[1] - self.entity.spawn_point[1])**2)**0.5
 
         self.entity.velocity[0] -=  0.001*distance*self.entity.velocity[0]*dt#0.1*math.cos(self.angle)
@@ -50,16 +53,16 @@ class Circle_converge_2(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update(self, dt):
+    def update_render(self, dt):     
         self.update_velocity(dt)
         self.check_collision()
 
     def check_collision(self):
         distance = ((self.entity.true_pos[0] - self.entity.game_objects.player.hitbox.center[0])**2+(self.entity.true_pos[1] - self.entity.game_objects.player.hitbox.center[1])**2)**0.5
         if distance < 5:#light up the room brifly -> make also aila glow blue maybe
-            if not self.entity.game_objects.shader_render.shaders.get('bloom',False):#do not append several if already exist
-                self.entity.game_objects.shader_render.append_shader('bloom', targetColor = [0.39, 0.78, 1], colorRange = 0.2)#append a bloom shader to screen -> should each particle add this?
-                self.entity.game_objects.player.shader_state.enter_state('Shining')
+            if not self.entity.game_objects.post_process.shaders.get('glow',False):#do not append several if already exist
+                pass
+                #self.entity.game_objects.post_process.append_shader('glow', target_colour = [0.39, 0.78, 1], tolerance = 0.2)#append a bloom shader to screen -> should each particle add this?
             self.entity.light.colour = [1,1,1,1]#change the colour of the light
             self.entity.light.updates.append(self.entity.light.expand)
             self.entity.light.updates.append(self.entity.light.fade)
@@ -78,6 +81,5 @@ class Circle_converge_2(Basic_states):
 
     def handle_input(self,input):
         if input == 'light_gone':#called from lights when lifetime < 0
-            if self.entity.game_objects.shader_render.shaders.get('bloom',False):#do not append several if already exist
-                self.entity.game_objects.shader_render.remove_shader('bloom')
-                self.entity.game_objects.player.shader_state.enter_state('Idle')
+            if self.entity.game_objects.post_process.shaders.get('glow',False):#do not append several if already exist
+                self.entity.game_objects.post_process.remove_shader('glow')

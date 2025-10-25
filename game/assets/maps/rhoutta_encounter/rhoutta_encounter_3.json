@@ -520,7 +520,7 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"rhoutta_encounter_2"
+                                 "value":"rhoutta_encounter_1"
                                 }, 
                                 {
                                  "name":"spawn",
@@ -599,29 +599,6 @@
                          "width":16,
                          "x":2144,
                          "y":304
-                        }, 
-                        {
-                         "gid":20,
-                         "height":336,
-                         "id":1669,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"event",
-                                 "type":"string",
-                                 "value":"Rhoutta_encounter"
-                                }, 
-                                {
-                                 "name":"event_type",
-                                 "type":"string",
-                                 "value":"cutscene"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":64,
-                         "x":1552,
-                         "y":416
                         }, 
                         {
                          "gid":15,

@@ -3,15 +3,15 @@ import pygame, math, sys
 from engine.system import event_triggers, groups
 from gameplay.entities.visuals.particles import screen_particles
 from engine.utils import read_files
-from gameplay.states.cutscenes import cutscenes
 from engine import constants as C
 from gameplay.world.weather import weather
+from gameplay.world.wrapping_manager import WrappingManager
 from gameplay.entities.items import SoulEssence
 from gameplay.world.camera.stop import Stop
 
 from gameplay.entities.interactables import *
 from gameplay.entities.platforms import *
-from gameplay.entities.visuals.enviroment import *
+from gameplay.entities.visuals.environments import *
 from engine.utils import functions
 
 class Level():
@@ -497,7 +497,9 @@ class Level():
             id = obj['gid'] - self.map_data['interactables_firstgid']
 
             if id == 2:#save point
-                new_int = SavePoint(object_position,self.game_objects,self.level_name)
+                #new_int = SavePoint(object_position,self.game_objects,self.level_name)  
+                new_int = AbilityBall(object_position,self.game_objects)     
+
                 self.game_objects.interactables.add(new_int)
 
             elif id == 3:#runestones, colectable
@@ -761,8 +763,17 @@ class Biome():
             },            
         }
 
-    def congigure_weather(self, group, parallax):
-        pass
+    def congigure_weather(self, group, parallax):        
+        for weather_type in self.weather_config.keys():#wind, rain, for etc.
+            if self.weather_config[weather_type]['layers'].get(group, False):   
+                kwarg = self.weather_config[weather_type]['layers'][group]                 
+                new_weather = getattr(weather, self._weather_registry[weather_type]['fx_class'])(self.level.game_objects, parallax = parallax, **kwarg)
+                
+                self._weather_registry[weather_type]['manager'].add_fx(new_weather)
+                if group.startswith('fg'):
+                    self.level.game_objects.all_fgs.add(group, new_weather)
+                else:
+                    self.level.game_objects.all_bgs.add(group, new_weather)        
 
     def load_objects(self, data, parallax, offset):
         pass
@@ -868,23 +879,10 @@ class Nordveden(Biome):
                     "bg5": { "intensity": 1.0, 'colour': (1,1,1,1) }
                 }
             }
-        }        
-
-    def congigure_weather(self, group, parallax):        
-        for weather_type in self.weather_config.keys():#wind, rain, for etc.
-            if self.weather_config[weather_type]['layers'].get(group, False):   
-                kwarg = self.weather_config[weather_type]['layers'][group]                 
-                new_weather = getattr(weather, self._weather_registry[weather_type]['fx_class'])(self.level.game_objects, parallax = parallax, **kwarg)
-                
-                self._weather_registry[weather_type]['manager'].add_fx(new_weather)
-                if group.startswith('fg'):
-                    self.level.game_objects.all_fgs.add(group, new_weather)
-                else:
-                    self.level.game_objects.all_bgs.add(group, new_weather)
+        }           
 
     def play_music(self):
-        #super().play_music()
-        sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/visuals/enviroments/ambient/nordveden/')
+        sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/visuals/environments/ambient/nordveden/')
         self.level.game_objects.sound.play_background_sound(sounds['idle'][0], index = 1, loop = -1, fade = 1000, volume = 0.2)
 
     def room(self, room):#called wgen a new room is loaded
@@ -992,7 +990,30 @@ class Nordveden(Biome):
 
 class Rhoutta_encounter(Biome):
     def __init__(self, level):
-        super().__init__(level)
+        super().__init__(level)  
+        self.weather_config = {
+            "wind": {                                
+                "layers": {
+                    "bg1": {"velocity": [-2, 0.1], "duration_range": [3000, 7000] },
+                    "bg2": {"velocity": [-2, 0.1], "duration_range": [3000, 7000] },
+                    "bg3": {"velocity": [-2, 0.1], "duration_range": [3000, 7000] }
+                }
+            },
+            "rain": {
+                "layers": {
+                    "bg1": { "number_particles": 20}
+                }
+            },
+            "fog": {
+                "layers": {
+                    "bg1": { "intensity": 0.5, 'colour': (0,0,0,1) },
+                    "bg2": { "intensity": 1.0, 'colour': (0,0,0,1) },
+                    "bg3": { "intensity": 0.3, 'colour': (0,0,0,1) },
+                    "bg4": { "intensity": 0.5, 'colour': (0,0,0,1) },
+                    "bg5": { "intensity": 1.0, 'colour': (0,0,0,1) }
+                }
+            }
+        }      
 
     def room(self, room):
         if room == '2':
@@ -1002,7 +1023,7 @@ class Rhoutta_encounter(Biome):
 
     def set_camera(self):
         if self.level.level_name == 'rhoutta_encounter_1' and self.level.spawn == '1':#if it a new game
-            self.level.game_objects.game.state_manager.enter_state('new_game')
+            self.level.game_objects.game.state_manager.enter_state('start_game')
 
     def load_objects(self,data,parallax,offset):
         for obj in data['objects']:
@@ -1027,7 +1048,7 @@ class Hlifblom(Biome):
 
     def play_music(self):
         super().play_music()
-        sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/visuals/enviroments/ambient/light_forest_cave/')
+        sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/visuals/environments/ambient/light_forest_cave/')
         #self.level.game_objects.sound.play_background_sound(sounds['idle'][0], index = 1, loop = -1, fade = 1000, volume = 0.1)
 
     def room(self, room = 1):
@@ -1148,7 +1169,7 @@ class Crystal_mines(Biome):
 
     def play_music(self):
         super().play_music()
-        sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/visuals/enviroments/ambient/crystal_mines')
+        sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/visuals/environments/ambient/crystal_mines')
         self.level.game_objects.sound.play_background_sound(sounds['idle'][0], index = 1, loop = -1, fade = 1000, volume = 0.2)
 
     def room(self, room = 1):
@@ -1375,3 +1396,28 @@ class Tall_trees(Biome):
                 if not self.level.game_objects.world_state.state[self.level.level_name]['breakable_platform'].get(str(ID_key), False):
                     platform = BreakableOnesideLeft(object_position, self.level.game_objects, str(ID_key), 'assets/sprites/entities/platforms/breakable/nordveden/type3/')
                     self.level.game_objects.platforms.add(platform)                       
+
+class Wakeup_forest(Biome):
+    def __init__(self, level):
+        super().__init__(level)
+        self.wrapping_enabled = False
+        self.world_width = 0         
+
+    def room(self, room = 1):
+        if room in ['3', '4']:
+            self.level.game_objects.lights.ambient = (30/255,30/255,30/255,230/255)#230
+            if self.level.game_objects.world_state.events.get('guide', False):#if guide interaction has happened
+                self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,200/255],interact = False)
+
+    def play_music(self):
+        super().play_music()
+        sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/visuals/environments/ambient/light_forest_cave/')
+        #self.level.game_objects.sound.play_background_sound(sounds['idle'][0], index = 1, loop = -1, fade = 1000, volume = 0.1)
+
+    def load_objects(self,data,parallax,offset):
+        for obj in data['objects']:
+            new_map_diff = [-self.level.PLAYER_CENTER[0],-self.level.PLAYER_CENTER[1]]
+            object_size = [int(obj['width']),int(obj['height'])]
+            object_position = [int(obj['x']) - math.ceil((1-parallax[0])*new_map_diff[0]) + offset[0], int(obj['y']) - math.ceil((1-parallax[1])*new_map_diff[1]) + offset[1]-object_size[1]]
+            properties = obj.get('properties',[])
+            id = obj['gid'] - self.level.map_data['objects_firstgid']

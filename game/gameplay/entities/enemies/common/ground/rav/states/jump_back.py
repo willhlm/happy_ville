@@ -1,8 +1,9 @@
-from gameplay.entities.shared.states.base_state import BaseState
+from gameplay.entities.enemies.common.shared.states.base_state import BaseState
+from engine.utils import functions
 
 class JumpBackPre(BaseState):
-    def __init__(self, entity, deciders, **kwargs):
-        super().__init__(entity, deciders)
+    def __init__(self, entity, deciders, config_key, **kwargs):
+        super().__init__(entity, deciders, config_key)
         self.entity.animation.play("jump_back_pre")
 
     def update_logic(self, dt):
@@ -12,8 +13,8 @@ class JumpBackPre(BaseState):
         self.enter_state("jump_back_main")
 
 class JumpBackMain(BaseState):
-    def __init__(self, entity, deciders, **kwargs):
-        super().__init__(entity, deciders)
+    def __init__(self, entity, deciders, config_key, **kwargs):
+        super().__init__(entity, deciders, config_key)
         self.entity.animation.play("jump_back_main")
         self.entity.velocity[1] = -2
         self.time = 15  # sliding duration

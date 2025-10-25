@@ -2,8 +2,8 @@ import pygame
 from gameplay.entities.enemies.base.enemy import Enemy
 from engine.utils import read_files
 from gameplay.entities.projectiles import HurtBox
-from gameplay.entities.shared.states.state_manager import StateManager
-from config.enemies.rav import ENEMY_CONFIG as RAV_CONFIG
+from gameplay.entities.enemies.common.shared.states.state_manager import StateManager
+from .config import ENEMY_CONFIG as RAV_CONFIG
 
 from .states import JumpAttackPre, JumpAttackMain, JumpAttackPost, JumpBackPre, JumpBackMain, Hurt
 from .deciders import JumpAttackDecider
@@ -30,20 +30,9 @@ class Rav(Enemy):
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1], 32, 32)        
 
-        self.health = self.config['health']
-        self.chase_speed = self.config['speeds']['chase']
-        self.patrol_speed = self.config['speeds']['patrol']        
-        
-        self.aggro_distance = self.config['distances']['aggro']
-        self.attack_distance = self.config['distances']['attack']
-        self.jump_distance = self.config['distances']['jump']
-
-        self.currentstate = StateManager(self, custom_states = RAV_STATES, custom_deciders = RAV_DECIDERS)
+        self.health = self.config['health']    
+        self.currentstate = StateManager(self, type = 'ground', custom_states = RAV_STATES, custom_deciders = RAV_DECIDERS)
 
     def attack(self):#called from states, attack main
         attack = HurtBox(self, lifetime = 10, dir = self.dir, size = [32, 32])#make the object
         self.projectiles.add(attack)#add to group but in main phase
-
-    def modify_hit(self, effect):
-        effect = self.currentstate.modify_hit(effect)
-        return effect        
