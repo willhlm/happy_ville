@@ -6,7 +6,7 @@ from gameplay.entities.player.entity_shader_manager import EntityShaderManager
 from gameplay.entities.player.player_states import PlayerStates
 from gameplay.entities.player import states_death
 from gameplay.entities.player.backpack import backpack
-from gameplay.entities.shared.modifiers import modifier_damage, modifier_movement
+from gameplay.entities.shared.modifiers import modifier_movement
 from gameplay.entities.visuals.cosmetics.slash import Slash
 from gameplay.entities.player.sword import Sword
 from gameplay.entities.player.abilities.ability_manager import AbilityManager
@@ -45,7 +45,6 @@ class Player(Character):
         self.timers = []#a list where timers are append whe applicable, e.g. wet status
         self.timer_jobs = {'wet': Wet(self, 60)}#these timers are activated when promt and a job is appeneded to self.timer.
 
-        self.damage_manager = modifier_damage.DamageManager(self)
         self.movement_manager = modifier_movement.MovementManager()
         self.reset_movement()
 
@@ -78,36 +77,28 @@ class Player(Character):
         if self.velocity[1] < 0:
             self.velocity[1] = max(self.velocity[1], -context.max_vel[1])
 
-        print(context.velocity[1])
-        print(context.gravity)
-
         self.velocity[0] += dt * (self.dir[0] * self.acceleration[0] - self.velocity[0] * context.friction[0]) + context.velocity[0]
 
-    def take_dmg(self, dmg = 1, effects = []):#called from collisions
-        return self.damage_manager.take_dmg(dmg, effects)#called from damage_manager: trturns true or false dependign on apply damaage was called or not
-
-    def apply_damage(self, context):#called from damage_manager
+    def take_dmg(self, effect):
+        """Called by hit_component after modifiers run. Apply damage and effects."""
+        self.health -= effect.damage
         self.flags['invincibility'] = True
-        self.health -= context.dmg
-        self.game_objects.ui.hud.remove_hearts(context.dmg)# * self.dmg_scale)#update UI
-
-        if self.health > 0:#check if dead¨
+        self.game_objects.ui.hud.remove_hearts(effect.damage)# * self.dmg_scale)#update UI
+                        
+        if self.health > 0:  # Still alive
             self.game_objects.timer_manager.start_timer(C.invincibility_time_player, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
             self.shader_state.handle_input('Hurt')#turn white and shake
             self.shader_state.handle_input('Invincibile')#blink a bit
             #self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state or interupt attacks?
-            self.emit_particles(lifetime = 40, scale = 3, colour=[0,0,0,255], fade_scale = 7,  number_particles = 60 )
+            #self.emit_particles(lifetime = 40, scale = 3, colour=[0,0,0,255], fade_scale = 7,  number_particles = 60 )
             self.game_objects.cosmetics.add(Slash(self.hitbox.center,self.game_objects))#make a slash animation
 
             self.game_objects.time_manager.modify_time(time_scale = 0, duration = 20)
             self.game_objects.camera_manager.camera_shake(amplitude = 10, duration = 20, scale = 0.9)
 
             self.game_objects.post_process.append_shader('chromatic_aberration', duration = 20)
-
-            for effect in context.effects:#e.g. knock back
-                effect()#apply the effects
-
-        else:#if health < 0
+            self.apply_hit_feedback(effect)#including knock back
+        else:  # dead
             self.game_objects.signals.emit('player_died')#emit a signal that player died
             self.death_state.die()#depending on gameplay state, different death stuff should happen
 

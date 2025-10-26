@@ -1,11 +1,8 @@
 import random
 from gameplay.entities.base.character import Character
 from gameplay.entities.enemies.common.ground import states_enemy
-
-def sign(number):
-    if number > 0: return 1
-    elif number < 0: return -1
-    else: return 0
+from engine.utils.functions import sign
+from gameplay.entities.shared.components import hit_effects
 
 class Enemy(Character):
     def __init__(self, pos, game_objects):
@@ -29,6 +26,9 @@ class Enemy(Character):
         self.aggro_distance = [100,50]#at which distance to the player when you should be aggro. Negative value make it no going aggro
         self.chase_speed = 0.6
 
+        particle = {'lifetime': 40,'scale': 3,'colour': [0,0,0,255],'fade_scale': 7,'number_particles': 60}
+        self.contact_effect = hit_effects.create_contact_effect(damage = 1, knockback = [50, 0], hitstop = 5, particles = particle, sound_key = None)#collision with player
+
     def update_render(self, dt):
         self.hitstop_states.update_render(dt)
 
@@ -37,14 +37,12 @@ class Enemy(Character):
         self.group_distance()
 
     def player_collision(self, player):#when player collides with enemy
-        if type(player.currentstate).__name__ in ['Thunder_main', 'Thunder_post']:
-            pm_one = sign(player.hitbox.center[0]-self.hitbox.center[0])            
-            self.take_dmg(dmg = 1, effects = [lambda: self.knock_back(amp = [50, 0], dir = [pm_one, 0])])
-        else:
-            if not self.flags['aggro']: return
-            if player.flags['invincibility']: return
-            pm_one = sign(player.hitbox.center[0]-self.hitbox.center[0])
-            player.take_dmg(dmg = 1, effects = [lambda: player.knock_back(amp = [50, 0], dir = [pm_one, 0])])#player take damage
+        if not self.flags['aggro']: return
+        pm_one = sign(player.hitbox.center[0]-self.hitbox.center[0])
+        
+        effect = self.contact_effect.copy()
+        effect.meta['attacker_dir'] = [pm_one, 0]  # Push player away                
+        damage_applied, modified = player.take_hit(effect)# Player takes hit
 
     def dead(self):#called when death animation is finished
         self.loots()
@@ -66,11 +64,4 @@ class Enemy(Character):
         self.velocity[0] += self.dir[0] * self.chase_speed
 
     def patrol(self, position = [0,0]):#called from AI: when patroling
-        self.velocity[0] += self.dir[0]*0.3
-
-    def modify_hit(self, effect):
-        effect = self.currentstate.modify_hit(effect)
-        return effect        
-
-    def apply_hitstop(self, lifetime=10, call_back=None):#called from aila sword, hut_effect
-        self.hitstop_states.enter_state('Stop', lifetime=lifetime, call_back=(lambda: self.knock_back(**call_back['knock_back'])))
+        self.velocity[0] += self.dir[0]*0.3      

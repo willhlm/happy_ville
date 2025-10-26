@@ -1,18 +1,20 @@
 import pygame
 from gameplay.entities.enemies.base.enemy import Enemy
 from engine.utils import read_files
+from engine import constants as C
 from .config import ENEMY_CONFIG 
 from gameplay.entities.projectiles import HurtBox
 
 from gameplay.entities.enemies.common.shared.states.state_manager import StateManager
 
-from .states import HidePre, HideMain, HidePost
+from .states import HidePre, HideMain, HidePost, Hurt
 from .deciders import CheckSafeDecider
 
 TAGGMUS_STATES = {
     'hide_pre': HidePre,
     'hide_main': HideMain,
     'hide_post': HidePost,
+    'hurt': Hurt,
 }
 
 TAGGMUS_DECIDERS = {
@@ -32,6 +34,6 @@ class TaggMus(Enemy):
         self.health = self.config['health']   
         self.currentstate = StateManager(self, custom_states = TAGGMUS_STATES, custom_deciders = TAGGMUS_DECIDERS)
 
-    def attack(self):#called from states, attack main
-        attack = HurtBox(self, lifetime = 10, dir = [0,0], size = [64, 64])#make the object
-        self.projectiles.add(attack)#add to group but in main phase
+    def hide(self):#called from states, attack main
+        self.hitbox = self.rect.copy()
+        self.flags['hiding'] = True

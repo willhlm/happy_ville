@@ -36,26 +36,30 @@ class LootContainers(Interactables):
 
     def on_invincibility_timeout(self):
         self.flags['invincibility'] = False
-
-    def take_dmg(self, dmg = 1):
-        if self.flags['invincibility']: return
-        self.game_objects.sound.play_sfx(self.sounds['hit'][0], vol = 0.2)
-
-        self.health -= 1
+   
+    def take_dmg(self, effect):
+        """Called by hit_component after modifiers run. Apply damage and effects."""
+        self.health -= effect.damage
         self.flags['invincibility'] = True
+        
+        # Play hurt sound
+        self.apply_hit_feedback(effect)
         self.shader_state.handle_input('Hurt', colour = [1,1,1,1], direction = [1,0.5])
-        self.hit_loot()
-
-        if self.health > 0:
+        self.hit_loot()        
+        
+        if self.health > 0:  # Still alive
             self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
-        else:
+        else:  # dead
             self.currentstate.handle_input('open')
             self.game_objects.world_state.state[self.game_objects.map.level_name]['loot_container'][self.ID_key] = True#write in the state dict that this has been picked up
+ 
+    def apply_hit_feedback(self, effect):
+        """Execute defender callbacks"""
+        attacker_dir = effect.meta.get('attacker_dir', [1, 0])        
+        for callback in effect.defender_callbacks.values():# Execute all defender callbacks in order
+            callback(self, effect, attacker_dir)
 
     def hit_loot(self):#sput out amvers when hit
         for i in range(0, random.randint(1,3)):
             obj = Amber_droplet(self.hitbox.midtop, self.game_objects)
             self.game_objects.loot.add(obj)
-
-    def modify_hit(self, effects):#called when aila sword hit it
-        return effects

@@ -21,15 +21,11 @@ ENEMY_CONFIG = {
                     'check_edge': {'next_state':'wait', 'score':90, 'priority':2, 'kwargs': {'time':60, 'next_state':'patrol', 'dir':-1}}
                     },
             },
-            'hidemain': {
+            'hide_main': {
                 'deciders':{
                     'check_safe': {'next_state':'hide_post', 'score': 80, 'priority': 1, 'kwargs': {}}, 
                     },
             },
-            'wait': {
-                'deciders':{
-                    'wait': {}},#the parameters are dynamicallly set by the other deciders.
-            }
         }
     }
 }

@@ -174,10 +174,9 @@ class DashGroundState(CompositeState):
         super().enter_state(phase_name, **kwarg)
 
     def cleanup(self, **kwarg):
-        print(kwarg)
         if kwarg.get('to_dash_jump', False):
             return
-        self.entity.flags['grounddash'] = False#if fasle, sword cannot be swang. sets to true when timer runs out
+        self.entity.flags['grounddash'] = False
         self.entity.game_objects.timer_manager.start_timer(C.ground_dash_timer, self.entity.on_grounddash_timout)
 
 class WallGlideState(CompositeState):

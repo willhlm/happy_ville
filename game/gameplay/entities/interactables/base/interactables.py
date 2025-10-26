@@ -1,5 +1,6 @@
 from gameplay.entities.base.animated_entity import AnimatedEntity
 from gameplay.entities.shared.states import states_shader
+from gameplay.entities.shared.components.hit_component import HitComponent
 
 class Interactables(AnimatedEntity):#interactables
     def __init__(self, pos, game_objects, sfx = None):
@@ -8,6 +9,8 @@ class Interactables(AnimatedEntity):#interactables
         self.pause_group = game_objects.entity_pause
         self.true_pos = self.rect.topleft
         self.shader_state = states_shader.Idle(self)
+        self.hit_component = HitComponent(self)
+
         if sfx: self.sfx = pygame.mixer.Sound('assets/audio/sfx/environment/' + sfx + '.mp3')
         else: self.sfx = None # make more dynamic incase we want to use more than just mp3
 
@@ -34,7 +37,11 @@ class Interactables(AnimatedEntity):#interactables
     def player_noncollision(self):#when player doesn't collide: for grass
         self.shader_state.handle_input('idle')
 
-    def take_dmg(self, dmg = 1):#when player hits with e.g. sword
+    def take_hit(self, effect):
+        """Delegate to hit component"""       
+        return self.hit_component.take_hit(effect)
+
+    def take_dmg(self, effect):#when player hits with e.g. sword
         pass
 
     def seed_collision(self, seed):#if seed hits

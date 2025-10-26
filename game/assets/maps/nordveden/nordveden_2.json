@@ -497,6 +497,18 @@
                          "width":64,
                          "x":4192,
                          "y":624
+                        }, 
+                        {
+                         "gid":30993,
+                         "height":32,
+                         "id":876,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":64,
+                         "x":496,
+                         "y":704
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -1437,13 +1449,13 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"rav"
+                                 "value":"tagg_mus"
                                 }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":1152,
+                         "x":1040,
                          "y":672
                         }, 
                         {
@@ -1859,6 +1871,42 @@
                          "width":752,
                          "x":-128,
                          "y":835
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":874,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"rav"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":3344,
+                         "y":464
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":875,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"vertical_mygga_torpedo"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1504,
+                         "y":656
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -1898,7 +1946,7 @@
          "y":0
         }],
  "nextlayerid":105,
- "nextobjectid":874,
+ "nextobjectid":877,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
