@@ -63,24 +63,19 @@ def default_defender_visual(effect, defender, **kwargs):
     """Visual feedback (hurt flash)"""
     defender.shader_state.handle_input('Hurt')
 
-def default_attacker_hitstop(effect, projectile, defender):
-    """Attacker hitstop without knock back"""
-    projectile.entity.apply_hitstop(lifetime=effect.hitstop, call_back=None)
+def default_attacker_hitstop(effect, attacker, defender):
+    """Attacker hitstop - works for projectiles AND entities"""    
+    entity = getattr(attacker, 'entity', attacker)# If projectile: use .entity; if entity: use itself
+    entity.apply_hitstop(lifetime=effect.hitstop, call_back=None)
 
 def default_attacker_particles(effect, projectile, defender):
-    """Clash particles (sword-specific)"""
+    """Clash particles (projectile-specific)"""
     projectile.clash_particles(defender.hitbox.center, number_particles=5)
-
-def default_attacker_sound(effect, projectile, defender):
-    """Hit sound"""
-    projectile.game_objects.sound.play_sfx(effect.sound, vol=0.3)
 
 def default_sound_dynamic(effect, projectile, defender):
     """Dynamically resolve and play hit sound"""        
-    weapon_type = effect.hit_type
     material = getattr(defender, 'material', 'flesh')
-
-    sound = projectile.game_objects.sound.get_sfx(weapon_type, material)[0]
+    sound = projectile.game_objects.sound.get_sfx(effect.hit_type, material)[0]
     projectile.game_objects.sound.play_sfx(sound, vol = 1)
 
 # ============================================================================
@@ -92,9 +87,10 @@ def create_melee_effect(**kwargs):#e.g. aila sword
     
     # Set up defender callbacks (executed on enemy/player getting hit)
     effect.defender_callbacks = {
-        'particles': default_defender_particles,
         'hitstop': default_defender_hitstop,  # Includes knockback
+        'particles': default_defender_particles,        
         'visual': default_defender_visual,
+        'sound': default_defender_sound,
     }
     
     # Set up attacker callbacks (executed on sword wielder)
@@ -110,17 +106,18 @@ def create_projectile_effect(**kwargs):
     """Factory for projectiles (no attacker hitstop)"""
     effect = HitEffect(**kwargs)
     
-    effect.defender_callbacks = {
-        'sound': default_defender_sound,
+    effect.defender_callbacks = {        
+        'hitstop': default_defender_hitstop,  # Includes knockback
         'particles': default_defender_particles,
-        'hitstop': default_defender_hitstop,
         'visual': default_defender_visual,
+        'sound': default_defender_sound,
     }
     
     # Projectiles don't have attacker hitstop
     effect.attacker_callbacks = {
+        'hitstop': default_attacker_hitstop,#without knock back
         'particles': default_attacker_particles,
-        'sound': default_attacker_sound,
+        'sound': default_sound_dynamic,
     }
     
     return effect
@@ -131,11 +128,13 @@ def create_contact_effect(**kwargs):#when enemy collides with player
     
     # Defender callbacks (player getting hit by contact)
     effect.defender_callbacks = {
-        'sound': default_defender_sound,
-        'hitstop': default_defender_hitstop,
+        'hitstop': default_defender_hitstop,        
+        'sound': default_defender_sound,        
     }
     
     # No attacker callbacks (enemy doesn't get feedback from contact)
-    effect.attacker_callbacks = {}
+    effect.attacker_callbacks = {
+        'hitstop': default_attacker_hitstop,
+    }
     
     return effect    

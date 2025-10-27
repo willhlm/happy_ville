@@ -15,6 +15,7 @@ class BgBlock(StaticEntity):
             self.blur(blur_radius)#if we do not want live blur
 
     def blur(self, blur_radius):
+        return
         if self.parallax[0] != 1:  # Don't blur if there is no parallax
             shader = self.game_objects.shaders['blur']
             shader['blurRadius'] = blur_radius  # Set the blur radius

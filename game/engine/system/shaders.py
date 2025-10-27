@@ -73,8 +73,10 @@ class Blur(Shaders):
     def draw(self, temp_layer, composite_screen):#needs the screen
         self.post_process.game_objects.shaders['blur']['blurRadius'] = self.radius
         self.post_process.game_objects.game.display.use_premultiplied_alpha_mode()
+        #self.post_process.game_objects.game.display.use_alpha_blending(False)#remove thr black outline
         self.post_process.game_objects.game.display.render(composite_screen.texture, temp_layer, shader = self.post_process.game_objects.shaders['blur'])#shader render
         self.post_process.game_objects.game.display.use_standard_alpha_mode()
+        #self.post_process.game_objects.game.display.use_alpha_blending(True)#remove thr black outline
         return temp_layer
 
     def draw_to_composite(self, temp_layer, composite_screen):
