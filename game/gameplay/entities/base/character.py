@@ -29,18 +29,15 @@ class Character(PlatformEntity):#enemy, NPC,player
         self.velocity[1] = min(self.velocity[1], self.max_vel[1])#set a y max speed#
         self.velocity[0] += dt * (self.dir[0]*self.acceleration[0] - self.friction[0] * self.velocity[0])
 
-    def take_hit(self, effect):
+    def take_hit(self, attacker, effect):
         """Delegate to hit component"""       
-        return self.hit_component.take_hit(effect)
+        return self.hit_component.take_hit(attacker, effect)
 
     def take_dmg(self, effect):
         """Called by hit_component after modifiers run. Apply damage and effects."""
         self.health -= effect.damage
         self.flags['invincibility'] = True
-        
-        # Play hurt sound
-        self.apply_hit_feedback(effect)
-        
+                        
         if self.health > 0:  # Still alive
             self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)
             self.shader_state.handle_input('Hurt')
@@ -50,12 +47,6 @@ class Character(PlatformEntity):#enemy, NPC,player
             self.game_objects.camera_manager.camera_shake(amplitude=15, duration=15, scale=0.9)
             self.flags['aggro'] = False
             self.currentstate.enter_state('Death')
-        
-    def apply_hit_feedback(self, effect):
-        """Execute defender callbacks"""
-        attacker_dir = effect.meta.get('attacker_dir', [1, 0])        
-        for callback in effect.defender_callbacks.values():# Execute all defender callbacks in order
-            callback(self, effect, attacker_dir)
 
     def knock_back(self, amp, dir):
         self.velocity[0] = dir[0] * amp[0]

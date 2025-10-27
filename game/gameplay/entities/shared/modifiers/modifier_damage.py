@@ -12,7 +12,8 @@ class DamageManager():
         self.registry = {
             'half_dmg': HalfDamageModifier,
             'tjasolmais_embrace': ShieldModifier,
-            'parry_window': ParryModifier
+            'parry_window': ParryModifier,
+            'super_armor': SuperArmorModifier,
         }
 
     def add_modifier(self, modifier_name, priority=0, **kwargs):
@@ -86,15 +87,21 @@ class ParryModifier(HitModifier):
         if self.active_frames > 0:
             effect.result = HitResult.PARRIED
 
-class SuperArmorModifier(HitModifier):#exaple showing
-    """Super armor - takes damage but no knockback, light hitstop"""
-    def __init__(self, priority=30):
+class SuperArmorModifier(HitModifier):
+    """Super armor - no knockback, no damage and no hitstop"""
+    def __init__(self, priority = 100):
         super().__init__(priority)
     
-    def modify_hit(self, effect):# Replace callbacks with class methods        
-        effect.defender_callbacks['hitstop'] = self.super_armor_hitstop
-        effect.attacker_callbacks['hitstop'] = self.light_attacker_hitstop
-    
+    def modify_hit(self, effect):# Replace callbacks with class methods    
+        effect.result = HitResult.BLOCKED
+
+        #may fail if using other than sword
+        effect.attacker_callbacks.pop('hitstop', None)
+        
+        effect.defender_callbacks.pop('visual', None)
+        effect.defender_callbacks.pop('hitstop', None)
+        effect.defender_callbacks.pop('particles', None)
+
     def super_armor_hitstop(self, defender, effect, attacker_dir):
         """Light hitstop without knockback"""
         defender.apply_hitstop(lifetime=3, call_back = None)

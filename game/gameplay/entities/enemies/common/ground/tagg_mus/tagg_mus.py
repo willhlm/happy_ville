@@ -34,6 +34,6 @@ class TaggMus(Enemy):
         self.health = self.config['health']   
         self.currentstate = StateManager(self, custom_states = TAGGMUS_STATES, custom_deciders = TAGGMUS_DECIDERS)
 
-    def hide(self):#called from states, attack main
-        self.hitbox = self.rect.copy()
-        self.flags['hiding'] = True
+    def on_blocked(self, effect):#called from states, attack main
+        self.flags['invincibility'] = True
+        self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)

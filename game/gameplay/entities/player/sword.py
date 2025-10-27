@@ -29,7 +29,7 @@ class Sword(Melee):
         self.stone_states['slash'].slash_speed()
         self.entity.game_objects.sound.play_sfx(self.entity.sword.sounds['swing'][0])
         particle = {'dir': self.dir,'lifetime': 180,'scale': 5,'angle_spread': [13, 15],'angle_dist': 'normal','colour': C.spirit_colour,'gravity_scale': -0.1,'gradient': 1,'fade_scale': 2.2,'number_particles': 8,'vel': {'ejac': [13, 17]}}
-        self.base_effect = hit_effects.create_melee_effect(damage = self.dmg, sound_key = ('sword',), knockback = [25, 10], hitstop = 10, particles = particle)
+        self.base_effect = hit_effects.create_melee_effect(damage = self.dmg, hit_type = 'sword', knockback = [25, 10], hitstop = 10, particles = particle)
         
     def update_hitbox(self):
         hitbox_attr, entity_attr = self.direction_mapping[tuple(self.dir)]#self.dir is set in states_sword
@@ -47,18 +47,15 @@ class Sword(Melee):
         self.currentstate.sword_jump()       
         effect = self.base_effect.copy()
         effect.meta['attacker_dir'] = self.dir#save the direction
-        damage_applied, modified_effect = enemy.take_hit(effect)                
-        if damage_applied:#if damage was applied
-            self.apply_hit_feedback(modified_effect, enemy)            
+        damage_applied, modified_effect = enemy.take_hit(self, effect)                        
+        if damage_applied:#if damage was applied            
             self.stone_states['enemy_collision'].enemy_collision()
 
     def collision_interactables(self, inetractable):#latest collision version
         self.currentstate.sword_jump()
         effect = self.base_effect.copy()
         effect.meta['attacker_dir'] = self.dir#save the direction
-        damage_applied, modified_effect = inetractable.take_hit(effect)                
-        if damage_applied:#if damage was applied
-            self.apply_hit_feedback(modified_effect, inetractable)            
+        damage_applied, modified_effect = inetractable.take_hit(self, effect)                         
 
     def clash_particles(self, pos, number_particles=12):
         angle = random.randint(-180, 180)#the erection anglex
@@ -66,11 +63,6 @@ class Sword(Melee):
         for i in range(0,number_particles):
             obj1 = getattr(particles, 'Spark')(pos, self.game_objects, distance = 0, lifetime = 10, vel = {'linear':[5,7]}, dir = angle, scale = 0.8, fade_scale = 7, colour = color)
             self.entity.game_objects.cosmetics.add(obj1)
-
-    def apply_hit_feedback(self, effect, target):
-        """Execute attacker callbacks"""
-        for callback in effect.attacker_callbacks.values():
-            callback(self, effect, target)
 
     def level_up(self):#called when the smith imporoves the sword
         self.entity.inventory['Tungsten'] -= self.tungsten_cost

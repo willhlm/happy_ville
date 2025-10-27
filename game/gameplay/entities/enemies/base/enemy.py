@@ -25,9 +25,8 @@ class Enemy(Character):
         self.attack_distance = [0,0]#at which distance to the player to attack
         self.aggro_distance = [100,50]#at which distance to the player when you should be aggro. Negative value make it no going aggro
         self.chase_speed = 0.6
-
-        particle = {'lifetime': 40,'scale': 3,'colour': [0,0,0,255],'fade_scale': 7,'number_particles': 60}
-        self.contact_effect = hit_effects.create_contact_effect(damage = 1, knockback = [50, 0], hitstop = 5, particles = particle, sound_key = None)#collision with player
+        
+        self.contact_effect = hit_effects.create_contact_effect(damage = 1, knockback = [50, 0], hitstop = 5)#collision with player
 
     def update_render(self, dt):
         self.hitstop_states.update_render(dt)
@@ -42,7 +41,7 @@ class Enemy(Character):
         
         effect = self.contact_effect.copy()
         effect.meta['attacker_dir'] = [pm_one, 0]  # Push player away                
-        damage_applied, modified = player.take_hit(effect)# Player takes hit
+        damage_applied, modified = player.take_hit(self, effect)# Player takes hit
 
     def dead(self):#called when death animation is finished
         self.loots()

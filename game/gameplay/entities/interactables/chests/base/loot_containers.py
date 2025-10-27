@@ -43,7 +43,6 @@ class LootContainers(Interactables):
         self.flags['invincibility'] = True
         
         # Play hurt sound
-        self.apply_hit_feedback(effect)
         self.shader_state.handle_input('Hurt', colour = [1,1,1,1], direction = [1,0.5])
         self.hit_loot()        
         
@@ -52,12 +51,6 @@ class LootContainers(Interactables):
         else:  # dead
             self.currentstate.handle_input('open')
             self.game_objects.world_state.state[self.game_objects.map.level_name]['loot_container'][self.ID_key] = True#write in the state dict that this has been picked up
- 
-    def apply_hit_feedback(self, effect):
-        """Execute defender callbacks"""
-        attacker_dir = effect.meta.get('attacker_dir', [1, 0])        
-        for callback in effect.defender_callbacks.values():# Execute all defender callbacks in order
-            callback(self, effect, attacker_dir)
 
     def hit_loot(self):#sput out amvers when hit
         for i in range(0, random.randint(1,3)):

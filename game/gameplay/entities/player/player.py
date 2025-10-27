@@ -90,14 +90,13 @@ class Player(Character):
             self.shader_state.handle_input('Hurt')#turn white and shake
             self.shader_state.handle_input('Invincibile')#blink a bit
             #self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state or interupt attacks?
-            #self.emit_particles(lifetime = 40, scale = 3, colour=[0,0,0,255], fade_scale = 7,  number_particles = 60 )
+            self.emit_particles(lifetime = 40, scale = 3, colour=[0,0,0,255], fade_scale = 7,  number_particles = 60 )
             self.game_objects.cosmetics.add(Slash(self.hitbox.center,self.game_objects))#make a slash animation
 
             self.game_objects.time_manager.modify_time(time_scale = 0, duration = 20)
             self.game_objects.camera_manager.camera_shake(amplitude = 10, duration = 20, scale = 0.9)
 
             self.game_objects.post_process.append_shader('chromatic_aberration', duration = 20)
-            self.apply_hit_feedback(effect)#including knock back
         else:  # dead
             self.game_objects.signals.emit('player_died')#emit a signal that player died
             self.death_state.die()#depending on gameplay state, different death stuff should happen

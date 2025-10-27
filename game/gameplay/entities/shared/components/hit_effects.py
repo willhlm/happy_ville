@@ -11,20 +11,17 @@ Defines:
 
 class HitEffect():
     """Represents a hit with all its properties"""
-    def __init__(self, damage=1, knockback = [25, 10], hitstop=10, sound_key = None, particles = {}):
+    def __init__(self, **kwargs):
         # Gameplay properties
-        self.damage = damage
-        self.knockback = knockback
-        self.hitstop = hitstop
-        self.result = HitResult.CONNECTED  # Default result
-        
-        # Sound key tuple: ('weapon_type',)
-        self.sound_key = sound_key
-        self.sound = None  # Resolved dynamically
-
-        self.particles = particles
+        self.damage = kwargs.get('damage', 1)
+        self.knockback = kwargs.get('knockback', [25, 10])
+        self.hitstop = kwargs.get('hitstop', 10)                        
+        self.hit_type = kwargs.get('hit_type', 'sword')
+        self.particles = kwargs.get('particles', {})
         self.meta = {}
         
+        self.result = HitResult.CONNECTED  # Default result
+
         # Callback dicts - populated by factory functions
         self.defender_callbacks = {}
         self.attacker_callbacks = {}
@@ -35,8 +32,7 @@ class HitEffect():
         new_effect.knockback = self.knockback[:]
         new_effect.hitstop = self.hitstop
         new_effect.result = self.result
-        new_effect.sound_key = self.sound_key  # Copy key
-        new_effect.sound = self.sound  # Copy resolved sound
+        new_effect.hit_type = self.hit_type  # Copy key
         new_effect.particles = self.particles
         new_effect.meta = self.meta.copy()
         new_effect.defender_callbacks = self.defender_callbacks.copy()
@@ -44,57 +40,58 @@ class HitEffect():
         return new_effect
 
 # ============================================================================
-# DEFAULT CALLBACKS
+# DEFAULT _execute_defender_feedback and _execute_attacker_feedback
 # ============================================================================
 
-def default_defender_sound(defender, effect, attacker_dir):
+def default_defender_sound(effect, defender, **kwargs):
     """Play hurt sound"""
     try:
         defender.game_objects.sound.play_sfx(defender.sounds['hurt'][0], vol=0.2)
     except:
         pass
 
-def default_defender_particles(defender, effect, attacker_dir):
+def default_defender_particles(effect, defender, **kwargs):
     """Spawn hit particles"""
     defender.emit_particles(**effect.particles)
 
-def default_defender_hitstop(defender, effect, attacker_dir):
+def default_defender_hitstop(effect, defender, **kwargs):
     """Hitstop with knockback"""
-    callback = {'knock_back': {'amp': effect.knockback, 'dir': attacker_dir}}
+    callback = {'knock_back': {'amp': effect.knockback, 'dir': effect.meta['attacker_dir']}}
     defender.apply_hitstop(lifetime=effect.hitstop, call_back=callback)
 
-def default_defender_visual(defender, effect, attacker_dir):
+def default_defender_visual(effect, defender, **kwargs):
     """Visual feedback (hurt flash)"""
     defender.shader_state.handle_input('Hurt')
 
-def default_attacker_hitstop(projectile, effect, defender):
-    """Attacker hitstop"""
+def default_attacker_hitstop(effect, projectile, defender):
+    """Attacker hitstop without knock back"""
     projectile.entity.apply_hitstop(lifetime=effect.hitstop, call_back=None)
 
-def default_attacker_particles(projectile, effect, defender):
+def default_attacker_particles(effect, projectile, defender):
     """Clash particles (sword-specific)"""
     projectile.clash_particles(defender.hitbox.center, number_particles=5)
 
-def default_attacker_sound(projectile, effect, defender):
+def default_attacker_sound(effect, projectile, defender):
     """Hit sound"""
     projectile.game_objects.sound.play_sfx(effect.sound, vol=0.3)
 
-def default_attacker_sound_dynamic(weapon, effect, defender):
+def default_sound_dynamic(effect, projectile, defender):
     """Dynamically resolve and play hit sound"""        
-    material = getattr(defender, 'material', 'flesh')# Get material from defender (default to 'flesh')        
-    sound = weapon.game_objects.sound.get_sfx(*effect.sound_key, material)[0]# Resolve sound: ('sword',) + 'flesh' -> get_sfx('sword', 'flesh')
-    weapon.game_objects.sound.play_sfx(sound, vol=0.3)
+    weapon_type = effect.hit_type
+    material = getattr(defender, 'material', 'flesh')
+
+    sound = projectile.game_objects.sound.get_sfx(weapon_type, material)[0]
+    projectile.game_objects.sound.play_sfx(sound, vol = 1)
 
 # ============================================================================
 # FACTORY FUNCTIONS
 # ============================================================================
-def create_melee_effect(damage, knockback, hitstop, sound_key, particles):#e.g. aila sword
+def create_melee_effect(**kwargs):#e.g. aila sword
     """Factory for melee weapons (sword, hammer, etc.)"""
-    effect = HitEffect(damage, knockback, hitstop, sound_key, particles)
+    effect = HitEffect(**kwargs)
     
     # Set up defender callbacks (executed on enemy/player getting hit)
     effect.defender_callbacks = {
-        'sound': default_defender_sound,
         'particles': default_defender_particles,
         'hitstop': default_defender_hitstop,  # Includes knockback
         'visual': default_defender_visual,
@@ -102,16 +99,16 @@ def create_melee_effect(damage, knockback, hitstop, sound_key, particles):#e.g. 
     
     # Set up attacker callbacks (executed on sword wielder)
     effect.attacker_callbacks = {
-        'hitstop': default_attacker_hitstop,
+        'hitstop': default_attacker_hitstop,#without knock back
         'particles': default_attacker_particles,
-        'sound': default_attacker_sound_dynamic,
+        'sound': default_sound_dynamic,
     }
     
     return effect
 
-def create_projectile_effect(damage, knockback, hitstop, sound_key, particles):
+def create_projectile_effect(**kwargs):
     """Factory for projectiles (no attacker hitstop)"""
-    effect = HitEffect(damage, knockback, hitstop, sound_key, particles)
+    effect = HitEffect(**kwargs)
     
     effect.defender_callbacks = {
         'sound': default_defender_sound,
@@ -128,14 +125,13 @@ def create_projectile_effect(damage, knockback, hitstop, sound_key, particles):
     
     return effect
 
-def create_contact_effect(damage, knockback, hitstop, sound_key, particles):#when enemy collides with player
+def create_contact_effect(**kwargs):#when enemy collides with player
     """Factory for contact damage (enemy touching player)"""
-    effect = HitEffect(damage, knockback, hitstop, sound_key, particles)
+    effect = HitEffect(**kwargs)
     
     # Defender callbacks (player getting hit by contact)
     effect.defender_callbacks = {
         'sound': default_defender_sound,
-        'particles': default_defender_particles,
         'hitstop': default_defender_hitstop,
     }
     

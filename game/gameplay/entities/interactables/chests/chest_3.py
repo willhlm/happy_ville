@@ -5,7 +5,7 @@ class Chest_3(LootContainers):
     def __init__(self, pos, game_objects, state, ID_key):
         super().__init__(pos, game_objects, state, ID_key)
         self.inventory = {'amber_droplet':3}
-        self.material = 'metal'
+        self.material = 'wood'#for sounds
 
     def hit_loot(self):
         pass

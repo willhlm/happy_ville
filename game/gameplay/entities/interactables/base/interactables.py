@@ -3,16 +3,13 @@ from gameplay.entities.shared.states import states_shader
 from gameplay.entities.shared.components.hit_component import HitComponent
 
 class Interactables(AnimatedEntity):#interactables
-    def __init__(self, pos, game_objects, sfx = None):
+    def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
         self.group = game_objects.interactables
         self.pause_group = game_objects.entity_pause
         self.true_pos = self.rect.topleft
         self.shader_state = states_shader.Idle(self)
         self.hit_component = HitComponent(self)
-
-        if sfx: self.sfx = pygame.mixer.Sound('assets/audio/sfx/environment/' + sfx + '.mp3')
-        else: self.sfx = None # make more dynamic incase we want to use more than just mp3
 
     def update(self, dt):
         super().update(dt)
@@ -25,9 +22,6 @@ class Interactables(AnimatedEntity):#interactables
         self.shader_state.draw()
         super().draw(target)
 
-    def play_sfx(self):
-        self.game_objects.sound.play_sfx(self.sfx)
-
     def interact(self):#when player press T
         pass
 
@@ -37,9 +31,9 @@ class Interactables(AnimatedEntity):#interactables
     def player_noncollision(self):#when player doesn't collide: for grass
         self.shader_state.handle_input('idle')
 
-    def take_hit(self, effect):
+    def take_hit(self, attacker, effect):
         """Delegate to hit component"""       
-        return self.hit_component.take_hit(effect)
+        return self.hit_component.take_hit(attacker, effect)
 
     def take_dmg(self, effect):#when player hits with e.g. sword
         pass
