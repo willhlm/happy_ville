@@ -1,4 +1,5 @@
 from engine import constants as C
+import math, numpy as np
 
 class Shaders():
     def __init__(self, post_process):
@@ -83,6 +84,80 @@ class Blur(Shaders):
         self.post_process.game_objects.shaders['blur']['blurRadius'] = self.radius
         self.post_process.game_objects.game.display.render(composite_screen.texture, temp_layer)#copy the screen
         self.post_process.game_objects.game.display.render(temp_layer.texture, composite_screen, shader=self.post_process.game_objects.shaders['blur'])    
+
+class Blur_fast(Shaders):
+    def __init__(self, post_process, **kwarg):
+        super().__init__(post_process)
+        self.radius = kwarg.get('radius',1)
+        self.weights = self.make_weights(self.radius)
+        self.layer = self.post_process.game_objects.game.display.make_layer([640, 360])
+
+    def make_weights(self, radius_float):
+        """
+        radius_float: blur 'radius' as float (e.g. 2.5)
+        returns: numpy array of length MAX_KERNEL (dtype float32) with normalized weights
+        """
+        MAX_KERNEL = 64
+        # If radius is very small, treat as no blur (single tap)
+        if radius_float <= 0.01:
+            w = np.zeros(MAX_KERNEL, dtype='f4')
+            w[0] = 1.0
+            return w
+
+        # Use sigma = radius_float for the gaussian spread (common convention)
+        sigma = max(radius_float, 0.001)
+
+        # kernel half-size (integer). ceil so we include enough samples for the float radius.
+        r = int(math.ceil(radius_float))
+
+        # Build weights for i in [-r .. r]
+        weights = []
+        for i in range(-r, r + 1):
+            x = float(i)
+            weights.append(math.exp(-0.5 * (x * x) / (sigma * sigma)))
+
+        # normalize
+        s = sum(weights)
+        weights = [w / s for w in weights]
+
+        # pad to MAX_KERNEL
+        if len(weights) > MAX_KERNEL:
+            raise ValueError(f"kernel size {len(weights)} > MAX_KERNEL {MAX_KERNEL}")
+        weights += [0.0] * (MAX_KERNEL - len(weights))
+
+        return np.array(weights, dtype='f4')
+
+    def set_radius(self, radius):        
+        self.radius = radius
+        self.weights = self.make_weights(radius)
+
+    def draw(self, temp_layer, composite_screen):
+        display = self.post_process.game_objects.game.display
+        blur = self.post_process.game_objects.shaders['blur_fast']
+
+        # --- Horizontal ---
+        self.layer.clear(0, 0, 0, 0)
+        blur['direction'] = (1.0, 0.0)
+        blur['weights'] = self.weights
+        blur['blurRadius'] = self.radius
+
+        #display.use_alpha_blending(False)  # <--- critical
+        display.render(composite_screen.texture, self.layer, shader=blur)
+        #display.use_alpha_blending(True)
+
+        # --- Vertical ---
+        blur['direction'] = (0.0, 1.0)
+        #display.use_alpha_blending(False)  # <--- critical
+        display.render(self.layer.texture, temp_layer, shader=blur)
+        #display.use_alpha_blending(True)
+
+        return temp_layer
+
+
+    def draw_to_composite(self, temp_layer, composite_screen):
+        self.post_process.game_objects.shaders['blur_fast']['blurRadius'] = self.radius
+        self.post_process.game_objects.game.display.render(composite_screen.texture, temp_layer)#copy the screen
+        self.post_process.game_objects.game.display.render(temp_layer.texture, composite_screen, shader=self.post_process.game_objects.shaders['blur_fast'])    
 
 class Bloom(Shaders):
     def __init__(self, post_process, **kwarg):

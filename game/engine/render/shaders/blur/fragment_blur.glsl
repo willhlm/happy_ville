@@ -33,13 +33,11 @@ void main()
             vec2 offset=vec2(float(x),float(y))*texelSize;
             float w = weights[x+int(blurRadius)]*weights[y+int(blurRadius)];            
 
-            //vec4 image = texture(imageTexture,fragmentTexCoord+offset);
+            vec4 image = texture(imageTexture,fragmentTexCoord+offset);
              
-            //blurredColor.rgb += image.rgb * w * image.a;
-            //blurredColor.a += w * image.a;
-
-vec4 image = texture(imageTexture, fragmentTexCoord + offset);
-blurredColor += image * w;            
+            blurredColor.rgb += image.rgb * w * image.a;
+            blurredColor.a += w * image.a;
+            //blurredColor += image * w;            
         }
     }
 
