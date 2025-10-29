@@ -781,12 +781,15 @@ class Biome():
     def room(self, room):#called wgen a new room is loaded -> before load objects or configure weather
         pass
     
-    def post_process(self, layer_name, parallax):
+    def post_process(self, layer_name, parallax):#called at the end of load_groups        
         radius = functions.blur_radius(parallax)
+        if radius > 5:
+            print(parallax)
+            return
         self.level.game_objects.game.screen_manager.append_shader('Blur_fast', [layer_name], radius = radius)   
-        if layer_name == 'bg1':     
-            self.level.game_objects.game.screen_manager.append_shader('Blur_fast', ['player'], radius = radius)   
-            self.level.game_objects.game.screen_manager.append_shader('Blur_fast', ['player_fg'], radius = radius)   
+        #if layer_name == 'bg1':     
+            #self.level.game_objects.game.screen_manager.append_shader('Blur_fast', ['player'], radius = radius)   
+            #self.level.game_objects.game.screen_manager.append_shader('Blur_fast', ['player_fg'], radius = radius)   
 
     def play_music(self):
         try:#try laoding bg music

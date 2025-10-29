@@ -98,6 +98,7 @@ class GameLoop():
             # Update display and limit FPS
             pygame.display.flip()
             self.clock.tick(C.fps)
+            #print(self.clock.get_fps())
 
 if __name__ == '__main__':
     pygame.mixer.pre_init(44100, 16, 2, 4096)#should result in better sound if this init before pygame.init()
