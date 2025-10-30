@@ -84,7 +84,7 @@ class Player(Character):
         self.health -= effect.damage
         self.flags['invincibility'] = True
         self.game_objects.ui.hud.remove_hearts(effect.damage)# * self.dmg_scale)#update UI
-                        
+
         if self.health > 0:  # Still alive
             self.game_objects.timer_manager.start_timer(C.invincibility_time_player, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
             self.shader_state.handle_input('Hurt')#turn white and shake
