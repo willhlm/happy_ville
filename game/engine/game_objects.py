@@ -58,7 +58,6 @@ class Game_Objects():
         self.cosmetics = groups.Group()#things we just want to blit after the player layer
         self.cosmetics_bg = groups.Group()#things we just want to blit before player layer
         self.interactables_fg = groups.Group()#interacrables but are blitted after the player layer
-        self.cosmetics_no_clear = groups.Group()# a group that will not be cleared when changing map
 
         self.camera_blocks = groups.Group()#camera blocks
         self.interactables = groups.Group()#player collisions, when pressing T/Y and projectile collisions: chest, bushes, collision path, sign post, save point
@@ -155,7 +154,6 @@ class Game_Objects():
         self.bg_interact.update(dt)
         self.all_fgs.update(dt)        
         self.cosmetics.update(dt)
-        self.cosmetics_no_clear.update(dt)
         self.cosmetics_bg.update(dt)
         self.interactables.update(dt)
         self.weather.update(dt)
@@ -178,7 +176,6 @@ class Game_Objects():
         self.eprojectiles.update_render(dt)
         self.loot.update_render(dt)
         self.cosmetics.update_render(dt)
-        self.cosmetics_no_clear.update_render(dt)
         self.cosmetics_bg.update_render(dt)
         self.interactables.update_render(dt)
         self.interactables_fg.update_render(dt)#twoD water use it
@@ -208,7 +205,6 @@ class Game_Objects():
         self.eprojectiles.draw(plater_fg_screen)                
         self.interactables_fg.draw(plater_fg_screen)#shoud be after the player -> upstream, 2D water
         self.cosmetics.draw(plater_fg_screen)
-        self.cosmetics_no_clear.draw(plater_fg_screen)#e.g. big timer
         
         #fgs
         self.all_fgs.draw(self.game.screen_manager.screens)#returns the last layer              
