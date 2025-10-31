@@ -3,7 +3,7 @@ from .base.cutscene_engine import CutsceneEngine
 class TutorialBossEncounter(CutsceneEngine):#boss fight cutscene
     def __init__(self, game):
         super().__init__(game)
-        pos = [5888, 100]
+        pos = [5888, 500]
         self.entity = game.game_objects.registry.fetch('enemies', 'wolfies')(pos, game.game_objects)        
         game.game_objects.enemies.add(self.entity)
 
