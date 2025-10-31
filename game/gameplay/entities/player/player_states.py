@@ -48,14 +48,14 @@ class PlayerStates():
 
         self.composite_state = self.states['idle']
         self.composite_state.enter_phase('main')
-        self._state_factories = {'dash_air': [('dash_air', DashAirState)], 
-                                'smash_up': [('smash_up', SmashUpState)], 
-                                'wall': [('wall_jump', WallJumpState), ('wall_glide', WallGlideState), ('belt_glide', BeltGlideState)], 
+        self._state_factories = {'dash_air': [('dash_air', DashAirState)],
+                                'smash_up': [('smash_up', SmashUpState)],
+                                'wall': [('wall_jump', WallJumpState), ('wall_glide', WallGlideState), ('belt_glide', BeltGlideState)],
                                 'dash': [('dash_ground', DashGroundState), ('dash_jump', DashJumpState)],
-                                'bow': [('bow', BowState)], 
-                                'thunder': [('thunder', ThunderState)], 
-                                'shield': [('shield', ShieldState)], 
-                                'wind': [('wind', WindState)], 
+                                'bow': [('bow', BowState)],
+                                'thunder': [('thunder', ThunderState)],
+                                'shield': [('shield', ShieldState)],
+                                'wind': [('wind', WindState)],
                                 'slow_motion': [('slow_motion', SlowMotionState)]}#should contain all the states that can be created, so that they can be be appended to self.stataes when needed
 
     def enter_state(self, state_name, phase = None, **kwargs):
@@ -1173,6 +1173,8 @@ class DashGroundPre(PhaseBase):
         self.entity.animation.play('dash_ground_pre')#the name of the class
 
         self.dash_length = C.dash_length
+        if int(self.entity.velocity[0]) == 0:
+            self.dash_length += 1
         self.entity.shader_state.handle_input('motion_blur')
         self.entity.game_objects.cosmetics.add(Dusts(self.entity.hitbox.center, self.entity.game_objects, dir = self.entity.dir, state = 'one'))#dust
         self.entity.flags['ground'] = True
@@ -1283,6 +1285,8 @@ class DashJumpPre(PhaseBase):#enters from ground dash pre
     def enter(self, **kwarg):
         self.entity.animation.play('dash_jump_pre')#the name of the class
         self.dash_length = C.dash_jump_length
+        if int(self.entity.velocity[0]) == 0:
+            self.dash_length += 1
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0])
         self.entity.movement_manager.add_modifier('dash_jump', entity = self.entity)
         self.entity.shader_state.handle_input('motion_blur')
@@ -1294,8 +1298,8 @@ class DashJumpPre(PhaseBase):#enters from ground dash pre
             self.entity.movement_manager.add_modifier('air_boost', entity = self.entity)
             self.enter_state('fall')
 
-    def handle_movement(self, event):
-        pass
+    def handle_movement(self, event):#all dash states should omit setting entity.dir
+        self.entity.acceleration[0] = 0
 
     def handle_input(self, input, **kwarg):
         if input == 'Wall' or input =='belt':
@@ -1306,7 +1310,7 @@ class DashJumpPre(PhaseBase):#enters from ground dash pre
                         self.enter_state(state, **kwarg)
 
     def enter_state(self, state):
-        self.entity.acceleration[1] =  C.acceleration[1]
+        self.entity.acceleration[1] = C.acceleration[1]
         self.entity.movement_manager.remove_modifier('dash_jump')
         super().enter_state(state)
         self.entity.shader_state.handle_input('idle')
@@ -1792,10 +1796,11 @@ class DashAirPost(DashGroundPre):
             self.entity.dir[0] = sign(value[0])
 
     def increase_phase(self):
+        self.entity.movement_manager.add_modifier('air_boost', entity = self.entity)
         if self.entity.acceleration[0] == 0:
             self.enter_state('idle')
         else:
-            self.enter_state('run')#enter run main phase
+            self.enter_state('fall')#enter run main phase
 
     def handle_press_input(self, input):#all states should inehrent this function, if it should be able to jump
         event = input.output()
