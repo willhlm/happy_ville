@@ -11,81 +11,89 @@ uniform float time;        // Time variable for animation
 uniform vec2 camera_scroll; // 
 uniform vec2 u_resolution; 
 
-// Function to interpolate (fade) used in Perlin noise
-float fade(float t) {
-    return t * t * t * (t * (t * 6.0 - 15.0) + 10.0);
+// Simple random function
+float random(vec2 st) {
+    return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
 }
 
-// Function to generate a gradient
-float grad(int hash, float x, float y) {
-    int h = hash & 7; // Mask hash
-    float u = h < 4 ? x : y;
-    float v = h < 4 ? y : x;
-    return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
+// Value noise
+float noise(vec2 st) {
+    vec2 i = floor(st);
+    vec2 f = fract(st);
+
+    // Four corners
+    float a = random(i);
+    float b = random(i + vec2(1.0, 0.0));
+    float c = random(i + vec2(0.0, 1.0));
+    float d = random(i + vec2(1.0, 1.0));
+
+    // Smooth interpolation
+    vec2 u = f * f * (3.0 - 2.0 * f);
+
+    return mix(a, b, u.x) +
+            (c - a) * u.y * (1.0 - u.x) +
+            (d - b) * u.x * u.y;
 }
 
-// Function to generate Perlin noise
-float perlin_noise(vec2 coord) {
-    vec2 p = floor(coord);
-    vec2 f = fract(coord);
-    f = f * f * (3.0 - 2.0 * f);
-
-    float n = p.x + p.y * 57.0;
-    float res = mix(
-        mix(grad(int(n + 0.0), f.x, f.y),
-            grad(int(n + 1.0), f.x - 1.0, f.y), fade(f.x)),
-        mix(grad(int(n + 57.0), f.x, f.y - 1.0),
-            grad(int(n + 58.0), f.x - 1.0, f.y - 1.0), fade(f.x)),
-        fade(f.y));
-    return res;
-}
-
-// Function to generate layered Perlin noise for a cloud effect
-float layered_perlin_noise(vec2 coord, float scale, float amplitude) {
-    float noise = 0.0;
-    float persistence = 0.5; // Influence of successive noise layers
-
-    // Adding multiple layers of noise to create more complex effects
+// Fractal Brownian Motion
+float fbm(vec2 st) {
+    float value = 0.0;
+    float amplitude = 0.5;
+    float frequency = 1.0;
+    
     for (int i = 0; i < 5; i++) {
-        noise += perlin_noise(coord * scale) * amplitude;
-        scale *= 2.0;
-        amplitude *= persistence;
+        value += amplitude * noise(st * frequency);
+        frequency *= 2.0;
+        amplitude *= 0.5;
     }
-    return noise;
+    return value;
 }
 
 void main() {
-vec2 uv = fragmentTexCoord;
-//uv.y = 1.0 - uv.y; // bottom = horizon
-
-float perspective = pow(uv.y, 1); // warp for fake depth
-
-float parallax_strength = mix(0.2, 1.0, perspective);
-
-vec2 warped_uv = vec2(uv.x, perspective);
-
-vec2 normalized_scroll = vec2(camera_scroll.x * perspective , 0 * camera_scroll.y) / u_resolution;
-
-vec2 parallax_uv = warped_uv + normalized_scroll * parallax_strength;
-
-float base_scale = mix(5, 0.7, perspective);
-
-vec2 scroll_speed = vec2(0.0, 0.01);
-
-float noise = 0;
-for (int i = 0; i < 5; i++) {
-    vec2 cloud_center = vec2(1);//vec2(fract(sin(float(i) * 0.1) * 43758.5453), fract(cos(float(i) * 0.1) * 43758.5453));    
-
-    vec2 noise_uv = (parallax_uv * base_scale - time * scroll_speed ) * cloud_center;
-
-    float noise1 = layered_perlin_noise(noise_uv, 1.0, 1.0);
-    noise += noise1;// max(final_noise, noise);
-}
-
-float fade = smoothstep(0, 0.9, perspective); // fade near top/bottom
-vec4 cloudColor = vec4(cloud_color.rgb, cloud_color.a * noise * cloud_opacity * fade);
-
-color = cloudColor;
-
-
+    vec2 uv = fragmentTexCoord;        
+    // Gentler perspective that doesn't create extreme distortion
+    // Now perspective is small at top (horizon) and large at bottom (close)
+    float perspective = mix(0.3, 1.0, pow(uv.y, 1.2));
+    
+    float parallax_strength = mix(0.3, 1.0, uv.y);
+    
+    vec2 normalized_scroll = vec2(camera_scroll.x * parallax_strength, 0 * camera_scroll.y) / u_resolution;
+    
+    vec2 parallax_uv = uv + normalized_scroll * parallax_strength;
+    
+    // More moderate scale range to avoid extreme stretching
+    float base_scale = mix(2.0, 1.0, pow(uv.y, 0.8));
+    
+    // CHANGED: Clouds move toward horizon (positive Y direction after flip = toward top of screen)
+    vec2 scroll_speed = vec2(0.0, 0.01); // Negative to move "up" in flipped coords = into depth
+    
+    // Gentler perspective scaling to avoid distortion
+    float y_stretch = mix(1.5, 1.0, pow(uv.y, 0.5));
+    vec2 perspective_scale = vec2(base_scale, base_scale * y_stretch * 4);
+    
+    vec2 noise_uv = (parallax_uv * perspective_scale - time * scroll_speed);
+    noise_uv += vec2(100.789, 200.456);
+    
+    // Use fbm for cloud generation
+    float noise_value = fbm(noise_uv * 2.5);
+    
+    // Better cloud shaping
+    float cloud_threshold = 0.5;
+    float cloud_softness = 0.2;
+    
+    float cloud_alpha = smoothstep(cloud_threshold - cloud_softness, 
+                                   cloud_threshold + cloud_softness, 
+                                   noise_value);
+    
+    // Make clouds more defined
+    cloud_alpha = pow(cloud_alpha, 1.2);
+    
+    // Fade at top and bottom edges
+    float fade_top = smoothstep(0.0, 0.15, uv.y);
+    float fade_bottom = smoothstep(1.0, 0.85, uv.y);
+    float fade = fade_top * fade_bottom;
+    
+    vec4 cloudColor = vec4(cloud_color.rgb, cloud_color.a * cloud_alpha * cloud_opacity * fade);
+    
+    color = cloudColor;
 }

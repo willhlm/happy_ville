@@ -11,7 +11,7 @@ class TjasolmaisEmbrace(Ability):#makes the shield, water god
 
     def shield_expire(self):#called when the shield is destroyed
         self.entity.movement_manager.remove_modifier('tjasolmais_embrace')
-        self.entity.damage_manager.remove_modifier('tjasolmais_embrace')
+        self.entity.hit_component.damage_manager.remove_modifier('tjasolmais_embrace')
         self.shield = None
 
     def sword(self):#called when aila swings the sword
@@ -21,7 +21,7 @@ class TjasolmaisEmbrace(Ability):#makes the shield, water god
         if self.shield: self.shield.kill()    #kill the old one
         self.shield = Shield(self.entity)
         self.entity.movement_manager.add_modifier('tjasolmais_embrace', entity = self.entity)
-        self.entity.damage_manager.add_modifier('tjasolmais_embrace', entity = self.entity)
+        self.entity.hit_component.damage_manager.add_modifier('tjasolmais_embrace', entity = self.entity)
 
         self.entity.projectiles.add(self.shield)
 
