@@ -1,11 +1,10 @@
-import pygame, random
+import pygame
 
 from gameplay.entities.projectiles.base.melee import Melee
 from engine.utils import read_files
 from gameplay.entities.player import states_sword
 from engine import constants as C
 from gameplay.entities.shared.components import hit_effects
-from gameplay.entities.visuals.particles import particles
 
 class Sword(Melee):
     def __init__(self, entity):
@@ -56,13 +55,6 @@ class Sword(Melee):
         effect = self.base_effect.copy()
         effect.meta['attacker_dir'] = self.dir#save the direction
         damage_applied, modified_effect = inetractable.take_hit(self, effect)                         
-
-    def clash_particles(self, pos, number_particles=12):
-        angle = random.randint(-180, 180)#the erection anglex
-        color = [255, 255, 255, 255]
-        for i in range(0,number_particles):
-            obj1 = getattr(particles, 'Spark')(pos, self.game_objects, distance = 0, lifetime = 10, vel = {'linear':[5,7]}, dir = angle, scale = 0.8, fade_scale = 7, colour = color)
-            self.entity.game_objects.cosmetics.add(obj1)
 
     def level_up(self):#called when the smith imporoves the sword
         self.entity.inventory['Tungsten'] -= self.tungsten_cost

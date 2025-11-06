@@ -23,7 +23,7 @@ class Event_trigger(Interactables):
             if self.event == 'Butterfly_encounter':
                 if not self.game_objects.world_state.statistics['kill'].get('maggot',False): return#don't do cutscene if aggro path is not chosen
 
-            self.game_objects.game.state_manager.enter_state(self.event.capitalize(), category = 'game_states_cutscenes')              
+            self.game_objects.game.state_manager.enter_state(self.event)              
         else:            
             self.game_objects.quests_events.initiate_event(self.event.capitalize())#event
         

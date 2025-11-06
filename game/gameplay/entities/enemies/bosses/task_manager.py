@@ -8,15 +8,16 @@ class TaskManager():#manager
         self.task_queue = []  # Tasks to execute in order
         self.state = state_registry['idle'](self.entity)        
         
-    def update(self):
+    def update(self, dt):
         self.track_player_distance()
-        self.state.update()
+        self.state.update(dt)
+        print(self.state)
  
     def track_player_distance(self):
         self.player_distance = [self.entity.game_objects.player.rect.centerx - self.entity.rect.centerx, self.entity.game_objects.player.rect.centery - self.entity.rect.centery]
 
-    def start_next_task(self):#start when state is finished
-        kwarg = self.task_queue.pop(0)
+    def start_next_task(self):#start when state is finished        
+        kwarg = self.task_queue.pop(0)        
         task_name = kwarg.pop("task")
         self.state = self.state_registry[task_name.lower()](self.entity, **kwarg)
 

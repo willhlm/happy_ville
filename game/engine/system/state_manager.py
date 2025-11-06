@@ -66,6 +66,7 @@ REGISTERY = {
 
     # Cutscenes
     "boss_deer_encounter": BossDeerEncounter,
+    "tutorial_boss_encounter": TutorialBossEncounter,
     "butterfly_encounter": ButterflyEncounter,
     "cultist_encounter": CultistEncounter,
     "death": Death,

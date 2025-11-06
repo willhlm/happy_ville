@@ -714,34 +714,6 @@
                          "y":464
                         }, 
                         {
-                         "gid":20,
-                         "height":304,
-                         "id":280,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"event",
-                                 "type":"string",
-                                 "value":"Boss_deer_encounter"
-                                }, 
-                                {
-                                 "name":"event_type",
-                                 "type":"string",
-                                 "value":"cutscene"
-                                }, 
-                                {
-                                 "name":"new_state",
-                                 "type":"bool",
-                                 "value":true
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":5344,
-                         "y":544
-                        }, 
-                        {
                          "gid":15,
                          "height":16,
                          "id":284,
@@ -1265,8 +1237,31 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":5136,
-                         "y":432
+                         "x":4880,
+                         "y":384
+                        }, 
+                        {
+                         "gid":20,
+                         "height":320,
+                         "id":307,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"event",
+                                 "type":"string",
+                                 "value":"tutorial_boss_encounter"
+                                }, 
+                                {
+                                 "name":"new_state",
+                                 "type":"bool",
+                                 "value":true
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":5360,
+                         "y":544
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -1305,7 +1300,7 @@
          "y":0
         }],
  "nextlayerid":96,
- "nextobjectid":306,
+ "nextobjectid":308,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

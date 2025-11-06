@@ -782,15 +782,11 @@ class Biome():
         pass
     
     def post_process(self, layer_name, parallax):#called at the end of load_groups        
-        radius = functions.blur_radius(parallax)
-        if radius > 5:
-            print(parallax)
-            return
-        self.level.game_objects.game.screen_manager.append_shader('Blur_fast', [layer_name], radius = radius)   
-        #if layer_name == 'bg1':     
-            #self.level.game_objects.game.screen_manager.append_shader('Blur_fast', ['player'], radius = radius)   
-            #self.level.game_objects.game.screen_manager.append_shader('Blur_fast', ['player_fg'], radius = radius)   
-
+        pass
+        #radius = functions.blur_radius(parallax)
+        #if radius > 5: return
+        #self.level.game_objects.game.screen_manager.append_shader('Blur_fast', [layer_name], radius = radius)   
+  
     def play_music(self):
         try:#try laoding bg music
             sound = read_files.load_single_sfx("audio/music/maps/" + self.level.biome_name + "/default.mp3" )
