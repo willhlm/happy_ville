@@ -9,6 +9,8 @@ class Controller():
         self.key = False
         self.value = {'l_stick': [0, 0], 'r_stick': [0, 0], 'd_pad': [0, 0], 'l_trigger': 0, 'r_trigger': 0}#analogue values
         self.outputs = [self.keydown, self.keyup, self.value, self.key]
+        
+        self.held_buttons = set()  # Track currently held buttons
 
         self.map_keyboard()
         self.map_joystick()
@@ -104,12 +106,16 @@ class Controller():
         if event.type == pygame.KEYDOWN:
             self.keydown = True
             self.key = self.keyboard_map.get(event.key, None)
-            if self.key: self.insert_buffer()
+            if self.key: 
+                self.held_buttons.add(self.key)  # Track as held
+                self.insert_buffer()
 
         elif event.type == pygame.KEYUP:
             self.keyup = True
             self.key = self.keyboard_map.get(event.key, None)
-            if self.key: self.insert_buffer()
+            if self.key: 
+                self.held_buttons.discard(self.key)  # Remove from held
+                self.insert_buffer()
 
         if event.type == pygame.CONTROLLERDEVICEADDED:
             self.update_controller()
@@ -123,12 +129,16 @@ class Controller():
         if event.type == pygame.CONTROLLERBUTTONDOWN:
             self.keydown = True
             self.key = self.joystick_map.get(event.button, None)
-            if self.key: self.insert_buffer()
+            if self.key: 
+                self.held_buttons.add(self.key)  # Track as held
+                self.insert_buffer()
 
         elif event.type == pygame.CONTROLLERBUTTONUP:
             self.keyup = True
             self.key = self.joystick_map.get(event.button, None)
-            if self.key: self.insert_buffer()
+            if self.key: 
+                self.held_buttons.discard(self.key)  # Remove from held
+                self.insert_buffer()
         
         if event.type == pygame.CONTROLLERAXISMOTION:
             if event.axis == pygame.CONTROLLER_AXIS_TRIGGERLEFT:
@@ -141,18 +151,24 @@ class Controller():
                     if self.value["r_trigger"] > 0.5:
                         self.keydown = True
                         self.key = 'rt'
+                        self.held_buttons.add('rt')  # Track RT as held
                         self.insert_buffer()
                         self.last_input["r_trigger"] = self.value["r_trigger"]
                 else:#releasing
                     if self.value["r_trigger"] < 0.5:
                         self.keyup = True
                         self.key = 'rt'
+                        self.held_buttons.discard('rt')  # Remove RT from held
                         self.insert_buffer()  
                         self.last_input["r_trigger"] = self.value["r_trigger"]                      
 
     @staticmethod
     def normalize_axis(value):
         return value / 32768.0#value taken from documentation
+
+    def is_held(self, button_name):
+        """Check if a button is currently being held down"""
+        return button_name in self.held_buttons
 
     def continuous_input_checks(self):#caled every frame from game
         keys = pygame.key.get_pressed()

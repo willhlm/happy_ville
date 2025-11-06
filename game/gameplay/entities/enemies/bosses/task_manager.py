@@ -11,7 +11,6 @@ class TaskManager():#manager
     def update(self, dt):
         self.track_player_distance()
         self.state.update(dt)
-        print(self.state)
  
     def track_player_distance(self):
         self.player_distance = [self.entity.game_objects.player.rect.centerx - self.entity.rect.centerx, self.entity.game_objects.player.rect.centery - self.entity.rect.centery]

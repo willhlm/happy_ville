@@ -18,8 +18,11 @@ class PlayerStates():
             'invisible': InvisibleState(entity),
             'run': RunState(entity),
             'walk': WalkState(entity),
+            'sprint': SprintState(entity),
             'fall': FallState(entity),
+            'land': LandState(entity),
             'jump': JumpState(entity),
+            'jump_sprint': JumpSprintState(entity),
             'dash_ground': DashGroundState(entity),
             'dash_jump': DashJumpState(entity),
             'wall_glide': WallGlideState(entity),
@@ -64,7 +67,6 @@ class PlayerStates():
             if not state.enter_state(phase, **kwargs):
                 self.composite_state.cleanup(**kwargs)
                 self.composite_state = state
-
 
     def update(self, dt):#called from player
         self.composite_state.update(dt)#main state
@@ -123,9 +125,6 @@ class CompositeState():#will contain pre, main, post phases of a state
     def handle_movement(self, event):
         self.current_phase.handle_movement(event)
 
-    def change_phase(self, new_phase):
-        self.enter_phase(new_phase)
-
     def increase_phase(self):#called when an animation is finished for that state
         self.current_phase.increase_phase()
 
@@ -133,9 +132,23 @@ class CompositeState():#will contain pre, main, post phases of a state
 class FallState(CompositeState):
     def __init__(self, entity):
         super().__init__(entity)
-        self.phases = {'pre': FallPre(entity), 'main': FallMain(entity), 'post': FallPost(entity)}
+        self.phases = {'pre': FallPre(entity), 'main': FallMain(entity)}        
 
-#wrappers
+    def common_values(self):#call when this state is enetred
+        self.falltime = 0
+
+    def update(self, dt):
+        self.falltime += dt
+
+    def determine_fall(self):
+        if self.falltime > 40: return True
+        return False
+
+class LandState(CompositeState):
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.phases = {'soft': LandSoftMain(entity), 'hard': LandHardMain(entity)}
+
 class InvisibleState(CompositeState):
     def __init__(self, entity):
         super().__init__(entity)
@@ -151,6 +164,11 @@ class WalkState(CompositeState):
         super().__init__(entity)
         self.phases = {'pre': WalkPre(entity), 'main': WalkMain(entity), 'post': WalkPost(entity)}
 
+class SprintState(CompositeState):
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.phases = {'main': SprintMain(entity), 'post': SprintPost(entity)}#'pre': SprintPre(entity), 
+
 class IdleState(CompositeState):
     def __init__(self, entity):
         super().__init__(entity)
@@ -160,6 +178,11 @@ class JumpState(CompositeState):
     def __init__(self, entity):
         super().__init__(entity)
         self.phases = {'main': JumpMain(entity)}
+
+class JumpSprintState(CompositeState):
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.phases = {'pre': JumpSprintPre(entity),'main': JumpSprintMain(entity),'post': JumpSprintPost(entity)}
 
 class DashGroundState(CompositeState):
     def __init__(self, entity):
@@ -845,6 +868,102 @@ class WalkPost(PhaseBase):
     def increase_phase(self):
         self.enter_state('idle')
 
+class SprintPre(PhaseBase):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def enter(self, **kwarg):
+        self.entity.animation.play('sprint_pre')
+        self.entity.flags['ground'] = True
+        self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
+
+    def update(self, dt):
+        if not self.entity.collision_types['bottom']:
+            self.enter_state('fall')
+            self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
+
+    def increase_phase(self):
+        self.enter_phase('main')
+
+    def handle_press_input(self,input):
+        event = input.output()
+        if event[-1] == 'a':
+            input.processed()
+            self.enter_state('jump')#main
+
+    def handle_release_input(self, input):
+        event = input.output()
+        if event[-1]=='a':
+            input.processed()
+
+    def handle_movement(self,event):
+        super().handle_movement(event)
+        if self.entity.acceleration[0] == 0:
+            self.entity.currentstate.composite_state.enter_phase('post')
+
+class SprintMain(PhaseBase):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def enter(self, **kwarg):
+        self.entity.animation.play('sprint_main')
+
+    def update(self, dt):
+        if not self.entity.collision_types['bottom']:
+            self.enter_state('fall')#fall pre
+            self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
+
+    def handle_press_input(self,input):
+        event = input.output()
+        if event[-1] == 'a':
+            input.processed()
+            self.enter_state('jump_sprint')#main
+
+    def handle_release_input(self, input):
+        event = input.output()
+        if event[-1]=='a':
+            input.processed()
+        elif event[-1]=='lb':
+            self.enter_phase('post')           
+
+    def handle_movement(self,event):
+        value = event['l_stick']#the avlue of the press
+        self.entity.acceleration[0] = C.acceleration[0] * 2#always positive, add acceleration to entity
+
+        self.entity.dir[1] = -value[1]
+
+        if self.entity.acceleration[0] == 0:
+            self.entity.currentstate.composite_state.enter_phase('post')
+
+class SprintPost(PhaseBase):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def enter(self, **kwarg):
+        self.entity.animation.play('sprint_post')
+
+    def update(self, dt):
+        if not self.entity.collision_types['bottom']:
+            self.enter_state('fall')#pre
+            self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
+
+    def handle_press_input(self,input):
+        event = input.output()
+        if event[-1] == 'a':
+            input.processed()
+            self.enter_state('jump')#main
+
+    def handle_release_input(self, input):
+        event = input.output()
+        if event[-1]=='a':
+            input.processed()
+
+    def increase_phase(self):
+        if self.entity.acceleration[0] == 0:
+            self.enter_state('idle')
+        else:
+            self.enter_state('run')#enter run
+
 class JumpMain(PhaseAirBase):
     def __init__(self, entity):
         super().__init__(entity)
@@ -912,6 +1031,56 @@ class JumpMain(PhaseAirBase):
             state = 'sword_air' + str(int(self.entity.sword.swing)+1)
             self.enter_state(state)
             self.entity.sword.swing = not self.entity.sword.swing
+
+class JumpSprintPre(PhaseAirBase):
+    def __init__(self, entity):
+        super().__init__(entity)
+
+    def enter(self, **kwarg):
+        self.entity.animation.play('jump_sprint_pre')#the name of the class
+        try:
+            self.air_timer = self.entity.colliding_platform.jumped()#jump charactereistics is set from the platform
+        except AttributeError:
+            print(self.entity.flags['ground'])
+ 
+        self.entity.flags['ground'] = False
+
+    def update(self, dt):
+        self.air_timer -= dt
+        if self.air_timer >= 0:
+            self.entity.velocity[1] = C.jump_vel_player
+            self.entity.velocity[0] = self.entity.dir[0] * 10
+
+    def increase_phase(self):
+        self.enter_phase('main')
+
+class JumpSprintMain(PhaseAirBase):
+    def __init__(self, entity):
+        super().__init__(entity)
+
+    def enter(self, **kwarg):
+        self.entity.animation.play('jump_sprint_main')#the name of the class
+        try:
+            self.air_timer = self.entity.colliding_platform.jumped()#jump charactereistics is set from the platform
+        except AttributeError:
+            print(self.entity.flags['ground'])
+ 
+    def update(self, dt):
+        if self.entity.collision_types['bottom']:
+            self.enter_phase('post')
+
+class JumpSprintPost(PhaseAirBase):
+    def __init__(self, entity):
+        super().__init__(entity)
+
+    def enter(self, **kwarg):
+        self.entity.animation.play('jump_sprint_post')#the name of the class
+        self.jump_dash_timer = C.jump_dash_timer
+        #self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
+        self.entity.flags['ground'] = False
+
+    def increase_phase(self):
+        self.enter_state('idle')
 
 class WallJumpPre(PhaseBase):
     def __init__(self, entity, **kwarg):
@@ -989,10 +1158,13 @@ class FallPre(PhaseAirBase):
         elif input == 'belt':
             self.enter_state('Belt_glide_main')
         elif input == 'Ground':
-            if self.entity.acceleration[0] != 0:
-                self.enter_state('run')#enter run pre phase
+            if self.entity.currentstate.states['fall'].determine_fall():
+                self.enter_state('land', phase = 'hard')
             else:
-                self.enter_state('idle')
+                if self.entity.acceleration[0] != 0:
+                    self.enter_state('run')#enter run pre phase
+                else:                
+                    self.enter_state('land', phase = 'soft')
 
     def swing_sword(self):
         if not self.entity.flags['attack_able']: return
@@ -1018,15 +1190,61 @@ class FallMain(FallPre):
     def increase_phase(self):#called when an animation is finihed for that state
         pass
 
-class FallPost(FallPre):#landing
+class LandSoftMain(PhaseBase):#landing: mainly cosmetic
     def __init__(self,entity):
         super().__init__(entity)
 
     def enter(self, **kwarg):
-        self.entity.animation.play('fall_post')
+        self.entity.flags['ground'] = True
+        self.entity.animation.play('land_soft_main')
+
+    def handle_press_input(self,input):
+        event = input.output()
+        if event[-1] == 'a':
+            if self.entity.flags['ground']:
+                input.processed()
+                self.enter_state('jump')
+        elif event[-1]=='b':
+            input.processed()
+            self.do_ability()
+        elif event[-1]=='lb':
+            if self.entity.flags['ground']:
+                input.processed()
+                self.enter_state('Ground_dash_pre')
+            else:
+                input.processed()
+                self.enter_state('dash_air')
+        elif event[-1]=='x':
+            input.processed()
+            self.swing_sword()
 
     def increase_phase(self):#called when an animation is finihed for that state
-        pass
+        self.enter_state('idle')
+
+    def swing_sword(self):
+        if not self.entity.flags['attack_able']: return
+        if self.entity.dir[1] > 0.7:
+            self.enter_state('sword_up')
+        elif self.entity.dir[1] < -0.7:
+            self.enter_state('sword_down')
+        else:#right or left
+            state = 'sword_air' + str(int(self.entity.sword.swing)+1)
+            self.enter_state(state)
+            self.entity.sword.swing = not self.entity.sword.swing
+
+class LandHardMain(PhaseBase):#landing: cannot move
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def enter(self, **kwarg):
+        self.entity.flags['ground'] = True
+        self.entity.animation.play('land_hard_main')
+
+    def update(self, dt):
+        self.entity.velocity[0] = 0
+
+    def increase_phase(self):#called when an animation is finihed for that state
+        self.enter_state('idle')
 
 class WallGlide(PhaseBase):
     def __init__(self, entity, **kwarg):
@@ -1167,9 +1385,7 @@ class DashGroundPre(PhaseBase):
     def __init__(self,entity, **kwarg):
         super().__init__(entity)
 
-    def enter(self, **kwarg):
-        #remove any air boosts
-
+    def enter(self, **kwarg):        
         self.entity.animation.play('dash_ground_pre')#the name of the class
 
         self.dash_length = C.dash_length
@@ -1181,7 +1397,6 @@ class DashGroundPre(PhaseBase):
         self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
         self.jump_dash_timer = C.jump_dash_timer
         self.entity.movement_manager.add_modifier('dash', entity = self.entity)
-        self.entity.velocity[1] *= 0
 
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0], vol = 1)
 
@@ -1229,7 +1444,7 @@ class DashGroundPre(PhaseBase):
 
 class DashGroundMain(DashGroundPre):#level one dash: normal
     def __init__(self, entity, **kwarg):
-        super().__init__(entity)
+        super().__init__(entity)        
 
     def enter(self, **kwarg):
         self.entity.animation.play('dash_ground_main')
@@ -1237,11 +1452,14 @@ class DashGroundMain(DashGroundPre):#level one dash: normal
         self.jump_dash_timer = C.jump_dash_timer
 
     def handle_press_input(self, input):#all states should inehrent this function, if it should be able to jump
-        input.processed()
+        input.processed()   
 
     def increase_phase(self):
-        self.entity.shader_state.handle_input('idle')
-        self.enter_phase('post')
+        self.entity.shader_state.handle_input('idle')     
+        if self.entity.game_objects.controller.is_held('lb'):
+            self.enter_state('sprint')  
+        else:
+            self.enter_phase('post')#enter run              
 
 class DashGroundPost(DashGroundPre):
     def __init__(self,entity):
