@@ -20,6 +20,7 @@ class PlayerStates():
             'walk': WalkState(entity),
             'sprint': SprintState(entity),
             'fall': FallState(entity),
+            'land': LandState(entity),
             'jump': JumpState(entity),
             'jump_sprint': JumpSprintState(entity),
             'dash_ground': DashGroundState(entity),
@@ -124,9 +125,6 @@ class CompositeState():#will contain pre, main, post phases of a state
     def handle_movement(self, event):
         self.current_phase.handle_movement(event)
 
-    def change_phase(self, new_phase):
-        self.enter_phase(new_phase)
-
     def increase_phase(self):#called when an animation is finished for that state
         self.current_phase.increase_phase()
 
@@ -134,9 +132,23 @@ class CompositeState():#will contain pre, main, post phases of a state
 class FallState(CompositeState):
     def __init__(self, entity):
         super().__init__(entity)
-        self.phases = {'pre': FallPre(entity), 'main': FallMain(entity), 'post': FallPost(entity)}
+        self.phases = {'pre': FallPre(entity), 'main': FallMain(entity)}        
 
-#wrappers
+    def common_values(self):#call when this state is enetred
+        self.falltime = 0
+
+    def update(self, dt):
+        self.falltime += dt
+
+    def determine_fall(self):
+        if self.falltime > 40: return True
+        return False
+
+class LandState(CompositeState):
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.phases = {'soft': LandSoftMain(entity), 'hard': LandHardMain(entity)}
+
 class InvisibleState(CompositeState):
     def __init__(self, entity):
         super().__init__(entity)
@@ -1146,10 +1158,13 @@ class FallPre(PhaseAirBase):
         elif input == 'belt':
             self.enter_state('Belt_glide_main')
         elif input == 'Ground':
-            if self.entity.acceleration[0] != 0:
-                self.enter_state('run')#enter run pre phase
+            if self.entity.currentstate.states['fall'].determine_fall():
+                self.enter_state('land', phase = 'hard')
             else:
-                self.enter_state('idle')
+                if self.entity.acceleration[0] != 0:
+                    self.enter_state('run')#enter run pre phase
+                else:                
+                    self.enter_state('land', phase = 'soft')
 
     def swing_sword(self):
         if not self.entity.flags['attack_able']: return
@@ -1175,15 +1190,61 @@ class FallMain(FallPre):
     def increase_phase(self):#called when an animation is finihed for that state
         pass
 
-class FallPost(FallPre):#landing
+class LandSoftMain(PhaseBase):#landing: mainly cosmetic
     def __init__(self,entity):
         super().__init__(entity)
 
     def enter(self, **kwarg):
-        self.entity.animation.play('fall_post')
+        self.entity.flags['ground'] = True
+        self.entity.animation.play('land_soft_main')
+
+    def handle_press_input(self,input):
+        event = input.output()
+        if event[-1] == 'a':
+            if self.entity.flags['ground']:
+                input.processed()
+                self.enter_state('jump')
+        elif event[-1]=='b':
+            input.processed()
+            self.do_ability()
+        elif event[-1]=='lb':
+            if self.entity.flags['ground']:
+                input.processed()
+                self.enter_state('Ground_dash_pre')
+            else:
+                input.processed()
+                self.enter_state('dash_air')
+        elif event[-1]=='x':
+            input.processed()
+            self.swing_sword()
 
     def increase_phase(self):#called when an animation is finihed for that state
-        pass
+        self.enter_state('idle')
+
+    def swing_sword(self):
+        if not self.entity.flags['attack_able']: return
+        if self.entity.dir[1] > 0.7:
+            self.enter_state('sword_up')
+        elif self.entity.dir[1] < -0.7:
+            self.enter_state('sword_down')
+        else:#right or left
+            state = 'sword_air' + str(int(self.entity.sword.swing)+1)
+            self.enter_state(state)
+            self.entity.sword.swing = not self.entity.sword.swing
+
+class LandHardMain(PhaseBase):#landing: cannot move
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def enter(self, **kwarg):
+        self.entity.flags['ground'] = True
+        self.entity.animation.play('land_hard_main')
+
+    def update(self, dt):
+        self.entity.velocity[0] = 0
+
+    def increase_phase(self):#called when an animation is finihed for that state
+        self.enter_state('idle')
 
 class WallGlide(PhaseBase):
     def __init__(self, entity, **kwarg):
