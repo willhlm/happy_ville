@@ -52,6 +52,7 @@ class Player(Character):
 
     def ramp_down_collision(self, ramp):#when colliding with platform beneth
         super().ramp_down_collision(ramp)
+        self.movement_manager.handle_input('ground')
         self.colliding_platform = ramp#save the latest platform
 
     def down_collision(self, block):#when colliding with platform beneth

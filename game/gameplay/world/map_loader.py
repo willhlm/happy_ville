@@ -1376,7 +1376,7 @@ class Tall_trees(Biome):
                     if property['name'] == 'direction':#determine spawn type and set position accordingly
                         kwarg['direction'] = property['value']
 
-                new_enemy = self.game_objects.registry.fetch('enemies', 'packun')(object_position, self.level.game_objects, **kwarg)
+                new_enemy = self.level.game_objects.registry.fetch('enemies', 'packun')(object_position, self.level.game_objects, **kwarg)
                 self.level.game_objects.enemies.add(new_enemy)
 
             elif id == 11:#one side brakable
