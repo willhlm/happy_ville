@@ -13,11 +13,10 @@ class SavePoint(Interactables):#save point
         self.hitbox = self.rect.copy()
         self.map = map
         self.init_cord = [pos[0],pos[1]-100]
-        self.currentstate = states_savepoint.Idle(self)
+        self.currentstate = states_savepoint.Idle(self)              
 
     def interact(self):#when player press t/y
         self.game_objects.player.currentstate.enter_state('crouch')
         self.game_objects.player.backpack.map.save_savepoint(map =  self.map, point = self.init_cord)
         self.currentstate.handle_input('active')
         self.game_objects.cosmetics.add(LogoLoading(self.game_objects))
-

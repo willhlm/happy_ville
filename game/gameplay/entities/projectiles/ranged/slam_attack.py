@@ -13,7 +13,6 @@ class SlamAttack(Projectiles):
         self.currentstate.enter_state('Death')
         self.animation.play('idle')
         self.dir = kwarg.get('dir', [1, 0])
-        self.dmg = 1
         self.base_effect = hit_effects.create_projectile_effect(damage = self.dmg, hit_type = 'stone', knockback = [25, 0], hitstop = 10)
 
     def pool(game_objects):

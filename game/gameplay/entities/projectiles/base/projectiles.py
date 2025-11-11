@@ -1,10 +1,13 @@
 from gameplay.entities.base.platform_entity import PlatformEntity
+from gameplay.entities.shared.components import hit_effects
 
 class Projectiles(PlatformEntity):#projectiels
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects)
         self.lifetime = kwarg.get('lifetime', 300)
-        self.flags = {'invincibility': False, 'charge_blocks': kwarg.get('charge_blocks', False), 'aggro': True}#if they can break special blocks
+        self.flags = {'invincibility': False, 'charge_blocks': kwarg.get('charge_blocks', False), 'aggro': True}#if they can break special blocks        
+        self.dmg = kwarg.get('dmg', 1)
+        self.base_effect = hit_effects.HitEffect(damage = self.dmg, attacker = self)            
 
     def update(self, dt):
         super().update(dt)
@@ -23,8 +26,8 @@ class Projectiles(PlatformEntity):#projectiels
         eprojectile.take_dmg(self.dmg)
 
     def collision_enemy(self, collision_enemy):#projecticle enemy collision (including player)
-        if self.flags['aggro']:
-            collision_enemy.take_dmg(dmg = self.dmg)
+        if self.flags['aggro']:      
+            collision_enemy.take_hit(self.base_effect)
 
     def collision_interactables(self,interactable):#collusion interactables
         interactable.take_dmg(self)#some will call clash_particles but other will not. So sending self to interactables
@@ -43,7 +46,7 @@ class Projectiles(PlatformEntity):#projectiels
             self.velocity[0] = 10 * dir[0]
             self.velocity[1] = dy * 0.2
 
-    def take_dmg(self, dmg):
+    def take_hit(self, effect):
         pass
 
     #pltform, ramp collisions.

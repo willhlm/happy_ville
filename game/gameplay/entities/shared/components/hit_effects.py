@@ -25,6 +25,10 @@ class HitEffect():
         # Callback dicts - populated by factory functions
         self.defender_callbacks = {}
         self.attacker_callbacks = {}
+
+        # Runtime context (set at collision time)
+        self.attacker = kwargs.get('attacker', None)
+        self.defender = None        
     
     def copy(self):
         new_effect = HitEffect.__new__(HitEffect)
@@ -37,46 +41,49 @@ class HitEffect():
         new_effect.meta = self.meta.copy()
         new_effect.defender_callbacks = self.defender_callbacks.copy()
         new_effect.attacker_callbacks = self.attacker_callbacks.copy()
+
+        new_effect.attacker = self.attacker
+        new_effect.defender = None        
         return new_effect
 
 # ============================================================================
 # DEFAULT _execute_defender_feedback and _execute_attacker_feedback
 # ============================================================================
 
-def default_defender_sound(effect, defender, **kwargs):
+def default_defender_sound(effect):
     """Play hurt sound"""
     try:
-        defender.game_objects.sound.play_sfx(defender.sounds['hurt'][0], vol=0.2)
+        effect.defender.game_objects.sound.play_sfx(effect.defender.sounds['hurt'][0], vol=0.2)
     except:
         pass
 
-def default_defender_particles(effect, defender, **kwargs):
+def default_defender_particles(effect):
     """Spawn hit particles"""
-    defender.emit_particles(**effect.particles)
+    effect.defender.emit_particles(**effect.particles)
 
-def default_defender_hitstop(effect, defender, **kwargs):
+def default_defender_hitstop(effect):
     """Hitstop with knockback"""
     callback = {'knock_back': {'amp': effect.knockback, 'dir': effect.meta['attacker_dir']}}
-    defender.apply_hitstop(lifetime=effect.hitstop, call_back=callback)
+    effect.defender.apply_hitstop(lifetime=effect.hitstop, call_back=callback)
 
-def default_defender_visual(effect, defender, **kwargs):
+def default_defender_visual(effect):
     """Visual feedback (hurt flash)"""
-    defender.shader_state.handle_input('Hurt')
+    effect.defender.shader_state.handle_input('Hurt')
 
-def default_attacker_hitstop(effect, attacker, defender):
+def default_attacker_hitstop(effect):
     """Attacker hitstop - works for projectiles AND entities"""    
-    entity = getattr(attacker, 'entity', attacker)# If projectile: use .entity; if entity: use itself
+    entity = getattr(effect.attacker, 'entity', effect.attacker)# If projectile: use .entity; if entity: use itself
     entity.apply_hitstop(lifetime=effect.hitstop, call_back=None)
 
-def default_attacker_particles(effect, projectile, defender):
+def default_attacker_particles(effect):
     """Clash particles (projectile-specific)"""
-    projectile.clash_particles(defender.hitbox.center, number_particles=5)
+    effect.attacker.clash_particles(effect.defender.hitbox.center, number_particles=5)
 
-def default_sound_dynamic(effect, projectile, defender):
+def default_sound_dynamic(effect):
     """Dynamically resolve and play hit sound"""        
-    material = getattr(defender, 'material', 'flesh')
-    sound = projectile.game_objects.sound.get_sfx(effect.hit_type, material)[0]
-    projectile.game_objects.sound.play_sfx(sound, vol = 1)
+    material = getattr(effect.defender, 'material', 'flesh')
+    sound = effect.attacker.game_objects.sound.get_sfx(effect.hit_type, material)[0]
+    effect.attacker.game_objects.sound.play_sfx(sound, vol = 1)
 
 # ============================================================================
 # FACTORY FUNCTIONS

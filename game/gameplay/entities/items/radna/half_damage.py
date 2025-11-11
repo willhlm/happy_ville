@@ -22,5 +22,5 @@ class HalfDamage(Radna):
 
     @classmethod
     def pool(cls, game_objects):
-        cls.sprites = read_files.load_sprites_dict('assets/sprites/entities/radna/half_dmg/',game_objects)#for inventory
+        cls.sprites = read_files.load_sprites_dict('assets/sprites/entities/items/radna/half_dmg/',game_objects)#for inventory
         super().pool(game_objects)

@@ -15,6 +15,7 @@ class Character(PlatformEntity):#enemy, NPC,player
         self.shader_state = states_shader.Idle(self)
         self.hitstop_states = hitstop_states.Idle(self)
         self.hit_component = HitComponent(self)
+        self.flags = {'invincibility': False}
 
     def update(self, dt):
         self.update_vel(dt)
@@ -29,13 +30,13 @@ class Character(PlatformEntity):#enemy, NPC,player
         self.velocity[1] = min(self.velocity[1], self.max_vel[1])#set a y max speed#
         self.velocity[0] += dt * (self.dir[0]*self.acceleration[0] - self.friction[0] * self.velocity[0])
 
-    def take_hit(self, attacker, effect):
+    def take_hit(self, effect):
         """Delegate to hit component"""       
-        return self.hit_component.take_hit(attacker, effect)
+        return self.hit_component.take_hit(effect)
 
-    def take_dmg(self, effect):
+    def take_dmg(self, damage):
         """Called by hit_component after modifiers run. Apply damage and effects."""
-        self.health -= effect.damage
+        self.health -= damage
         self.flags['invincibility'] = True
                         
         if self.health > 0:  # Still alive

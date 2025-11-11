@@ -1989,6 +1989,7 @@ class DashAirMain(DashGroundPre):#level one dash: normal
         self.entity.animation.play('dash_air_main')
         self.dash_length = C.dash_length
         self.jump_dash_timer = C.jump_dash_timer
+        self.wall_buffer = 3
 
     def handle_press_input(self, input):#all states should inehrent this function, if it should be able to jump
         input.processed()
@@ -2004,6 +2005,7 @@ class DashAirPost(DashGroundPre):
     def enter(self, **kwarg):
         self.entity.animation.play('dash_air_post')
         self.entity.movement_manager.remove_modifier('dash')
+        self.wall_buffer = 3
 
     def update(self, dt):
         pass
