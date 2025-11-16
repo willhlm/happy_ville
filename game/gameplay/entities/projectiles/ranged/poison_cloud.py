@@ -9,7 +9,6 @@ class PoisonCloud(Projectiles):
         self.image = self.sprites['death'][0]
         self.rect = pygame.Rect(pos[0], pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
-        self.dmg = 1
         self.lifetime=400
 
     def pool(game_objects):

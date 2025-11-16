@@ -3,6 +3,7 @@ from engine.utils import read_files
 from engine import constants as C
 from gameplay.entities.interactables.base.interactables import Interactables
 from . import loot_container_states
+from gameplay.entities.items import AmberDroplet
 
 class LootContainers(Interactables):
     def __init__(self, pos, game_objects, state, ID_key):
@@ -37,9 +38,9 @@ class LootContainers(Interactables):
     def on_invincibility_timeout(self):
         self.flags['invincibility'] = False
    
-    def take_dmg(self, effect):
+    def take_dmg(self, damage):
         """Called by hit_component after modifiers run. Apply damage and effects."""
-        self.health -= effect.damage
+        self.health -= damage
         self.flags['invincibility'] = True
         
         # Play hurt sound
@@ -54,5 +55,5 @@ class LootContainers(Interactables):
 
     def hit_loot(self):#sput out amvers when hit
         for i in range(0, random.randint(1,3)):
-            obj = Amber_droplet(self.hitbox.midtop, self.game_objects)
+            obj = AmberDroplet(self.hitbox.midtop, self.game_objects)
             self.game_objects.loot.add(obj)

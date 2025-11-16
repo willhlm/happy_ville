@@ -90,7 +90,7 @@ class Dash(MovementModifier):#should it instead be a general driction modifier?
 
     def apply(self, context):
         context.gravity = 0
-        context.velocity[0] += self.dash_vel * self.entity.dir[0]
+        context.velocity[0] += self.dash_vel * self.entity.dir[0] 
 
 class DashJump(MovementModifier):
     def __init__(self, priority, **kwarg):

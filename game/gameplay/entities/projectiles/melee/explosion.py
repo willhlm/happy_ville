@@ -11,7 +11,6 @@ class Explosion(Melee):
         self.hitbox = self.rect.copy()
         self.dir = [0, 0]
         self.lifetime = 100
-        self.dmg = 1
 
     def pool(game_objects):
         Explosion.sprites = read_files.load_sprites_dict('assets/sprites/entities/projectiles/explosion/', game_objects)

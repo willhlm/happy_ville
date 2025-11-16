@@ -11,7 +11,6 @@ class FallingRock(Projectiles):#things that can be placed in cave, the source ma
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = self.rect.copy()
         self.lifetime = 100
-        self.dmg = 1
         self.currentstate = states_droplet.Idle(self)
 
     def pool(game_objects):

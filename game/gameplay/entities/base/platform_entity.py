@@ -51,7 +51,7 @@ class PlatformEntity(AnimatedEntity):#Things to collide with platforms
     def right_collision(self, block, type = 'Wall'):
         self.hitbox.right = block.hitbox.left
         self.collision_types['right'] = True
-        self.currentstate.handle_input(type)        
+        self.currentstate.handle_input(type)    
 
     def left_collision(self, block, type = 'Wall'):
         self.hitbox.left = block.hitbox.right

@@ -14,21 +14,21 @@ class HitComponent():
             HitResult.REFLECTED: self.on_reflected,
         }
 
-    def take_hit(self, attacker, effect):
+    def take_hit(self, effect):
         """Process incoming hit. Returns (damage_applied, modified_effect)"""        
         if self.entity.flags.get('invincibility', False): return False, effect# Check invincibility first
-        
+        effect.defender = self.entity
         # Process through modifiers directly
         for modifier in self.damage_manager._sorted_modifiers:
             modifier.modify_hit(effect)            
             if effect.result != HitResult.CONNECTED:# Stop if hit was cancelled
-                self._execute_attacker_feedback(effect, attacker)
+                self._execute_attacker_feedback(effect)
                 self.hit_handlers[effect.result](effect)
                 return False, effect
                 
-        self.entity.take_dmg(effect)#hit is conencted: Apply the damage
+        self.entity.take_dmg(effect.damage)#hit is conencted: Apply the damage
         self._execute_defender_feedback(effect)
-        self._execute_attacker_feedback(effect, attacker)        
+        self._execute_attacker_feedback(effect)        
         
         return True, effect
     
@@ -44,9 +44,9 @@ class HitComponent():
     def _execute_defender_feedback(self, effect):
         """Execute defender callbacks"""
         for callback in effect.defender_callbacks.values():
-            callback(effect, self.entity)
+            callback(effect)
     
-    def _execute_attacker_feedback(self, effect, attacker):        
+    def _execute_attacker_feedback(self, effect):        
         """Execute attacker callbacks"""
         for callback in effect.attacker_callbacks.values():
-            callback(effect, attacker, self.entity)        
+            callback(effect)        

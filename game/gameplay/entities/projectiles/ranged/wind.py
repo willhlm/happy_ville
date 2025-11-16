@@ -7,7 +7,6 @@ class Wind(Projectiles):
         self.image = Wind.image
         self.rect = pygame.Rect(pos[0], pos[1], self.image.texture.width, self.image.texture.height)
         self.hitbox = self.rect.copy()
-        self.dmg = 0
 
         self.time = 0
 

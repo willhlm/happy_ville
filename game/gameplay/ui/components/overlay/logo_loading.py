@@ -11,7 +11,7 @@ class LogoLoading(AnimatedEntity):
         self.animation.framerate = 0.1#makes it slower
 
     def pool(game_objects):
-        LogoLoading.sprites = read_files.load_sprites_dict('assets/sprites/ui/hud/logo_loading/',game_objects)
+        LogoLoading.sprites = read_files.load_sprites_dict('assets/sprites/ui/overlay/logo_loading/',game_objects)
 
     def update(self, dt):
         super().update(dt)

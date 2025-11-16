@@ -494,9 +494,7 @@ class Level():
             id = obj['gid'] - self.map_data['interactables_firstgid']
 
             if id == 2:#save point
-                #new_int = SavePoint(object_position,self.game_objects,self.level_name)  
-                new_int = AbilityBall(object_position,self.game_objects)     
-
+                new_int = SavePoint(object_position,self.game_objects,self.level_name)                  
                 self.game_objects.interactables.add(new_int)
 
             elif id == 3:#runestones, colectable
@@ -1376,7 +1374,7 @@ class Tall_trees(Biome):
                     if property['name'] == 'direction':#determine spawn type and set position accordingly
                         kwarg['direction'] = property['value']
 
-                new_enemy = self.game_objects.registry.fetch('enemies', 'packun')(object_position, self.level.game_objects, **kwarg)
+                new_enemy = self.level.game_objects.registry.fetch('enemies', 'packun')(object_position, self.level.game_objects, **kwarg)
                 self.level.game_objects.enemies.add(new_enemy)
 
             elif id == 11:#one side brakable

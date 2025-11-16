@@ -12,6 +12,7 @@ from gameplay.entities.player.sword import Sword
 from gameplay.entities.player.abilities.ability_manager import AbilityManager
 from gameplay.entities.shared.status.wet import Wet
 from engine import constants as C
+from gameplay.entities.visuals.cosmetics import Blood
 
 class Player(Character):
     def __init__(self, pos, game_objects):
@@ -52,6 +53,7 @@ class Player(Character):
 
     def ramp_down_collision(self, ramp):#when colliding with platform beneth
         super().ramp_down_collision(ramp)
+        self.movement_manager.handle_input('ground')
         self.colliding_platform = ramp#save the latest platform
 
     def down_collision(self, block):#when colliding with platform beneth
@@ -79,11 +81,11 @@ class Player(Character):
 
         self.velocity[0] += dt * (self.dir[0] * self.acceleration[0] - self.velocity[0] * context.friction[0]) + context.velocity[0]
 
-    def take_dmg(self, effect):
+    def take_dmg(self, damage):
         """Called by hit_component after modifiers run. Apply damage and effects."""
-        self.health -= effect.damage
+        self.health -= damage
         self.flags['invincibility'] = True
-        self.game_objects.ui.hud.remove_hearts(effect.damage)# * self.dmg_scale)#update UI
+        self.game_objects.ui.hud.remove_hearts(damage)# * self.dmg_scale)#update UI
 
         if self.health > 0:  # Still alive
             self.game_objects.timer_manager.start_timer(C.invincibility_time_player, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
