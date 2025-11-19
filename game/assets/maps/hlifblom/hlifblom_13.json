@@ -304,12 +304,12 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"light_forest_cave_1"
+                                 "value":"hlifblom_14"
                                 }, 
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"2"
+                                 "value":"1"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -327,7 +327,7 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"light_forest_cave_3"
+                                 "value":"hlifblom_25"
                                 }, 
                                 {
                                  "name":"spawn",
@@ -404,12 +404,12 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"light_forest_cave_14"
+                                 "value":"hlifblom_7"
                                 }, 
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"1"
+                                 "value":"3"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -1284,8 +1284,8 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":320,
-                         "x":3856,
+                         "width":384,
+                         "x":3792,
                          "y":2720
                         }, 
                         {
@@ -1422,49 +1422,31 @@
                         }, 
                         {
                          "gid":4107,
-                         "height":128,
-                         "id":1830,
+                         "height":176,
+                         "id":1834,
                          "name":"",
                          "properties":[
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"light_forest_cave_5"
+                                 "value":"hlifblom_16"
                                 }, 
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"1"
+                                 "value":"2"
                                 }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":1520,
-                         "y":2496
-                        }, 
-                        {
-                         "gid":4111,
-                         "height":400,
-                         "id":1831,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"direction",
-                                 "type":"string",
-                                 "value":"left"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":1504,
-                         "y":2768
+                         "x":1536,
+                         "y":2512
                         }, 
                         {
                          "gid":4097,
                          "height":16,
-                         "id":1832,
+                         "id":1835,
                          "name":"",
                          "properties":[
                                 {
@@ -1476,43 +1458,8 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":1552,
-                         "y":2416
-                        }, 
-                        {
-                         "gid":4104,
-                         "height":32,
-                         "id":1833,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":384,
-                         "x":1312,
-                         "y":2368
-                        }, 
-                        {
-                         "gid":4107,
-                         "height":128,
-                         "id":1834,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"path_to",
-                                 "type":"string",
-                                 "value":"light_forest_cave_5"
-                                }, 
-                                {
-                                 "name":"spawn",
-                                 "type":"string",
-                                 "value":"1"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":1536,
-                         "y":1584
+                         "x":1632,
+                         "y":2432
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -1528,7 +1475,7 @@
          "y":0
         }],
  "nextlayerid":41,
- "nextobjectid":1835,
+ "nextobjectid":1836,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

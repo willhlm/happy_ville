@@ -969,14 +969,14 @@
                         }, 
                         {
                          "gid":39204,
-                         "height":137,
-                         "id":1995,
+                         "height":32,
+                         "id":1999,
                          "name":"",
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":160,
-                         "x":1776,
+                         "width":64,
+                         "x":1840,
                          "y":1408
                         }],
                  "opacity":1,
@@ -1041,12 +1041,12 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"light_forest_cave_3"
+                                 "value":"hlifblom_15"
                                 }, 
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"2"
+                                 "value":"1"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -1064,7 +1064,7 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"light_forest_cave_6"
+                                 "value":"hlifblom_22"
                                 }, 
                                 {
                                  "name":"spawn",
@@ -1627,12 +1627,12 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"light_forest_cave_13"
+                                 "value":"hlifblom_7"
                                 }, 
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"2"
+                                 "value":"1"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -1739,7 +1739,7 @@
          "y":0
         }],
  "nextlayerid":41,
- "nextobjectid":1999,
+ "nextobjectid":2000,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

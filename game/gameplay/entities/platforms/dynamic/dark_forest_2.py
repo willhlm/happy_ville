@@ -14,6 +14,10 @@ class DarkForest_2(BaseDynamic):#dynamic one: #shoudl be added to platforms and 
 
         self.animation = animation.Animation(self)
         self.currentstate = states_moving_platform.Off(self)#
+        self.game_objects.signals.subscribe(self.ID_key, self.lever_hit)
 
     def update_vel(self, dt):
         pass
+
+    def lever_hit(self):
+        self.currentstate.handle_input('transform')

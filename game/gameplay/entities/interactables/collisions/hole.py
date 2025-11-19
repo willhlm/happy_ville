@@ -27,7 +27,7 @@ class Hole(Interactables):#area which will make aila spawn to safe_point if coll
         if self.interacted: return#enter only once
         #print(self.interacted, 'col')
         self.player_transport(player)
-        player.take_dmg(dmg = 1)
+        player.take_dmg(damage = 1)
         self.interacted = True
 
     def player_transport(self, player):#transports the player to safe position

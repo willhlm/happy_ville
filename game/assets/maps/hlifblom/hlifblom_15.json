@@ -747,7 +747,7 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":3136,
+                         "x":3008,
                          "y":1712
                         }, 
                         {
@@ -759,12 +759,12 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"light_forest_cave_2"
+                                 "value":"hlifblom_16"
                                 }, 
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"4"
+                                 "value":"1"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -775,7 +775,7 @@
                         }, 
                         {
                          "gid":4111,
-                         "height":96,
+                         "height":432,
                          "id":1817,
                          "name":"",
                          "properties":[
@@ -789,7 +789,7 @@
                          "visible":true,
                          "width":16,
                          "x":3200,
-                         "y":1760
+                         "y":1936
                         }, 
                         {
                          "gid":4111,

@@ -5,7 +5,7 @@
   <image width="80" height="64" source="../../../sprites/entities/interactables/grass/hlifblom/cave_grass/idle/idle01.png"/>
  </tile>
  <tile id="1">
-  <image width="32" height="32" source="../../../sprites/entities/visuals/enviroments/ljusmaskar/idle/ljusmaskar01.png"/>
+  <image width="32" height="32" source="../../../sprites/entities/visuals/environments/ljusmaskar/idle/ljusmaskar01.png"/>
  </tile>
  <tile id="2">
   <image width="32" height="32" source="../../../sprites/entities/interactables/sources/droplet/idle/source1.png"/>
@@ -14,7 +14,7 @@
   <image width="16" height="48" source="../../../sprites/entities/interactables/sources/falling_rock/idle/idle.png"/>
  </tile>
  <tile id="4">
-  <image width="32" height="112" source="../../../sprites/entities/visuals/enviroments/vines/vines_2/idle/idle.png"/>
+  <image width="32" height="112" source="../../../sprites/entities/visuals/environments/vines/vines_2/idle/idle.png"/>
  </tile>
  <tile id="5">
   <properties>

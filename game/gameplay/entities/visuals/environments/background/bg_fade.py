@@ -39,7 +39,8 @@ class BgFade(BgBlock):
 
     def draw(self, target):#called before draw in group
         self.shader_state.draw()
-        super().draw(target)
+        pos = (int(self.true_pos[0] - self.parallax[0] * self.game_objects.camera_manager.camera.interp_scroll[0]),int(self.true_pos[1] - self.parallax[0] * self.game_objects.camera_manager.camera.interp_scroll[1]))
+        self.game_objects.game.display.render(self.image, target, position = pos, shader = self.shader)  # Shader render
 
     def player_collision(self, player):
         if self.interacted: return
