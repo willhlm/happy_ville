@@ -23,7 +23,7 @@ class Off(Basic_states):#idle
         self.entity.velocity[0] = 0
 
     def handle_input(self,input,**kwarg):
-        if input == 'Transform' or input == 'On':
+        if input == 'transform' or input == 'On':
             self.enter_state('On')   
 
 class On(Basic_states):#on
@@ -34,6 +34,6 @@ class On(Basic_states):#on
         self.entity.velocity[0] += dt * 0.01
 
     def handle_input(self,input,**kwarg):
-        if input == 'Transform' or input == 'Off':
+        if input == 'transform' or input == 'Off':
             self.enter_state('Off')   
 

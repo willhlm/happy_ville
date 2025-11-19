@@ -6,7 +6,7 @@ class HurtBox(Melee):#a hitbox that spawns
     def __init__(self, entity, **kwarg):
         super().__init__(entity, **kwarg)
         self.hitbox = pygame.Rect(entity.rect.topleft, kwarg.get('size', [64, 64]))
-        self.base_effect = hit_effects.create_melee_effect(damage = self.dmg, hit_type = 'sword', knockback = [25, 10], hitstop = 10)
+        self.base_effect = hit_effects.create_melee_effect(damage = self.dmg, hit_type = 'sword', knockback = [25, 10], hitstop = 10, attacker = self)
 
     def update_render(self, dt):
         pass

@@ -11,7 +11,7 @@ class BreakableOnesideLeft(BaseBreakableOneside):
         self.hitbox = self.rect.copy()
 
     def take_dmg(self, projectile):
-        if self.hitbox.centerx - projectile.rect.centerx > 0:#projectile from left: depends on the speciic objects
+        if self.hitbox.centerx - projectile.rect.centerx < 0:#projectile from left: depends on the speciic objects
             super().take_dmg(projectile)            
 
 #dynamics (moving) ones

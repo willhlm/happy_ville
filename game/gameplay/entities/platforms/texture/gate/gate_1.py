@@ -21,6 +21,10 @@ class Gate_1(BaseTexture):#a gate. The ones that are owned by the lever will han
 
         self.animation = animation.Animation(self)
         self.currentstate = {'erect': states_gate.Erect, 'down': states_gate.Down}[state](self)
+        self.game_objects.signals.subscribe(self.ID_key, self.lever_hit)
 
     def init(self):
         self.sprites = read_files.load_sprites_dict('assets/sprites/entities/platforms/gates/gate_1/', self.game_objects)
+
+    def lever_hit(self):
+        self.currentstate.handle_input('transform')

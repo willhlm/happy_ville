@@ -245,7 +245,7 @@ class FloatyParticles(Particles):#particles with a texture
         self.velocity[1] += dt*0.01
 
     def pool(game_objects):#save the stuff in memory for later use
-        FloatyParticles.sprites = read_files.load_sprites_dict('assets/sprites/gfx/particles/floaty/', game_objects)
+        FloatyParticles.sprites = read_files.load_sprites_dict('assets/sprites/entities/visuals/cosmetics/particles/floaty/', game_objects)
 
 class Offset(Particles):#not implemented fully -> need angular motion
     def __init__(self, pos, game_objects, **kwarg):

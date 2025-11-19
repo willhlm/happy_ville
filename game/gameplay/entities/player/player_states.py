@@ -130,13 +130,13 @@ class FallState(CompositeState):
         self.phases = {'pre': FallPre(entity), 'main': FallMain(entity)}        
 
     def common_values(self):#call when this state is enetred
-        self.falltime = 0
+        self.falltime = 0        
 
     def update(self, dt):
         self.falltime += dt
 
     def determine_fall(self):
-        if self.falltime > 40: return True
+        if self.falltime >= 40: return True
         return False
 
 class LandState(CompositeState):

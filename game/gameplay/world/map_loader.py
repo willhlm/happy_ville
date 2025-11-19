@@ -27,7 +27,7 @@ class Level():
     def load_map(self, map_name, spawn):
         self.game_objects.game.screen_manager.clear_screens()
         self.game_objects.player.shader_state.handle_input('idle')#reset any shaders that might be on        
-        self.references = {'shade':[], 'gate':[], 'lever':[], 'platforms':[], 'bg_fade': []}#to save some stuff so that it can be organisesed later in case e.g. some things needs to be loaded in order: needs to be cleaned after each map loading
+        self.references = {'bg_fade': []}#to save some stuff so that it can be organisesed later in case e.g. some things needs to be loaded in order: needs to be cleaned after each map loading
         self.spawned = False#a flag so that we only spawn alia once
         self.level_name = map_name.lower()#biom_room
         self.spawn = spawn
@@ -100,7 +100,7 @@ class Level():
             parallax = [self.map_data['groups'][group]['parallaxx'], self.map_data['groups'][group]['parallaxy']]
             offset = [self.map_data['groups'][group]['offsetx'], self.map_data['groups'][group]['offsety']]
 
-            self.game_objects.game.screen_manager.register_screen(group, parallax)#make a screen for eahcl ayer in tiled
+            self.game_objects.game.screen_manager.register_screen(group, parallax)#make a screen for eahc layer in tiled
             if group.startswith('bg'):
                 self.game_objects.all_bgs.new_group(group, groups.LayeredUpdates())#make a new pygame group for each layer in tiled
                 #self.game_objects.all_bgs.append(groups.Group_BG())#make a new pygame group for each layer in tiled                
@@ -361,12 +361,20 @@ class Level():
                 self.game_objects.interactables.add(new_zoom)
 
             elif id == 23:#shade trigger, to change the screen shade upon trigger
+                kwargs = {}
                 for property in properties:
                     if property['name'] == 'colour':
-                        colour = property['value']
-                
-                new_interacable = ShadeTrigger(object_position, self.game_objects, object_size, pygame.Color(colour))
-                self.references['shade_trigger'] = new_interacable
+                         colour = list(pygame.Color(property['value']))
+                         kwargs['colour'] = [colour[1]/255,colour[2]/255,colour[3]/255,colour[0]/255]
+                    elif property['name'] == 'layers':                        
+                        layers = property['value'] .split(",")
+                        kwargs['layers'] = [l.strip() for l in layers]
+                    elif property['name'] == 'scale':
+                        kwargs['scale'] = property['value']       
+                    elif property['name'] == 'shader':
+                        kwargs['shader'] = property['value']        
+
+                new_interacable = LayerTrigger(object_position, self.game_objects, object_size, **kwargs)
                 self.game_objects.interactables.add(new_interacable)
 
             elif id == 24:#deadth fog
@@ -556,7 +564,6 @@ class Level():
                         kwarg['on'] = property['value']
                 
                 lever = Lever(object_position,self.game_objects, **kwarg)
-                self.references['lever'].append(lever)
                 self.game_objects.interactables.add(lever)
 
             elif id == 11:#gate
@@ -567,7 +574,6 @@ class Level():
                     elif property['name'] == 'erect':
                         kwarg['erect'] = property['value']
                 gate = Gate_1(object_position,self.game_objects, **kwarg)
-                self.references['gate'].append(gate)
                 self.game_objects.platforms.add(gate)
 
             elif id == 12:#challenge monument
@@ -599,7 +605,6 @@ class Level():
                     elif property['name'] == 'erect':
                         kwarg['erect'] = property['value']
                 gate = Gate_2(object_position,self.game_objects, **kwarg)
-                self.references['gate'].append(gate)
                 self.game_objects.platforms.add(gate)
 
             elif id == 16:#air dash statue
@@ -715,19 +720,7 @@ class Level():
                         self.game_objects.all_bgs.add(self.layer,bg_animation)
 
     def orginise_references(self):#called at the end of the loader
-        if self.references.get('shade_trigger',False):
-            self.references['shade_trigger'].add_shade_layers(self.references['shade'])
-
-        for lever in self.references['lever']:#assume that the gate/platform - lever is on the same map
-            for gate in self.references['gate']:#conenct gates to a lever
-                if lever.ID_key == gate.ID_key:
-                    lever.add_reference(gate)
-
-            for platform in self.references['platforms']:#connect a platform to a lever
-                if lever.ID_key == platform.ID_key:
-                    lever.add_reference(platform)
-
-        for i, bg_fade in enumerate(self.references['bg_fade']):#combines the bg_fades
+        for i, bg_fade in enumerate(self.references['bg_fade']):#combines the bg_fades if they overlap in tiled
             for j in range(i + 1, len(self.references['bg_fade'])):
                 if bg_fade.hitbox.colliderect(self.references['bg_fade'][j].hitbox):
                     bg_fade.add_child(self.references['bg_fade'][j])
@@ -850,7 +843,6 @@ class Village(Biome):
                 door_i = DoorInteract(object_position, self.level.game_objects, door)
                 self.level.game_objects.platforms.add(door)
                 self.level.game_objects.interactables.add(door_i)
-                #self.references['gate'].append(door)
 
 class Nordveden(Biome):
     def __init__(self, level):
@@ -965,7 +957,7 @@ class Nordveden(Biome):
                         ID_key = property['value']
 
                 if not self.level.game_objects.world_state.state[self.level.level_name]['breakable_platform'].get(str(ID_key), False):
-                    platform = BreakableOnesideLeft(object_position, self.level.game_objects, str(ID_key), 'assets/sprites/entitites/platforms/breakable/nordveden/type2/')
+                    platform = BreakableOnesideLeft(object_position, self.level.game_objects, str(ID_key), 'assets/sprites/entities/platforms/breakable/nordveden/type2/')
                     self.level.game_objects.platforms.add(platform)
 
             elif id == 10:#dissapera when standing on it
@@ -1347,7 +1339,6 @@ class Dark_forest(Biome):
                 new_platform = DarkForest_2(object_position, self.level.game_objects, **kwarg)
                 #self.level.game_objects.dynamic_platforms.add(new_platform)
                 self.level.game_objects.platforms.add(new_platform)
-                self.level.references['platforms'].append(new_platform)
 
             elif id == 14:
                 new_boss = self.game_objects.registry.fetch('enemies', 'reindeer')(object_position, self.game_objects)

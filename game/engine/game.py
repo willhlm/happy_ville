@@ -13,12 +13,12 @@ class Game():
         self.scale = self.scale_size(2)#get the scale according to your display size
         self.display_size = [int(self.window_size[0] * self.scale), int(self.window_size[1] * self.scale)]
         game_settings = read_files.read_json('config/game_settings.json')['display']
-        self.display = RenderEngine(self.display_size[0] - self.scale, self.display_size[1] - self.scale, fullscreen = game_settings['fullscreen'], vsync = game_settings['vsync']) #vsync -1 may be good for mac
-        self.screen_manager = ScreenManager(self)
+        self.display = RenderEngine(self.display_size[0] - self.scale, self.display_size[1] - self.scale, fullscreen = game_settings['fullscreen'], vsync = game_settings['vsync']) #vsync -1 may be good for mac        
 
         #initiate game related values
         self.game_loop = GameLoop(self)
         self.game_objects = game_objects.Game_Objects(self)
+        self.screen_manager = ScreenManager(self)
         self.state_manager = state_manager.State_manager(self, 'title_menu')
 
         #debug flags

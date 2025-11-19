@@ -46,7 +46,7 @@ class Layer:
         """Get the height of the layer."""
         return self._fbo.height
 
-    def clear(self, R: (int or tuple[int]) = 0, G: int = 0, B: int = 0, A: int = 255):
+    def clear(self, R: (int | tuple[int]) = 0, G: int = 0, B: int = 0, A: int = 255):
         """
         Clear the layer with a color.
 

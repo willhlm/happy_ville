@@ -227,25 +227,7 @@
                  "draworder":"topdown",
                  "id":110,
                  "name":"statics",
-                 "objects":[
-                        {
-                         "gid":17,
-                         "height":16,
-                         "id":444,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"colour",
-                                 "type":"color",
-                                 "value":"#ffffffff"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":2368,
-                         "y":848
-                        }],
+                 "objects":[],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -308,25 +290,7 @@
                  "draworder":"topdown",
                  "id":109,
                  "name":"statics",
-                 "objects":[
-                        {
-                         "gid":17,
-                         "height":16,
-                         "id":443,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"colour",
-                                 "type":"color",
-                                 "value":"#ffffffff"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":2528,
-                         "y":704
-                        }],
+                 "objects":[],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -379,25 +343,7 @@
                  "draworder":"topdown",
                  "id":108,
                  "name":"statics",
-                 "objects":[
-                        {
-                         "gid":17,
-                         "height":16,
-                         "id":442,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"colour",
-                                 "type":"color",
-                                 "value":"#ffffffff"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":2928,
-                         "y":816
-                        }],
+                 "objects":[],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -448,25 +394,7 @@
                  "draworder":"topdown",
                  "id":107,
                  "name":"statics",
-                 "objects":[
-                        {
-                         "gid":17,
-                         "height":16,
-                         "id":441,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"colour",
-                                 "type":"color",
-                                 "value":"#ffffffff"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":2976,
-                         "y":496
-                        }],
+                 "objects":[],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -1373,7 +1301,7 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":464,
+                         "x":496,
                          "y":912
                         }, 
                         {
@@ -1558,6 +1486,16 @@
                                  "name":"colour",
                                  "type":"color",
                                  "value":"#ff000000"
+                                }, 
+                                {
+                                 "name":"layers",
+                                 "type":"string",
+                                 "value":"bg1, bg2, bg3"
+                                }, 
+                                {
+                                 "name":"shader",
+                                 "type":"string",
+                                 "value":"vignette"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -1565,24 +1503,6 @@
                          "width":1008,
                          "x":3520,
                          "y":864
-                        }, 
-                        {
-                         "gid":17,
-                         "height":16,
-                         "id":445,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"colour",
-                                 "type":"color",
-                                 "value":"#ffffffff"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":3360,
-                         "y":688
                         }, 
                         {
                          "gid":8,

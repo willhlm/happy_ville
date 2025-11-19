@@ -1,6 +1,7 @@
 import pygame
 from engine.utils import read_files
 from gameplay.entities.interactables.grass.base.interactable_bushes import InteractableBushes
+from gameplay.entities.visuals.particles import particles
 
 class InteractableCaveGrass(InteractableBushes):
     def __init__(self,pos,game_objects):
