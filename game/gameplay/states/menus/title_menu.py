@@ -82,14 +82,10 @@ class TitleMenu(BaseUI):
             #self.game.game_objects.load_map(self,'crystal_mines_1','1')
             self.game.game_objects.load_map(self,'nordveden_1','1')
             #self.game.game_objects.load_map(self,'nordveden_windtest','1')
-<<<<<<< HEAD
             #self.game.game_objects.load_map(self,'nordveden_platformtest','1')
-            self.game.game_objects.load_map(self,'dark_forest_1','5')
             #self.game.game_objects.load_map(self,'tall_trees_1','1')
-=======
             #self.game.game_objects.load_map(self,'dark_forest_1','5')
             #self.game.game_objects.load_map(self,'tall_trees_2','1')
->>>>>>> 3403d98d3a7b126c69be4e3699c10199b2b6b8e0
             #self.game.game_objects.load_map(self,'hlifblom_1','1')
             #self.game.game_objects.load_map(self,'rhoutta_encounter_3','1')
             #self.game.game_objects.load_map(self,'golden_fields_2','1')
