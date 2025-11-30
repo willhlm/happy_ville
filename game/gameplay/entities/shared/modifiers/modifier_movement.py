@@ -90,7 +90,7 @@ class Dash(MovementModifier):#should it instead be a general driction modifier?
 
     def apply(self, context):
         context.gravity = 0
-        context.velocity[0] += self.dash_vel * self.entity.dir[0] 
+        context.velocity[0] += self.dash_vel * self.entity.dir[0]
 
 class DashJump(MovementModifier):
     def __init__(self, priority, **kwarg):
@@ -112,7 +112,7 @@ class AirBoost(MovementModifier):#should it instead be a general driction modifi
         super().__init__(priority)
         self.entity = kwarg['entity']
         self.target = MovementContext().friction[0]
-        self.friction_x = 0.15
+        self.friction_x = kwarg.get('friction_x', 0.14)
         self.friction_y = 0.00
         self.ref_y = self.friction_y * (0.0001  + 1)
         self.ref_x = self.friction_x * (1 - 0.000000005 )
