@@ -1251,7 +1251,6 @@ class WallGlide(PhaseBase):
         super().__init__(entity)
         self.animation_name = kwarg['animation_name']
 
-
     def enter(self, **kwarg):
         self.entity.animation.play(self.animation_name)#the name of the class
         self.entity.flags['ground'] = False#used for jumping: sets to false in cayote timer and in jump state
@@ -1275,8 +1274,6 @@ class WallGlide(PhaseBase):
             self.enter_state('fall', wall_dir = self.dir)
         else:
             self.entity.velocity[0] += self.entity.dir[0] * 0.2
-
-
 
     def handle_press_input(self,input):
         event = input.output()

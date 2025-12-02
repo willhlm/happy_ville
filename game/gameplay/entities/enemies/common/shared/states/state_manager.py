@@ -44,4 +44,4 @@ class StateManager:
 
     def check_player_distance(self):
         player = self.entity.game_objects.player
-        self.player_distance = [player.rect.centerx - self.entity.rect.centerx, player.rect.centery - self.entity.rect.centery]
+        self.player_distance = [player.hitbox.centerx - self.entity.hitbox.centerx, player.hitbox.centery - self.entity.hitbox.centery]

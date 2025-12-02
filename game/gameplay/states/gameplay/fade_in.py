@@ -10,17 +10,17 @@ class FadeIn(Gameplay):
         self.fade_surface.clear(0,0,0,255)
 
     def init(self):
-        self.aila_state = 'Idle_main'#for respawn after death
+        self.aila_state = 'idle'#for respawn after death
         for state in self.game.state_manager.state_stack:
             if 'Death' == type(state).__name__:
-                self.aila_state = 'Invisible_main'
-                self.game.game_objects.player.currentstate.enter_state('Invisible_main')
+                self.aila_state = 'invisible'
+                self.game.game_objects.player.currentstate.enter_state('invisible')
                 break
 
     def update_render(self, dt):
         self.fade_update(dt)#so that it doesn't collide with collision path
         self.count += dt
-        if self.count > self.fade_length*2:
+        if self.count > self.fade_length:
             self.exit()
 
     def exit(self):
@@ -34,4 +34,7 @@ class FadeIn(Gameplay):
         alpha = max(int((self.fade_length - self.count)*(255/self.fade_length)),0)
         self.fade_surface.clear(0,0,0,alpha)
         self.game.render_display(self.fade_surface.texture)
+
+    def handle_movement(self):#to prevent controller inputs on aila movement
+        pass
 
