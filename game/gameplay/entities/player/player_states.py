@@ -58,10 +58,9 @@ class PlayerStates():
 
     def enter_state(self, state_name, phase = None, **kwargs):
         state = self.states.get(state_name)
-        if state:#if the requested state is unlocked
-            if not state.enter_state(phase, **kwargs):
-                self.composite_state.cleanup(**kwargs)
-                self.composite_state = state
+        if state and state.allowed():#if the requested state is unlocked
+            state.enter_state(phase, **kwargs)
+            self.composite_state = state
 
     def update(self, dt):#called from player
         self.composite_state.update(dt)#main state
@@ -99,8 +98,8 @@ class CompositeState():#will contain pre, main, post phases of a state
         self.common_values()
         self.enter_phase(phase_name, **kwarg) #enter the phase of the state
 
-    def cleanup(self, **kwarg): #called when exiting this state
-        pass
+    def allowed(self):
+        return True
 
     def common_values(self):#set common values for the phases
         pass
@@ -108,8 +107,8 @@ class CompositeState():#will contain pre, main, post phases of a state
     def update(self, dt):
         self.current_phase.update(dt)
 
-    def handle_input(self, input, **kwargs):
-        self.current_phase.handle_input(input, **kwargs)
+    def handle_input(self, input, **kwarg):
+        self.current_phase.handle_input(input, **kwarg)
 
     def handle_press_input(self, input):
         self.current_phase.handle_press_input(input)
@@ -129,6 +128,10 @@ class FallState(CompositeState):
         super().__init__(entity)
         self.phases = {'pre': FallPre(entity), 'main': FallMain(entity)}
 
+    def enter_state(self, phase_name, **kwarg):
+        super().enter_state(phase_name, **kwarg)
+        self.allow_sprint = kwarg.get('allow_sprint', False)
+
     def common_values(self):#call when this state is enetred
         self.falltime = 0
 
@@ -138,6 +141,9 @@ class FallState(CompositeState):
     def determine_fall(self):
         if self.falltime >= 4000: return True
         return False
+
+    def determine_sprint(self):
+        return self.allow_sprint
 
 class LandState(CompositeState):
     def __init__(self, entity):
@@ -187,15 +193,8 @@ class DashGroundState(CompositeState):
     def common_values(self):#called when entering this new state, and will not change during phase changes
         self.dir = self.entity.dir.copy()#copy the direction of the entity, and save it in the state across phases
 
-    def enter_state(self, phase_name, **kwarg):#called when entering a new state
-        if not self.entity.flags['grounddash']: return True
-        super().enter_state(phase_name, **kwarg)
-
-    def cleanup(self, **kwarg):
-        if kwarg.get('to_dash_jump', False):
-            return
-        self.entity.flags['grounddash'] = False
-        self.entity.game_objects.timer_manager.start_timer(C.ground_dash_timer, self.entity.on_grounddash_timout)
+    def allowed(self):
+        return self.entity.flags['grounddash']
 
 class WallGlideState(CompositeState):
     def __init__(self, entity):
@@ -212,13 +211,9 @@ class DashJumpState(CompositeState):
         super().__init__(entity)
         self.phases = {'pre': DashJumpPre(entity)}#, 'main': DashJumpMain(entity), 'post': DashJumpPost(entity)}
 
-    def enter_state(self, phase_name, **kwarg):#called when entering a new state
-        if not self.entity.flags['grounddash']: return True
-        super().enter_state(phase_name, **kwarg)
+    def allowed(self):
+        return self.entity.flags['grounddash']
 
-    def cleanup(self, **kwarg):
-        self.entity.flags['grounddash'] = False#if fasle, sword cannot be swang. sets to true when timer runs out
-        self.entity.game_objects.timer_manager.start_timer(C.ground_dash_timer, self.entity.on_grounddash_timout)
 
 class WallJumpState(CompositeState):
     def __init__(self, entity):
@@ -904,7 +899,7 @@ class SprintMain(PhaseBase):
 
     def update(self, dt):
         if not self.entity.collision_types['bottom']:
-            self.enter_state('fall')#fall pre
+            self.enter_state('fall', allow_sprint=True)#fall pre
             self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
 
     def handle_press_input(self,input):
@@ -936,7 +931,7 @@ class SprintPost(PhaseBase):
 
     def update(self, dt):
         if not self.entity.collision_types['bottom']:
-            self.enter_state('fall')#pre
+            self.enter_state('fall', allow_sprint=True)#pre
             self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
 
     def handle_press_input(self,input):
@@ -1154,6 +1149,8 @@ class FallPre(PhaseAirBase):
         elif input == 'Ground':
             if self.entity.currentstate.states['fall'].determine_fall():
                 self.enter_state('land', phase = 'hard')
+            elif self.entity.game_objects.controller.is_held('lb') and self.entity.currentstate.states['fall'].determine_sprint():
+                self.enter_state('sprint')
             else:
                 if self.entity.acceleration[0] != 0:
                     self.enter_state('run')#enter run pre phase
@@ -1457,6 +1454,8 @@ class DashGroundMain(DashGroundPre):#level one dash: normal
         input.processed()
 
     def increase_phase(self):
+        self.entity.flags['grounddash'] = False#if fasle, sword cannot be swang. sets to true when timer runs out
+        self.entity.game_objects.timer_manager.start_timer(C.ground_dash_timer, self.entity.on_grounddash_timout, 'dash timeout')
         self.entity.shader_state.handle_input('idle')
         if self.entity.game_objects.controller.is_held('lb'):
             self.enter_state('sprint')
@@ -2027,7 +2026,7 @@ class DashAirPost(DashGroundPre):
         if self.entity.acceleration[0] == 0:
             self.enter_state('idle')
         else:
-            self.enter_state('fall')#enter run main phase
+            self.enter_state('fall', allow_sprint=True)#enter run main phase
 
     def handle_press_input(self, input):#all states should inehrent this function, if it should be able to jump
         event = input.output()

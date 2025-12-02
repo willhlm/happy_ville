@@ -32,9 +32,9 @@ class Game_Objects():
         self.map = map_loader.Level(self)
         self.camera_manager = camera.Camera_manager(self)
         self.world_state = world_state.World_state(self)#save/handle all world state stuff here
-        self.ui = ui.UI_manager(self)        
+        self.ui = ui.UI_manager(self)
         self.save_load = save_load.Save_load(self)#contains save and load attributes to load and save game
-        self.quests_events = quests_events.Quests_events(self)        
+        self.quests_events = quests_events.Quests_events(self)
         self.signals = signals.Signals()
         self.input_interpreter = input_interpreter.InputInterpreter(self)
         self.time_manager = time_manager.Time_manager(self)
@@ -77,13 +77,13 @@ class Game_Objects():
 
     def load_map2(self, map_name, spawn = '1', fade = True):#called from fadeout or load_map above
         self.clean_groups()
-        t1_start = perf_counter()  
+        t1_start = perf_counter()
         self.map.load_map(map_name, spawn)#memory leak somwehre here
         t1_stop = perf_counter()
         print(t1_stop-t1_start)
 
         if fade:#for cutscenes
-            self.game.state_manager.enter_state('fade_in')        
+            self.game.state_manager.enter_state('fade_in')
 
     def clean_groups(self):#called wgen changing map
         self.npcs.empty()
@@ -92,7 +92,7 @@ class Game_Objects():
         self.platforms.empty()
         self.loot.empty()
         self.platforms_ramps.empty()
-        self.entity_pause.empty()  
+        self.entity_pause.empty()
         self.all_bgs.empty()
         self.all_fgs.empty()
         self.camera_blocks.empty()
@@ -108,7 +108,7 @@ class Game_Objects():
         self.timer_manager.clear_timers()
         self.weather.empty()
 
-    def collide_all(self, dt):        
+    def collide_all(self, dt):
         self.platform_collision(dt)
 
         self.collisions.player_collision(self.loot)
@@ -120,8 +120,8 @@ class Game_Objects():
         self.collisions.projectile_collision(self.fprojectiles, self.enemies)
         self.collisions.projectile_collision(self.eprojectiles, self.players)
 
-    def platform_collision(self, dt):        
-        self.collisions.platform_collision(self.players, dt)        
+    def platform_collision(self, dt):
+        self.collisions.platform_collision(self.players, dt)
         self.collisions.platform_collision(self.enemies, dt)
         self.collisions.platform_collision(self.eprojectiles, dt)
         self.collisions.platform_collision(self.fprojectiles, dt)
@@ -141,18 +141,18 @@ class Game_Objects():
         #collide and move the entities
         self.collide_all(dt)
 
-        #camera and calculate true pos        
+        #camera and calculate true pos
         self.camera_blocks.update(dt)#need to be before camera: caemras stop needs tobe calculated before the scroll
         self.camera_manager.update(dt)#should be first
 
         #update cosmetics and BGs
         self.timer_manager.update(dt)
-        self.platforms.update(dt)        
+        self.platforms.update(dt)
         self.platforms_ramps.update(dt)
         self.layer_pause.update(dt)#should be before all_bgs and all_fgs
         self.all_bgs.update(dt)
         self.bg_interact.update(dt)
-        self.all_fgs.update(dt)        
+        self.all_fgs.update(dt)
         self.cosmetics.update(dt)
         self.cosmetics_bg.update(dt)
         self.interactables.update(dt)
@@ -162,9 +162,9 @@ class Game_Objects():
         self.lights.update_render(dt)
 
     def update_render(self, dt):#called after update_physics
-        #self.camera_blocks.update(dt)#need to be before camera: caemras stop needs to be calculated before the scroll        
-        self.camera_manager.update_render(dt)#should be first     
-        self.platforms.update_render(dt)        
+        #self.camera_blocks.update(dt)#need to be before camera: caemras stop needs to be calculated before the scroll
+        self.camera_manager.update_render(dt)#should be first
+        self.platforms.update_render(dt)
         self.platforms_ramps.update_render(dt)
         self.all_bgs.update_render(dt)
         self.bg_interact.update_render(dt)
@@ -182,9 +182,9 @@ class Game_Objects():
         self.special_shaders.update_render(dt)#portal use it
 
     def draw(self):#called from render states
-        self.lights.clear_normal_map()        
-        self.all_bgs.draw(self.game.screen_manager.screens)#returns the last layer      
-        
+        self.lights.clear_normal_map()
+        self.all_bgs.draw(self.game.screen_manager.screens)#returns the last layer
+
         #bg1:
         layer = self.all_bgs.get_topmost_screen()
         last_bg_screen = self.game.screen_manager.screens[layer].layer
@@ -192,24 +192,24 @@ class Game_Objects():
         self.interactables.draw(last_bg_screen)#should be before bg_interact
         self.bg_interact.draw(last_bg_screen)#small grass stuff so that interactables blends with BG
         self.cosmetics_bg.draw(last_bg_screen)#Should be before enteties
-                
+
         self.enemies.draw(last_bg_screen)
         self.npcs.draw(last_bg_screen)
         self.loot.draw(last_bg_screen)
 
-        self.players.draw(self.game.screen_manager.screens['player'].layer)        
-                
-        #after the player but bg1:       
-        plater_fg_screen = self.game.screen_manager.screens['player_fg'].layer         
+        self.players.draw(self.game.screen_manager.screens['player'].layer)
+
+        #after the player but bg1:
+        plater_fg_screen = self.game.screen_manager.screens['player_fg'].layer
         self.fprojectiles.draw(plater_fg_screen)
-        self.eprojectiles.draw(plater_fg_screen)                
+        self.eprojectiles.draw(plater_fg_screen)
         self.interactables_fg.draw(plater_fg_screen)#shoud be after the player -> upstream, 2D water
         self.cosmetics.draw(plater_fg_screen)
-        
+
         #fgs
-        self.all_fgs.draw(self.game.screen_manager.screens)#returns the last layer              
+        self.all_fgs.draw(self.game.screen_manager.screens)#returns the last layer
         #self.camera_blocks.draw()
-      
+
         #temporaries draws. Shuold be removed
         if self.game.RENDER_HITBOX_FLAG:
             image = pygame.Surface(self.game.window_size,pygame.SRCALPHA,32).convert_alpha()
@@ -247,13 +247,13 @@ class Game_Objects():
 
             for group in self.all_bgs.group_dict.values():
                 for obj in group:
-                    if type(obj).__name__ == 'River':                        
+                    if type(obj).__name__ == 'River':
                         pygame.draw.rect(image, (0,0,255), (int(obj.reflect_rect[0]),int(obj.reflect_rect[1]),obj.reflect_rect[2],obj.reflect_rect[3]),1)#draw hitbox
                         pygame.draw.rect(image, (255,0,0), (int(obj.rect[0]-obj.parallax[0]*self.camera_manager.camera.scroll[0]),int(obj.rect[1]-obj.parallax[1]*self.camera_manager.camera.scroll[1]),obj.rect[2],obj.rect[3]),1)#draw hitbox
 
             for group in self.all_fgs.group_dict.values():
                 for obj in group:
-                    if type(obj).__name__ == 'River':                        
+                    if type(obj).__name__ == 'River':
                         pygame.draw.rect(image, (0,0,255), (int(obj.reflect_rect[0]),int(obj.reflect_rect[1]),obj.reflect_rect[2],obj.reflect_rect[3]),1)#draw hitbox
                         pygame.draw.rect(image, (255,0,0), (int(obj.rect[0]-obj.parallax[0]*self.camera_manager.camera.scroll[0]),int(obj.rect[1]-obj.parallax[1]*self.camera_manager.camera.scroll[1]),obj.rect[2],obj.rect[3]),1)#draw hitbox
 
