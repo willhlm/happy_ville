@@ -1095,7 +1095,9 @@ class WallJumpMain(JumpMain):
         self.entity.velocity[0] = -self.entity.dir[0]*6
         self.ignore_input_timer = 8
         self.accelerate_timer = 15
-        self.start_dir = -self.entity.dir[0]
+        self.start_dir = -kwarg.get('wall_dir', [1,0])[0]
+        self.entity.dir[0] = self.start_dir
+        #self.entity.dir[0] =
 
     def update(self, dt):
         super().update(dt)
@@ -1249,7 +1251,6 @@ class WallGlide(PhaseBase):
         super().__init__(entity)
         self.animation_name = kwarg['animation_name']
 
-
     def enter(self, **kwarg):
         self.entity.animation.play(self.animation_name)#the name of the class
         self.entity.flags['ground'] = False#used for jumping: sets to false in cayote timer and in jump state
@@ -1257,7 +1258,7 @@ class WallGlide(PhaseBase):
         self.entity.movement_manager.add_modifier('wall_glide')
         if self.entity.collision_types['right']:
             self.dir = [1,0]
-        else:
+        else:#left
             self.dir = [-1,0]
         self.timer_init = 6
         self.timer = self.timer_init
@@ -1274,8 +1275,6 @@ class WallGlide(PhaseBase):
         else:
             self.entity.velocity[0] += self.entity.dir[0] * 0.2
 
-
-
     def handle_press_input(self,input):
         event = input.output()
         if event[-1] == 'a':
@@ -1283,8 +1282,8 @@ class WallGlide(PhaseBase):
             self.enter_state('wall_jump', wall_dir = self.dir)
         elif event[-1] == 'lb':
             input.processed()
-            self.entity.dir[0] *= -1
             self.enter_state('dash_ground')
+            self.entity.dir[0] *= -1
 
     def handle_release_input(self, input):
         event = input.output()

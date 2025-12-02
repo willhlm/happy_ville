@@ -69,7 +69,7 @@ class Character(PlatformEntity):#enemy, NPC,player
         self.flags['attack_able'] = True
 
     def on_hurt_timeout(self):#starts when entering hurt state, and make sure that you don't eneter again until timer runs out
-        self.flags['hurt_able'] = True
+        self.flags['hurt_state_able'] = True
 
     def apply_hitstop(self, lifetime=10, call_back = None):#called from aila sword, hut_effect
         if call_back:

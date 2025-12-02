@@ -64,7 +64,7 @@ class BaseState():
         self.entity.currentstate.enter_state(state_name, **kwargs)
 
     def handle_input(self, input_type):
-        if input_type == "Hurt" and self.entity.flags.get("hurt_able", True):
+        if input_type == "Hurt" and self.entity.flags.get("hurt_state_able", True):
             self.enter_state("hurt")
 
     def modify_hit(self, effect):
