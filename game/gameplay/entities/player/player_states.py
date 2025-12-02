@@ -58,6 +58,7 @@ class PlayerStates():
 
     def enter_state(self, state_name, phase = None, **kwargs):
         state = self.states.get(state_name)
+        print(state_name, self.entity.dir[0])
         if state:#if the requested state is unlocked
             if not state.enter_state(phase, **kwargs):
                 self.composite_state.cleanup(**kwargs)
@@ -1099,7 +1100,9 @@ class WallJumpMain(JumpMain):
         self.entity.velocity[0] = -self.entity.dir[0]*6
         self.ignore_input_timer = 8
         self.accelerate_timer = 15
-        self.start_dir = -self.entity.dir[0]
+        self.start_dir = -kwarg.get('wall_dir', [1,0])[0]
+        self.entity.dir[0] = self.start_dir
+        #self.entity.dir[0] = 
 
     def update(self, dt):
         super().update(dt)
@@ -1258,7 +1261,7 @@ class WallGlide(PhaseBase):
         self.entity.movement_manager.add_modifier('wall_glide')
         if self.entity.collision_types['right']:
             self.dir = [1,0]
-        else:
+        else:#left
             self.dir = [-1,0]
         self.timer_init = 6
         self.timer = self.timer_init
@@ -1281,9 +1284,9 @@ class WallGlide(PhaseBase):
             input.processed()
             self.enter_state('wall_jump', wall_dir = self.dir)
         elif event[-1] == 'lb':
-            input.processed()
-            self.entity.dir[0] *= -1
+            input.processed()            
             self.enter_state('dash_ground')
+            self.entity.dir[0] *= -1
 
     def handle_release_input(self, input):
         event = input.output()
@@ -1393,7 +1396,7 @@ class DashGroundPre(PhaseBase):
         self.entity.flags['ground'] = True
         self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
         self.jump_dash_timer = C.jump_dash_timer
-        self.entity.movement_manager.add_modifier('dash', entity = self.entity)
+        self.entity.movement_manager.add_modifier('dash', entity = self.entity)        
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0], vol = 1)    
         self.wall_buffer = 3
 
