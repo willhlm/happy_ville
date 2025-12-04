@@ -1,9 +1,6 @@
 import sys
 from engine import constants as C
-
-def sign(num):
-    if num > 0: return 1
-    return -1
+from engine.utils.functions import sign
 
 class Basic_states():#states for aila sword
     def __init__(self, entity):

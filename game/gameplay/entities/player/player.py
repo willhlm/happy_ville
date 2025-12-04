@@ -3,12 +3,12 @@ import pygame
 from gameplay.entities.base.character import Character
 from engine.utils import read_files
 from gameplay.entities.player.entity_shader_manager import EntityShaderManager
-from gameplay.entities.player.player_states import PlayerStates
+from gameplay.entities.player.player_states.state_manager import StateManager
 from gameplay.entities.player import states_death
 from gameplay.entities.player.backpack import backpack
 from gameplay.entities.shared.modifiers import modifier_movement
 from gameplay.entities.visuals.cosmetics.slash import Slash
-from gameplay.entities.player.sword import Sword
+from gameplay.entities.player.sword.sword import Sword
 from gameplay.entities.player.abilities.ability_manager import AbilityManager
 from gameplay.entities.shared.status.wet import Wet
 from engine import constants as C
@@ -38,7 +38,7 @@ class Player(Character):
         self.abilities = AbilityManager(self)#spirit (thunder,migawari etc) and movement /dash, double jump and wall glide)
 
         self.flags = {'ground': True, 'invincibility': False, 'shroompoline': False, 'attack_able': True, 'grounddash': True}# flags to check if on ground (used for jumpåing), #a flag to make sure you can only swing sword when this is False
-        self.currentstate = PlayerStates(self)#states_player.Idle_main(self)
+        self.currentstate = StateManager(self)#states_player.Idle_main(self)
         self.death_state = states_death.Idle(self)#this one can call "normal die" or specifal death (for example cultist encounter)
 
         self.backpack = backpack.Backpack(self)

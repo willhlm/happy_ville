@@ -1,387 +1,11 @@
 import random, math
+
+from .base_state import PhaseBase, PhaseAirBase
 from engine import constants as C
 from engine.utils.functions import sign
 from gameplay.entities.visuals.effects.fade_effect import FadeEffect
 from gameplay.ui.components.overlay.point_arrow import PointArrow
 from gameplay.entities.visuals.cosmetics import PlayerSoul, PrayEffect, ThunderBall, ThunderSpark, Dusts
-
-class PlayerStates():
-    def __init__(self, entity):
-        self.entity = entity
-        self.states = {
-            'idle': IdleState(entity),
-            'invisible': InvisibleState(entity),
-            'run': RunState(entity),
-            'walk': WalkState(entity),
-            'sprint': SprintState(entity),
-            'fall': FallState(entity),
-            'land': LandState(entity),
-            'jump': JumpState(entity),
-            'jump_sprint': JumpSprintState(entity),
-            'dash_ground': DashGroundState(entity),
-            'dash_jump': DashJumpState(entity),
-            'wall_glide': WallGlideState(entity),
-            'belt_glide': BeltGlideState(entity),
-            'wall_jump': WallJumpState(entity),
-            'sword_stand1': SwordStand1State(entity),
-            'sword_stand2': SwordStand2State(entity),
-            'sword_air1': SwordAir1State(entity),
-            'sword_air2': SwordAir2State(entity),
-            'sword_down': SwordDownState(entity),
-            'sword_up': SwordUpState(entity),
-            'smash_side': SmashSideState(entity),
-            'smash_up': SmashUpState(entity),
-            'dash_air': DashAirState(entity),
-            'death': DeathState(entity),
-            'respawn': ReSpawnState(entity),#used when respawning after death
-            'heal': HealState(entity),
-            'crouch': CrouchState(entity),
-            'plat_bone': PlantBoneState(entity),
-            'thunder': ThunderState(entity),
-            'shield': ShieldState(entity),
-            'wind': WindState(entity),
-            'slow_motion': SlowMotionState(entity),
-            'bow': BowState(entity),
-        }
-
-        self.composite_state = self.states['idle']
-        self.composite_state.enter_phase('main')
-        self._state_factories = {'dash_air': [('dash_air', DashAirState)],
-                                'smash_up': [('smash_up', SmashUpState)],
-                                'wall': [('wall_jump', WallJumpState), ('wall_glide', WallGlideState), ('belt_glide', BeltGlideState)],
-                                'dash': [('dash_ground', DashGroundState), ('dash_jump', DashJumpState)],
-                                'bow': [('bow', BowState)],
-                                'thunder': [('thunder', ThunderState)],
-                                'shield': [('shield', ShieldState)],
-                                'wind': [('wind', WindState)],
-                                'slow_motion': [('slow_motion', SlowMotionState)]}#should contain all the states that can be created, so that they can be be appended to self.stataes when needed
-
-    def enter_state(self, state_name, phase = None, **kwargs):
-        state = self.states.get(state_name)
-        if state and state.allowed():#if the requested state is unlocked
-            state.enter_state(phase, **kwargs)
-            self.composite_state = state
-
-    def update(self, dt):#called from player
-        self.composite_state.update(dt)#main state
-
-    def handle_input(self, input, **kwargs):
-        self.composite_state.handle_input(input, **kwargs)
-
-    def handle_press_input(self, input):
-        self.composite_state.handle_press_input(input)
-
-    def handle_release_input(self, input):
-        self.composite_state.handle_release_input(input)
-
-    def handle_movement(self, event):#called from gameplay loop state
-        self.composite_state.handle_movement(event)
-
-    def increase_phase(self):#called when an animation is finished for that state
-        self.composite_state.increase_phase()
-
-    def unlock_state(self, name):#should be called when unlocking a new state
-        for state_name, cls in self._state_factories[name]:
-            self.states[state_name] = cls(self.entity)
-
-class CompositeState():#will contain pre, main, post phases of a state
-    def __init__(self, entity):
-        self.entity = entity
-        self.phases = {}
-
-    def enter_phase(self, phase_name, **kwarg):#called when entering a new phase
-        self.current_phase = self.phases[phase_name]
-        self.current_phase.enter(**kwarg)
-
-    def enter_state(self, phase_name, **kwarg):#called when entering a new state
-        if not phase_name: phase_name = next(iter(self.phases))#get the first phase from the dictionary if not specified
-        self.common_values()
-        self.enter_phase(phase_name, **kwarg) #enter the phase of the state
-
-    def allowed(self):
-        return True
-
-    def common_values(self):#set common values for the phases
-        pass
-
-    def update(self, dt):
-        self.current_phase.update(dt)
-
-    def handle_input(self, input, **kwarg):
-        self.current_phase.handle_input(input, **kwarg)
-
-    def handle_press_input(self, input):
-        self.current_phase.handle_press_input(input)
-
-    def handle_release_input(self, input):
-        self.current_phase.handle_release_input(input)
-
-    def handle_movement(self, event):
-        self.current_phase.handle_movement(event)
-
-    def increase_phase(self):#called when an animation is finished for that state
-        self.current_phase.increase_phase()
-
-#wrappers
-class FallState(CompositeState):
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.phases = {'pre': FallPre(entity), 'main': FallMain(entity)}
-
-    def enter_state(self, phase_name, **kwarg):
-        super().enter_state(phase_name, **kwarg)
-        self.allow_sprint = kwarg.get('allow_sprint', False)
-
-    def common_values(self):#call when this state is enetred
-        self.falltime = 0
-
-    def update(self, dt):
-        self.falltime += dt
-
-    def determine_fall(self):
-        if self.falltime >= 4000: return True
-        return False
-
-    def determine_sprint(self):
-        return self.allow_sprint
-
-class LandState(CompositeState):
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.phases = {'soft': LandSoftMain(entity), 'hard': LandHardMain(entity)}
-
-class InvisibleState(CompositeState):
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.phases = {'main': Invisible(entity)}
-
-class RunState(CompositeState):
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.phases = {'pre': RunPre(entity), 'main': RunMain(entity), 'post': RunPost(entity)}
-
-class WalkState(CompositeState):
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.phases = {'pre': WalkPre(entity), 'main': WalkMain(entity), 'post': WalkPost(entity)}
-
-class SprintState(CompositeState):
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.phases = {'main': SprintMain(entity), 'post': SprintPost(entity)}#'pre': SprintPre(entity),
-
-class IdleState(CompositeState):
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.phases = {'main': IdleMain(entity)}
-
-class JumpState(CompositeState):
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.phases = {'main': JumpMain(entity)}
-
-class JumpSprintState(CompositeState):
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.phases = {'pre': JumpSprintPre(entity),'main': JumpSprintMain(entity),'post': JumpSprintPost(entity)}
-
-class DashGroundState(CompositeState):
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.phases = {'pre': DashGroundPre(entity), 'main': DashGroundMain(entity), 'post': DashGroundPost(entity)}
-
-    def common_values(self):#called when entering this new state, and will not change during phase changes
-        self.dir = self.entity.dir.copy()#copy the direction of the entity, and save it in the state across phases
-
-    def allowed(self):
-        return self.entity.flags['grounddash']
-
-class WallGlideState(CompositeState):
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.phases = {'main': WallGlide(entity, animation_name = 'wall_glide_main')}#{'pre': WallGlide(entity, animation_name = 'wall_glide_pre'), 'main': WallGlide(entity, animation_name = 'wall_glide_main')}
-
-class BeltGlideState(CompositeState):
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.phases = {'pre': BeltGlide(entity, animation_name = 'wall_glide_pre'), 'main': BeltGlide(entity, animation_name = 'wall_glide_main')}
-
-class DashJumpState(CompositeState):
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.phases = {'pre': DashJumpPre(entity)}#, 'main': DashJumpMain(entity), 'post': DashJumpPost(entity)}
-
-    def allowed(self):
-        return self.entity.flags['grounddash']
-
-
-class WallJumpState(CompositeState):
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.phases = {'main': WallJumpMain(entity)}#'pre': WallJumpPre(entity),
-
-class SwordStand1State(CompositeState):
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.phases = {#'pre': SwordStandPre(entity, animation_name = 'sword_stand1_pre'),
-                       'main': SwordStandMain(entity, animation_name = 'sword_stand1_main'),
-                       'post': SwordStandPost(entity, animation_name = 'sword_stand1_post')}#
-
-class SwordStand2State(CompositeState):
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.phases = {#'pre': SwordStandPre(entity, animation_name = 'sword_stand2_pre'),
-                       'main': SwordStandMain(entity, animation_name = 'sword_stand2_main'),
-                       'post': SwordStandPost(entity, animation_name = 'sword_stand2_post')}#
-
-class SwordDownState(CompositeState):
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.phases = {'main': SwordDownMain(entity)}
-
-class SwordUpState(CompositeState):
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.phases = {'main': SwordUpMain(entity)}
-
-class SmashSideState(CompositeState):
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.phases = {'pre': SmashSidePre(entity), 'charge': SmashSideCharge(entity), 'main': SmashSideMain(entity), 'post': SmashSidePost(entity)}
-
-class SmashUpState(CompositeState):
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.phases = {'pre': SmashUpPre(entity), 'charge': SmashUpCharge(entity), 'main': SmashUpMain(entity), 'post': SmashUpPost(entity)}
-
-class SwordAir1State(CompositeState):
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.phases = {'main': SwordAirMain(entity, animation_name = 'sword_air1_main')}
-
-class SwordAir2State(CompositeState):
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.phases = {'main': SwordAirMain(entity, animation_name = 'sword_air2_main')}
-
-class DashAirState(CompositeState):
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.phases = {'pre': DashAirPre(entity), 'main': DashAirMain(entity), 'post': DashAirPost(entity)}
-
-class DeathState(CompositeState):
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.phases = {'pre': DeathPre(entity), 'main': DeathMain(entity), 'post': DeathPost(entity)}
-
-class ReSpawnState(CompositeState):
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.phases = {'main': ReSpawnMain(entity)}
-
-class HealState(CompositeState):
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.phases = {'pre': HealPre(entity), 'main': HealMain(entity)}
-
-class CrouchState(CompositeState):
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.phases = {'pre': CrouchPre(entity), 'main': CrouchMain(entity), 'post': CrouchPost(entity)}
-
-class PlantBoneState(CompositeState):
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.phases = {'main': PlantBoneMain(entity)}
-
-class ThunderState(CompositeState):
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.phases = {'pre': ThunderPre(entity), 'main': ThunderMain(entity), 'post': ThunderPost(entity)}
-
-class ShieldState(CompositeState):
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.phases = {'pre': ShieldPre(entity), 'main': ShieldMain(entity)}
-
-class WindState(CompositeState):
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.phases = {'main': WindMain(entity)}
-
-class SlowMotionState(CompositeState):
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.phases = {'pre': SlowMotionPre(entity), 'main': SlowMotionMain(entity)}
-
-class BowState(CompositeState):
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.phases = {'pre': BowPre(entity), 'main': BowMain(entity)}
-
-#normal phases
-class PhaseBase():
-    def __init__(self, entity):
-        self.entity = entity
-
-    def update(self, dt):
-        pass
-
-    def increase_phase(self):
-        pass
-
-    def handle_input(self, input, **kwarg):
-        pass
-
-    def enter(self, **kwarg):#called when entering a new phase
-        pass
-
-    def enter_state(self, new_state, **kwarg):#should call when entering a new state
-        self.entity.currentstate.enter_state(new_state, **kwarg)
-
-    def enter_phase(self, phase_name, **kwarg):#should call when just changing phase
-        self.entity.currentstate.composite_state.enter_phase(phase_name, **kwarg)
-
-    def handle_press_input(self, input):#all states should inehrent this function, if it should be able to jump
-        input.processed()
-
-    def handle_release_input(self, input):#all states should inehrent this function, if it should be able to jump
-        input.processed()
-
-    def handle_movement(self, event):#all states should inehrent this function: called in update function of gameplay state
-        value = event['l_stick']#the avlue of the press
-
-        #self.entity.acceleration[0] = C.acceleration[0] * math.ceil(abs(value[0]*0.8))#always positive, add acceleration to entity
-        multiplier = 0
-        if 0.1 < abs(value[0]) < 0.65:
-            multiplier = 0.3
-        elif abs(value[0]) >= 0.65:
-            multiplier = 1
-        self.entity.acceleration[0] = C.acceleration[0] * multiplier#always positive, add acceleration to entity
-
-        self.entity.dir[1] = -value[1]
-        if multiplier > 0:
-            self.entity.dir[0] = sign(value[0])
-
-    def do_ability(self):#called when pressing B (E). This is needed if all of them do not have pre animation, or vice versa
-        self.enter_state(self.entity.abilities.equip.lower())
-
-class PhaseAirBase(PhaseBase):
-    def __init__(self, entity):
-        super().__init__(entity)
-
-    def handle_movement(self, event):#all states should inehrent this function: called in update function of gameplay state
-        value = event['l_stick']#the avlue of the press
-
-        #self.entity.acceleration[0] = C.acceleration[0] * math.ceil(abs(value[0]*0.8))#always positive, add acceleration to entity
-        multiplier = 0
-        if abs(value[0]) > 0.1:
-            multiplier = 1
-        self.entity.acceleration[0] = C.acceleration[0] * multiplier#always positive, add acceleration to entity
-
-        self.entity.dir[1] = -value[1]
-        if multiplier > 0:
-            self.entity.dir[0] = sign(value[0])
 
 class Invisible(PhaseBase):
     def __init__(self, entity):
@@ -873,17 +497,6 @@ class SprintPre(PhaseBase):
     def increase_phase(self):
         self.enter_phase('main')
 
-    def handle_press_input(self,input):
-        event = input.output()
-        if event[-1] == 'a':
-            input.processed()
-            self.enter_state('jump')#main
-
-    def handle_release_input(self, input):
-        event = input.output()
-        if event[-1]=='a':
-            input.processed()
-
     def handle_movement(self,event):
         super().handle_movement(event)
         if self.entity.acceleration[0] == 0:
@@ -893,11 +506,14 @@ class SprintMain(PhaseBase):
     def __init__(self,entity):
         super().__init__(entity)
         self.sprint_multiplier = C.sprint_multiplier
+        self.sprint_time_threshold = 10
 
     def enter(self, **kwarg):
+        self.sprint_time = 0
         self.entity.animation.play('sprint_main', f_rate=0.22)
 
     def update(self, dt):
+        self.sprint_time += dt
         if not self.entity.collision_types['bottom']:
             self.enter_state('fall', allow_sprint=True)#fall pre
             self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
@@ -905,8 +521,9 @@ class SprintMain(PhaseBase):
     def handle_press_input(self,input):
         event = input.output()
         if event[-1] == 'a':
-            input.processed()
-            self.enter_state('jump_sprint')#main
+            if self.sprint_time > self.sprint_time_threshold:
+                input.processed()
+                self.enter_state('jump_sprint')#main
 
     def handle_release_input(self, input):
         event = input.output()
@@ -963,10 +580,8 @@ class JumpMain(PhaseAirBase):
         #self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
         self.entity.flags['ground'] = False
         self.shroomboost = 1#if landing on shroompoline and press jump, this vakue is modified
-        try:
-            self.air_timer = self.entity.colliding_platform.jumped()#jump charactereistics is set from the platform
-        except AttributeError:
-            print(self.entity.flags['ground'])
+
+        self.air_timer = kwarg.get('air_timer', 10)
         self.entity.game_objects.cosmetics.add(Dusts(self.entity.hitbox.center, self.entity.game_objects, dir = self.entity.dir, state = 'two'))#dust
 
     def update(self, dt):
@@ -1034,18 +649,15 @@ class JumpSprintPre(PhaseAirBase):
             self.entity.velocity[1] = C.jump_vel_player
             self.entity.velocity[0] = self.entity.dir[0] * 10
         else:
-            self.enter_phase('main')
+            self.enter_phase('main', air_timer = self.entity.colliding_platform.jumped())
 
 class JumpSprintMain(PhaseAirBase):
     def __init__(self, entity):
         super().__init__(entity)
-
+        
     def enter(self, **kwarg):
-        self.entity.animation.play('jump_sprint_main')#the name of the class
-        try:
-            self.air_timer = self.entity.colliding_platform.jumped()#jump charactereistics is set from the platform
-        except AttributeError:
-            print(self.entity.flags['ground'])
+        self.entity.animation.play('jump_sprint_main')#the name of the class        
+        self.air_timer = kwarg.get('air_timer', C.air_timer)
 
     def update(self, dt):
         self.entity.velocity[0] += self.entity.dir[0]
@@ -1123,7 +735,7 @@ class FallPre(PhaseAirBase):
         if event[-1] == 'a':
             if self.entity.flags['ground']:
                 input.processed()
-                self.enter_state('jump')#TODO how about sprint jump
+                self.enter_state('jump', air_timer = self.entity.colliding_platform.jumped())
         elif event[-1]=='b':
             input.processed()
             self.do_ability()
@@ -1264,7 +876,7 @@ class WallGlide(PhaseBase):
         self.timer = self.timer_init
         self.count_timer = False
 
-    def update(self, dt):#is needed
+    def update(self, dt):
         if self.count_timer:
             self.timer -= dt
             if self.timer <= 0:
@@ -1308,9 +920,10 @@ class WallGlide(PhaseBase):
         if input == 'Ground':
             self.enter_state('run')
 
-    def enter_state(self, input, **kwarg):#reset friction before exiting this state
+    def exit(self):
+        # cleanup on leaving wall_glide
         self.entity.movement_manager.remove_modifier('wall_glide')
-        super().enter_state(input, **kwarg)
+
 
 class BeltGlide(PhaseBase):#same as wall glide but only jump if wall_glide has been unlocked
     def __init__(self, entity, **kwarg):
@@ -1504,14 +1117,17 @@ class DashJumpPre(PhaseBase):#enters from ground dash pre
     def enter(self, **kwarg):
         self.entity.animation.play('dash_jump_pre')#the name of the class
         self.dash_length = C.dash_jump_length
+
+        #normalize velocity regardless of previous state
+        self.entity.velocity = [0, 0]
+
         if int(self.entity.velocity[0]) == 0:
             self.dash_length += 1
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0])
         self.entity.movement_manager.add_modifier('dash_jump', entity = self.entity)
         self.entity.shader_state.handle_input('motion_blur')
         self.entity.flags['ground'] = False
-        self.buffer_time = C.jump_dash_wall_timer
-        self.entity.velocity[1] *= 0
+        self.buffer_time = C.jump_dash_wall_timer        
 
     def exit_state(self):
         if self.dash_length < 0:
@@ -2028,10 +1644,7 @@ class DashAirPost(DashGroundPre):
             self.enter_state('fall', allow_sprint=True)#enter run main phase
 
     def handle_press_input(self, input):#all states should inehrent this function, if it should be able to jump
-        event = input.output()
-        if event[-1] == 'a':
-            self.enter_state('jump')
-            input.processed()
+        pass
 
     def enter_state(self, state, **kwarg):
         self.entity.shader_state.handle_input('idle')

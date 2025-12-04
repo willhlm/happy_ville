@@ -2,7 +2,7 @@ import pygame
 
 from gameplay.entities.projectiles.base.melee import Melee
 from engine.utils import read_files
-from gameplay.entities.player import states_sword
+from . import states_sword
 from engine import constants as C
 from gameplay.entities.shared.components import hit_effects
 
