@@ -583,7 +583,7 @@ class JumpMain(PhaseAirBase):
         self.entity.flags['ground'] = False
         self.shroomboost = 1#if landing on shroompoline and press jump, this vakue is modified
 
-        self.air_timer = kwarg.get('air_timer', 10)
+        self.air_timer = kwarg.get('air_timer', C.air_timer)
         self.entity.game_objects.cosmetics.add(Dusts(self.entity.hitbox.center, self.entity.game_objects, dir = self.entity.dir, state = 'two'))#dust
 
     def update(self, dt):
@@ -896,6 +896,7 @@ class WallGlide(PhaseBase):
             self.enter_state('wall_jump', wall_dir = self.dir)
         elif event[-1] == 'lb':
             input.processed()
+            print('pressed')
             self.enter_state('dash_ground')
             self.entity.dir[0] *= -1
 
@@ -925,7 +926,6 @@ class WallGlide(PhaseBase):
     def exit(self):
         # cleanup on leaving wall_glide
         self.entity.movement_manager.remove_modifier('wall_glide')
-
 
 class BeltGlide(PhaseBase):#same as wall glide but only jump if wall_glide has been unlocked
     def __init__(self, entity, **kwarg):
@@ -1069,7 +1069,7 @@ class DashGroundMain(DashGroundPre):#level one dash: normal
 
     def increase_phase(self):
         self.entity.flags['grounddash'] = False#if fasle, sword cannot be swang. sets to true when timer runs out
-        self.entity.game_objects.timer_manager.start_timer(C.ground_dash_timer, self.entity.on_grounddash_timout, 'dash timeout')
+        self.entity.game_objects.timer_manager.start_timer(C.ground_dash_timer, self.entity.on_grounddash_timout, 'dash_timeout')
         self.entity.shader_state.handle_input('idle')
         if self.entity.game_objects.controller.is_held('lb'):
             self.enter_state('sprint')
@@ -1136,7 +1136,7 @@ class DashJumpPre(PhaseBase):#enters from ground dash pre
             self.entity.movement_manager.add_modifier('air_boost', entity = self.entity)
             self.enter_state('fall', allow_sprint=True)
 
-    def handle_movement(self, event):#all dash states should omit setting entity.dir
+    def handle_movement(self, event):
         self.entity.acceleration[0] = 0
 
     def handle_input(self, input, **kwarg):
@@ -1160,14 +1160,14 @@ class DashJumpPre(PhaseBase):#enters from ground dash pre
         self.dash_length -= dt
         self.exit_state()
 
-class DashJumpMain(PhaseBase):
+class DashJumpMain(PhaseBase):#not used
     def __init__(self,entity, **kwarg):
         super().__init__(entity)
 
     def enter(self, **kwarg):
-        self.entity.animation.play('dash_jump_main')#the name of the class
+        self.entity.animation.play('dash_jump_main')
 
-    def handle_movement(self, event):#all states should inehrent this function: called in update function of gameplay states
+    def handle_movement(self, event):
         pass
 
     def handle_input(self, input, **kwarg):
@@ -1181,7 +1181,7 @@ class DashJumpMain(PhaseBase):
             else:
                 self.enter_state('run')
 
-class DashJumpPost(PhaseBase):#landing
+class DashJumpPost(PhaseBase):#not used
     def __init__(self,entity):
         super().__init__(entity)
 
@@ -1595,10 +1595,9 @@ class DashAirPre(PhaseBase):
         #    input.processed()
         #    if self.jump_dash_timer > 0: self.enter_state('dash_jump')
 
-    def enter_state(self, state, **kwarg):
+    def exit(self):
         self.entity.shader_state.handle_input('idle')
         self.entity.movement_manager.remove_modifier('dash')
-        super().enter_state(state, **kwarg)
 
 class DashAirMain(DashGroundPre):#level one dash: normal
     def __init__(self, entity, **kwarg):

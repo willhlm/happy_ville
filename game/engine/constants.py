@@ -20,13 +20,12 @@ animation_framerate = 0.25#1/animation_framerate is the number of frames to blit
 #timers
 jump_dash_wall_timer = 4#how many frames it should take before going into wall when doing dash jump
 jump_dash_timer = 3#how many frames from pressing jump/dash to pressing dash/jump one can do dash jump
-ground_dash_timer = 50 #cooldown frames between dash
+ground_dash_timer = 40 #cooldown frames between dash
 cayote_timer_player = 4#how many frames from falling in which the player can still jump
 air_timer = 14#for how long one can press A and keep jumping
 
 #input buffers
 shroomjump_timer_player = 3#how many frames the player can press jump, after landing on a shroompolin, and do shroomjump
-#jump_buffer_timer_player = 4##how many frames from falling in which the player can jump when landing
 
 #combat
 invincibility_time_player = 50

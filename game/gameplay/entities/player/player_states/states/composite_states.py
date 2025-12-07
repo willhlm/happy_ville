@@ -93,7 +93,6 @@ class DashJumpState(CompositeState):
     def allowed(self):
         return self.entity.flags['grounddash']
 
-
 class WallJumpState(CompositeState):
     def __init__(self, entity):
         super().__init__(entity)

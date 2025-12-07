@@ -52,7 +52,8 @@ class StateManager():
                                 'slow_motion': [('slow_motion', SlowMotionState)]}#should contain all the states that can be created, so that they can be be appended to self.stataes when needed
 
     def enter_state(self, state_name, phase = None, **kwargs):
-        state = self.states.get(state_name)        
+        state = self.states.get(state_name)           
+        print(state_name)     
         if state and state.allowed():#if the requested state is unlocked
             self.composite_state.exit()#exit the old one before entering/setting a new state
             state.enter_state(phase, **kwargs)            
@@ -60,6 +61,7 @@ class StateManager():
 
     def update(self, dt):#called from player
         self.composite_state.update(dt)#main state
+        print(self.composite_state.current_phase)
 
     def handle_input(self, input, **kwargs):
         self.composite_state.handle_input(input, **kwargs)
