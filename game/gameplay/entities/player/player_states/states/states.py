@@ -896,9 +896,7 @@ class WallGlide(PhaseBase):
             self.enter_state('wall_jump', wall_dir = self.dir)
         elif event[-1] == 'lb':
             input.processed()
-            print('pressed')
-            self.enter_state('dash_ground')
-            self.entity.dir[0] *= -1
+            self.enter_state('dash_ground', dir = -self.entity.dir[0])
 
     def handle_release_input(self, input):
         event = input.output()
@@ -961,7 +959,6 @@ class BeltGlide(PhaseBase):#same as wall glide but only jump if wall_glide has b
                 self.enter_state('fall')
         elif event[-1] == 'lb':
             if self.entity.currentstate.states.get('wall_glide'):
-                self.entity.dir[0] *= -1
                 input.processed()
                 self.enter_state('dash_ground')
 
@@ -1011,6 +1008,7 @@ class DashGroundPre(PhaseBase):
         self.entity.movement_manager.add_modifier('dash', entity = self.entity)
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0], vol = 1)
         self.wall_buffer = 3
+        self.entity.dir[0] = kwarg.get('dir', self.entity.dir[0])
 
     def handle_movement(self, event):#all dash states should omit setting entity.dir
         self.entity.acceleration[0] = 0
