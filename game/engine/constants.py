@@ -13,7 +13,7 @@ pogo_vel = -6
 dash_length = 5#how long  Aila dashes
 dash_jump_length = 8
 dash_vel = 3
-dash_jump_vel = -3.2
+dash_jump_vel = -3.25
 sprint_multiplier = 1.7
 animation_framerate = 0.25#1/animation_framerate is the number of frames to blit before goging to next frame
 
