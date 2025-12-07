@@ -1,4 +1,4 @@
-from gameplay.entities.player.base.ability import Ability
+from .base_ability import Ability
 from engine.utils import read_files
 from gameplay.entities.projectiles import Shield
 
