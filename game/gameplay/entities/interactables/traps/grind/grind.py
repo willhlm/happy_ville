@@ -2,6 +2,7 @@ import pygame, math
 from engine.utils import read_files
 from gameplay.entities.interactables.base.interactables import Interactables
 from . import states_grind
+from gameplay.entities.shared.components import hit_effects
 
 class Grind(Interactables):#trap
     def __init__(self, pos, game_objects, **kwarg):
@@ -16,16 +17,17 @@ class Grind(Interactables):#trap
         direction = kwarg.get('direction', '0,0')#standing still
         string_list = direction.split(',')
         self.direction = [int(num) for num in string_list]
-        self.distance = int(kwarg.get('distance', 1))#standing still
+        self.distance = int(kwarg.get('distance', 1))/16
         self.speed = float(kwarg.get('speed', 1))
 
         self.velocity = [0, 0]
         self.time = 0
-        self.original_pos = pos
+
+        self.base_effect = hit_effects.create_contact_effect(damage = 1, hit_type = 'metal', hitstop = 10, attacker = self)
 
     def update_vel(self):
         self.velocity[0] = self.direction[0] * self.distance * math.cos(self.speed * self.time)
-        self.velocity[1] = self.direction[1] * self.distance * math.sin(self.speed * self.time)
+        self.velocity[1] = self.direction[1] * self.distance * math.sin(self.speed * self.time + math.pi*0.5) 
 
     def update(self, dt):
         super().update(dt)
@@ -35,7 +37,7 @@ class Grind(Interactables):#trap
         self.update_pos(dt)
 
     def update_pos(self, dt):
-        self.true_pos = [self.original_pos[0] + self.velocity[0] * dt,self.original_pos[1] + self.velocity[1] * dt]
+        self.true_pos = [self.true_pos[0] + self.velocity[0] * dt, self.true_pos[1] + self.velocity[1] * dt]
         self.rect.topleft = self.true_pos
         self.hitbox.center = self.rect.center
 
@@ -43,7 +45,11 @@ class Grind(Interactables):#trap
         pass
 
     def player_collision(self, player):#player collision
-        player.take_dmg(dmg = 1)
+        effect = self.base_effect.copy()
+        effect.meta['attacker_dir'] = [0,0]#save the direction
+        #effect.particles['dir'] = self.dir        
+
+        damage_applied, modified_effect = player.take_hit(effect)                        
 
     def take_dmg(self, projectile):#when player hits with e.g. sword
         if hasattr(projectile, 'sword_jump'):#if it has the attribute
