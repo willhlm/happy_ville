@@ -55,11 +55,13 @@ class Player(Character):
         super().ramp_down_collision(ramp)
         self.movement_manager.handle_input('ground')
         self.colliding_platform = ramp#save the latest platform
+        self.flags['ground'] = True
 
     def down_collision(self, block):#when colliding with platform beneth
         super().down_collision(block)
         self.movement_manager.handle_input('ground')
         self.colliding_platform = block#save the latest platform
+        self.flags['ground'] = True
 
     def right_collision(self, block, type = 'Wall'):
         super().right_collision(block, type)

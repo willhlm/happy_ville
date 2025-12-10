@@ -20,7 +20,6 @@ class IdleMain(PhaseBase):
 
     def enter(self, **kwarg):
         self.entity.animation.play('idle', f_rate = 0.1667)
-        self.entity.flags['ground'] = True
         self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
 
     def update(self, dt):
@@ -84,7 +83,6 @@ class RunPre(PhaseBase):
     def enter(self, **kwarg):
         self.entity.animation.play('run_pre')
         self.particle_timer = 0
-        self.entity.flags['ground'] = True
         self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
 
     def update(self, dt):
@@ -284,7 +282,6 @@ class WalkPre(PhaseBase):
     def enter(self, **kwarg):
         self.entity.animation.play('walk_pre')
         self.particle_timer = 0
-        self.entity.flags['ground'] = True
         self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
 
     def update(self, dt):
@@ -487,7 +484,6 @@ class SprintPre(PhaseBase):
 
     def enter(self, **kwarg):
         self.entity.animation.play('sprint_pre')
-        self.entity.flags['ground'] = True
 
     def update(self, dt):
         if not self.entity.collision_types['bottom']:
@@ -674,7 +670,6 @@ class JumpSprintPost(PhaseAirBase):
 
     def enter(self, **kwarg):#landing
         self.entity.animation.play('jump_sprint_post')#the name of the class
-        self.entity.flags['ground'] = True
 
     def handle_movement(self, event):#all states should inehrent this function: called in update function of gameplay state
         self.entity.acceleration[0] = 0
@@ -802,7 +797,6 @@ class LandSoftMain(PhaseBase):#landing: mainly cosmetic
         super().__init__(entity)
 
     def enter(self, **kwarg):
-        self.entity.flags['ground'] = True
         self.entity.animation.play('land_soft_main')
 
     def handle_movement(self, event):#all states should inehrent this function: called in update function of gameplay state
@@ -851,7 +845,6 @@ class LandHardMain(PhaseBase):#landing: cannot move
         super().__init__(entity)
 
     def enter(self, **kwarg):
-        self.entity.flags['ground'] = True
         self.entity.animation.play('land_hard_main')
 
     def update(self, dt):
@@ -867,7 +860,6 @@ class WallGlide(PhaseBase):
 
     def enter(self, **kwarg):
         self.entity.animation.play(self.animation_name)#the name of the class
-        self.entity.flags['ground'] = False#used for jumping: sets to false in cayote timer and in jump state
         self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
         self.entity.movement_manager.add_modifier('wall_glide')
         if self.entity.collision_types['right']:
@@ -932,7 +924,6 @@ class BeltGlide(PhaseBase):#same as wall glide but only jump if wall_glide has b
 
     def enter(self, **kwarg):
         self.entity.animation.play(self.animation_name)#the name of the class
-        self.entity.flags['ground'] = True#used for jumping: sets to false in cayote timer and in jump state
         self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
         self.entity.movement_manager.add_modifier('wall_glide')
         if self.entity.collision_types['right']:
@@ -1002,7 +993,6 @@ class DashGroundPre(PhaseBase):
             self.dash_length += 1
         self.entity.shader_state.handle_input('motion_blur')
         self.entity.game_objects.cosmetics.add(Dusts(self.entity.hitbox.center, self.entity.game_objects, dir = self.entity.dir, state = 'one'))#dust
-        self.entity.flags['ground'] = True
         self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
         self.jump_dash_timer = C.jump_dash_timer
         self.entity.movement_manager.add_modifier('dash', entity = self.entity)
@@ -1310,7 +1300,7 @@ class SwordUpMain(Sword):
         self.entity.projectiles.add(self.entity.sword)#add sword to group
 
     def increase_phase(self):
-        if self.entity.flags['ground']:
+        if self.entity.collision_types['bottom']:
             if self.entity.acceleration[0] == 0:
                 self.enter_state('idle')
             else:
