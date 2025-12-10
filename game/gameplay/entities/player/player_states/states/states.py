@@ -37,7 +37,7 @@ class IdleMain(PhaseBase):
             input.processed()
             self.enter_state('dash_ground')
         elif event[-1] == 'x':
-            if input.meta.get('smash'):
+            if input.meta.get('smash') and False:
                 direction = input.meta.get('direction')
                 if direction == 'left':
                     self.enter_state('smash_side', dir = -1)
@@ -1545,7 +1545,6 @@ class DashAirPre(PhaseBase):
         self.dash_length = C.dash_length
         self.entity.shader_state.handle_input('motion_blur')
         self.entity.game_objects.cosmetics.add(Dusts(self.entity.hitbox.center, self.entity.game_objects, dir = self.entity.dir, state = 'one'))#dust
-        self.entity.flags['ground'] = True
         self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
         self.jump_dash_timer = C.jump_dash_timer
         self.entity.movement_manager.add_modifier('dash', entity = self.entity)
@@ -1609,6 +1608,11 @@ class DashAirMain(DashGroundPre):#level one dash: normal
 
     def handle_press_input(self, input):#all states should inehrent this function, if it should be able to jump
         input.processed()
+
+    def exit_state(self):
+        if self.dash_length < 0:
+            self.entity.movement_manager.add_modifier('air_boost', friction_x = 0.15, entity = self.entity)
+            self.enter_state('fall', allow_sprint=True)
 
     def increase_phase(self):
         self.entity.shader_state.handle_input('idle')
