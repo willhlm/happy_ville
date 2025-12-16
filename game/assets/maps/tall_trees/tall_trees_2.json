@@ -117,8 +117,8 @@
                  "y":0
                 }],
          "name":"bg10",
-         "offsetx":-528,
-         "offsety":-368,
+         "offsetx":-1136,
+         "offsety":-784,
          "opacity":1,
          "parallaxx":0.1,
          "parallaxy":0.1,
@@ -1981,7 +1981,7 @@
          "y":0
         }],
  "nextlayerid":51,
- "nextobjectid":1949,
+ "nextobjectid":1951,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",
