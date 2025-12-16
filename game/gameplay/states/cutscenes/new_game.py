@@ -11,7 +11,12 @@ class NewGame(GameState):
 
         self.frame = 0     
         self.time = 0        
-        self.texts = ['Before frost found the earth, there was only song. The world was a great dream, breathed by those who walked among the stars. They shaped rivers from whispers, and lit the sky with memory.', 'In that land, no one wept.The dream and the living were one, and every heart was clear as glass.But even the purest light gathers shadow when it burns too long.', 'The shadow took root in one child.Her laughter stilled, and her eyes saw through the world — into what should not be seen.The dream bent around her, and the ground beneath her feet began to weep.']       
+        self.texts = ['Before frost found the earth, there was only song. The world was a great dream, breathed by those who walked among the stars. They shaped rivers from whispers, and lit the sky with memory.', 
+        'In that land, no one wept. The dream and the living were one, and every heart was clear as glass. But even the purest light gathers shadow when it burns too long.', 
+        'The shadow took root in one child. Her laughter stilled, and her eyes saw through the world into what should not be seen. The dream bent around her, and the ground beneath her feet began to weep.',
+        'To keep her from breaking, they laid her beneath the roots of the Dreamtree. They sang her to sleep with names forgotten to all but wind and stone. The earth closed, and silence took her place.',
+        'Seasons drifted into ages. The dream thinned. The songs faded. Yet the roots still breathe, and the whisper beneath them grows restless once more.',
+        '“Mama,” the child asks, “what if she wakes?” The mother smiles, though her eyes do not. “Then, little one… someone must remember how to dream again.”']       
 
     def update_render(self,dt):
         self.time += dt
@@ -45,7 +50,6 @@ class NewGame(GameState):
     def on_exit(self):
         self.game.state_manager.enter_state('gameplay')
         self.game.game_objects.load_map(self.game.state_manager.state_stack[-1], 'rhoutta_encounter_1', spawn = '1', fade = False)                                        
-
 
     def render_text(self):        
         self.game.display.render_text(self.game.game_objects.font.font_atals, self.game.screen_manager.screen, text = self.texts[self.frame], letter_frame = int(self.time), color = (255,255,255,255), width = 300, position = (30,60))

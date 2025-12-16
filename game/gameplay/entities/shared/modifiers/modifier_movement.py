@@ -68,10 +68,10 @@ class WallGlide(MovementModifier):#should it instead be a general driction modif
     def __init__(self, priority):
         super().__init__(priority)
         self.end_friction = 0.1
-        self.friction = 0.8
+        self.friction = 0.5
 
     def apply(self, context):
-        self.friction -= 0.05
+        self.friction -= 0.011
         context.friction[1] = max(self.friction, self.end_friction)
 
 class TwoDLiquid(MovementModifier):#should it instead be a general driction modifier?
@@ -101,7 +101,7 @@ class DashJump(MovementModifier):
         self.g_constant = 1
 
     def apply(self, context):
-        self.dash_jump_vel += 0.5
+        self.dash_jump_vel += 0.6
         self.dash_jump_vel = min(self.dash_jump_vel, 0)
         context.gravity = C.acceleration[1]/self.g_constant
         context.velocity[0] += self.dash_vel * self.entity.dir[0]
@@ -112,7 +112,7 @@ class AirBoost(MovementModifier):#should it instead be a general driction modifi
         super().__init__(priority)
         self.entity = kwarg['entity']
         self.target = MovementContext().friction[0]
-        self.friction_x = 0.15
+        self.friction_x = kwarg.get('friction_x', 0.14)
         self.friction_y = 0.00
         self.ref_y = self.friction_y * (0.0001  + 1)
         self.ref_x = self.friction_x * (1 - 0.000000005 )
@@ -133,7 +133,7 @@ class AirBoost(MovementModifier):#should it instead be a general driction modifi
             self.entity.movement_manager.remove_modifier('air_boost')
 
     def update(self, dt):
-        self.friction_x += dt * 0.0008 #this is probably the best one
+        self.friction_x += dt * 0.0005 #this is probably the best one
         #self.friction_x += self.entity.game_objects.game.dt * 0.002 * math.pow(self.friction_x/self.target, 2)
         #self.friction_x = self.friction_x * math.pow((2 - (self.target-self.friction_x)/(self.target-self.ref_x)), 0.5)
 
@@ -168,7 +168,6 @@ class UpStreamVertical(UpStream):
 
 class UpStreamHorizontal(UpStream):
     """Horizontal"""
-
 
 class TjasolmaisEmbrace(MovementModifier):#added from ability
     def __init__(self, priority, **kwarg):

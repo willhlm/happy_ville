@@ -11,11 +11,10 @@ class FallingRock(Projectiles):#things that can be placed in cave, the source ma
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = self.rect.copy()
         self.lifetime = 100
-        self.dmg = 1
         self.currentstate = states_droplet.Idle(self)
 
     def pool(game_objects):
-        FallingRock.sprites = read_files.load_sprites_dict('assets/sprites/entities/visuals/enviroment/falling_rock/', game_objects)
+        FallingRock.sprites = read_files.load_sprites_dict('assets/sprites/entities/visuals/environments/falling_rock/', game_objects)
 
     def collision_enemy(self, collision_enemy):#projecticle enemy collision (including player)
         super().collision_enemy(collision_enemy)

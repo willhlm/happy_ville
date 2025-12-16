@@ -3,15 +3,16 @@ import pygame
 from gameplay.entities.base.character import Character
 from engine.utils import read_files
 from gameplay.entities.player.entity_shader_manager import EntityShaderManager
-from gameplay.entities.player.player_states import PlayerStates
+from gameplay.entities.player.player_states.state_manager import StateManager
 from gameplay.entities.player import states_death
 from gameplay.entities.player.backpack import backpack
 from gameplay.entities.shared.modifiers import modifier_movement
 from gameplay.entities.visuals.cosmetics.slash import Slash
-from gameplay.entities.player.sword import Sword
+from gameplay.entities.player.sword.sword import Sword
 from gameplay.entities.player.abilities.ability_manager import AbilityManager
 from gameplay.entities.shared.status.wet import Wet
 from engine import constants as C
+from gameplay.entities.visuals.cosmetics import Blood
 
 class Player(Character):
     def __init__(self, pos, game_objects):
@@ -37,7 +38,7 @@ class Player(Character):
         self.abilities = AbilityManager(self)#spirit (thunder,migawari etc) and movement /dash, double jump and wall glide)
 
         self.flags = {'ground': True, 'invincibility': False, 'shroompoline': False, 'attack_able': True, 'grounddash': True}# flags to check if on ground (used for jumpåing), #a flag to make sure you can only swing sword when this is False
-        self.currentstate = PlayerStates(self)#states_player.Idle_main(self)
+        self.currentstate = StateManager(self)#states_player.Idle_main(self)
         self.death_state = states_death.Idle(self)#this one can call "normal die" or specifal death (for example cultist encounter)
 
         self.backpack = backpack.Backpack(self)
@@ -52,12 +53,15 @@ class Player(Character):
 
     def ramp_down_collision(self, ramp):#when colliding with platform beneth
         super().ramp_down_collision(ramp)
+        self.movement_manager.handle_input('ground')
         self.colliding_platform = ramp#save the latest platform
+        self.flags['ground'] = True
 
     def down_collision(self, block):#when colliding with platform beneth
         super().down_collision(block)
         self.movement_manager.handle_input('ground')
         self.colliding_platform = block#save the latest platform
+        self.flags['ground'] = True
 
     def right_collision(self, block, type = 'Wall'):
         super().right_collision(block, type)
@@ -79,18 +83,20 @@ class Player(Character):
 
         self.velocity[0] += dt * (self.dir[0] * self.acceleration[0] - self.velocity[0] * context.friction[0]) + context.velocity[0]
 
-    def take_dmg(self, effect):
+        #print(self.velocity[0])
+
+    def take_dmg(self, damage):
         """Called by hit_component after modifiers run. Apply damage and effects."""
-        self.health -= effect.damage
+        self.health -= damage
         self.flags['invincibility'] = True
-        self.game_objects.ui.hud.remove_hearts(effect.damage)# * self.dmg_scale)#update UI
-                        
+        self.game_objects.ui.hud.remove_hearts(damage)# * self.dmg_scale)#update UI
+
         if self.health > 0:  # Still alive
             self.game_objects.timer_manager.start_timer(C.invincibility_time_player, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
             self.shader_state.handle_input('Hurt')#turn white and shake
             self.shader_state.handle_input('Invincibile')#blink a bit
             #self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state or interupt attacks?
-            self.emit_particles(lifetime = 40, scale = 3, colour=[0,0,0,255], fade_scale = 7,  number_particles = 60 )
+            #self.emit_particles(lifetime = 40, scale = 3, colour=[0,0,0,255], fade_scale = 7,  number_particles = 60 )
             self.game_objects.cosmetics.add(Slash(self.hitbox.center,self.game_objects))#make a slash animation
 
             self.game_objects.time_manager.modify_time(time_scale = 0, duration = 20)

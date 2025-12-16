@@ -10,7 +10,6 @@ class BouncyBalls(Projectiles):#for ball challange room
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = self.rect.copy()
 
-        self.dmg = 1
         self.light = game_objects.lights.add_light(self)
         self.velocity = [random.uniform(-10,10),random.uniform(-10,-4)]
 

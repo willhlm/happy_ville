@@ -295,7 +295,7 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"light_forest_cave_4"
+                                 "value":"hlifblom_2"
                                 }, 
                                 {
                                  "name":"spawn",
@@ -749,7 +749,7 @@
                         }, 
                         {
                          "gid":8200,
-                         "height":480,
+                         "height":576,
                          "id":1972,
                          "name":"",
                          "rotation":0,
@@ -757,7 +757,7 @@
                          "visible":true,
                          "width":208,
                          "x":736,
-                         "y":992
+                         "y":1088
                         }, 
                         {
                          "gid":8200,
@@ -976,197 +976,6 @@
                          "y":1264
                         }, 
                         {
-                         "gid":8200,
-                         "height":384,
-                         "id":1996,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":208,
-                         "x":416,
-                         "y":1104
-                        }, 
-                        {
-                         "gid":8205,
-                         "height":16,
-                         "id":1997,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":48,
-                         "x":624,
-                         "y":1088
-                        }, 
-                        {
-                         "gid":8200,
-                         "height":384,
-                         "id":1998,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":32,
-                         "x":704,
-                         "y":816
-                        }, 
-                        {
-                         "gid":8205,
-                         "height":64,
-                         "id":1999,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":720,
-                         "y":992
-                        }, 
-                        {
-                         "gid":8205,
-                         "height":32,
-                         "id":2000,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":624,
-                         "y":912
-                        }, 
-                        {
-                         "gid":8205,
-                         "height":32,
-                         "id":2001,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":704,
-                         "y":848
-                        }, 
-                        {
-                         "gid":8205,
-                         "height":32,
-                         "id":2002,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":624,
-                         "y":816
-                        }, 
-                        {
-                         "gid":8200,
-                         "height":160,
-                         "id":2003,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":624,
-                         "y":1072
-                        }, 
-                        {
-                         "gid":8200,
-                         "height":64,
-                         "id":2004,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":624,
-                         "y":880
-                        }, 
-                        {
-                         "gid":8200,
-                         "height":64,
-                         "id":2005,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":624,
-                         "y":784
-                        }, 
-                        {
-                         "gid":8200,
-                         "height":80,
-                         "id":2006,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":32,
-                         "x":704,
-                         "y":928
-                        }, 
-                        {
-                         "gid":8203,
-                         "height":176,
-                         "id":2007,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"path_to",
-                                 "type":"string",
-                                 "value":"light_forest_cave_7"
-                                }, 
-                                {
-                                 "name":"spawn",
-                                 "type":"string",
-                                 "value":"3"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":464,
-                         "y":720
-                        }, 
-                        {
-                         "gid":8193,
-                         "height":16,
-                         "id":2008,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"spawn",
-                                 "type":"string",
-                                 "value":"2"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":512,
-                         "y":640
-                        }, 
-                        {
-                         "gid":8207,
-                         "height":704,
-                         "id":2009,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"direction",
-                                 "type":"string",
-                                 "value":"left"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":448,
-                         "y":1264
-                        }, 
-                        {
                          "gid":8205,
                          "height":48,
                          "id":2017,
@@ -1216,7 +1025,7 @@
                         }, 
                         {
                          "gid":8200,
-                         "height":16,
+                         "height":128,
                          "id":2021,
                          "name":"",
                          "rotation":0,
@@ -1224,31 +1033,7 @@
                          "visible":true,
                          "width":80,
                          "x":3024,
-                         "y":1472
-                        }, 
-                        {
-                         "height":0,
-                         "id":2022,
-                         "name":"",
-                         "polygon":[
-                                {
-                                 "x":0,
-                                 "y":0
-                                }, 
-                                {
-                                 "x":-128,
-                                 "y":-128
-                                }, 
-                                {
-                                 "x":0,
-                                 "y":-128
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":0,
-                         "x":704,
-                         "y":560
+                         "y":1584
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -1312,14 +1097,14 @@
                         {
                          "gid":43312,
                          "height":32,
-                         "id":2016,
+                         "id":2023,
                          "name":"",
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":32,
                          "x":1152,
-                         "y":1072
+                         "y":1056
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -1368,7 +1153,7 @@
          "y":0
         }],
  "nextlayerid":47,
- "nextobjectid":2023,
+ "nextobjectid":2024,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

@@ -63,7 +63,7 @@ class Base_states():
     def __init__(self, entity, **kwarg):
         self.entity = entity
     
-    def update(self):
+    def update(self, dt):
         pass
 
     def handle_input(self, input):
@@ -89,8 +89,8 @@ class Wait(Base_states):
         self.entity.animation.play('idle')
         self.duration = kwarg.get('duration',50)
 
-    def update(self):   
-        self.duration -= self.entity.game_objects.game.dt  
+    def update(self, dt):   
+        self.duration -= dt 
         if self.duration < 0:
             self.entity.currentstate.start_next_task()
 
@@ -101,7 +101,7 @@ class Turn_around(Base_states):
         self.entity.dir[0] *= -1
         self.entity.animation.play('idle')                  
 
-    def update(self):
+    def update(self, dt):
         self.entity.currentstate.start_next_task()
 
 @register_state(STATE_REGISTRY)
@@ -110,7 +110,7 @@ class Transform(Base_states):
         super().__init__(entity)
         self.entity.animation.play('transform')
 
-    def update(self):
+    def update(self, dt):
         self.entity.velocity = [0,0]
 
     def increase_phase(self):
@@ -123,11 +123,11 @@ class Move(Base_states):#not used
         self.entity.animation.play('walk')
         self.timer = 200  # duration to walk before re-evaluating (adjust as needed)
 
-    def update(self):
+    def update(self, dt):
         self.entity.chase([0, 0])
 
         dist_x, dist_y = self.entity.currentstate.player_distance
-        self.timer -= self.entity.game_objects.game.dt
+        self.timer -= dt
 
         # Stop if close enough to reevaluate
         if abs(dist_x) < self.entity.attack_distance[0] * 1.5:
@@ -143,7 +143,7 @@ class Think(Base_states):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)        
 
-    def update(self):
+    def update(self, dt):
         dist_x, dist_y = self.entity.currentstate.player_distance
 
         # Face the player first
@@ -208,7 +208,7 @@ class Death(Base_states):
         super().__init__(entity)
         self.entity.animation.play('death')
 
-    def update(self):
+    def update(self, dt):
         self.entity.velocity = [0,0]
 
     def increase_phase(self):
@@ -272,7 +272,7 @@ class Charge_run(Base_states):
         self.cycles = 1#to add a delay from running to attack
         self.next = False#to add a delay from running to attack
 
-    def update(self):
+    def update(self, dt):
         self.entity.velocity[0] = self.entity.dir[0] * 5
         if abs(self.entity.currentstate.player_distance[0]) < self.entity.attack_distance[0]:    
             self.next = True
@@ -332,8 +332,8 @@ class Jump_main(Base_states):
         self.timer = 5      
         self.entity.acceleration[0] = 1
 
-    def update(self):
-        self.timer -= self.entity.game_objects.game.dt
+    def update(self, dt):
+        self.timer -= dt
         self.entity.velocity[1] = -7           
         if self.timer < 0:
             self.entity.currentstate.start_next_task()    

@@ -10,6 +10,10 @@ class ScreenManager():
         self.screen = self.game.display.make_layer(self.game.window_size)#the screen we can use to render things on
         self.composite_screen = self.game.display.make_layer(self.game.display_size)#display size: need to be large to do the pp camera
         
+        game.game_objects.signals.subscribe("layer_trigger_in", self.append_shader)
+        game.game_objects.signals.subscribe("layer_trigger_update", self.update_layer_trigger)
+        game.game_objects.signals.subscribe("layer_trigger_out", self.remove_shader)
+
     def register_screen(self, key, parallax):#called from maploader when loading each layer in titled
         if self.screens.get(key):#already exist, just update parallax
             self.screens[key].reset(parallax)
@@ -61,13 +65,21 @@ class ScreenManager():
         for screen in self.screens.values():
             screen.clear(0,0,0,0)
 
-    def append_shader(self, shader, layers, **kwarg):  #can append shaders to the screen (post process like stff)
+    def append_shader(self, shader, layers, **kwarg):#can append shaders to the screen (post process like stff)
         for key in layers:     
             self.screens[key].append_shader(shader, **kwarg)
 
     def clear_shaders(self):
         for key in self.screens.keys():
             self.screens[key].clear_shaders()
+
+    def remove_shader(self, shader, layers, **kwarg):#remove single shader for specivied layers
+        for key in layers:
+            self.screens[key].remove_shader(shader)
+
+    def update_layer_trigger(self, shader, layers, **kwarg):#dynamically update shader uniforms
+        for key in layers:     
+            self.screens[key].update_shader(shader, **kwarg)
 
 class ScreenLayer():
     def __init__(self, game, parallax = [1, 1]):
@@ -107,7 +119,7 @@ class ScreenLayer():
     def render(self, composite_target):
         self.post_process.apply(source_layer=self.layer,final_target=composite_target)
 
-    def reset(self, parallax):
+    def reset(self, parallax):  
         self.parallax = parallax
         self.offset = [0, 0]
 
@@ -116,6 +128,12 @@ class ScreenLayer():
 
     def append_shader(self, shader, **kwarg):        
         self.post_process.append_shader(shader, **kwarg)
+
+    def update_shader(self, shader_name, **kwarg):#to dynamically update uniforms
+        self.post_process.shaders[shader_name].set_uniforms(**kwarg)
+
+    def remove_shader(self, shader, **kwarg):        
+        self.post_process.remove_shader(shader)
 
     def clear_shaders(self):
         self.post_process.clear_shaders()

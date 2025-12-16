@@ -2,6 +2,7 @@ import pygame
 from gameplay.entities.enemies.base.enemy import Enemy
 from engine.utils import read_files
 from . import packun_states
+from gameplay.entities.projectiles import Projectile_1
 
 class Packun(Enemy):
     def __init__(self,pos, game_objects, **kwarg):

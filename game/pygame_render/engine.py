@@ -33,10 +33,10 @@ class RenderEngine:
         self,
         screen_width: int,
         screen_height: int,
-        fullscreen: int or bool = 0,
-        resizable: int or bool = 0,
-        noframe: int or bool = 0,
-        scaled: int or bool = 0,
+        fullscreen: int | bool = 0,
+        resizable: int | bool = 0,
+        noframe: int | bool = 0,
+        scaled: int | bool = 0,
         depth: int = 0,
         display: int = 0,
         vsync: int = 0,
@@ -245,11 +245,11 @@ class RenderEngine:
         self,
         size: tuple[int, int],
         components: int = 4,
-        data: bytes or None = None,
+        data: bytes | None = None,
         samples: int = 0,
         alignment: int = 1,
         dtype: str = "f1",
-        internal_format: int or None = None,
+        internal_format: int | None = None,
     ) -> Layer:
         """
         Create a rendering layer with optional parameters. A layer consists of a texture and a framebuffer.
@@ -340,7 +340,7 @@ class RenderEngine:
         ubo.bind_to_uniform_block(binding)
         shader.add_ubo(ubo, ubo_name)
 
-    def clear(self, R: int or tuple[int] = 0, G: int = 0, B: int = 0, A: int = 255):
+    def clear(self, R: int | tuple[int] = 0, G: int = 0, B: int = 0, A: int = 255):
         """
         Clear the screen with a color.
 
@@ -358,10 +358,10 @@ class RenderEngine:
         tex: Texture,
         layer: Layer,
         position: tuple[float, float] = (0, 0),
-        scale: tuple[float, float] or float = (1.0, 1.0),
+        scale: tuple[float, float] | float = (1.0, 1.0),
         angle: float = 0.0,
-        flip: tuple[bool, bool] or bool = (False, False),
-        section: pygame.Rect or None = None,
+        flip: tuple[bool, bool] | bool = (False, False),
+        section: pygame.Rect | None = None,
         shader: Shader = None,
         hdr_render: bool = False,
     ) -> None:
@@ -617,7 +617,7 @@ class RenderEngine:
         angle1: float,
         angle2: float,
         antialias: bool = False,
-        num_segments: None or int = None,
+        num_segments: None | int = None,
     ):
         """
         Render a circular arc on the specified layer.

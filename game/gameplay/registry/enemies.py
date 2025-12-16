@@ -2,6 +2,7 @@ from gameplay.entities.enemies import *
 
 REGISTER_ENEMIES = {
     'reindeer': Reindeer,
+    'wolfies': Wolfies,
     'cocoon_boss': CocoonBoss,
     'rhoutta_encounter': RhouttaEncounter,
     'butterfly': Butterfly,

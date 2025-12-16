@@ -283,12 +283,12 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"light_forest_cave_14"
+                                 "value":"hlifblom_12"
                                 }, 
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"2"
+                                 "value":"3"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -642,12 +642,12 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"light_forest_cave_8"
+                                 "value":"hlifblom_24"
                                 }, 
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"4"
+                                 "value":"2"
                                 }],
                          "rotation":0,
                          "type":"",

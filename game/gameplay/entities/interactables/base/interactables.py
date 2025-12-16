@@ -10,6 +10,7 @@ class Interactables(AnimatedEntity):#interactables
         self.true_pos = self.rect.topleft
         self.shader_state = states_shader.Idle(self)
         self.hit_component = HitComponent(self)
+        self.flags = {'invincibility': True}
 
     def update(self, dt):
         super().update(dt)
@@ -31,9 +32,9 @@ class Interactables(AnimatedEntity):#interactables
     def player_noncollision(self):#when player doesn't collide: for grass
         self.shader_state.handle_input('idle')
 
-    def take_hit(self, attacker, effect):
+    def take_hit(self, effect):
         """Delegate to hit component"""       
-        return self.hit_component.take_hit(attacker, effect)
+        return self.hit_component.take_hit(effect)
 
     def take_dmg(self, effect):#when player hits with e.g. sword
         pass

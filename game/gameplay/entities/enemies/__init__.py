@@ -1,4 +1,5 @@
 from .bosses.reindeer.reindeer import Reindeer
+from .bosses.wolfies.wolfies import Wolfies
 from .bosses.rhoutta_encounter import RhouttaEncounter
 from .bosses.butterfly.butterfly import Butterfly
 from .bosses.cocoon.cocoon_boss import CocoonBoss

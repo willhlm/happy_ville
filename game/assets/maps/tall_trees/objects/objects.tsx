@@ -6,7 +6,7 @@
   <properties>
    <property name="direction" value=""/>
   </properties>
-  <image source="../../../sprites/entities/enemies/common/ground/packun/idle/idle1.png" width="64" height="48"/>
+  <image width="64" height="48" source="../../../sprites/entities/enemies/common/ground/packun/idle/idle1.png"/>
  </tile>
  <tile id="11">
   <properties>

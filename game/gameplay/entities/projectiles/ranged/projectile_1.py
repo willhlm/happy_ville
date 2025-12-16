@@ -10,7 +10,6 @@ class Projectile_1(Projectiles):
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = self.rect.copy()
 
-        self.dmg = 1
         self.lifetime = kwarg.get('lifetime', 200)
         self.dir = kwarg.get('dir', [1, 0])
         amp = kwarg.get('amp', [5, 5])

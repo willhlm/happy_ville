@@ -8,7 +8,7 @@ class Shaders():
     def update_render(self, dt):
         pass
 
-    def set_uniforms(self):
+    def set_uniforms(self, **kwargs):#is also called from screen layers
         pass
 
     def draw(self, source_texture, target_texture):
@@ -26,7 +26,7 @@ class Vignette(Shaders):
         self.vignette_intensity = kwargs.get('vignette_intensity', 1.0)
         self.vignette_opacity = kwargs.get('vignette_opacity', 0.1)  # More visible
 
-    def set_uniforms(self):
+    def set_uniforms(self, **kwargs):
         shader = self.post_process.game_objects.shaders['vignette']
 
         shader['colour'] = self.colour

@@ -1,7 +1,9 @@
 import pygame 
 from gameplay.entities.enemies.base.boss import Boss
 from engine.utils import read_files
+from . import reindeer_states
 from gameplay.entities.enemies.bosses import task_manager
+from gameplay.entities.projectiles import HurtBox
 
 class Reindeer(Boss):
     def __init__(self, pos, game_objects):
@@ -17,7 +19,7 @@ class Reindeer(Boss):
         self.attack_distance = [100, 50]
         #self.chase_distance = [200, 50]
         self.jump_distance = [240, 50]
-        self.attack = Hurt_box
+        self.attack = HurtBox
 
         self.light = self.game_objects.lights.add_light(self, radius = 150)
         self.animation.framerate = 1/6

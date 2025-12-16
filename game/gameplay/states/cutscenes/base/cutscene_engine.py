@@ -16,6 +16,14 @@ class CutsceneEngine(Gameplay):#cut scenens that is based on game engien
         self.rect2.clear(0,0,0,255)
         self.rect1.clear(0,0,0,255)
 
+    def update_render(self, dt):
+        super().update_render(dt)
+        self.pos[0] += dt#the upper balck box
+        self.pos[1] -= dt#the lower balck box
+
+        self.pos[0] = min(-self.game.window_size[1]*self.const[0], self.pos[0])
+        self.pos[1] = max(self.game.window_size[1]*self.const[1], self.pos[1])        
+
     def render(self):
         super().render()
         self.cinematic()
@@ -24,12 +32,6 @@ class CutsceneEngine(Gameplay):#cut scenens that is based on game engien
         pass
 
     def cinematic(self):#black box stuff
-        self.pos[0] += self.game.dt#the upper balck box
-        self.pos[1] -= self.game.dt#the lower balck box
-
-        self.pos[0] = min(-self.game.window_size[1]*self.const[0], self.pos[0])
-        self.pos[1] = max(self.game.window_size[1]*self.const[1], self.pos[1])
-
         self.game.display.render(self.rect1.texture, self.game.screen_manager.screen, position = [0,self.pos[0]])
         self.game.display.render(self.rect2.texture,  self.game.screen_manager.screen, position = [0,self.pos[1]])
         self.game.render_display(self.game.screen_manager.screen.texture)  

@@ -9,7 +9,7 @@ from .collisions.hole import Hole
 from .collisions.path_collision import PathCollision
 from .collisions.path_interact import PathInteract
 from .collisions.safe_spawn import SafeSpawn
-from .collisions.shade_trigger import ShadeTrigger
+from .collisions.layer_trigger import LayerTrigger
 from .collisions.zoom_collision import ZoomCollision
 
 from .doors.door_interact import DoorInteract

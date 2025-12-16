@@ -120,6 +120,9 @@
  <tile id="23">
   <properties>
    <property name="colour" value=""/>
+   <property name="layers" value=""/>
+   <property name="scale" value=""/>
+   <property name="shader" value=""/>
   </properties>
  </tile>
  <tile id="25">
