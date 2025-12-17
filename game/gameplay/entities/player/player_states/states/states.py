@@ -623,9 +623,9 @@ class JumpMain(PhaseAirBase):
 
     def swing_sword(self):
         if not self.entity.flags['attack_able']: return
-        if self.entity.dir[1] > 0.7:
+        if self.entity.dir[1] > C.down_angle:
             self.enter_state('sword_up')
-        elif self.entity.dir[1] < -0.7:
+        elif self.entity.dir[1] < C.down_angle * -1:
             self.enter_state('sword_down')
         else:#right or left
             state = 'sword_air' + str(int(self.entity.sword.swing)+1)
@@ -770,9 +770,9 @@ class FallPre(PhaseAirBase):
 
     def swing_sword(self):
         if not self.entity.flags['attack_able']: return
-        if self.entity.dir[1] > 0.7:
+        if self.entity.dir[1] > C.down_angle:
             self.enter_state('sword_up')
-        elif self.entity.dir[1] < -0.7:
+        elif self.entity.dir[1] < C.down_angle * -1:
             self.enter_state('sword_down')
         else:#right or left
             state = 'sword_air' + str(int(self.entity.sword.swing)+1)
@@ -831,9 +831,9 @@ class LandSoftMain(PhaseBase):#landing: mainly cosmetic
 
     def swing_sword(self):
         if not self.entity.flags['attack_able']: return
-        if self.entity.dir[1] > 0.7:
+        if self.entity.dir[1] > C.down_angle:
             self.enter_state('sword_up')
-        elif self.entity.dir[1] < -0.7:
+        elif self.entity.dir[1] < C.down_angle * -1:
             self.enter_state('sword_down')
         else:#right or left
             state = 'sword_stand' + str(int(self.entity.sword.swing)+1)
@@ -1601,7 +1601,7 @@ class DashAirMain(DashGroundPre):#level one dash: normal
 
     def exit_state(self):
         if self.dash_length < 0:
-            self.entity.movement_manager.add_modifier('air_boost', friction_x = 0.15, entity = self.entity)
+            self.entity.movement_manager.add_modifier('air_boost', friction_x = 0.18, entity = self.entity)
             self.enter_state('fall', allow_sprint=True)
 
     def increase_phase(self):

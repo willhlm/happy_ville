@@ -9,7 +9,7 @@ friction = [0.5,0]#need to be less than 1
 friction_player = [0.24,0.01]
 jump_vel_player = -5.5
 max_vel = [30,7]#[30,6]
-pogo_vel = -6
+pogo_vel = -7
 dash_length = 5#how long  Aila dashes
 dash_jump_length = 8
 dash_vel = 3
@@ -33,6 +33,7 @@ invincibility_time_enemy = 20
 sword_time_player = 25#how long one has to wait before can swing the sword again
 hurt_animation_length = 15#how long enteties turn white upon dmg
 default_enemydmg_hitstop = 7
+down_angle = 0.45
 
 #colour
 spirit_colour = [255*0.39, 255*0.78, 255, 255]
