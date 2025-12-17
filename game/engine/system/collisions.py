@@ -29,6 +29,14 @@ class Collisions():
                 self.game_objects.player.velocity[1] = offset#so that it looks more natural (cannot be 0, needs to be finite)
                 self.game_objects.player.go_through['ramp'] = ramp.go_through#a flag that determines if one can go through
 
+    def entity_collision(self, entities, target_group):
+        for entity in entities.sprites():   
+            for target in target_group.sprites():
+                if self.collided(entity, target):
+                    target.collision(entity)
+                else:
+                    target.noncollision(entity)        
+
     def interactables_collision(self, enteties):#interactables: only works for player since we have plyare collision and non collisiosn
         for interactable in self.game_objects.interactables.sprites():                  
             collision_entity = pygame.sprite.spritecollideany(interactable, enteties, Collisions.collided)
@@ -108,7 +116,7 @@ class Collisions():
             entity.update_true_pos_x(dt)#it sets the true pos and update the hitbox
             static_entities_x = pygame.sprite.spritecollide(entity, self.game_objects.platforms, False, Collisions.collided)
             for static_entity_x in static_entities_x:                
-                static_entity_x.collide_x(entity)
+                static_entity_x.collide_x(entity)            
 
             #move in y every dynamic sprite
             entity.update_true_pos_y(dt)#it sets the true pos and update the hitbox              

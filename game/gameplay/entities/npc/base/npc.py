@@ -23,12 +23,12 @@ class NPC(Character):
         self.collided = False
         self.indicator = InteractableIndicator(self.rect.topright, self.game_objects)
 
-    def player_noncollision(self):
+    def noncollision(self, player):
         if not self.collided: return
         self.indicator.kill()
         self.collided = False
         
-    def player_collision(self, player):        
+    def collision(self, player):        
         if self.collided: return              
         self.game_objects.cosmetics.add(self.indicator)
         self.collided = True

@@ -1,5 +1,6 @@
 import pygame, math
 from engine.utils import read_files
+from engine import constants as C
 from gameplay.entities.interactables.base.interactables import Interactables
 from . import states_grind
 from gameplay.entities.shared.components import hit_effects
@@ -23,7 +24,8 @@ class Grind(Interactables):#trap
         self.velocity = [0, 0]
         self.time = 0
 
-        self.base_effect = hit_effects.create_contact_effect(damage = 1, hit_type = 'metal', hitstop = 10, attacker = self)
+        self.flags['invincibility'] = False
+        self.base_effect = hit_effects.create_contact_effect(damage = 1, hit_type = 'metal', hitstop = 100, attacker = self)
 
     def update_vel(self):
         self.velocity[0] = self.direction[0] * self.distance * math.cos(self.speed * self.time)
@@ -51,7 +53,9 @@ class Grind(Interactables):#trap
 
         damage_applied, modified_effect = player.take_hit(effect)                        
 
-    def take_dmg(self, projectile):#when player hits with e.g. sword
-        if hasattr(projectile, 'sword_jump'):#if it has the attribute
-            projectile.sword_jump()
-
+    def take_dmg(self, damage):
+        """Called by hit_component after modifiers run. Apply damage and effects."""
+        self.flags['invincibility'] = True
+                        
+        self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)
+        self.game_objects.camera_manager.camera_shake(amplitude=10, duration=15, scale=0.9)

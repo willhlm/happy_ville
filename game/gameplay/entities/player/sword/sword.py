@@ -53,7 +53,7 @@ class Sword(Melee):
             self.stone_states['enemy_collision'].enemy_collision()
 
     def collision_interactables(self, inetractable):#latest collision version
-        self.currentstate.sword_jump()
+        self.currentstate.sword_jump()        
         effect = self.base_effect.copy()
         effect.meta['attacker_dir'] = self.dir#save the direction
 

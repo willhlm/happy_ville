@@ -1386,6 +1386,10 @@ class Tall_trees(Biome):
                     platform = BreakableOnesideLeft(object_position, self.level.game_objects, str(ID_key), 'assets/sprites/entities/platforms/breakable/nordveden/type3/')
                     self.level.game_objects.platforms.add(platform)                       
 
+            elif id == 13:#dissapera when standing on it
+                new_platofrm = TallTrees_1( self.level.game_objects, object_position)
+                self.level.game_objects.platforms.add(new_platofrm)
+
 class Wakeup_forest(Biome):
     def __init__(self, level):
         super().__init__(level)

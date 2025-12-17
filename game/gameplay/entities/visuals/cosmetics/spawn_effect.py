@@ -7,9 +7,8 @@ class SpawnEffect(AnimatedEntity):#the thing that crets when aila re-spawns
         super().__init__(pos,game_objects)
         self.sprites = read_files.load_sprites_dict('assets/sprites/entities/visuals/cosmetics/spawn_effect/',game_objects)
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.finish = False#needed for the cutscene
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)        
 
     def reset_timer(self):
-        self.finish = True
+        self.game_objects.signals.emit('finish_spawn_effect')
         self.kill()

@@ -239,17 +239,19 @@ class Zoom(Shaders):#only zoom in?
         self.center = kwarg.get('center', (0.5, 0.5))
         self.rate = kwarg.get('rate', 1)
         self.scale = kwarg.get('scale', 0.5)
+        self.target = -1#remove shader when zoom reaches this value. Negatuve so it never reaches this on zoom in.
 
     def zoom_out(self, **kwarg):
         self.scale = kwarg.get('scale', 1)
         self.rate = kwarg.get('rate', 1)
+        self.target = self.scale
 
     def update_render(self, dt):
         """Smoothly interpolate zoom toward target."""
         self.zoom += (self.scale - self.zoom) * self.rate
-        
-        if abs(self.zoom - self.scale) < 0.001:# Snap and cleanup if fully zoomed out
-            self.zoom = self.scale
+
+        if abs(self.zoom - self.target) < 0.001:# Snap and cleanup if fully zoomed out
+            self.zoom = self.target
             self.post_process.remove_shader('zoom')
 
     def set_uniforms(self):

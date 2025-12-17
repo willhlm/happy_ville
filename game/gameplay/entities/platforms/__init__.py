@@ -30,3 +30,4 @@ from .timer.bubble_static import BubbleStatic
 from .timer.crystal_mines_1 import CrystalMines_1
 from .timer.nordveden_1 import Nordveden_1
 from .timer.rhoutta_encounter_1 import RhouttaEncounter_1
+from .timer.tall_trees_1 import TallTrees_1

@@ -83,8 +83,6 @@ class Player(Character):
 
         self.velocity[0] += dt * (self.dir[0] * self.acceleration[0] - self.velocity[0] * context.friction[0]) + context.velocity[0]
 
-        #print(self.velocity[0])
-
     def take_dmg(self, damage):
         """Called by hit_component after modifiers run. Apply damage and effects."""
         self.health -= damage

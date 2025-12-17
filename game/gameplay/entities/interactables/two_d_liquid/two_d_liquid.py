@@ -59,7 +59,7 @@ class TwoDLiquid(StaticEntity):#inside interactables_fg group. fg because in fro
 
         self.game_objects.game.display.render(self.empty.texture, target, position = pos, shader = self.shader)#shader render
 
-    def player_collision(self, player):#player collision
+    def collision(self, player):#player collision
         if self.interacted: return
         player.movement_manager.add_modifier('two_d_liquid')
         vel_scale = player.velocity[1] / C.max_vel[1]
@@ -68,7 +68,7 @@ class TwoDLiquid(StaticEntity):#inside interactables_fg group. fg because in fro
         self.interacted = True
         self.currentstate.player_collision(player)
 
-    def player_noncollision(self):
+    def noncollision(self, player):
         if not self.interacted: return
         self.game_objects.player.movement_manager.remove_modifier('two_d_liquid')
         self.game_objects.player.timer_jobs['wet'].activate(self.currentstate.liquid_tint)#water when player leaves

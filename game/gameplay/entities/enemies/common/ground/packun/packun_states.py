@@ -24,6 +24,7 @@ class Idle(EnemyStates):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
         self.entity.animation.play('idle')
+        self.entity.velocity = [0,0]
 
     def update(self, dt):
         super().update(dt)
@@ -62,6 +63,7 @@ class Death(EnemyStates):
     def increase_phase(self):#called from states, depending on if the player was close when it wanted to explode or not
         self.entity.dead()
 
+#angle states
 class Angle_sates():
     def __init__(self, entity):
         self.entity = entity      

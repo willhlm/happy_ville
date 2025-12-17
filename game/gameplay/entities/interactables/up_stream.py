@@ -22,7 +22,7 @@ class UpStream(StaticEntity):#a draft that can lift enteties along a direction
         self.interacted = False#for player collision
         self.type = 'up_stream_vertical' if self.dir[1] != 0 else 'up_stream_horizontal'
 
-    def player_collision(self, player):#player collision
+    def collision(self, player):#player collision
         if self.interacted: return
         self.interacted = True
         player.velocity[1] += self.dir[1] * int(player.collision_types['bottom'])#a small inital boost if on ground
@@ -35,7 +35,7 @@ class UpStream(StaticEntity):#a draft that can lift enteties along a direction
         #if (player.velocity[1]) < 0:
         #    player.velocity[1] = min(abs(player.velocity[1]), self.max_speed) * self.dir[1]
 
-    def player_noncollision(self):
+    def noncollision(self, player):
         if not self.interacted: return
         self.game_objects.player.movement_manager.remove_modifier(self.type)
         self.interacted = False

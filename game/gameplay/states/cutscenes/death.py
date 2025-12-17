@@ -1,9 +1,11 @@
 from .base.cutscene_engine import CutsceneEngine
+from gameplay.entities.visuals.cosmetics import SpawnEffect
 
 class Death(CutsceneEngine):#when aila dies
     def __init__(self,game):
         super().__init__(game)
-        self.stage = 0        
+        self.stage = 0       
+        self.game.game_objects.signals.subscribe('finish_spawn_effect', self.finish_spawn_effect) 
 
     def update(self, dt):
         super().update(dt)
@@ -18,16 +20,15 @@ class Death(CutsceneEngine):#when aila dies
                 #spawn effect
                 pos = (0,0)#
                 offset = 100#depends on the effect animation    
-                self.spawneffect = Spawneffect(pos,self.game.game_objects)
-                self.spawneffect.rect.midbottom=self.game.game_objects.player.rect.midbottom
-                self.spawneffect.rect.bottom += offset
-                self.game.game_objects.cosmetics.add(self.spawneffect)
-                self.stage = 2
+                spawneffect = SpawnEffect(pos,self.game.game_objects)
+                spawneffect.rect.midbottom = self.game.game_objects.player.rect.midbottom
+                spawneffect.rect.bottom += offset
+                self.game.game_objects.cosmetics.add(spawneffect)     
+                self.stage = 2             
 
-        elif self.stage == 2:
-            if self.spawneffect.finish:#when the cosmetic effetc finishes        
-                self.game.game_objects.player.currentstate.enter_state('respawn')
-                self.game.state_manager.exit_state()
+    def finish_spawn_effect(self):
+        self.game.game_objects.player.currentstate.enter_state('respawn')
+        self.game.state_manager.exit_state()
 
     def state1(self):
         if self.game.game_objects.player.backpack.map.spawn_point.get('bone', False):#respawn by bone

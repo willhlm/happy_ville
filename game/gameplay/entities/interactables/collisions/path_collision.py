@@ -35,7 +35,7 @@ class PathCollision(Interactables):
             else:#down
                 pass
 
-    def player_collision(self, player):
+    def collision(self, player):
         self.player_movement(player)
         self.game_objects.load_map(self.game_objects.game.state_manager.state_stack[-1], self.destination, self.spawn)#nned to send previous state so that we can update and render for exampe gameplay or title screeen while fading
         self.kill()#so that aila only collides once

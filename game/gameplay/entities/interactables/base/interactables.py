@@ -26,14 +26,14 @@ class Interactables(AnimatedEntity):#interactables
     def interact(self):#when player press T
         pass
 
-    def player_collision(self, player):#player collision
+    def collision(self, player):#player collision
         self.shader_state.handle_input('outline')
 
-    def player_noncollision(self):#when player doesn't collide: for grass
+    def noncollision(self, player):#when player doesn't collide: for grass
         self.shader_state.handle_input('idle')
 
     def take_hit(self, effect):
-        """Delegate to hit component"""       
+        """Delegate to hit component"""      
         return self.hit_component.take_hit(effect)
 
     def take_dmg(self, effect):#when player hits with e.g. sword
@@ -50,3 +50,6 @@ class Interactables(AnimatedEntity):#interactables
 
     def emit_particles(self, **kwargs):#called when aila sword hit it
         pass        
+
+    def on_invincibility_timeout(self):
+        self.flags['invincibility'] = False

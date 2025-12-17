@@ -466,7 +466,7 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"village_ola2_2"
+                                 "value":"village_2"
                                 }, 
                                 {
                                  "name":"spawn",
@@ -839,8 +839,8 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":2048,
-                         "y":528
+                         "x":400,
+                         "y":416
                         }],
                  "opacity":1,
                  "type":"objectgroup",
