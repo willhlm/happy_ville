@@ -36,7 +36,7 @@ class IdleMain(PhaseBase):
             input.processed()
             self.enter_state('dash_ground')
         elif event[-1] == 'x':
-            if input.meta.get('smash'):
+            if input.meta.get('smash') and False:
                 direction = input.meta.get('direction')
                 if direction == 'left':
                     self.enter_state('smash_side', dir = -1)
@@ -519,7 +519,9 @@ class SprintMain(PhaseBase):
         if event[-1] == 'a':
             if self.sprint_time > self.sprint_time_threshold:
                 input.processed()
-                self.enter_state('jump_sprint')#main
+                #self.enter_state('jump_sprint')#main
+                self.entity.flags['grounddash'] = True
+                self.enter_state('dash_jump')
 
     def handle_release_input(self, input):
         event = input.output()
@@ -621,9 +623,9 @@ class JumpMain(PhaseAirBase):
 
     def swing_sword(self):
         if not self.entity.flags['attack_able']: return
-        if self.entity.dir[1] > 0.7:
+        if self.entity.dir[1] > C.down_angle:
             self.enter_state('sword_up')
-        elif self.entity.dir[1] < -0.7:
+        elif self.entity.dir[1] < C.down_angle * -1:
             self.enter_state('sword_down')
         else:#right or left
             state = 'sword_air' + str(int(self.entity.sword.swing)+1)
@@ -650,9 +652,9 @@ class JumpSprintPre(PhaseAirBase):
 class JumpSprintMain(PhaseAirBase):
     def __init__(self, entity):
         super().__init__(entity)
-        
+
     def enter(self, **kwarg):
-        self.entity.animation.play('jump_sprint_main')#the name of the class        
+        self.entity.animation.play('jump_sprint_main')#the name of the class
         self.air_timer = kwarg.get('air_timer', C.air_timer)
 
     def update(self, dt):
@@ -768,9 +770,9 @@ class FallPre(PhaseAirBase):
 
     def swing_sword(self):
         if not self.entity.flags['attack_able']: return
-        if self.entity.dir[1] > 0.7:
+        if self.entity.dir[1] > C.down_angle:
             self.enter_state('sword_up')
-        elif self.entity.dir[1] < -0.7:
+        elif self.entity.dir[1] < C.down_angle * -1:
             self.enter_state('sword_down')
         else:#right or left
             state = 'sword_air' + str(int(self.entity.sword.swing)+1)
@@ -829,9 +831,9 @@ class LandSoftMain(PhaseBase):#landing: mainly cosmetic
 
     def swing_sword(self):
         if not self.entity.flags['attack_able']: return
-        if self.entity.dir[1] > 0.7:
+        if self.entity.dir[1] > C.down_angle:
             self.enter_state('sword_up')
-        elif self.entity.dir[1] < -0.7:
+        elif self.entity.dir[1] < C.down_angle * -1:
             self.enter_state('sword_down')
         else:#right or left
             state = 'sword_stand' + str(int(self.entity.sword.swing)+1)
@@ -1115,12 +1117,12 @@ class DashJumpPre(PhaseBase):#enters from ground dash pre
         self.entity.movement_manager.add_modifier('dash_jump', entity = self.entity)
         self.entity.shader_state.handle_input('motion_blur')
         self.entity.flags['ground'] = False
-        self.buffer_time = C.jump_dash_wall_timer        
+        self.buffer_time = C.jump_dash_wall_timer
 
     def exit_state(self):
         if self.dash_length < 0:
             self.entity.movement_manager.add_modifier('air_boost', entity = self.entity)
-            self.enter_state('fall')
+            self.enter_state('fall', allow_sprint=True)
 
     def handle_movement(self, event):
         self.entity.acceleration[0] = 0
@@ -1133,9 +1135,10 @@ class DashJumpPre(PhaseBase):#enters from ground dash pre
                         state = input.lower() + '_glide'
                         self.enter_state(state, **kwarg)
 
-    def exit(self):
+    def enter_state(self, state, **kwarg):
         self.entity.acceleration[1] = C.acceleration[1]
         self.entity.movement_manager.remove_modifier('dash_jump')
+        super().enter_state(state, **kwarg)
         self.entity.shader_state.handle_input('idle')
 
     def update(self, dt):
@@ -1595,6 +1598,11 @@ class DashAirMain(DashGroundPre):#level one dash: normal
 
     def handle_press_input(self, input):#all states should inehrent this function, if it should be able to jump
         input.processed()
+
+    def exit_state(self):
+        if self.dash_length < 0:
+            self.entity.movement_manager.add_modifier('air_boost', friction_x = 0.18, entity = self.entity)
+            self.enter_state('fall', allow_sprint=True)
 
     def increase_phase(self):
         self.entity.shader_state.handle_input('idle')

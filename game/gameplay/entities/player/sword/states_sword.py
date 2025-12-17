@@ -29,7 +29,7 @@ class Slash_1(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.sign = sign(self.entity.dir[0])
-        self.entity.lifetime = 10#swrod hitbox duration        
+        self.entity.lifetime = 10#swrod hitbox duration
         self.entity.hitbox[2] = 45
         self.entity.hitbox[3] = 29
         self.entity.dir = [self.sign, 0]#sword dir
@@ -46,7 +46,7 @@ class Slash_up(Basic_states):
         super().__init__(entity)
         self.entity.lifetime = 10#swrod hitbox duration
         self.entity.hitbox[2] = 40
-        self.entity.hitbox[3] = 35                        
+        self.entity.hitbox[3] = 35
         self.entity.dir = [sign(self.entity.dir[0]), 1]#sword dir
 
         if self.entity.dir[0] > 0:
@@ -60,10 +60,11 @@ class Slash_up(Basic_states):
 class Slash_down(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.lifetime = 10#swrod hitbox duration        
+        self.entity.lifetime = 10#swrod hitbox duration
         self.entity.hitbox[2] = 40
         self.entity.hitbox[3] = 35
         self.entity.dir = [sign(self.entity.dir[0]), -1]#sword dir
+        self.check_pogo = True
 
         if self.entity.dir[0] > 0:
             self.offset = 45
@@ -74,12 +75,14 @@ class Slash_down(Basic_states):
         self.entity.rect.center = [self.entity.hitbox.center[0] + self.offset, self.entity.hitbox.center[1] - 4]
 
     def sword_jump(self):
-        self.entity.entity.velocity[1] = C.pogo_vel
+        if self.check_pogo:
+            self.entity.entity.velocity[1] = C.pogo_vel
+            self.check_pogo = False
 
 #states for the stones (the stones alters the sword properties)
 class Stone_states():
     def __init__(self, entity):
-        self.entity = entity    
+        self.entity = entity
 
     def enter_state(self, newstate, key, **kwarg):
         self.entity.stone_states[key] = getattr(sys.modules[__name__], newstate)(self.entity,**kwarg)#make a class based on the name of the newstate: need to import sys
@@ -98,7 +101,7 @@ class Enemy_collision(Stone_states):#blue stone can set this satte
         super().__init__(entity)
 
     def enemy_collision(self):
-        self.entity.entity.add_spirit()        
+        self.entity.entity.add_spirit()
 
 class Projectile_collision(Stone_states):#pirpöle stone ca nset this state
     def __init__(self, entity):
@@ -106,7 +109,7 @@ class Projectile_collision(Stone_states):#pirpöle stone ca nset this state
 
     def projectile_collision(self, eprojecitile):
         eprojecitile.reflect(self.entity.dir, self.entity.hitbox.center)
-        self.entity.sword_jump()        
+        self.entity.sword_jump()
 
 class Slash(Stone_states):#green stone can set this
     def __init__(self, entity):
