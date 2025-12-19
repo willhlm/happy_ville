@@ -30,7 +30,7 @@ class ZoomCollision(Interactables):
     def update(self, dt):
         self.group_distance()
 
-    def player_collision(self, player):
+    def collision(self, entity):
         self.blur_timer -= 1
         if self.blur_timer < 0:#make a delay in the blur and zoom
             self.update_blur(collision=True)
@@ -39,7 +39,7 @@ class ZoomCollision(Interactables):
             self.interacted = True
             self.game_objects.camera_manager.zoom(rate=self.rate,scale=self.scale,center=self.center)
 
-    def player_noncollision(self):        
+    def noncollision(self, entity):        
         self.update_blur(collision=False)
         
         if not self.interacted: return# Trigger zoom out only once per collision end

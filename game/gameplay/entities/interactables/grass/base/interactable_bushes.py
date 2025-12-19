@@ -5,7 +5,7 @@ class InteractableBushes(Interactables):
         super().__init__(pos,game_objects)
         self.interacted = False
 
-    def player_collision(self, player):#player collision
+    def collision(self, entity):#player collision
         if self.interacted: return
         self.currentstate.handle_input('Once',animation_name ='hurt', next_state = 'idle')
         self.interacted = True#sets to false when player gos away
@@ -17,6 +17,6 @@ class InteractableBushes(Interactables):
         super().reset_timer()
         self.currentstate.handle_input('Idle')
 
-    def player_noncollision(self):#when player doesn't collide
+    def noncollision(self, entity):#when player doesn't collide
         self.interacted = False
 

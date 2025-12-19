@@ -18,15 +18,15 @@ class LayerTrigger(Interactables):
     def update(self, dt):
         pass
 
-    def player_collision(self, player):#append some shader to specified screen layers
-        self.kwargs['scale'] = [0.5 * max((self.game_objects.player.hitbox.centerx - self.rect.left)/self.rect[2],0)]                
+    def collision(self, entity):#append some shader to specified screen layers
+        self.kwargs['scale'] = [0.5 * max((entity.hitbox.centerx - self.rect.left)/self.rect[2],0)]                
         if not self.interacted: 
             self.interacted = True
             self.game_objects.signals.emit("layer_trigger_in", **self.kwargs)        
         else:
             self.game_objects.signals.emit("layer_trigger_update", **self.kwargs)# 2. emit continuous update
 
-    def player_noncollision(self):#when player doesn't collide        
+    def noncollision(self, entity):#when player doesn't collide        
         if not self.interacted: return
         self.interacted = False
         self.game_objects.signals.emit("layer_trigger_out", **self.kwargs)  

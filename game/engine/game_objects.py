@@ -114,8 +114,8 @@ class Game_Objects():
         self.collisions.player_collision(self.loot)
         self.collisions.player_collision(self.enemies)
         self.collisions.player_collision(self.bg_fade)
-        #self.collisions.interactables_collision(self.players)#need to know when it doesn't collide
 
+        #checks colliions and non collisions
         self.collisions.entity_collision(self.players, self.interactables)
         self.collisions.entity_collision(self.players, self.interactables_fg)
         self.collisions.entity_collision(self.players, self.npcs)

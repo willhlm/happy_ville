@@ -52,4 +52,4 @@ class Interactables(AnimatedEntity):#interactables
         pass        
 
     def on_invincibility_timeout(self):
-        self.flags['invincibility'] = False
+        self.flags['invincibility'] = False   

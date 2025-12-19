@@ -12,7 +12,7 @@ class InteractableCaveGrass(InteractableBushes):
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)        
         self.hitbox.midbottom = self.rect.midbottom
 
-    def player_collision(self, player):
+    def collision(self, entity):
         if self.interacted: return
         self.currentstate.handle_input('Once',animation_name ='hurt', next_state = 'Idle')
         self.interacted = True#sets to false when player gos away

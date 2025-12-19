@@ -31,7 +31,7 @@ class Character(PlatformEntity):#enemy, NPC,player
         self.velocity[0] += dt * (self.dir[0]*self.acceleration[0] - self.friction[0] * self.velocity[0])
 
     def take_hit(self, effect):
-        """Delegate to hit component"""       
+        """Delegate to hit component"""      
         return self.hit_component.take_hit(effect)
 
     def take_dmg(self, damage):

@@ -15,6 +15,6 @@ class LightningSpikes(Interactables):#traps
         self.hurt_box = Hurt_box
         self.dmg = 1
 
-    def player_collision(self, player):#player collision
+    def collision(self, entity):#
         self.currentstate.handle_input('Once')
 

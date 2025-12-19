@@ -23,11 +23,10 @@ class Hole(Interactables):#area which will make aila spawn to safe_point if coll
     def update_render(self, dt):
         pass
 
-    def player_collision(self, player):
+    def collision(self, entity):
         if self.interacted: return#enter only once
-        #print(self.interacted, 'col')
-        self.player_transport(player)
-        player.take_dmg(damage = 1)
+        self.player_transport(entity)
+        entity.take_dmg(damage = 1)
         self.interacted = True
 
     def player_transport(self, player):#transports the player to safe position
@@ -37,7 +36,6 @@ class Hole(Interactables):#area which will make aila spawn to safe_point if coll
         player.velocity = [0,0]
         player.acceleration = [0,0]
 
-    def player_noncollision(self):#when player doesn't collide
-        #print(self.interacted, 'non')
-        self.interacted = False
+    def noncollision(self, entity):#when player doesn't collide
+        self.interacted = False        
 

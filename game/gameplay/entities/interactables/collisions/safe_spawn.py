@@ -21,6 +21,6 @@ class SafeSpawn(Interactables):#area which gives the coordinates which will make
     def update(self, dt):
         self.group_distance()
 
-    def player_collision(self, player):
-        player.backpack.map.save_safespawn(self.position)
+    def collision(self, entity):
+        entity.backpack.map.save_safespawn(self.position)
 
