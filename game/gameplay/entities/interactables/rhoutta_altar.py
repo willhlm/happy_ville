@@ -10,7 +10,7 @@ class RhouttaAltar(Interactables):#altar to trigger the cutscane at the beginnin
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox=self.rect.copy()
 
-    def collision(self, entity):#player collision
+    def on_collision(self, entity):#player collision
         self.currentstate.handle_input('Outline')
 
     def interact(self):#when player press t/y

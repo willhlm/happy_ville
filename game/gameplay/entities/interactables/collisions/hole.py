@@ -8,7 +8,6 @@ class Hole(Interactables):#area which will make aila spawn to safe_point if coll
         self.rect.topleft = pos
         self.hitbox = self.rect.copy()
         self.bounds = [-800, 800, -800, 800]#-x,+x,-y,+y: Boundaries to phase out enteties outside screen
-        self.interacted = False
 
     def release_texture(self):
         pass
@@ -23,11 +22,9 @@ class Hole(Interactables):#area which will make aila spawn to safe_point if coll
     def update_render(self, dt):
         pass
 
-    def collision(self, entity):
-        if self.interacted: return#enter only once
+    def on_collision(self, entity):
         self.player_transport(entity)
         entity.take_dmg(damage = 1)
-        self.interacted = True
 
     def player_transport(self, player):#transports the player to safe position
         if player.health > 1:#if about to die, don't transport to safe point
@@ -35,7 +32,5 @@ class Hole(Interactables):#area which will make aila spawn to safe_point if coll
             player.currentstate.enter_state('invisible')
         player.velocity = [0,0]
         player.acceleration = [0,0]
-
-    def noncollision(self, entity):#when player doesn't collide
-        self.interacted = False        
+    
 

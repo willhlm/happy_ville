@@ -14,10 +14,10 @@ class Sign(Interactables):
         self.hitbox=self.rect.copy()
         self.symbols = Symbols(self)
 
-    def collision(self, entity):#player collision
+    def on_collision(self, entity):#player collision
         self.currentstate.handle_input('Outline')
 
-    def noncollision(self, entity):#when player doesn't collide
+    def on_noncollision(self, entity):#when player doesn't collide
         self.symbols.finish()
         self.currentstate.handle_input('Idle')
 

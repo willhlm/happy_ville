@@ -19,26 +19,17 @@ class UpStream(StaticEntity):#a draft that can lift enteties along a direction
 
         sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/visuals/environments/up_stream/')
         self.channel = game_objects.sound.play_sfx(sounds['idle'][0], loop = -1, vol = 0.5)
-        self.interacted = False#for player collision
         self.type = 'up_stream_vertical' if self.dir[1] != 0 else 'up_stream_horizontal'
 
-    def collision(self, player):#player collision
-        if self.interacted: return
-        self.interacted = True
-        player.velocity[1] += self.dir[1] * int(player.collision_types['bottom'])#a small inital boost if on ground
-        player.movement_manager.add_modifier(self.type, speed = [self.dir[0] * self.accel_x, self.dir[1] * self.accel_y], max_speed = self.max_speed)
+    def collision(self, entity):
+        pass
 
+    def on_collision(self, entity):#entity collision
+        entity.velocity[1] += self.dir[1] * int(entity.collision_types['bottom'])#a small inital boost if on ground
+        entity.movement_manager.add_modifier(self.type, speed = [self.dir[0] * self.accel_x, self.dir[1] * self.accel_y], max_speed = self.max_speed)
 
-        #context = player.movement_manager.resolve()
-        #player.velocity[0] += self.dir[0] * self.accel_x * context.upstream
-        #player.velocity[1] += self.dir[1] * self.accel_y * context.upstream + self.dir[1] * int(player.collision_types['bottom'])#a small inital boost if on ground
-        #if (player.velocity[1]) < 0:
-        #    player.velocity[1] = min(abs(player.velocity[1]), self.max_speed) * self.dir[1]
-
-    def noncollision(self, player):
-        if not self.interacted: return
-        self.game_objects.player.movement_manager.remove_modifier(self.type)
-        self.interacted = False
+    def on_noncollision(self, entity):
+        entity.movement_manager.remove_modifier(self.type)
 
     def release_texture(self):
         self.image.release()

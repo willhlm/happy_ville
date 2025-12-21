@@ -1,13 +1,14 @@
 import pygame
 from gameplay.entities.interactables.base.interactables import Interactables
 
+'append some shader to specified screen layers'
+
 class LayerTrigger(Interactables):
     def __init__(self, pos, game_objects, size, **kwargs):
         super().__init__(pos, game_objects)
         self.rect = pygame.Rect(pos,size)
         self.hitbox = self.rect.copy()
         self.kwargs = kwargs
-        self.interacted = False
 
     def draw(self, target):
         pass
@@ -20,14 +21,11 @@ class LayerTrigger(Interactables):
 
     def collision(self, entity):#append some shader to specified screen layers
         self.kwargs['scale'] = [0.5 * max((entity.hitbox.centerx - self.rect.left)/self.rect[2],0)]                
-        if not self.interacted: 
-            self.interacted = True
-            self.game_objects.signals.emit("layer_trigger_in", **self.kwargs)        
-        else:
-            self.game_objects.signals.emit("layer_trigger_update", **self.kwargs)# 2. emit continuous update
+        self.game_objects.signals.emit("layer_trigger_update", **self.kwargs)# 2. emit continuous update
 
-    def noncollision(self, entity):#when player doesn't collide        
-        if not self.interacted: return
-        self.interacted = False
+    def on_collision(self, entity):
+        self.game_objects.signals.emit("layer_trigger_in", **self.kwargs)            
+
+    def on_noncollision(self, entity):#when player doesn't collide        
         self.game_objects.signals.emit("layer_trigger_out", **self.kwargs)  
 

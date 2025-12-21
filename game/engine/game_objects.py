@@ -107,22 +107,28 @@ class Game_Objects():
         self.fprojectiles.empty()
         self.timer_manager.clear_timers()
         self.weather.empty()
+        self.collisions.clear_state()
 
     def collide_all(self, dt):
         self.platform_collision(dt)
 
-        self.collisions.player_collision(self.loot)
-        self.collisions.player_collision(self.enemies)
-        self.collisions.player_collision(self.bg_fade)
+        self.collisions.simple_collision(self.players, self.loot, 'player_collision')
+        self.collisions.simple_collision(self.players, self.enemies, 'player_collision')
+        self.collisions.simple_collision(self.players, self.bg_fade, 'player_collision')
 
         #checks colliions and non collisions
         self.collisions.entity_collision(self.players, self.interactables)
         self.collisions.entity_collision(self.players, self.interactables_fg)
         self.collisions.entity_collision(self.players, self.npcs)
 
-        self.collisions.counter(self.fprojectiles, self.eprojectiles)
-        self.collisions.projectile_collision(self.fprojectiles, self.enemies)
-        self.collisions.projectile_collision(self.eprojectiles, self.players)
+        self.collisions.simple_collision(self.eprojectiles, self.fprojectiles, 'collision_projectile')
+        self.collisions.simple_collision(self.enemies, self.fprojectiles, 'collision_enemy')
+        self.collisions.simple_collision(self.players, self.eprojectiles, 'collision_enemy')
+
+        self.collisions.simple_collision(self.interactables, self.fprojectiles,'collision_interactables')
+        self.collisions.simple_collision(self.interactables_fg,self.fprojectiles, 'collision_interactables_fg')
+        self.collisions.simple_collision(self.interactables, self.eprojectiles,'collision_interactables')
+        self.collisions.simple_collision(self.interactables_fg,self.eprojectiles, 'collision_interactables_fg')
 
     def platform_collision(self, dt):
         self.collisions.platform_collision(self.players, dt)

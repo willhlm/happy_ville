@@ -15,5 +15,5 @@ class SpiritSpikes(Interactables):#traps
         self.hurt_box = Hurt_box
         self.dmg = 1
 
-    def collision(self, entity):#player collision
+    def on_collision(self, entity):#player collision
         self.currentstate.handle_input('Death')

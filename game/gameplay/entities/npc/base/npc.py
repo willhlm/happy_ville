@@ -20,18 +20,16 @@ class NPC(Character):
         self.currentstate = states_npc.Idle(self)
         self.dialogue = dialogue.Dialogue(self)#handles dialoage and what to say
         self.define_conversations()
-        self.collided = False
         self.indicator = InteractableIndicator(self.rect.topright, self.game_objects)
 
-    def noncollision(self, player):
-        if not self.collided: return
+    def collision(self, entity):
+        pass
+
+    def on_noncollision(self, entity):
         self.indicator.kill()
-        self.collided = False
         
-    def collision(self, player):        
-        if self.collided: return              
+    def on_collision(self, entity):        
         self.game_objects.cosmetics.add(self.indicator)
-        self.collided = True
 
     def define_conversations(self):#should depend on NPC
         self.priority = ['reindeer','ape']#priority events to say

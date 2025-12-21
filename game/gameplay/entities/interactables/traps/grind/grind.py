@@ -46,7 +46,7 @@ class Grind(Interactables):#trap
     def group_distance(self):
         pass
 
-    def collision(self, entity):#entity collision
+    def on_collision(self, entity):#entity collision
         effect = self.base_effect.copy()
         effect.meta['attacker_dir'] = [0,0]#save the direction
         #effect.particles['dir'] = self.dir        

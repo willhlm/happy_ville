@@ -22,12 +22,6 @@ class AbilityBall(Interactables):
         self.explosion = 0
         self.time = 0
 
-    def collision(self, entity):#player collision
-        pass
-
-    def noncollision(self, entity):#when player doesn't collide: for grass
-        pass        
-
     def on_invincibility_timeout(self):
         self.flags['invincibility'] = False
 

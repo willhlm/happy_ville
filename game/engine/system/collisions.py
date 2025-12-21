@@ -3,6 +3,7 @@ import pygame, math
 class Collisions():
     def __init__(self,game_objects):
         self.game_objects = game_objects
+        self._collision_state = {}  # target → {entities}
 
     def check_ground(self, point):#called from AI
         for platform in self.game_objects.platforms:
@@ -29,46 +30,60 @@ class Collisions():
                 self.game_objects.player.velocity[1] = offset#so that it looks more natural (cannot be 0, needs to be finite)
                 self.game_objects.player.go_through['ramp'] = ramp.go_through#a flag that determines if one can go through
 
-    def entity_collision(self, entities, target_group):#calls also non collision: can be merged with self.player_collision?
-        for entity in entities.sprites():   
-            for target in target_group.sprites():
+    def entity_collision(self, entities, target_group):
+        """
+        Track collisions using object references.
+        - collision(entity): called EVERY frame while colliding
+        - on_collision(entity): called ONCE when entity enters
+        - on_noncollision(entity): called ONCE when entity exits
+        """
+        entity_list = list(entities.sprites())
+        active_targets = set(target_group.sprites())
+
+        for target in active_targets:
+            previous = self._collision_state.get(target, set())
+            current = set()
+
+            # Find current collisions
+            for entity in entity_list:
                 if self.collided(entity, target):
                     target.collision(entity)
-                else:
-                    target.noncollision(entity)        
+                    current.add(entity)
 
-    @staticmethod
-    def counter(fprojectiles, eprojectiles):
-        for projectile in fprojectiles.sprites():#go through the group
-            collision_epro = pygame.sprite.spritecollideany(projectile, eprojectiles, Collisions.collided)
-            if collision_epro:
-                projectile.collision_projectile(collision_epro)
+            # Calculate state changes
+            entered = current - previous
+            exited = previous - current
 
-    def projectile_collision(self, projectiles, enemies):
-        for projectile in projectiles.sprites():#go through the group
-            #projectile collision?            
-            collision_enemies = pygame.sprite.spritecollide(projectile, enemies, False, Collisions.collided)
-            collision_interactables = pygame.sprite.spritecollideany(projectile, self.game_objects.interactables, Collisions.collided)
-            collision_interactables_fg = pygame.sprite.spritecollideany(projectile, self.game_objects.interactables_fg, Collisions.collided)
-            
-            #if hit chest, bushes
-            if collision_interactables:
-                projectile.collision_interactables(collision_interactables)#go through the projecticle in case there are projectile that should do dmg to interactable
+            # Emit events
+            for entity in entered:#once
+                #if target.alive():
+                target.on_collision(entity)
 
-            #if hit e.g. twoDliquid
-            if collision_interactables_fg:
-                projectile.collision_interactables_fg(collision_interactables_fg)
+            for entity in exited:#once
+                #if target.alive():
+                target.on_noncollision(entity)
 
-            #if hit enemy
-            for enemy in collision_enemies:
-                projectile.collision_enemy(enemy)
+            # Update state
+            if current:
+                self._collision_state[target] = current
+            elif target in self._collision_state:
+                del self._collision_state[target] 
 
-    #check for player collision
-    def player_collision(self, enteties):#loot and enemies: need to be sprite collide for loot so that you can pick up several ay pnce
-        for player in self.game_objects.players:#aila and eventual double gangler
-            collision_enteties = pygame.sprite.spritecollide(player, enteties, dokill = False, collided = Collisions.collided)#check collision
-            for collision_entetiy in collision_enteties:
-                collision_entetiy.player_collision(player)
+    #check for entity collision
+    def simple_collision(self, entities, target_group, callback_name = 'collision'):
+        """
+        Generic collision check that calls a named method on targets.
+        
+        Args:
+            entities: Group of entities to check
+            target_group: Group of targets
+            callback_name: Method name to call on target (default: 'collision')
+        """
+        for entity in entities.sprites():
+            collision_targets = pygame.sprite.spritecollide(entity, target_group, dokill=False, collided=Collisions.collided)
+            for target in collision_targets:
+                callback = getattr(target, callback_name)
+                callback(entity)
 
     #npc player conversation, when pressing t
     def check_interaction_collision(self):
@@ -83,8 +98,7 @@ class Collisions():
         if loot:
             loot.interact(self.game_objects.player)
 
-    #collision of player, enemy and loot: setting the flags depedning on the collisoin directions
-    #collisions between entities-groups: a dynamic and a static one
+    #collision of player, enemy and loot: setting the flags depedning on the collisoin directions collisions between entities-groups: a dynamic and a static one    
     def platform_collision(self, dynamic_Entities, dt):
         for entity in dynamic_Entities.sprites():
             entity.collision_types = {'top':False,'bottom':False,'right':False,'left':False, 'standing_platform': None}
@@ -102,7 +116,7 @@ class Collisions():
             for static_entity_y in static_entities_y:                
                 static_entity_y.collide_y(entity)
 
-            ramps = pygame.sprite.spritecollide(entity,self.game_objects.platforms_ramps,False,Collisions.collided)
+            ramps = pygame.sprite.spritecollide(entity, self.game_objects.platforms_ramps, False, Collisions.collided)
             if ramps:
                 for ramp in ramps:
                     ramp.collide(entity)
@@ -123,3 +137,33 @@ class Collisions():
     @staticmethod
     def collided_point(dynamic_Entities, static_entities):
         return static_entities.hitbox.collidepoint(dynamic_Entities.hitbox.midbottom)
+
+    def clear_state(self):
+        self._collision_state.clear()
+
+
+
+
+#def multi_target_collision(self, entities, targets_map):
+#    """
+#    Args:
+#        entities: Group of entities to check
+#        targets_map: Dict of {target_group: callback_name}
+#    """
+#    for entity in entities.sprites():
+#        for target_group, callback_name in targets_map.items():
+#            collision_targets = pygame.sprite.spritecollide(
+#                entity, target_group, dokill=False, collided=Collisions.collided
+#            )
+#            for target in collision_targets:
+#                callback = getattr(target, callback_name, None)
+#                if callback:
+#                    callback(entity)
+
+# Usage:
+#self.collisions.multi_target_collision(self.fprojectiles, {
+#    self.eprojectiles: 'collision_projectile',
+#    self.enemies: 'collision_enemy',
+#    self.interactables: 'collision_interactables',
+#    self.interactables_fg: 'collision_interactables_fg',
+#})        

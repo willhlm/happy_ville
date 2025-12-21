@@ -16,9 +16,6 @@ class DoorInteract(Interactables): #game object for itneracting with locked door
             else:
                 self.door.shake()
 
-    def collision(self, entity):#player collision
-        pass
-
     def update(self, dt):
         pass
 
