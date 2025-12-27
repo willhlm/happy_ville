@@ -7,25 +7,32 @@ class TitleMenu(BaseUI):
         super().__init__(game)
         self.menu_ui = getattr(ui_loader, 'TitleMenu')(game.game_objects)
         self.play_music()
-        self.image = self.menu_ui.sprites['idle'][0]
+        self.bg = self.menu_ui.sprites['idle'][0]
+        self.image = game.display.make_layer((640, 360))
+        self.time = 0
         self.current_button = 0
         self.update_arrow()
 
     def update_render(self, dt):
+        self.time += dt * 0.01
         for arrow in self.menu_ui.arrows:
             arrow.update(dt)#make them move back and forth
 
     def fade_update(self, dt):#called from fade out: update that should be played when fading: it is needed becayse depending on state, only part of the update loop should be called
-        self.update_render(dt)
+        self.update_render(dt)        
 
     def render(self):
         self.game.screen_manager.screen.clear(0,0,0,0)
+        self.image.clear(0,0,0,0)
         self.menu_ui.buttons[self.current_button].hoover()
-        self.game.display.render(self.image, self.game.screen_manager.screen)#shader render
 
+        self.game.game_objects.shaders['title_screen']['time'] = self.time
+        self.game.display.render(self.image.texture, self.game.screen_manager.screen, shader = self.game.game_objects.shaders['title_screen'])#render background
+        self.game.display.render(self.bg, self.game.screen_manager.screen)
+    
         #blit buttons
         for b in self.menu_ui.buttons:
-            self.game.display.render(b.image, self.game.screen_manager.screen, position = b.rect.topleft)
+            b.render(self.game.screen_manager.screen)            
 
         #blit arrow
         for arrow in self.menu_ui.arrows:
@@ -35,13 +42,14 @@ class TitleMenu(BaseUI):
 
     def update_arrow(self):
         button = self.menu_ui.buttons[self.current_button]
-        bx, by, bw, bh = button.rect
+        bx, by, bw, bh = button.rect[0], button.rect.centery, button.rect[2], button.rect[3]
 
         for arrow in self.menu_ui.arrows:
+            y_pos = by - arrow.rect.height * 0.5
             if arrow.flip:
-                arrow.set_pos((bx + bw + 10, by))  # +10 px padding
+                arrow.set_pos((bx + bw + 10, y_pos))  # +10 px padding
             else:# left arrow, align to left edge of button
-                arrow.set_pos((bx - arrow.rect.width - 10, by))  # -10 px padding
+                arrow.set_pos((bx - arrow.rect.width - 10, y_pos))  # -10 px padding
         arrow.play_SFX()
 
     def handle_events(self, input):
@@ -80,7 +88,7 @@ class TitleMenu(BaseUI):
             #self.game.game_objects.load_map(self,'wakeup_forest_1','1')
             #self.game.game_objects.load_map(self,'spirit_world_1','1')
             #self.game.game_objects.load_map(self,'crystal_mines_1','1')
-            self.game.game_objects.load_map(self,'village_5','1')
+            self.game.game_objects.load_map(self,'village_1','1')
             #self.game.game_objects.load_map(self,'nordveden_windtest','1')
             #self.game.game_objects.load_map(self,'nordveden_1','1')
             #self.game.game_objects.load_map(self,'tall_trees_1','1')

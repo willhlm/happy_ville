@@ -20,78 +20,6 @@
          "name":"elements",
          "objects":[
                 {
-                 "gid":881,
-                 "height":16,
-                 "id":5,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"name",
-                         "type":"string",
-                         "value":"New game"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":32,
-                 "x":320,
-                 "y":192
-                }, 
-                {
-                 "gid":881,
-                 "height":16,
-                 "id":6,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"name",
-                         "type":"string",
-                         "value":"Load game"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":32,
-                 "x":320,
-                 "y":224
-                }, 
-                {
-                 "gid":881,
-                 "height":16,
-                 "id":7,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"name",
-                         "type":"string",
-                         "value":"Option"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":32,
-                 "x":320,
-                 "y":256
-                }, 
-                {
-                 "gid":881,
-                 "height":16,
-                 "id":8,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"name",
-                         "type":"string",
-                         "value":"Quit"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":32,
-                 "x":320,
-                 "y":288
-                }, 
-                {
                  "gid":882,
                  "height":8,
                  "id":9,
@@ -100,8 +28,8 @@
                  "type":"",
                  "visible":true,
                  "width":17,
-                 "x":384,
-                 "y":186
+                 "x":400,
+                 "y":163
                 }, 
                 {
                  "gid":885,
@@ -112,8 +40,80 @@
                  "type":"",
                  "visible":true,
                  "width":17,
-                 "x":272,
-                 "y":186
+                 "x":224,
+                 "y":163
+                }, 
+                {
+                 "gid":881,
+                 "height":32,
+                 "id":12,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"New game"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":128,
+                 "x":256,
+                 "y":176
+                }, 
+                {
+                 "gid":881,
+                 "height":32,
+                 "id":13,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"Load game"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":128,
+                 "x":256,
+                 "y":224
+                }, 
+                {
+                 "gid":881,
+                 "height":32,
+                 "id":14,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"Option"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":128,
+                 "x":256,
+                 "y":272
+                }, 
+                {
+                 "gid":881,
+                 "height":32,
+                 "id":15,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"Quit"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":128,
+                 "x":256,
+                 "y":320
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -122,7 +122,7 @@
          "y":0
         }],
  "nextlayerid":3,
- "nextobjectid":12,
+ "nextobjectid":16,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -132,7 +132,7 @@
          "columns":40,
          "firstgid":1,
          "image":"..\/..\/..\/Sprites\/UI\/menus\/title_menu\/idle\/start_screen2.png",
-         "imageheight":363,
+         "imageheight":360,
          "imagewidth":640,
          "margin":0,
          "name":"start_screen",

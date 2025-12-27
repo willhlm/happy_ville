@@ -19,19 +19,23 @@ class PauseMenu(BaseUI):#when pressing ESC duing gameplay
 
     def update_arrow(self):
         button = self.menu_ui.buttons[self.current_button]
-        bx, by, bw, bh = button.rect
+        bx, by, bw, bh = button.rect[0], button.rect.centery, button.rect[2], button.rect[3]
 
         for arrow in self.menu_ui.arrows:
-            if arrow.flip:  
-                arrow.set_pos((bx + bw + 10, by))  # +10 px padding
-            else:# left arrow, align to left edge of button                
-                arrow.set_pos((bx - arrow.rect.width - 10, by))  # -10 px padding
+            y_pos = by - arrow.rect.height * 0.5
+            if arrow.flip:
+                arrow.set_pos((bx + bw + 10, y_pos))  # +10 px padding
+            else:# left arrow, align to left edge of button
+                arrow.set_pos((bx - arrow.rect.width - 10, y_pos))  # -10 px padding
         arrow.play_SFX()
 
     def render(self):
+        #bg
+        self.game.display.render(self.menu_ui.bg, self.game.screen_manager.screen)#shader render
+
         #blit buttons
         for b in self.menu_ui.buttons:
-            self.game.display.render(b.image, self.game.screen_manager.screen, position = b.rect.topleft)
+            b.render(self.game.screen_manager.screen)
 
         #blit arrow
         for arrow in self.menu_ui.arrows:
