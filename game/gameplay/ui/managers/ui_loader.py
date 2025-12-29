@@ -285,7 +285,6 @@ class OptionMenu(UI_loader):
 class PauseMenu(UI_loader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
-        self.bg = game_objects.game.display.surface_to_texture(pygame.image.load('assets/ui_layouts/menus/pause_menu/bg.png').convert_alpha())                    
         path = 'assets/ui_layouts/menus/pause_menu/pause_menu.json'
         self.load_UI_data(path, 'pause_menu')
         self.load_data()

@@ -5,10 +5,11 @@ in vec2 fragmentTexCoord;
 // Time uniform
 uniform float time;
 
-// === CUSTOMIZABLE UNIFORMS ===
+uniform vec2 resolution = vec2(640, 360);//game screen size
 
+// === CUSTOMIZABLE UNIFORMS ===
 // Base colors
-uniform vec3 baseVoidColor = vec3(0.015, 0.02, 0.035);
+uniform vec4 baseVoidColor = vec4(0.5,0.5,0.5,0.92);
 uniform vec3 fogColorTint = vec3(0.12, 0.15, 0.22);
 uniform vec3 rayColorTint = vec3(0.18, 0.22, 0.3);
 
@@ -20,7 +21,7 @@ uniform float fogIntensity = 1.0;
 uniform float fogContrast = 1.5;
 
 // Particle settings
-uniform float particleSpawnThreshold = 0.85; // Higher = fewer particles (0.0 to 1.0)
+uniform float particleSpawnThreshold = 0.85;
 uniform float particleSpeed1 = 0.2;
 uniform float particleSpeed2 = 0.15;
 uniform float particleSpeed3 = 0.1;
@@ -29,9 +30,9 @@ uniform float particleMaxSize = 0.3;
 uniform vec3 particleColor1 = vec3(0.8, 0.9, 1.0);
 uniform vec3 particleColor2 = vec3(0.7, 0.85, 1.0);
 uniform vec3 particleColor3 = vec3(0.9, 0.95, 1.0);
-uniform float particleLayer1Intensity = 0.6;
-uniform float particleLayer2Intensity = 0.4;
-uniform float particleLayer3Intensity = 0.5;
+uniform float particleLayer1Intensity = 0.5;
+uniform float particleLayer2Intensity = 0.3;
+uniform float particleLayer3Intensity = 0.4;
 
 // Light orb settings
 uniform int lightCount = 12;
@@ -45,9 +46,9 @@ uniform float fogLightInteraction = 0.6;
 
 // Vignette settings
 uniform float vignetteStrength = 0.5;
-uniform float vignetteStart = 0.3;
-uniform float vignetteEnd = 1.3;
-uniform float vignettePower = 0.8;
+uniform float vignetteStart = 0.1;
+uniform float vignetteEnd = 1;
+uniform float vignettePower = 0.6;
 
 // Depth gradient
 uniform float depthGradientStrength = 0.25;
@@ -112,7 +113,6 @@ vec2 warp(vec2 p, float amount) {
 
 // Smooth fade-in/fade-out function
 float lifetimeFade(float normalizedLifetime) {
-    // Fade in over first 15%, fade out over last 15%
     float fadeIn = smoothstep(0.0, 0.15, normalizedLifetime);
     float fadeOut = smoothstep(1.0, 0.85, normalizedLifetime);
     return fadeIn * fadeOut;
@@ -120,9 +120,8 @@ float lifetimeFade(float normalizedLifetime) {
 
 // Improved particle system with smooth lifetime fading
 float particles(vec2 p, float seed, float speed) {
-    // Account for aspect ratio in the grid to keep particles circular
     vec2 aspectCorrectedP = p;
-    aspectCorrectedP.x *= 640.0 / 360.0;
+    aspectCorrectedP.x *= resolution.x / resolution.y;
     
     vec2 gridP = aspectCorrectedP * 8.0;
     vec2 gridI = floor(gridP);
@@ -135,41 +134,33 @@ float particles(vec2 p, float seed, float speed) {
             vec2 neighbor = vec2(float(x), float(y));
             vec2 cellId = gridI + neighbor;
             
-            // Random properties for each cell
             float randSeed = hash(cellId + seed);
             
-            // Only spawn particle if random is high enough
             if(randSeed > particleSpawnThreshold) {
-                // Random position within cell
                 vec2 offset = vec2(
                     hash(cellId + 0.1),
                     hash(cellId + 0.2)
                 );
                 
-                // Chaotic movement
                 float timeOffset = hash(cellId + 0.3) * 6.28;
                 float moveSpeed = 0.5 + hash(cellId + 0.4) * 1.5;
-                float lifetime = hash(cellId + 0.7) * 100.0; // Random start offset
+                float lifetime = hash(cellId + 0.7) * 100.0;
                 
                 vec2 movement = vec2(
                     sin(time * moveSpeed * 0.3 + timeOffset) * 0.3,
                     -time * speed * moveSpeed + lifetime
                 );
                 
-                // Calculate particle's lifetime (0 to 1, wrapping)
                 float particleLife = fract(movement.y);
                 movement.y = particleLife;
                 
-                // SMOOTH FADE IN/OUT based on lifetime
                 float lifetimeMask = lifetimeFade(particleLife);
                 
                 vec2 particlePos = neighbor + offset + movement - gridF;
                 float dist = length(particlePos);
                 
-                // Random size using uniform parameters
                 float size = particleMinSize + hash(cellId + 0.6) * (particleMaxSize - particleMinSize);
                 
-                // Individual brightness for each particle (not synchronized)
                 float baseBrightness = 0.6 + hash(cellId + 0.8) * 0.4;
                 float pulseSpeedVar = 0.5 + hash(cellId + 0.9) * 2.0;
                 float pulsePhase = hash(cellId + 1.0) * 6.28;
@@ -177,7 +168,6 @@ float particles(vec2 p, float seed, float speed) {
                 
                 float particle = smoothstep(size, 0.0, dist);
                 
-                // Apply lifetime fade to prevent popping
                 particleField += particle * brightness * lifetimeMask;
             }
         }
@@ -191,41 +181,30 @@ float lights(vec2 p, float seed, out vec3 lightColorOut) {
     float lightField = 0.0;
     lightColorOut = vec3(0.0);
     
-    // Create several floating lights - each individually tracked
     for(int i = 0; i < lightCount; i++) {
         float fi = float(i) + seed;
         
-        // Individual lifetime for each light
         float lightLifetime = hash13(vec3(fi, seed, 2.0)) * 100.0;
         float lightSpeedVar = lightSpeed + hash13(vec3(fi, seed, 3.0)) * lightSpeed;
         
-        // Calculate this light's current lifetime (0 to 1)
         float life = fract((time * lightSpeedVar) + lightLifetime);
         
-        // Smooth fade in/out for this specific light
         float lifetimeMask = lifetimeFade(life);
         
-        // Each light has its own path
         vec2 lightPos = vec2(
             sin(time * 0.15 + fi * 0.8) * 1.2 + sin(time * 0.3 + fi) * 0.4,
-            life * 2.5 - 0.5  // Use lifetime for Y position
+            life * 2.5 - 0.5
         );
         
-        // Figure-8 or circular motion
         lightPos.x += cos(time * 0.2 + fi * 1.3) * 0.3;
         
         float dist = length(p - lightPos);
         
-        // Core glow
         float core = smoothstep(lightCoreSize, 0.0, dist) * 0.8;
-        
-        // Outer glow (larger, softer)
         float glow = smoothstep(lightGlowSize, 0.0, dist) * 0.3;
         
-        // Individual pulsing for each light
-        float pulse = 0.7 + 0.3 * sin(time * 1.5 + fi * 2.0);
+        float lightPulse = 0.7 + 0.3 * sin(time * 1.5 + fi * 2.0);
         
-        // Individual color per light
         float colorSeed = hash13(vec3(fi, seed, 4.0));
         vec3 lightColor;
         
@@ -235,14 +214,12 @@ float lights(vec2 p, float seed, out vec3 lightColorOut) {
             lightColor = coolLightColor;
         }
         
-        // Apply lifetime fade to this light
-        float intensity = (core + glow) * pulse * lifetimeMask;
+        float intensity = (core + glow) * lightPulse * lifetimeMask;
         
         lightField += intensity;
         lightColorOut += lightColor * intensity;
     }
     
-    // Normalize color
     if(lightField > 0.0) {
         lightColorOut /= lightField;
     }
@@ -252,14 +229,12 @@ float lights(vec2 p, float seed, out vec3 lightColorOut) {
 
 void main()
 {
-    // Normalize coordinates
     vec2 uv = fragmentTexCoord;
     uv.y = 1.0 - uv.y;
     vec2 p = uv * 2.0 - 1.0;
-    p.x *= 640.0 / 360.0;
+    p.x *= resolution.x / resolution.y;
     
-    // === BASE VOID COLOR ===
-    vec3 baseColor = baseVoidColor;
+    vec4 baseColor = baseVoidColor;
     
     // === LAYERED FOG ===
     vec2 warpedUV1 = warp(uv * 1.5 + vec2(time * fogSpeed1, 0.0), 0.3);
@@ -290,34 +265,27 @@ void main()
     rays *= rayIntensity;
     vec3 rayColor = rayColorTint * rays;
     
-    // === CHAOTIC PARTICLES WITH SMOOTH FADING ===
+    // === CHAOTIC PARTICLES ===
     vec2 pUV = uv;
     
-    // Layer 1: Small, fast particles
     float particles1 = particles(pUV, 1.0, particleSpeed1);
-    
-    // Layer 2: Medium particles with different timing
     float particles2 = particles(pUV * 0.7, 2.5, particleSpeed2);
-    
-    // Layer 3: Slow, drifting particles
     float particles3 = particles(pUV * 1.3, 4.2, particleSpeed3);
     
-    // Different colors for particle layers
     vec3 particleColor1Val = particleColor1 * particles1 * particleLayer1Intensity;
     vec3 particleColor2Val = particleColor2 * particles2 * particleLayer2Intensity;
     vec3 particleColor3Val = particleColor3 * particles3 * particleLayer3Intensity;
     
     vec3 particleColor = particleColor1Val + particleColor2Val + particleColor3Val;
     
-    // === FLOATING LIGHTS WITH INDIVIDUAL TRACKING ===
+    // === FLOATING LIGHTS ===
     vec2 lightUV = p;
     vec3 lightColor;
     float lightField = lights(lightUV, 0.0, lightColor);
     
-    // Apply the calculated color
     vec3 finalLightColor = lightColor * lightField * lightIntensity;
     
-    // === LIGHT GLOW ON FOG (interaction) ===
+    // === LIGHT GLOW ON FOG ===
     vec3 fogLightInteractionColor = fogColor * lightField * fogLightInteraction;
     
     // === VIGNETTE ===
@@ -328,23 +296,38 @@ void main()
     // === DEPTH GRADIENT ===
     float depth = smoothstep(0.0, 0.7, uv.y) * depthGradientStrength;
     
-    // === COMBINE ALL LAYERS ===
-    vec3 finalColor = baseColor;
-    finalColor += fogColor;
-    finalColor += fogLightInteractionColor;
-    finalColor += rayColor;
-    finalColor += particleColor;
-    finalColor += finalLightColor;
-    finalColor *= vignette;
-    finalColor -= depth;
+    // === COMBINE ALL LAYERS (including baseColor) ===
+// === COMBINE ALL LAYERS ===
+vec3 finalColor = vec3(0.0);
+
+// Apply vignette only to base color and fog (atmospheric elements)
+finalColor += baseColor.rgb * vignette;
+finalColor += fogColor * vignette;
+finalColor += fogLightInteractionColor * vignette;
+finalColor += rayColor * vignette;
+
+// Add particles and lights WITHOUT vignette (keep them bright at edges)
+finalColor += particleColor;
+finalColor += finalLightColor;
+
+// Apply depth to everything
+finalColor = max(finalColor - depth, 0.0);
     
     // === SUBTLE PULSING ===
-    float pulse = sin(time * pulseSpeed) * pulseIntensity + 1.0;
-    finalColor *= pulse;
+    float animPulse = sin(time * pulseSpeed) * pulseIntensity + 1.0;
+    finalColor *= animPulse;
     
     // === COLOR GRADING ===
     finalColor = pow(finalColor, vec3(1.05));
     finalColor = clamp(finalColor, 0.0, 1.0);
     
-    color = vec4(finalColor, 1.0);
+    // === CALCULATE ALPHA ===
+    // Calculate how much "effect" is visible (not baseColor)
+    vec3 effectsOnly = fogColor + fogLightInteractionColor + rayColor + particleColor + finalLightColor;
+    float effectAlpha = clamp(length(effectsOnly) * 1.5, 0.0, 1.0);
+    
+    // Final alpha: if baseColor.a is low, use effect alpha; if high, use full opacity
+    float finalAlpha = max(effectAlpha, baseColor.a);
+    
+    color = vec4(finalColor, finalAlpha);
 }
