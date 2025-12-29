@@ -2,7 +2,7 @@ from gameplay.entities.shared.modifiers import modifier_damage
 from gameplay.entities.shared.components.hit_results import HitResult
 
 class HitComponent():
-    """Handles hit processing for any entity - clean and simple"""
+    """Handles hit processing for any entity"""
     
     def __init__(self, entity):
         self.entity = entity

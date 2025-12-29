@@ -9,10 +9,11 @@ from engine import game_objects
 class Game():
     def __init__(self):
         #initiate all screens
-        self.window_size = C.window_size.copy()
-        self.scale = self.scale_size(2)#get the scale according to your display size
-        self.display_size = [int(self.window_size[0] * self.scale), int(self.window_size[1] * self.scale)]
         game_settings = read_files.read_json('config/game_settings.json')['display']
+        self.window_size = game_settings['resolution']#[800,450]
+        self.scale = self.scale_size()#get the scale according to your display size
+        self.display_size = [int(self.window_size[0] * self.scale), int(self.window_size[1] * self.scale)]
+        
         self.display = RenderEngine(self.display_size[0] - self.scale, self.display_size[1] - self.scale, fullscreen = game_settings['fullscreen'], vsync = game_settings['vsync']) #vsync -1 may be good for mac        
 
         #initiate game related values

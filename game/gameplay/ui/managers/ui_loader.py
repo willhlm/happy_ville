@@ -212,8 +212,7 @@ class TitleMenu(UI_loader):
                     if property['name'] == 'name':
                         button = property['value']
 
-                text = (self.game_objects.font.render(text = button))
-                self.buttons.append(Button(self.game_objects, image = text, position = topleft_object_position, center = True))
+                self.buttons.append(Button(self.game_objects, text = button, position = topleft_object_position, center = True))
 
             elif id == 1:#arrows
                 self.arrows.append(MenuArrow(topleft_object_position, self.game_objects, flip = True))
@@ -244,8 +243,7 @@ class LoadMenu(UI_loader):
                     if property['name'] == 'name':
                         button = property['value']
 
-                text = (self.game_objects.font.render(text = button))
-                self.buttons.append(Button(self.game_objects, image = text, position = topleft_object_position, center = True))
+                self.buttons.append(Button(self.game_objects, text = button, position = topleft_object_position, center = True))
 
             elif id == 1:#arrows
                 self.arrows.append(MenuArrow(topleft_object_position, self.game_objects, flip = True))
@@ -276,8 +274,7 @@ class OptionMenu(UI_loader):
                     if property['name'] == 'name':
                         button = property['value']
 
-                text = (self.game_objects.font.render(text = button))
-                self.buttons.append(Button(self.game_objects, image = text, position = topleft_object_position, center = True))
+                self.buttons.append(Button(self.game_objects, text = button, position = topleft_object_position, center = True))
 
             elif id == 1:#arrows
                 self.arrows.append(MenuArrow(topleft_object_position, self.game_objects, flip = True))
@@ -306,8 +303,7 @@ class PauseMenu(UI_loader):
                     if property['name'] == 'name':
                         button = property['value']
 
-                text = (self.game_objects.font.render(text = button))
-                self.buttons.append(Button(self.game_objects, image = text, position = topleft_object_position, center = True))
+                self.buttons.append(Button(self.game_objects, text = button, position = topleft_object_position, center = True))
 
             elif id == 1:#arrows
                 self.arrows.append(MenuArrow(topleft_object_position, self.game_objects, flip = True))

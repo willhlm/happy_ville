@@ -22,7 +22,7 @@ class Character(PlatformEntity):#enemy, NPC,player
         self.currentstate.update(dt)#need to be aftre update_vel since some state transitions look at velocity
         self.animation.update(dt)#need to be after currentstate since animation will animate the current state
 
-    def update_render(self, dt):        
+    def update_render(self, dt):
         self.shader_state.update_render(dt)
 
     def update_vel(self, dt):#called from hitsop_states
@@ -31,21 +31,21 @@ class Character(PlatformEntity):#enemy, NPC,player
         self.velocity[0] += dt * (self.dir[0]*self.acceleration[0] - self.friction[0] * self.velocity[0])
 
     def take_hit(self, effect):
-        """Delegate to hit component"""      
+        """Delegate to hit component"""
         return self.hit_component.take_hit(effect)
 
     def take_dmg(self, damage):
         """Called by hit_component after modifiers run. Apply damage and effects."""
         self.health -= damage
         self.flags['invincibility'] = True
-                        
+
         if self.health > 0:  # Still alive
             self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)
             self.shader_state.handle_input('Hurt')
             self.currentstate.handle_input('Hurt')
-            self.game_objects.camera_manager.camera_shake(amplitude=10, duration=15, scale=0.9)
+            self.game_objects.camera_manager.camera_shake(amplitude=4, duration=12, scale=0.9)
         else:  # dead
-            self.game_objects.camera_manager.camera_shake(amplitude=15, duration=15, scale=0.9)
+            self.game_objects.camera_manager.camera_shake(amplitude=4, duration=20, scale=0.95)
             self.flags['aggro'] = False
             self.currentstate.enter_state('Death')
 
@@ -58,9 +58,9 @@ class Character(PlatformEntity):#enemy, NPC,player
             obj1 = getattr(particles, type)(self.hitbox.center, self.game_objects, **kwarg)
             self.game_objects.cosmetics.add(obj1)
 
-    def draw(self, target):        
+    def draw(self, target):
         self.blit_pos = [int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1])]
-        self.game_objects.game.display.render(self.image, target, position = self.blit_pos, flip = self.dir[0] > 0, shader = self.shader)#shader render        
+        self.game_objects.game.display.render(self.image, target, position = self.blit_pos, flip = self.dir[0] > 0, shader = self.shader)#shader render
 
     def on_invincibility_timeout(self):#runs when sword timer runs out
         self.flags['invincibility'] = False

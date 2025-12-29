@@ -10,7 +10,7 @@ class Alphabet():
         self.text_bg_dict = {'default':read_files.generic_sheet_reader("assets/sprites/utils/text_bg5.png",16,16,3,3), 'text_bubble':read_files.generic_sheet_reader("assets/sprites/utils/text_bg6.png",16,16,3,3)}
 
     def get_height(self):
-        return self.font.get_height()
+        return self.font.get_height()    
 
     def render(self, surface_size=False, text='', letter_frame=1000, color=(255, 255, 255), alignment='left'):
         # Limit text to `letter_frame`

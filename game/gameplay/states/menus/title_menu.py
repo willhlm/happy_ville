@@ -5,61 +5,97 @@ from .base.base_ui import BaseUI
 class TitleMenu(BaseUI):
     def __init__(self,game):
         super().__init__(game)
+        
         self.menu_ui = getattr(ui_loader, 'TitleMenu')(game.game_objects)
         self.play_music()
-        self.image = self.menu_ui.sprites['idle'][0]
-        self.current_button = 0
-        self.update_arrow()
+        self.bg = self.menu_ui.sprites['title'][0]
+        self.bg2 = self.menu_ui.sprites['start_screen'][0]
 
-    def update_render(self, dt):
+        self.image = game.display.make_layer((640, 360))
+        self.game.game_objects.shaders['title_screen']['resolution'] = self.game.window_size
+
+        self.time = 0
+        self.current_button = 0
+        self.previous_button = None  # Track previous button
+        self._update_arrow()
+        self._update_button()  # Initialize first button as active
+
+    def update_render(self, dt):        
+        self.menu_ui.buttons[self.current_button].active()# Always call active on the current button (for continuous hover effects)
+
+        self.time += dt * 0.01
         for arrow in self.menu_ui.arrows:
             arrow.update(dt)#make them move back and forth
 
     def fade_update(self, dt):#called from fade out: update that should be played when fading: it is needed becayse depending on state, only part of the update loop should be called
-        self.update_render(dt)
+        self.update_render(dt)        
 
     def render(self):
         self.game.screen_manager.screen.clear(0,0,0,0)
-        self.menu_ui.buttons[self.current_button].hoover()
-        self.game.display.render(self.image, self.game.screen_manager.screen)#shader render
+        self.image.clear(0,0,0,0)                      
 
-        #blit buttons
+        self.game.game_objects.shaders['title_screen']['time'] = self.time
+        self.game.display.render(self.bg2, self.game.screen_manager.screen)
+        self.game.display.render(self.image.texture, self.game.screen_manager.screen, shader = self.game.game_objects.shaders['title_screen'])
+        self.game.display.render(self.bg, self.game.screen_manager.screen)
+
+        # Blit buttons
         for b in self.menu_ui.buttons:
-            self.game.display.render(b.image, self.game.screen_manager.screen, position = b.rect.topleft)
+            b.render(self.game.screen_manager.screen)            
 
-        #blit arrow
+        # Blit arrow
         for arrow in self.menu_ui.arrows:
             self.game.display.render(arrow.image, self.game.screen_manager.screen, position = arrow.true_pos, flip = arrow.flip)
 
         self.game.render_display(self.game.screen_manager.screen.texture)
 
-    def update_arrow(self):
+    def _update_arrow(self):
         button = self.menu_ui.buttons[self.current_button]
-        bx, by, bw, bh = button.rect
+        bx, by, bw, bh = button.rect[0], button.rect.centery, button.rect[2], button.rect[3]
 
         for arrow in self.menu_ui.arrows:
+            y_pos = by - arrow.rect.height * 0.5
             if arrow.flip:
-                arrow.set_pos((bx + bw + 10, by))  # +10 px padding
+                arrow.set_pos((bx + bw + 10, y_pos))  # +10 px padding
             else:# left arrow, align to left edge of button
-                arrow.set_pos((bx - arrow.rect.width - 10, by))  # -10 px padding
+                arrow.set_pos((bx - arrow.rect.width - 10, y_pos))  # -10 px padding
         arrow.play_SFX()
+    
+    def _update_button(self):
+        """Handle button state transitions when selection changes"""
+        
+        # Exit the previous button (if there was one)
+        if self.previous_button is not None and self.previous_button != self.current_button:
+            self.menu_ui.buttons[self.previous_button].on_exit()
+        
+        # Enter the new button (if it's different)
+        if self.previous_button != self.current_button:
+            self.menu_ui.buttons[self.current_button].on_enter()
+                
+        # Update previous button tracker
+        self.previous_button = self.current_button
 
     def handle_events(self, input):
         event = input.output()
         input.processed()
+        
         if event[2]['l_stick'][1] < 0 or (event[-1] == 'dpad_up' and event[0]):#up
             self.current_button -= 1
             if self.current_button < 0:
                 self.current_button = len(self.menu_ui.buttons) - 1
-            self.update_arrow()
+            self._update_arrow()
+            self._update_button()  # Handle button state change
+            
         elif event[2]['l_stick'][1] > 0 or (event[-1] == 'dpad_down' and event[0]):#down
             self.current_button += 1
             if self.current_button >= len(self.menu_ui.buttons):
                 self.current_button = 0
-            self.update_arrow()
+            self._update_arrow()
+            self._update_button()  # Handle button state change
+            
         elif event[0]:
             if event[-1] in ('return', 'a'):
-                self.menu_ui.buttons[self.current_button].pressed()#if we want to make it e.g. glow or something
+                self.menu_ui.buttons[self.current_button].pressed()
                 self.change_state()
             elif event[-1] == 'start':
                 pygame.quit()
@@ -80,8 +116,13 @@ class TitleMenu(BaseUI):
             #self.game.game_objects.load_map(self,'wakeup_forest_1','1')
             #self.game.game_objects.load_map(self,'spirit_world_1','1')
             #self.game.game_objects.load_map(self,'crystal_mines_1','1')
+<<<<<<< HEAD
             #self.game.game_objects.load_map(self,'village_5','1')
             self.game.game_objects.load_map(self,'nordveden_windtest','1')
+=======
+            self.game.game_objects.load_map(self,'village_1','1')
+            #self.game.game_objects.load_map(self,'nordveden_windtest','1')
+>>>>>>> 22d2e7f78f8660faaaa14c44fcf8e8f57da59c39
             #self.game.game_objects.load_map(self,'nordveden_1','1')
             #self.game.game_objects.load_map(self,'tall_trees_1','1')
             #self.game.game_objects.load_map(self,'dark_forest_1','5')
