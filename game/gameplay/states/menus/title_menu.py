@@ -4,17 +4,11 @@ from .base.base_ui import BaseUI
 
 class TitleMenu(BaseUI):
     def __init__(self,game):
-        super().__init__(game)
-        
+        super().__init__(game)        
         self.menu_ui = getattr(ui_loader, 'TitleMenu')(game.game_objects)
         self.play_music()
-        self.bg = self.menu_ui.sprites['title'][0]
-        self.bg2 = self.menu_ui.sprites['start_screen'][0]
-
-        self.image = game.display.make_layer((640, 360))
-        self.game.game_objects.shaders['title_screen']['resolution'] = self.game.window_size
-
-        self.time = 0
+        self.game_title = self.menu_ui.sprites['title'][0]
+              
         self.current_button = 0
         self.previous_button = None  # Track previous button
         self._update_arrow()
@@ -23,7 +17,7 @@ class TitleMenu(BaseUI):
     def update_render(self, dt):        
         self.menu_ui.buttons[self.current_button].active()# Always call active on the current button (for continuous hover effects)
 
-        self.time += dt * 0.01
+        self.game.game_objects.ui.uis['menu'].update_time(dt)
         for arrow in self.menu_ui.arrows:
             arrow.update(dt)#make them move back and forth
 
@@ -32,12 +26,8 @@ class TitleMenu(BaseUI):
 
     def render(self):
         self.game.screen_manager.screen.clear(0,0,0,0)
-        self.image.clear(0,0,0,0)                      
-
-        self.game.game_objects.shaders['title_screen']['time'] = self.time
-        self.game.display.render(self.bg2, self.game.screen_manager.screen)
-        self.game.display.render(self.image.texture, self.game.screen_manager.screen, shader = self.game.game_objects.shaders['title_screen'])
-        self.game.display.render(self.bg, self.game.screen_manager.screen)
+        self.game.game_objects.ui.uis['menu'].render_background(self.game.screen_manager.screen)
+        self.game.display.render(self.game_title, self.game.screen_manager.screen)                
 
         # Blit buttons
         for b in self.menu_ui.buttons:

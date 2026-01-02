@@ -1,9 +1,10 @@
 from .menus.load_menu import LoadMenu
-from .menus.option_menu_display import OptionMenuDisplay
-from .menus.option_menu_sounds import OptionMenuSounds
-from .menus.option_menu import OptionMenu
 from .menus.pause_menu import PauseMenu
 from .menus.title_menu import TitleMenu
+
+from .menus.option.display import OptionDisplay
+from .menus.option.sounds import OptionSounds
+from .menus.option.menu import OptionMenu
 
 from .gameplay.gameplay import Gameplay
 from .gameplay.ability_select import AbilitySelect

@@ -20,6 +20,8 @@ from .hud.money_frame import MoneyFrame
 from .elements.menu_arrow import MenuArrow
 from .elements.menu_box import MenuBox
 from .elements.button import Button
+from .elements.text import Text
+from .elements.slider import Slider
 
 from .elements.controllers.controllers import Controllers
 from .elements.controllers.xbox import Xbox

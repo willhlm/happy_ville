@@ -5,6 +5,7 @@ from gameplay.ui.components import *
 class UI_loader():#for map, omamori, ability, journal etc: json file should have same name as class and folder, tsx file should end with _UI
     def __init__(self, game_objects):
         self.game_objects = game_objects
+        self.base_resolution = (640, 360)
 
     def load_UI_data(self, path, name):
         map_data = read_files.read_json(path)
@@ -16,6 +17,20 @@ class UI_loader():#for map, omamori, ability, journal etc: json file should have
 
     def load_data(self):
         pass
+
+    def _scale_position(self, pos):
+        """Scale a position from base resolution to current resolution"""
+        current_res = self.game_objects.game.window_size
+        scale_x = current_res[0] / self.base_resolution[0]
+        scale_y = current_res[1] / self.base_resolution[1]
+        return (int(pos[0] * scale_x), int(pos[1] * scale_y))
+    
+    def _scale_size(self, size):
+        """Scale a size from base resolution to current resolution"""
+        current_res = self.game_objects.game.window_size
+        scale_x = current_res[0] / self.base_resolution[0]
+        scale_y = current_res[1] / self.base_resolution[1]
+        return (int(size[0] * scale_x), int(size[1] * scale_y))        
 
 class Vendor(UI_loader):
     def __init__(self, game_objects):
@@ -207,6 +222,9 @@ class TitleMenu(UI_loader):
             properties = obj.get('properties',[])
             id = obj['gid'] - self.map_data['UI_firstgid']
 
+            topleft_object_position = self._scale_position(topleft_object_position)
+            object_size = self._scale_size(object_size)
+
             if id == 0:#buttons
                 for property in properties:
                     if property['name'] == 'name':
@@ -223,8 +241,6 @@ class TitleMenu(UI_loader):
 class LoadMenu(UI_loader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
-        self.sprites = read_files.load_sprites_dict('assets/sprites/ui/menus/load_menu/', game_objects)
-
         path = 'assets/ui_layouts/menus/load_menu/load_menu.json'
         self.load_UI_data(path, 'load_menu')
         self.load_data()
@@ -254,8 +270,6 @@ class LoadMenu(UI_loader):
 class OptionMenu(UI_loader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
-        self.sprites = read_files.load_sprites_dict('assets/sprites/ui/menus/option_menu/', game_objects)
-
         path = 'assets/ui_layouts/menus/option_menu/option_menu.json'
         self.load_UI_data(path, 'option_menu')
         self.load_data()
@@ -281,6 +295,76 @@ class OptionMenu(UI_loader):
 
             elif id == 4:#arrows
                 self.arrows.append(MenuArrow(topleft_object_position, self.game_objects))
+
+class OptionDisplay(UI_loader):
+    def __init__(self, game_objects):
+        super().__init__(game_objects)
+        path = 'assets/ui_layouts/menus/option_display/option_display.json'
+        self.load_UI_data(path, 'option_display')
+        self.load_data()
+
+    def load_data(self):
+        self.arrows = []
+        self.buttons = []
+        self.results = []
+        for obj in self.map_data['elements']:
+            object_size = [int(obj['width']),int(obj['height'])]
+            topleft_object_position = [int(obj['x']), int(obj['y'])-int(obj['height'])]
+            properties = obj.get('properties',[])
+            id = obj['gid'] - self.map_data['UI_firstgid']
+
+            if id == 1:#arrows
+                self.arrows.append(MenuArrow(topleft_object_position, self.game_objects, flip = True))
+
+            elif id == 4:#arrows
+                self.arrows.append(MenuArrow(topleft_object_position, self.game_objects))
+
+            elif id == 5:#display
+                for property in properties:
+                    if property['name'] == 'text':
+                        button = property['value']
+
+                self.buttons.append(Text(self.game_objects, text = button, position = topleft_object_position))
+
+            elif id == 6:
+                self.results.append(topleft_object_position)
+
+class OptionSounds(UI_loader):
+    def __init__(self, game_objects):
+        super().__init__(game_objects)
+        path = 'assets/ui_layouts/menus/option_sounds/option_sounds.json'
+        self.load_UI_data(path, 'option_sounds')
+        self.load_data()
+
+    def load_data(self):
+        self.arrows = []
+        self.buttons = []
+        self.results = []
+        self.slider = []
+        for obj in self.map_data['elements']:
+            object_size = [int(obj['width']),int(obj['height'])]
+            topleft_object_position = [int(obj['x']), int(obj['y'])-int(obj['height'])]
+            properties = obj.get('properties',[])
+            id = obj['gid'] - self.map_data['UI_firstgid']
+
+            if id == 1:#arrows
+                self.arrows.append(MenuArrow(topleft_object_position, self.game_objects, flip = True))
+
+            elif id == 4:#arrows
+                self.arrows.append(MenuArrow(topleft_object_position, self.game_objects))
+
+            elif id == 5:#text
+                for property in properties:
+                    if property['name'] == 'text':
+                        button = property['value']
+
+                self.buttons.append(Text(self.game_objects, text = button, position = topleft_object_position))
+
+            elif id == 6:#result positions
+                self.results.append(topleft_object_position)
+
+            elif id == 8:#result positions
+                self.slider.append(Slider(self.game_objects, position = topleft_object_position))
 
 class PauseMenu(UI_loader):
     def __init__(self, game_objects):

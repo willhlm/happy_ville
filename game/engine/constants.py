@@ -1,5 +1,4 @@
 #game settings
-fps = 60#this is the screeen resfresh rate
 tile_size = 16
 
 #physics

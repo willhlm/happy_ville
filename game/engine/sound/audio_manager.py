@@ -4,7 +4,6 @@ from engine.utils import read_files
 
 class AudioManager:
     """Low-level audio channel and volume management"""
-    
     def __init__(self, config):        
         self.config = config
         self.volume_settings = read_files.read_json('config/game_settings.json')['sounds']
@@ -35,7 +34,7 @@ class AudioManager:
     
     def calculate_volume(self, base_volume, category):
         volume_multiplier = self.volume_settings.get(category, 1.0)
-        return base_volume * volume_multiplier * self.config['volume_normalizer']
+        return base_volume * volume_multiplier * self.config['volume_normalizer'] * self.volume_settings['overall']
     
     def update_volume_setting(self, category, amount):
         self.volume_settings[category] += amount
