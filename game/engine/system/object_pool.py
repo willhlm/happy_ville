@@ -2,7 +2,7 @@ from gameplay.entities.visuals.environments import Leaves, BackgroundDroplet
 from gameplay.ui.components import MenuArrow, LogoLoading
 from gameplay.entities.visuals.particles import particles, screen_particles
 from gameplay.world.weather import weather
-from gameplay.states import Bank, OptionMenu
+from gameplay.states import Bank, OptionMenu, OptionDisplay, OptionSounds
 from gameplay.entities.enemies import Reindeer, CultistWarrior, CultistRogue
 from gameplay.entities.platforms import Bubble, SeedPlatform
 from gameplay.entities.items import *
@@ -89,3 +89,5 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         #states
         Bank.pool(game_objects)
         OptionMenu.pool(game_objects)
+        OptionDisplay.pool(game_objects)
+        OptionSounds.pool(game_objects)

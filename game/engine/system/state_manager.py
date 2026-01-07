@@ -36,8 +36,8 @@ class State_manager():
 REGISTERY = {
     # Menus
     "load_menu": LoadMenu,
-    "option_menu_display": OptionMenuDisplay,
-    "option_menu_sounds": OptionMenuSounds,
+    "option_display": OptionDisplay,
+    "option_sounds": OptionSounds,
     "option_menu": OptionMenu,
     "pause_menu": PauseMenu,
     "title_menu": TitleMenu,

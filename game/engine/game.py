@@ -9,12 +9,13 @@ from engine import game_objects
 class Game():
     def __init__(self):
         #initiate all screens
-        game_settings = read_files.read_json('config/game_settings.json')['display']
-        self.window_size = game_settings['resolution']#[800,450]
+        display_settings = read_files.read_json('config/game_settings.json')['display']
+        self.window_size = display_settings['resolution']
+        self.fps = display_settings['fps']
         self.scale = self.scale_size()#get the scale according to your display size
         self.display_size = [int(self.window_size[0] * self.scale), int(self.window_size[1] * self.scale)]
         
-        self.display = RenderEngine(self.display_size[0] - self.scale, self.display_size[1] - self.scale, fullscreen = game_settings['fullscreen'], vsync = game_settings['vsync']) #vsync -1 may be good for mac        
+        self.display = RenderEngine(self.display_size[0] - self.scale, self.display_size[1] - self.scale, fullscreen = display_settings['fullscreen'], vsync = display_settings['vsync']) #vsync -1 may be good for mac        
 
         #initiate game related values
         self.game_loop = GameLoop(self)
@@ -76,7 +77,7 @@ class GameLoop():
 
             # Calculate frame time in seconds
             frame_end = time.perf_counter()
-            raw_frame_time = min(frame_end - prev_time, 2.0 / C.fps)  # Cap large jumps
+            raw_frame_time = min(frame_end - prev_time, 2.0 / self.game.fps)  # Cap large jumps
             prev_time = frame_end
             dt = max(raw_frame_time, 0.001)# Avoid zero or negative dt
 
@@ -98,7 +99,7 @@ class GameLoop():
 
             # Update display and limit FPS
             pygame.display.flip()
-            self.clock.tick(C.fps)
+            self.clock.tick(self.game.fps)
             #print(self.clock.get_fps())
 
 if __name__ == '__main__':

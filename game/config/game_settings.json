@@ -1,5 +1,1 @@
-{"display": 
-    {"vsync": true, "fullscreen": false, "resolution": [640, 360]}, 
-"sounds": 
-    {"SFX": 10, "music": 10, "overall": 10}
-}
+{"display": {"vsync": true, "fullscreen": false, "resolution": [640, 360], "fps": 60}, "sounds": {"SFX": 5, "music": 5, "overall": 10}}

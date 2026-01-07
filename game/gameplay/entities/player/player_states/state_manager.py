@@ -13,9 +13,9 @@ class StateManager():
             'land': LandState(entity),
             'jump': JumpState(entity),
             'jump_sprint': JumpSprintState(entity),
-            'dash_ground': DashGroundState(entity),
-            'dash_jump': DashJumpState(entity),
-            'wall_glide': WallGlideState(entity),
+            #'dash_ground': DashGroundState(entity),
+            #'dash_jump': DashJumpState(entity),
+            #'wall_glide': WallGlideState(entity),
             'belt_glide': BeltGlideState(entity),
             'wall_jump': WallJumpState(entity),
             'sword_stand1': SwordStand1State(entity),
@@ -26,7 +26,7 @@ class StateManager():
             'sword_up': SwordUpState(entity),
             'smash_side': SmashSideState(entity),
             'smash_up': SmashUpState(entity),
-            'dash_air': DashAirState(entity),
+            #'dash_air': DashAirState(entity),
             'death': DeathState(entity),
             'respawn': ReSpawnState(entity),#used when respawning after death
             'heal': HealState(entity),
@@ -52,10 +52,10 @@ class StateManager():
                                 'slow_motion': [('slow_motion', SlowMotionState)]}#should contain all the states that can be created, so that they can be be appended to self.stataes when needed
 
     def enter_state(self, state_name, phase = None, **kwargs):
-        state = self.states.get(state_name)           
+        state = self.states.get(state_name)
         if state and state.allowed():#if the requested state is unlocked
             self.composite_state.exit()#exit the old one before entering/setting a new state
-            state.enter_state(phase, **kwargs)            
+            state.enter_state(phase, **kwargs)
             self.composite_state = state
 
     def update(self, dt):#called from player
@@ -79,5 +79,3 @@ class StateManager():
     def unlock_state(self, name):#should be called when unlocking a new state
         for state_name, cls in self._state_factories[name]:
             self.states[state_name] = cls(self.entity)
-
-
