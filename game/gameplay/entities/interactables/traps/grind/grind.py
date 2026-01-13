@@ -29,7 +29,7 @@ class Grind(Interactables):#trap
 
     def update_vel(self):
         self.velocity[0] = self.direction[0] * self.distance * math.cos(self.speed * self.time)
-        self.velocity[1] = self.direction[1] * self.distance * math.sin(self.speed * self.time + math.pi*0.5) 
+        self.velocity[1] = self.direction[1] * self.distance * math.sin(self.speed * self.time + math.pi*0.5)
 
     def update(self, dt):
         super().update(dt)
@@ -49,13 +49,13 @@ class Grind(Interactables):#trap
     def on_collision(self, entity):#entity collision
         effect = self.base_effect.copy()
         effect.meta['attacker_dir'] = [0,0]#save the direction
-        #effect.particles['dir'] = self.dir        
+        #effect.particles['dir'] = self.dir
 
-        damage_applied, modified_effect = entity.take_hit(effect)                        
+        damage_applied, modified_effect = entity.take_hit(effect)
 
     def take_dmg(self, damage):
         """Called by hit_component after modifiers run. Apply damage and effects."""
+
         self.flags['invincibility'] = True
-                        
         self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)
-        self.game_objects.camera_manager.camera_shake(amplitude=10, duration=15, scale=0.9)
+        self.game_objects.camera_manager.camera_shake(amplitude=2, duration=15, scale=0.90)

@@ -28,9 +28,9 @@ class Player(Character):
         self.rect.midbottom = self.hitbox.midbottom#match the positions of hitboxes
         self.prev_true_pos = self.true_pos.copy()#to save the previous position
 
-        self.max_health = 15
+        self.max_health = 20
         self.max_spirit = 4
-        self.health = 6
+        self.health = 20
         self.spirit = 2
 
         self.projectiles = game_objects.fprojectiles
