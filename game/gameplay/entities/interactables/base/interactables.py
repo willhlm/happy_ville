@@ -39,7 +39,7 @@ class Interactables(AnimatedEntity):#interactables
         """Delegate to hit component"""      
         return self.hit_component.take_hit(effect)
 
-    def take_dmg(self, effect):#called from hitcomponent
+    def take_dmg(self, damage):#called from hitcomponent
         pass
 
     def seed_collision(self, seed):#if seed hits

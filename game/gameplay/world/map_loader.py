@@ -797,7 +797,7 @@ class Village(Biome):
         super().__init__(level)
 
     def post_process(self, layer_name, parallax):#called at the end of group loading
-        if self.live_blur:
+        if self.live_blur:            
             if parallax[0] == 1: 
                  radius = 0.01
             else:                
@@ -809,7 +809,9 @@ class Village(Biome):
 
     def room(self, room):#called wgen a new room is loaded
         if room in ['5']:
-            self.live_blur = True            
+            self.live_blur = True   
+        else:
+            self.live_blur = False            
 
     def load_objects(self, data, parallax, offset):
         for obj in data['objects']:

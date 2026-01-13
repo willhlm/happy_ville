@@ -334,18 +334,6 @@
                          "y":1200
                         }, 
                         {
-                         "gid":8205,
-                         "height":16,
-                         "id":1949,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":160,
-                         "x":2096,
-                         "y":720
-                        }, 
-                        {
                          "gid":8200,
                          "height":96,
                          "id":1955,
@@ -371,7 +359,7 @@
                         }, 
                         {
                          "gid":8200,
-                         "height":144,
+                         "height":112,
                          "id":1962,
                          "name":"",
                          "rotation":0,
@@ -379,7 +367,7 @@
                          "visible":true,
                          "width":560,
                          "x":944,
-                         "y":992
+                         "y":960
                         }, 
                         {
                          "gid":8205,
@@ -491,7 +479,7 @@
                         }, 
                         {
                          "gid":8200,
-                         "height":32,
+                         "height":16,
                          "id":1978,
                          "name":"",
                          "rotation":0,
@@ -499,7 +487,7 @@
                          "visible":true,
                          "width":80,
                          "x":688,
-                         "y":992
+                         "y":976
                         }, 
                         {
                          "gid":8205,
@@ -575,7 +563,7 @@
                         }, 
                         {
                          "gid":8200,
-                         "height":192,
+                         "height":208,
                          "id":2002,
                          "name":"",
                          "rotation":0,
@@ -583,7 +571,7 @@
                          "visible":true,
                          "width":176,
                          "x":2080,
-                         "y":704
+                         "y":720
                         }, 
                         {
                          "gid":8200,
@@ -763,6 +751,42 @@
                          "width":80,
                          "x":1968,
                          "y":832
+                        }, 
+                        {
+                         "gid":43312,
+                         "height":32,
+                         "id":2017,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":1408,
+                         "y":784
+                        }, 
+                        {
+                         "gid":43312,
+                         "height":32,
+                         "id":2018,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":1280,
+                         "y":784
+                        }, 
+                        {
+                         "gid":8200,
+                         "height":32,
+                         "id":2019,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":496,
+                         "x":1008,
+                         "y":992
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -811,7 +835,7 @@
          "y":0
         }],
  "nextlayerid":45,
- "nextobjectid":2017,
+ "nextobjectid":2020,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -915,6 +939,10 @@
         {
          "firstgid":43288,
          "source":"..\/_objects\/interactables.tsx"
+        }, 
+        {
+         "firstgid":43305,
+         "source":"objects\/objects.tsx"
         }],
  "tilewidth":16,
  "type":"map",
