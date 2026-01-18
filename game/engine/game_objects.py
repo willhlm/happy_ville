@@ -10,13 +10,12 @@ from gameplay.world import map_loader, world_state
 from gameplay.world.weather import weather
 from engine import constants as C
 from gameplay.ui.managers import ui
-from gameplay.narrative import quests_events
-
+from gameplay.narrative.quests_events.manager import QuestsEventsManager
 from gameplay.registry.registry_manager import RegistryManager
 
 from time import perf_counter
 
-class Game_Objects():
+class GameObjects():
     def __init__(self, game):
         self.game = game
         self.font = alphabet.Alphabet(self)#intitilise the alphabet class, scale of alphabet
@@ -32,9 +31,9 @@ class Game_Objects():
         self.map = map_loader.Level(self)
         self.camera_manager = camera.Camera_manager(self)
         self.world_state = world_state.World_state(self)#save/handle all world state stuff here
-        self.ui = ui.UI_manager(self)
+        self.ui = ui.UiManager(self)
         self.save_load = save_load.Save_load(self)#contains save and load attributes to load and save game
-        self.quests_events = quests_events.Quests_events(self)
+        self.quests_events = QuestsEventsManager(self)
         self.signals = signals.Signals()
         self.input_interpreter = input_interpreter.InputInterpreter(self)
         self.time_manager = time_manager.Time_manager(self)
@@ -112,23 +111,23 @@ class Game_Objects():
     def collide_all(self, dt):
         self.platform_collision(dt)
 
-        self.collisions.simple_collision(self.players, self.loot, 'player_collision')
-        self.collisions.simple_collision(self.players, self.enemies, 'player_collision')
-        self.collisions.simple_collision(self.players, self.bg_fade, 'player_collision')
+        self.collisions.simple_collision(self.players, self.loot, callback_name = 'player_collision')
+        self.collisions.simple_collision(self.players, self.enemies, callback_name = 'player_collision')
+        self.collisions.simple_collision(self.players, self.bg_fade, callback_name = 'player_collision')
 
         #checks colliions and non collisions
         self.collisions.entity_collision(self.players, self.interactables)
         self.collisions.entity_collision(self.players, self.interactables_fg)
         self.collisions.entity_collision(self.players, self.npcs)
 
-        self.collisions.simple_collision(self.eprojectiles, self.fprojectiles, 'collision_projectile')
-        self.collisions.simple_collision(self.enemies, self.fprojectiles, 'collision_enemy')
-        self.collisions.simple_collision(self.players, self.eprojectiles, 'collision_enemy')
+        self.collisions.simple_collision(self.eprojectiles, self.fprojectiles, callback_name = 'collision_projectile')
+        self.collisions.simple_collision(self.enemies, self.fprojectiles, callback_name = 'collision_enemy')
+        self.collisions.simple_collision(self.players, self.eprojectiles, callback_name = 'collision_enemy')
 
-        self.collisions.simple_collision(self.interactables, self.fprojectiles,'collision_interactables')
-        self.collisions.simple_collision(self.interactables_fg,self.fprojectiles, 'collision_interactables_fg')
-        self.collisions.simple_collision(self.interactables, self.eprojectiles,'collision_interactables')
-        self.collisions.simple_collision(self.interactables_fg,self.eprojectiles, 'collision_interactables_fg')
+        self.collisions.simple_collision(self.interactables, self.fprojectiles, callback_name = 'collision_interactables')
+        self.collisions.simple_collision(self.interactables_fg,self.fprojectiles, callback_name = 'collision_interactables_fg')
+        self.collisions.simple_collision(self.interactables, self.eprojectiles, callback_name = 'collision_interactables')
+        self.collisions.simple_collision(self.interactables_fg,self.eprojectiles, callback_name = 'collision_interactables_fg')
 
     def platform_collision(self, dt):
         self.collisions.platform_collision(self.players, dt)

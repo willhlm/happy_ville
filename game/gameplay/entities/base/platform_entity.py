@@ -55,7 +55,7 @@ class PlatformEntity(AnimatedEntity):#Things to collide with platforms
 
     def left_collision(self, block, type = 'Wall'):
         self.hitbox.left = block.hitbox.right
-        self.collision_types['left'] = True
+        self.collision_types['left'] = True        
         self.currentstate.handle_input(type)
 
     def down_collision(self, block):
@@ -67,6 +67,7 @@ class PlatformEntity(AnimatedEntity):#Things to collide with platforms
         self.hitbox.top = block.hitbox.bottom
         self.collision_types['top'] = True
         self.velocity[1] = 0
+        self.currentstate.handle_input('ceiling')
 
     def limit_y(self):#limits the velocity on ground, onewayup. But not on ramps to make a smooth drop
         self.velocity[1] = 1.2#assume at least 60 fps -> 1

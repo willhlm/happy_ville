@@ -1,6 +1,6 @@
 from gameplay.entities.base.static_entity import StaticEntity
 
-class ChainProjectile(StaticEntity):
+class ChainSpawner(StaticEntity):
     def __init__(self, pos, game_objects, projecticle, direction, distance, number, frequency):
         super().__init__(pos, game_objects)
         self.pos = pos#inital position

@@ -4,7 +4,7 @@ from engine.utils import read_files
 from gameplay.entities.enemies.bosses import task_manager
 from gameplay.entities.projectiles import HurtBox
 from . import wolfies_states
-from gameplay.entities.projectiles.chain_projectile import ChainProjectile
+from gameplay.entities.projectiles.utils.chain_spawner import ChainSpawner
 from gameplay.entities.projectiles import SlamAttack
 
 class Wolfies(Boss):
@@ -38,7 +38,7 @@ class Wolfies(Boss):
         self.game_objects.eprojectiles.add(attack)#add to group but in main phase
 
     def slam_attack(self):#called from states, attack main
-        self.game_objects.cosmetics.add(ChainProjectile(self.rect.center, self.game_objects, SlamAttack, direction = self.dir, distance = 50, number = 5, frequency = 20))
+        self.game_objects.cosmetics.add(ChainSpawner(self.rect.center, self.game_objects, SlamAttack, direction = self.dir, distance = 50, number = 5, frequency = 20))
 
     def move(self, speed_multiplier=1.0):
         """Standard movement in current direction"""

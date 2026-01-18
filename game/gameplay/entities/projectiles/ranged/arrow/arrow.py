@@ -1,7 +1,7 @@
 import pygame, math
 from gameplay.entities.projectiles.base.projectiles import Projectiles
 from engine.utils import read_files
-from gameplay.entities.projectiles import seed_spawner
+from . import seed_spawner
 from gameplay.entities.visuals.particles import particles
 
 class Arrow(Projectiles):#should it be called seed?
