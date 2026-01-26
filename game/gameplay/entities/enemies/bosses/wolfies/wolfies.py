@@ -1,11 +1,12 @@
 import pygame 
 from gameplay.entities.enemies.base.boss import Boss
 from engine.utils import read_files
-from gameplay.entities.enemies.bosses import task_manager
+from gameplay.entities.enemies.bosses.shared import task_manager
 from gameplay.entities.projectiles import HurtBox
 from . import wolfies_states
 from gameplay.entities.projectiles.utils.chain_spawner import ChainSpawner
 from gameplay.entities.projectiles import SlamAttack
+from .config import WOLFIES_CONFIG
 
 class Wolfies(Boss):
     def __init__(self, pos, game_objects):
@@ -14,24 +15,19 @@ class Wolfies(Boss):
         self.image = self.sprites['idle_nice'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 35, 45)
-        self.health = 2
 
-        self.currentstate = task_manager.TaskManager(self, wolfies_states.STATE_REGISTRY, wolfies_states.PATTERNS)
+        self.currentstate = task_manager.TaskManager(self, wolfies_states.STATE_REGISTRY, WOLFIES_CONFIG['patterns'])
 
-        self.ability = 'dash_ground_main'#the stae of image that will be blitted to show which ability that was gained
-        
-        self.attack_distance = [100, 50]
-        self.jump_distance = [240, 50]
+        self.ability = WOLFIES_CONFIG['ability']#the stae of image that will be blitted to show which ability that was gained
+        self.attack_distance = WOLFIES_CONFIG['attack_distance']
+        self.jump_distance = WOLFIES_CONFIG['jump_distance']
+        self.health = WOLFIES_CONFIG['health']
 
         self.light = self.game_objects.lights.add_light(self, radius = 150)
 
-    def give_abillity(self):#called when reindeer dies
-        self.game_objects.player.currentstate.unlock_state('dash')#append dash abillity to available states
-        self.game_objects.world_state.cutscene_complete('boss_deer_encounter')#so not to trigger the cutscene again        
-
     def kill(self):
         super().kill()
-        self.game_objects.lights.remove_light(self.light)#should be removed when reindeer is removed from the game
+        self.game_objects.lights.remove_light(self.light)
 
     def attack(self, lifetime = 10):#called from states, attack main
         attack = HurtBox(self, lifetime = 10, dir = self.dir, size = [64, 64])#make the object

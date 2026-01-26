@@ -10,6 +10,8 @@ from gameplay.entities.projectiles import *
 from gameplay.entities.visuals.cosmetics import *
 from gameplay.entities.visuals.effects.fade_effect import FadeEffect
 from gameplay.ui.components.overlay import point_arrow
+from gameplay.entities.interactables import AbilityBall
+
 
 class Object_pool():#a class that contains the objecte one may one to spawn duirng the game: it preloads stiff that needs to be loaded from file
     def __init__(self, game_objects):
@@ -23,6 +25,9 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         GreenInfinityStone.pool(game_objects)
         OrangeInfinityStone.pool(game_objects)
         PurpleInfinityStone.pool(game_objects)
+
+        #interactbales
+        AbilityBall.pool(game_objects)
 
         #radna
         BossHP.pool(game_objects)
@@ -91,3 +96,5 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         OptionMenu.pool(game_objects)
         OptionDisplay.pool(game_objects)
         OptionSounds.pool(game_objects)
+
+

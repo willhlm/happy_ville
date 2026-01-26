@@ -13,7 +13,8 @@ ENEMY_CONFIG = {
             'slam_attack': [50, 80],#min max
             'roll_attack': [200, 250]#min max
         },
-        'timers': {'hurt_recovery': [200, 250]},#min max         
+        'timers': {'hurt_recovery': [200, 250]},#min max     
+        'initial_state': 'sleep_main',
 
         'states': {
             'patrol': {

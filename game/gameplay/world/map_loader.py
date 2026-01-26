@@ -329,7 +329,7 @@ class Level():
                 if obj:#if event is registered
                     new_trigger = obj(object_position, self.game_objects, object_size, **kwarg)
                 else:#if not, load the default
-                    new_trigger = self.game_objects.registry.fetch('default',  kwarg['event'])(object_position, self.game_objects, object_size, **kwarg)
+                    new_trigger = self.game_objects.registry.fetch('event_triggers', 'default')(object_position, self.game_objects, object_size, **kwarg)
 
                 self.game_objects.interactables.add(new_trigger)
 

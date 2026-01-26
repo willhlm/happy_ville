@@ -1,4 +1,4 @@
-from gameplay.entities.enemies.bosses.utils import register_state
+from gameplay.entities.enemies.bosses.shared.utils import register_state
 
 #attack patterns
 PATTERNS = {

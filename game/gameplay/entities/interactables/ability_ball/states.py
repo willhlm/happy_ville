@@ -26,6 +26,16 @@ class Idle(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
 
+class Grow(Basic_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def update_render(self, dt):
+        self.entity.radius += dt * 0.04
+        self.entity.radius = min(self.entity.radius, 1)
+        if self.entity.radius >= 1:
+            self.enter_state('idle')     
+
 class Hurt(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)

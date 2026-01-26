@@ -2,7 +2,7 @@ import pygame
 from gameplay.entities.enemies.base.boss import Boss
 from engine.utils import read_files
 from . import reindeer_states
-from gameplay.entities.enemies.bosses import task_manager
+from gameplay.entities.enemies.bosses.shared import task_manager
 from gameplay.entities.projectiles import HurtBox
 
 class Reindeer(Boss):
