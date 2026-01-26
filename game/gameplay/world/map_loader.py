@@ -1,6 +1,6 @@
 import pygame, math, sys
 
-from engine.system import event_triggers, groups
+from engine.system import groups
 from gameplay.entities.visuals.particles import screen_particles
 from engine.utils import read_files
 from engine import constants as C
@@ -13,6 +13,7 @@ from gameplay.entities.interactables import *
 from gameplay.entities.platforms import *
 from gameplay.entities.visuals.environments import *
 from engine.utils import functions
+from gameplay.entities.spawners.area_spawner import AreaSpawner
 
 class Level():
     def __init__(self, game_objects):
@@ -324,7 +325,12 @@ class Level():
                 if self.game_objects.world_state.cutscenes_complete.get(kwarg['event'], False): continue#if the cutscene has been shown before, return.
                 if self.game_objects.world_state.events.get(kwarg['event'], False): continue#if event has already been done
                 
-                new_trigger = getattr(event_triggers, kwarg['event'].capitalize(), event_triggers.Event_trigger)(object_position, self.game_objects, object_size, **kwarg)#returns Event_trigger (default) if there is no Event_trigger class
+                obj = self.game_objects.registry.fetch('event_triggers',  kwarg['event'])
+                if obj:#if event is registered
+                    new_trigger = obj(object_position, self.game_objects, object_size, **kwarg)
+                else:#if not, load the default
+                    new_trigger = self.game_objects.registry.fetch('default',  kwarg['event'])(object_position, self.game_objects, object_size, **kwarg)
+
                 self.game_objects.interactables.add(new_trigger)
 
             elif id == 20:#reflection object
@@ -359,6 +365,11 @@ class Level():
                 
                 new_zoom = ZoomCollision(object_position, self.game_objects, object_size, **kwarg)
                 self.game_objects.interactables.add(new_zoom)
+
+            elif id == 22:#projectile spawner     
+                kwarg = {}          
+                new_spawner = AreaSpawner(object_position, self.game_objects, object_size, **kwarg)
+                self.game_objects.cosmetics.add(new_spawner)
 
             elif id == 23:#shade trigger, to change the screen shade upon trigger
                 kwargs = {}

@@ -2,6 +2,8 @@
 from .items import REGISTER_ITEMS
 from .npcs import REGISTER_NPCS
 from .enemies import REGISTER_ENEMIES
+from .event_triggers import REGISTER_EVENT_TRIGGERS
+from .events import REGISTER_EVENTS
 
 class RegistryManager():
     def __init__(self):
@@ -14,6 +16,8 @@ class RegistryManager():
             "items": REGISTER_ITEMS,
             "npcs": REGISTER_NPCS,
             "enemies": REGISTER_ENEMIES,
+            "event_triggers": REGISTER_EVENT_TRIGGERS,
+            "events": REGISTER_EVENTS,
             #"interactables": REGISTER_INTERACTABLES,
         }
 

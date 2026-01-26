@@ -2,7 +2,7 @@ from . import ui_backpack  # Inventory, map, etc.
 from . import ui_hud  # HUD elements like health bar, timers, etc.
 from .background_menu import BackgroundMenu
 
-class UI_manager():#initialised in game_objects, keep common UIs always in memory
+class UiManager():#initialised in game_objects, keep common UIs always in memory
     def __init__(self, game_objects):
         self.screen = game_objects.game.display.make_layer(game_objects.game.window_size)        
         self.uis = {
