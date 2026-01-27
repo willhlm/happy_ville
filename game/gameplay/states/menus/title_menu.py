@@ -1,6 +1,10 @@
-import pygame, sys
+import sys
+
+import pygame
 from gameplay.ui.managers import ui_loader
+
 from .base.base_ui import BaseUI
+
 
 class TitleMenu(BaseUI):
     def __init__(self,game):
@@ -108,7 +112,12 @@ class TitleMenu(BaseUI):
             #self.game.game_objects.load_map(self,'crystal_mines_1','1')
             #self.game.game_objects.load_map(self,'village_5','1')
             #self.game.game_objects.load_map(self,'nordveden_windtest','1')
+<<<<<<< HEAD
             #self.game.game_objects.load_map(self,'nordveden_1','1')
+=======
+            #self.game.game_objects.load_map(self,'nordveden_12','1')
+            self.game.game_objects.load_map(self,'nordveden_1','1')
+>>>>>>> xun
             #self.game.game_objects.load_map(self,'tall_trees_1','1')
             self.game.game_objects.load_map(self,'dark_forest_1','5')
             #self.game.game_objects.load_map(self,'tall_trees_ola','1')
