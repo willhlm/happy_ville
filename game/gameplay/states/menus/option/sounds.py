@@ -1,5 +1,5 @@
 from engine.utils import read_files
-from gameplay.ui.managers import ui_loader
+from gameplay.ui.loaders import OptionSoundsLoader
 from ..base.base_ui import BaseUI
 
 class OptionSounds(BaseUI):
@@ -12,7 +12,7 @@ class OptionSounds(BaseUI):
         self._update_arrow()   
 
     def pool(game_objects):
-        OptionSounds.menu_ui = getattr(ui_loader, 'OptionSounds')(game_objects)
+        OptionSounds.menu_ui = OptionSoundsLoader(game_objects)
 
     def update_render(self, dt):
         self.game.game_objects.ui.uis['menu'].update_time(dt)

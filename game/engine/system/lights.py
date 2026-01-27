@@ -157,7 +157,6 @@ class Light():#light source
     def lifetime(self, dt):
         if self.colour[-1] < 0.01:
             self.game_objects.lights.remove_light(self)
-            #self.target.state.handle_input('light_gone')
 
     def follow_target(self, dt):
         self.hitbox.center = self.target.hitbox.center

@@ -1,11 +1,11 @@
 import pygame, sys
-from gameplay.ui.managers import ui_loader
+from gameplay.ui.loaders import PauseMenuLoader
 from .base.base_ui import BaseUI
 
 class PauseMenu(BaseUI):#when pressing ESC duing gameplay
     def __init__(self, game):
         super().__init__(game)
-        self.menu_ui = getattr(ui_loader, 'PauseMenu')(game.game_objects)
+        self.menu_ui = PauseMenuLoader(game.game_objects)
 
         self.image = self.game.display.make_layer(self.game.display_size)
         self.game.game_objects.shaders['blur']['blurRadius'] = 1

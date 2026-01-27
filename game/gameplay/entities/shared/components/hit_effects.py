@@ -17,7 +17,8 @@ class HitEffect():
         self.knockback = kwargs.get('knockback', [25, 10])
         self.hitstop = kwargs.get('hitstop', 10)                        
         self.hit_type = kwargs.get('hit_type', 'sword')
-        self.particles = kwargs.get('particles', {})
+        self.particles = kwargs.get('particles', {})        
+        self.projectile = kwargs.get('projectile', None)
         self.meta = {}
         
         self.result = HitResult.CONNECTED  # Default result
@@ -41,10 +42,31 @@ class HitEffect():
         new_effect.meta = self.meta.copy()
         new_effect.defender_callbacks = self.defender_callbacks.copy()
         new_effect.attacker_callbacks = self.attacker_callbacks.copy()
-
+        new_effect.projectile = self.projectile
         new_effect.attacker = self.attacker
         new_effect.defender = None        
         return new_effect
+
+    def append_callback(self, target, callback_type, callback_func):
+        """
+        Append or replace a callback with optional arguments.
+        
+        Args:
+            target: 'attacker' or 'defender'
+            callback_type: String key for the callback (e.g., 'hitstop', 'sound')
+            callback_func: The callback function to register
+        
+        Example:
+            effect.append_callback('defender', 'hitstop', custom_hitstop)
+            effect.append_callback('attacker', 'sound', custom_sound)
+        """
+        if target == 'defender':
+            callback_dict = self.defender_callbacks
+        elif target == 'attacker':
+            callback_dict = self.attacker_callbacks
+        
+        # If no kwargs, store the function directly (backward compatible)
+        callback_dict[callback_type] = callback_func
 
 # ============================================================================
 # DEFAULT _execute_defender_feedback and _execute_attacker_feedback
@@ -72,12 +94,12 @@ def default_defender_visual(effect):
 
 def default_attacker_hitstop(effect):
     """Attacker hitstop - works for projectiles AND entities"""    
-    entity = getattr(effect.attacker, 'entity', effect.attacker)# If projectile: use .entity; if entity: use itself
-    entity.apply_hitstop(lifetime=effect.hitstop, call_back=None)
+    #entity = getattr(effect.attacker, 'entity', effect.attacker)# If projectile: use .entity; if entity: use itself
+    effect.attacker.apply_hitstop(lifetime=effect.hitstop, call_back=None)
 
 def default_attacker_particles(effect):
     """Clash particles (projectile-specific)"""
-    effect.attacker.clash_particles(effect.defender.hitbox.center, number_particles=5)
+    effect.projectile.clash_particles(effect.defender.hitbox.center, number_particles=5)
 
 def default_sound_dynamic(effect):
     """Dynamically resolve and play hit sound"""        

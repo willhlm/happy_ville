@@ -322,8 +322,8 @@ class Level():
                     elif property['name'] == 'new_state':
                         kwarg['new_state'] = property['value']
 
-                if self.game_objects.world_state.cutscenes_complete.get(kwarg['event'], False): continue#if the cutscene has been shown before, return.
-                if self.game_objects.world_state.events.get(kwarg['event'], False): continue#if event has already been done
+                if self.game_objects.world_state.is_cutscene_complete(kwarg['event']): continue#if the cutscene has been shown before, return.
+                if self.game_objects.world_state.is_event_complete(kwarg['event']): continue#if event has already been done 
                 
                 obj = self.game_objects.registry.fetch('event_triggers',  kwarg['event'])
                 if obj:#if event is registered

@@ -34,9 +34,9 @@ class Character(PlatformEntity):#enemy, NPC,player
         """Delegate to hit component"""
         return self.hit_component.take_hit(effect)
 
-    def take_dmg(self, damage):
+    def take_dmg(self, effect):
         """Called by hit_component after modifiers run. Apply damage and effects."""
-        self.health -= damage
+        self.health -= effect.damage
         self.flags['invincibility'] = True
 
         if self.health > 0:  # Still alive
@@ -48,6 +48,7 @@ class Character(PlatformEntity):#enemy, NPC,player
             self.game_objects.camera_manager.camera_shake(amplitude=4, duration=20, scale=0.95)
             self.flags['aggro'] = False
             self.currentstate.enter_state('Death')
+        return effect
 
     def knock_back(self, amp, dir):
         self.velocity[0] = dir[0] * amp[0]
@@ -72,7 +73,7 @@ class Character(PlatformEntity):#enemy, NPC,player
         self.flags['hurt_state_able'] = True
 
     def apply_hitstop(self, lifetime=10, call_back = None):#called from aila sword, hut_effect
-        if call_back:
+        if call_back:            
             self.hitstop_states.enter_state('Stop', lifetime=lifetime, call_back=(lambda: self.knock_back(**call_back['knock_back'])))
-        else:
+        else:                 
             self.hitstop_states.enter_state('Stop', lifetime=lifetime)

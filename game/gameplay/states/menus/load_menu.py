@@ -1,11 +1,11 @@
 import pygame, sys
-from gameplay.ui.managers import ui_loader
+from gameplay.ui.loaders import LoadMenuLoader
 from .base.base_ui import BaseUI
 
 class LoadMenu(BaseUI):
     def __init__(self,game):
         super().__init__(game)
-        self.menu_ui = getattr(ui_loader, 'LoadMenu')(game.game_objects)
+        self.menu_ui = LoadMenuLoader(game.game_objects)
 
         self.current_button = 0
         self.previous_button = None  # Track previous button

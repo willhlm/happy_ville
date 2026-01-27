@@ -1,5 +1,5 @@
 import pygame, sys
-from gameplay.ui.managers import ui_loader
+from gameplay.ui.loaders import InventoryLoader, RadnaLoader, JournalLoader, NordvedenMapLoader, DarkforestMapLoader, HlifblomMapLoader, WorldMapLoader
 from gameplay.ui.components import InventoryPointer
 
 class BaseUI():
@@ -32,7 +32,7 @@ class BaseUI():
 class InventoryUI(BaseUI):
     def __init__(self, game_objects, **kwarg):
         super().__init__(game_objects, **kwarg)
-        self.iventory_UI = getattr(ui_loader, 'Inventory')(game_objects)
+        self.iventory_UI = InventoryLoader(game_objects)
         self.selected_container = self.iventory_UI.containers[0]#initial default container
 
         self.pointer = InventoryPointer([0,0], game_objects)
@@ -184,7 +184,7 @@ class InventoryUI(BaseUI):
 class RadnaUI(BaseUI):
     def __init__(self, game_objects, **kwarg):
         super().__init__(game_objects, **kwarg)
-        self.radna_UI = getattr(ui_loader, 'Radna')(game_objects)
+        self.radna_UI = RadnaLoader(game_objects)
         self.pointer = InventoryPointer([0,0], game_objects)
         self.selected_container = self.radna_UI.containers[0]#initial default container
 
@@ -342,7 +342,7 @@ class RadnaUI(BaseUI):
 class JournalUI(BaseUI):
     def __init__(self, game_objects, **kwarg):
         super().__init__(game_objects, **kwarg)
-        self.journal_UI = getattr(ui_loader, 'Journal')(game_objects)
+        self.journal_UI = JournalLoader(game_objects)
         self.define_pointer(game_objects)
         self.journal_index = [0,0]
         self.enemies = []
@@ -439,7 +439,7 @@ class JournalUI(BaseUI):
 class MapUI(BaseUI):#local maps
     def __init__(self, game_objects, **kwarg):
         super().__init__(game_objects, **kwarg)
-        self.map_UIs = {'nordveden': getattr(ui_loader, 'NordvedenMap')(game_objects),'dark_forest': getattr(ui_loader, 'DarkforestMap')(game_objects), 'hlifblom': getattr(ui_loader, 'HlifblomMap')(game_objects)}        
+        self.map_UIs = {'nordveden': NordvedenMapLoader(game_objects),'dark_forest': DarkforestMapLoader(game_objects), 'hlifblom': HlifblomMapLoader(game_objects)}        
 
     def on_enter(self, **kwarg):
         super().on_enter(**kwarg)
@@ -529,7 +529,7 @@ class MapUI(BaseUI):#local maps
 class MapUI_2(BaseUI):#world map
     def __init__(self, game_objects, **kwarg):
         super().__init__(game_objects, **kwarg)        
-        self.map_UI = getattr(ui_loader, 'WorldMap')(game_objects)        
+        self.map_UI = WorldMapLoader(game_objects)        
         self.selected_container = self.map_UI.objects[0]#initial default container
 
         self.scroll = [0,0]

@@ -1,11 +1,11 @@
 import pygame, sys
-from gameplay.ui.managers import ui_loader
+from gameplay.ui.loaders import TitleMenuLoader
 from .base.base_ui import BaseUI
 
 class TitleMenu(BaseUI):
     def __init__(self,game):
         super().__init__(game)
-        self.menu_ui = getattr(ui_loader, 'TitleMenu')(game.game_objects)
+        self.menu_ui = TitleMenuLoader(game.game_objects)
         self.play_music()
         self.game_title = self.menu_ui.sprites['title'][0]
 
@@ -108,9 +108,9 @@ class TitleMenu(BaseUI):
             #self.game.game_objects.load_map(self,'crystal_mines_1','1')
             #self.game.game_objects.load_map(self,'village_5','1')
             #self.game.game_objects.load_map(self,'nordveden_windtest','1')
-            #self.game.game_objects.load_map(self,'nordveden_1','1')
+            self.game.game_objects.load_map(self,'nordveden_1','1')
             #self.game.game_objects.load_map(self,'tall_trees_1','1')
-            self.game.game_objects.load_map(self,'dark_forest_1','5')
+            #self.game.game_objects.load_map(self,'dark_forest_1','5')
             #self.game.game_objects.load_map(self,'tall_trees_ola','1')
             #self.game.game_objects.load_map(self,'rhoutta_encounter_3','1')
             #self.game.game_objects.load_map(self,'golden_fields_2','1')

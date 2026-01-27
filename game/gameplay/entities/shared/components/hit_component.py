@@ -26,7 +26,7 @@ class HitComponent():
                 self.hit_handlers[effect.result](effect)
                 return False, effect
                 
-        self.entity.take_dmg(effect.damage)#hit is conencted: Apply the damage
+        effect = self.entity.take_dmg(effect)#hit is conencted: Apply the damage
         self._execute_defender_feedback(effect)
         self._execute_attacker_feedback(effect)        
         

@@ -23,7 +23,7 @@ class Stop(Idle):
         self.original_velocity = self.entity.velocity.copy()
 
     def update(self, dt):
-        self.entity.velocity = [0,0]
+        self.entity.velocity = [0, 0]
         self.lifetime -= dt
         if self.lifetime < 0:
             self.entity.velocity = self.original_velocity.copy()

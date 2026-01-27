@@ -1,13 +1,13 @@
 from .base.base_ui import BaseUI
 from gameplay.ui.components import MenuBox
-from gameplay.ui.managers.ui_loader import UI_loader
+from gameplay.ui.loaders import VendorLoader
 from gameplay.entities.items import AmberDroplet
 
 class Vendor(BaseUI):#called from Astrid
     def __init__(self, game, npc):
         super().__init__(game)
         self.npc = npc
-        self.vendor_UI = UI_loader.Vendor(self.game.game_objects)
+        self.vendor_UI = VendorLoader(self.game.game_objects)
         self.bg_pos = (70,20)
 
         self.init()
