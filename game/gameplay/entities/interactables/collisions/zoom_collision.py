@@ -37,7 +37,7 @@ class ZoomCollision(Interactables):
     def collision(self, entity):
         """Called EVERY frame while colliding"""        
         # Increment timer while colliding
-        if self.blur_timer < C.fps:
+        if self.blur_timer < 60:
             self.blur_timer += 1                  
         else:
             if not self.zoomed: 
@@ -59,7 +59,7 @@ class ZoomCollision(Interactables):
         # Update blur for all screens
         for screen in self.game_objects.game.screen_manager.active_screens:
             screen_obj = self.game_objects.game.screen_manager.screens[screen]
-            blur_shader = screen_obj.post_process.shaders['Blur']
+            blur_shader = screen_obj.post_process.shaders['Blur']#assumes that there is a blur pp shader
             current_blur = blur_shader.radius
             current_parallax = screen_obj.parallax
 

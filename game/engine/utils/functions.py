@@ -1,4 +1,4 @@
-def blur_radius(parallax, target_parallax = 1, min_blur=0.01, max_blur=3):
+def blur_radius(parallax, target_parallax = 1, min_blur=0.01, max_blur=10):
     mean_parallax = 0.5 * (parallax[0] + parallax[1])
     distance = abs(mean_parallax - target_parallax)  # distance from target
     # map distance to blur

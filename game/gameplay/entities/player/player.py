@@ -83,11 +83,11 @@ class Player(Character):
 
         self.velocity[0] += dt * (self.dir[0] * self.acceleration[0] - self.velocity[0] * context.friction[0]) + context.velocity[0]
 
-    def take_dmg(self, damage):
+    def take_dmg(self, effect):
         """Called by hit_component after modifiers run. Apply damage and effects."""
-        self.health -= damage
+        self.health -= effect.damage
         self.flags['invincibility'] = True
-        self.game_objects.ui.hud.remove_hearts(damage)# * self.dmg_scale)#update UI
+        self.game_objects.ui.hud.remove_hearts(effect.damage)# * self.dmg_scale)#update UI
 
         if self.health > 0:  # Still alive
             self.game_objects.timer_manager.start_timer(C.invincibility_time_player, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
@@ -104,6 +104,7 @@ class Player(Character):
         else:  # dead
             self.game_objects.signals.emit('player_died')#emit a signal that player died
             self.death_state.die()#depending on gameplay state, different death stuff should happen
+        return effect
 
     def die(self):#called from idle death_state, also called from vertical acid
         #self.animation.update()#make sure you get the new animation
