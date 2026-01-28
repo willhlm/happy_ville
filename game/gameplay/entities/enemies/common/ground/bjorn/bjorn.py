@@ -6,7 +6,7 @@ from gameplay.entities.projectiles import HurtBox
 from gameplay.entities.enemies.common.shared.states.state_manager import StateManager
 from .config import ENEMY_CONFIG as BJORN_CONFIG
 
-from .states import RollAttackPre, RollAttackMain, RollAttackPost, AttackPre, AttackMain, AttackPost, SlamPre, SlamMain, SlamPost
+from .states import RollAttackPre, RollAttackMain, RollAttackPost, AttackPre, AttackMain, AttackPost, SlamPre, SlamMain, SlamPost, SleepMain, SleepPost, RoarPre, RoarMain, RoarPost
 from .deciders import RollAttackDecider, SlamAttackDecider
 
 from gameplay.entities.projectiles.utils.chain_spawner import ChainSpawner
@@ -22,6 +22,11 @@ BJORN_STATES = {
     'slam_pre':SlamPre,
     'slam_main':SlamMain,
     'slam_post':SlamPost,    
+    'sleep_main':SleepMain,   
+    'sleep_post':SleepPost,    
+    'roar_pre':RoarPre,   
+    'roar_main':RoarMain,   
+    'roar_post':RoarPost,   
 }
 
 BJORN_DECIDERS = {
@@ -40,6 +45,8 @@ class Bjorn(Enemy):
 
         self.health = self.config['health']    
         self.currentstate = StateManager(self, type = 'ground', custom_states = BJORN_STATES, custom_deciders = BJORN_DECIDERS)
+
+        self.flags["hurt_state_able"] = False
 
     def attack(self):#called from states, attack main
         attack = HurtBox(self, lifetime = 10, dir = self.dir, size = [64, 32])#make the object
