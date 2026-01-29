@@ -99,7 +99,7 @@ class GameLoop():
 
             # Update display and limit FPS
             pygame.display.flip()
-            self.clock.tick(self.game.fps)
+            self.clock.tick()
             #print(self.clock.get_fps())
 
 if __name__ == '__main__':

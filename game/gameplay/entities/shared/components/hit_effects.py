@@ -104,8 +104,8 @@ def default_attacker_particles(effect):
 def default_sound_dynamic(effect):
     """Dynamically resolve and play hit sound"""        
     material = getattr(effect.defender, 'material', 'flesh')
-    sound = effect.attacker.game_objects.sound.get_sfx(effect.hit_type, material)[0]
-    effect.attacker.game_objects.sound.play_sfx(sound, vol = 1)
+    sound = effect.defender.game_objects.sound.get_sfx(effect.hit_type, material)[0]
+    effect.defender.game_objects.sound.play_sfx(sound, vol = 1)
 
 # ============================================================================
 # FACTORY FUNCTIONS
@@ -144,7 +144,6 @@ def create_projectile_effect(**kwargs):
     
     # Projectiles don't have attacker hitstop
     effect.attacker_callbacks = {
-        'hitstop': default_attacker_hitstop,#without knock back
         'particles': default_attacker_particles,
         'sound': default_sound_dynamic,
     }

@@ -87,8 +87,8 @@ class Stone_states():
     def enter_state(self, newstate, key, **kwarg):
         self.entity.stone_states[key] = getattr(sys.modules[__name__], newstate)(self.entity,**kwarg)#make a class based on the name of the newstate: need to import sys
 
-    def projectile_collision(self, eprojectile):#called when projectile collision
-        eprojectile.take_dmg(self.entity.dmg)
+    def projectile_collision(self, eprojectile, effect):#called when projectile collision
+        eprojectile.take_hit(effect)
 
     def enemy_collision(self):#called when wnemy collision
         pass
@@ -107,7 +107,7 @@ class Projectile_collision(Stone_states):#pirpöle stone ca nset this state
     def __init__(self, entity):
         super().__init__(entity)
 
-    def projectile_collision(self, eprojecitile):
+    def projectile_collision(self, eprojecitile, effect):
         eprojecitile.reflect(self.entity.dir, self.entity.hitbox.center)
         self.entity.sword_jump()
 

@@ -36,10 +36,10 @@ class Sword(Melee):
         self.currentstate.update_rect()
 
     def collision_projectile(self, eprojectile):#fprojecticle proectile collision with projectile
-        if eprojectile.flags['invincibility']: return
-        eprojectile.flags['invincibility'] = True
-        self.entity.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, eprojectile.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
-        self.stone_states['projectile_collision'].projectile_collision(eprojectile)
+        effect = self.base_effect.copy()
+        effect.meta['attacker_dir'] = self.dir#save the direction
+        effect.particles['dir'] = self.dir
+        self.stone_states['projectile_collision'].projectile_collision(eprojectile, effect)
 
     def collision_enemy(self, enemy):#latest collision version
         effect = self.base_effect.copy()
