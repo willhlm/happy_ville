@@ -42,6 +42,9 @@ REGISTERY = {
     "pause_menu": PauseMenu,
     "title_menu": TitleMenu,
 
+    #overlays
+    "instructions": Instructions,
+
     # Gameplay
     "gameplay": Gameplay,
     "ability_select": AbilitySelect,

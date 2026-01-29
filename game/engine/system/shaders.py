@@ -1,5 +1,6 @@
 from engine import constants as C
 import math, numpy as np
+import moderngl
 
 class Shaders():
     def __init__(self, post_process):
@@ -11,11 +12,11 @@ class Shaders():
     def set_uniforms(self, **kwargs):#is also called from screen layers
         pass
 
-    def draw(self, source_texture, target_texture):
+    def draw(self, temp_layer, input_layer):#called for screen pp (small resolution) and composiite pp (scaled resolution)
         """Draw to intermediate texture for pipeline"""
         pass
 
-    def draw_to_composite(self, source_texture, composite_screen):
+    def draw_to_composite(self, temp_layer, final_layer):#only called for composite pp -> sacled resoltuoin
         """Draw final result back to composite_screen"""
         pass
 
@@ -36,6 +37,7 @@ class Vignette(Shaders):
     def draw(self, temp_layer, composite_screen):
         """For intermediate rendering in pipeline"""
         self.set_uniforms()
+        #print(temp_layer.size, composite_screen.size)
         self.post_process.game_objects.game.display.render(temp_layer.texture, composite_screen, shader=self.post_process.game_objects.shaders['vignette'])
         return composite_screen
 
@@ -60,7 +62,7 @@ class Chromatic_aberration(Shaders):
 
     def draw_to_composite(self, temp_layer, composite_screen):
         self.post_process.game_objects.game.display.render(composite_screen.texture, temp_layer)#copy the screen
-        #composite_screen.clear(0,0,0,0)
+        #composite_screen.clear(0,0,0,0)        
         self.post_process.game_objects.game.display.render(temp_layer.texture, composite_screen, shader=self.post_process.game_objects.shaders['chromatic_aberration'])
 
 class Blur(Shaders):
@@ -89,8 +91,42 @@ class Blur_fast(Shaders):
     def __init__(self, post_process, **kwarg):
         super().__init__(post_process)
         self.radius = kwarg.get('radius',1)
-        self.weights = self.make_weights(self.radius)
-        self.layer = self.post_process.game_objects.game.display.make_layer([640, 360])
+        self.downsample = max(1, int(kwarg.get('downsample', 1)))#e.g. 2 or 4
+        self.weights = self.make_weights(self._effective_radius())
+        self.layer = self.post_process.game_objects.game.display.make_layer(post_process.game_objects.game.window_size)
+
+        if self.downsample > 1:
+            size = post_process.game_objects.game.window_size
+            down_w = max(1, int(size[0] / self.downsample))
+            down_h = max(1, int(size[1] / self.downsample))
+            self._down_size = (down_w, down_h)
+            self.down_layer = self.post_process.game_objects.game.display.make_layer(self._down_size)
+            self.down_temp = self.post_process.game_objects.game.display.make_layer(self._down_size)
+
+    def _effective_radius(self):
+        return self.radius / float(self.downsample)
+
+    def _ensure_downsample_layers(self, size):
+        down_w, down_h = self._down_size
+        down_scale = (down_w / size[0], down_h / size[1])
+        up_scale = (size[0] / down_w, size[1] / down_h)
+        return self.down_layer, self.down_temp, down_scale, up_scale
+
+    def _set_filter(self, textures, flt):
+        prev = []
+        for tex in textures:
+            if tex is None:
+                prev.append(None)
+                continue
+            prev.append(tex.filter)
+            tex.filter = flt
+        return prev
+
+    def _restore_filter(self, textures, prev):
+        for tex, old in zip(textures, prev):
+            if tex is None or old is None:
+                continue
+            tex.filter = old
 
     def make_weights(self, radius_float):
         """
@@ -129,35 +165,61 @@ class Blur_fast(Shaders):
 
     def set_radius(self, radius):        
         self.radius = radius
-        self.weights = self.make_weights(radius)
+        self.weights = self.make_weights(self._effective_radius())
 
-    def draw(self, temp_layer, composite_screen):
+    def _apply_blur(self, source_layer, target_layer, intermediate_layer):
         display = self.post_process.game_objects.game.display
         blur = self.post_process.game_objects.shaders['blur_fast']
+        effective_radius = self._effective_radius()
+
+        if self.downsample > 1:
+            size = source_layer.texture.size
+            down_layer, down_temp, down_scale, up_scale = self._ensure_downsample_layers(size)
+            prev_filter = self._set_filter(
+                [source_layer.texture, down_layer.texture, down_temp.texture],
+                (moderngl.LINEAR, moderngl.LINEAR),
+            )
+
+            down_layer.clear(0, 0, 0, 0)
+            display.render(source_layer.texture, down_layer, scale=down_scale)
+
+            blur['direction'] = (1.0, 0.0)
+            blur['weights'] = self.weights
+            blur['blurRadius'] = effective_radius
+            down_temp.clear(0, 0, 0, 0)
+            display.render(down_layer.texture, down_temp, shader=blur)
+
+            blur['direction'] = (0.0, 1.0)
+            down_layer.clear(0, 0, 0, 0)
+            display.render(down_temp.texture, down_layer, shader=blur)
+
+            display.render(down_layer.texture, target_layer, scale=up_scale)
+            self._restore_filter(
+                [source_layer.texture, down_layer.texture, down_temp.texture],
+                prev_filter,
+            )
+
+            return target_layer
 
         # --- Horizontal ---
-        self.layer.clear(0, 0, 0, 0)
+        intermediate_layer.clear(0, 0, 0, 0)
         blur['direction'] = (1.0, 0.0)
         blur['weights'] = self.weights
-        blur['blurRadius'] = self.radius
+        blur['blurRadius'] = effective_radius
 
-        #display.use_alpha_blending(False)  # <--- critical
-        display.render(composite_screen.texture, self.layer, shader=blur)
-        #display.use_alpha_blending(True)
+        display.render(source_layer.texture, intermediate_layer, shader=blur)
 
         # --- Vertical ---
         blur['direction'] = (0.0, 1.0)
-        #display.use_alpha_blending(False)  # <--- critical
-        display.render(self.layer.texture, temp_layer, shader=blur)
-        #display.use_alpha_blending(True)
+        display.render(intermediate_layer.texture, target_layer, shader=blur)
 
-        return temp_layer
+        return target_layer
 
+    def draw(self, temp_layer, input_layer):
+        return self._apply_blur(input_layer, temp_layer, self.layer)
 
-    def draw_to_composite(self, temp_layer, composite_screen):
-        self.post_process.game_objects.shaders['blur_fast']['blurRadius'] = self.radius
-        self.post_process.game_objects.game.display.render(composite_screen.texture, temp_layer)#copy the screen
-        self.post_process.game_objects.game.display.render(temp_layer.texture, composite_screen, shader=self.post_process.game_objects.shaders['blur_fast'])    
+    def draw_to_composite(self, temp_layer, final_layer):
+        self._apply_blur(final_layer, final_layer, temp_layer)
 
 class Bloom(Shaders):
     def __init__(self, post_process, **kwarg):

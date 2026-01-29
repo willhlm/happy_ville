@@ -19,7 +19,6 @@ from pygame_render.util import (
     to_source_coords,
 )
 
-
 class RenderEngine:
     """
     A rendering engine for 2D graphics using Pygame and ModernGL.

@@ -31,15 +31,14 @@ class World_state():
     def init_state_file(self, level_name):#make a state file if it is the first time loading this map, state of different interactables
         self.state[level_name] = {'loot_container': {}, 'lever': {}, 'soul_essence': {}, 'runestone': {}, 'interactable_items': {}, 'breakable_platform': {}, 'bg_fade': {}}#a place holder for things that should depend on map state
 
-
-    #called from maploader to know if it shold be laoded or not
-    def is_boss_defeated(self, boss_id):
-        """Check if a boss has been defeated"""
-        return self.defeated_bosses.get(boss_id, False)
-    
     def mark_boss_defeated(self, boss_id):
         """Mark a boss as defeated"""
         self.defeated_bosses[boss_id] = True
+
+    #called from maploader to check if triggers should be loaded
+    def is_boss_defeated(self, boss_id):
+        """Check if a boss has been defeated"""
+        return self.defeated_bosses.get(boss_id, False)
     
     def is_event_complete(self, event_name):
         """Check if an event has occurred"""
@@ -48,7 +47,3 @@ class World_state():
     def is_cutscene_complete(self, cutscene_name):
         """Check if a cutscene has been played"""
         return self.cutscenes_complete.get(cutscene_name, False)
-    
-    def check_event(self, event_name):
-        """Alias for backwards compatibility"""
-        return self.is_event_complete(event_name)

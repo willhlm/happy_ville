@@ -17,6 +17,7 @@ uniform float speed = 0.25;
 uniform float TIME;
 
 // Size and shape configuration
+uniform float radius = 1.0; // Scale from 0 to 1 for growing effect
 uniform float sphereSize = 0.3;
 uniform float breatheAmount = 0.08;
 uniform float breatheSpeed = 1.5;
@@ -77,6 +78,10 @@ uniform float explosionMaxOrbDistance = 0.7;
 // Pixelation configuration
 uniform float pixelSize = 1;
 uniform float colorSteps = 0;
+
+// Hit effect configuration
+uniform float hitFlash = 0.0;  // 0 to 1, white flash on hit
+uniform vec2 hitShake = vec2(0.0, 0.0);  // Screen-space shake offset
 
 out vec4 COLOR;
 
@@ -140,7 +145,7 @@ float getStarModifier(float angle)
 	float pointShape = 1.0 - smoothstep(0.0, 0.5 / starPointCount, angleFromPoint);
 	pointShape = pow(pointShape, starPointSharpness);
 	
-	return pointShape * starPointLength;
+	return pointShape * starPointLength * radius; // Scale star points with radius
 }
 
 void main()
@@ -154,9 +159,16 @@ void main()
 	vec2 p = (texCoord.xy - 0.5) * 2.0;
 	p.x *= resolution.x / resolution.y;
 	
-	float dist = length(p);
-	vec2 pNorm = dist > 0.001 ? p / dist : vec2(0.0);
-	float angle = atan(p.y, p.x);
+	// Apply shake offset to sphere (but not particles)
+	vec2 pShaken = p - hitShake * radius;  // Scale shake with sphere size
+	
+	// Two distance calculations:
+	float distSphere = length(pShaken);    // Used for sphere, core, rim, glow
+	float distParticles = length(p);       // Used for motes and orbs (unshaken)
+	
+	// Use shaken position for sphere calculations
+	vec2 pNorm = distSphere > 0.001 ? pShaken / distSphere : vec2(0.0);
+	float angle = atan(pShaken.y, pShaken.x);
 	
 	// EXPLOSION EFFECTS
 	// Expansion phase: grow quickly
@@ -178,12 +190,12 @@ void main()
 	float explosionFlash = flashPeak + flashLinger * 0.3;
 	
 	// Edge fade for containment
-	float edgeDistance = 1.0 - dist;
+	float edgeDistance = 1.0 - distSphere;
 	float textureBoundaryFade = smoothstep(0.0, explosionBoundaryFadeZone, edgeDistance);
 	float boundaryFadeAmount = mix(1.0, textureBoundaryFade, explosionProgress);
 	
 	// Organic boundary
-	float breathe = sin(TIME * speed * breatheSpeed) * breatheAmount;
+	float breathe = sin(TIME * speed * breatheSpeed) * breatheAmount * radius; // Scale breathing with radius
 	
 	float borderNoise = 0.0;
 	int numBorderSamples = int(borderRayCount);
@@ -200,18 +212,19 @@ void main()
 	}
 	
 	float starMod = getStarModifier(angle);
-	float organicRadius = sphereSize + (borderNoise - 0.5) * borderDistortion * borderRayIntensity + breathe + starMod + explosionExpand;
+	// Apply radius scaling to the entire organic radius
+	float organicRadius = (sphereSize + (borderNoise - 0.5) * borderDistortion * borderRayIntensity + breathe + starMod) * radius + explosionExpand;
 	
-	float sphere = smoothstep(organicRadius + 0.2, organicRadius - 0.15, dist);
+	float sphere = smoothstep(organicRadius + 0.2, organicRadius - 0.15, distSphere);
 	
-	if (explosionProgress < 0.01 && dist > organicRadius + 0.5) {
-		COLOR = vec4(0.0);
-		return;
-	}
+	// Early return removed - allow particles to render beyond sphere boundary
 	
 	// Energy sampling
-	vec2 sphereUV = p * 1.2;
+	vec2 sphereUV = pShaken * 1.2;  // Use shaken position for sphere effects
 	float energy = 0.0;
+	
+	// Scale energy intensity with radius (fade in as sphere grows)
+	float energyIntensityScale = smoothstep(0.0, 0.3, radius);
 	
 	for (int i = 0; i < 8; i++)
 	{
@@ -222,7 +235,7 @@ void main()
 		                + 30.0 + float(i) * 5.0;
 		energy += fbm(rotatedUV * 1.5 + flowOffset);
 	}
-	energy *= 0.125 * energyIntensity;
+	energy *= 0.125 * energyIntensity * energyIntensityScale;
 	
 	// Detail layers
 	vec2 offset1 = vec2(sin(TIME * speed * 0.5), cos(TIME * speed * 0.5)) * 2.0 + 50.0;
@@ -232,7 +245,7 @@ void main()
 	// Core glow
 	float corePulse = sin(TIME * speed * 3.0) * 0.4 + 0.6;
 	corePulse += noise(vec2(sin(TIME * speed * 2.0), cos(TIME * speed * 2.0)) * 2.0 + 60.0) * 0.3;
-	float coreGlow = exp(-dist * coreGlowSize) * clamp(corePulse, 0.3, 1.0);
+	float coreGlow = exp(-distSphere * coreGlowSize / max(radius, 0.1)) * clamp(corePulse, 0.3, 1.0); // Use distSphere
 	
 	// Fade out core glow during explosion
 	coreGlow *= 1.0 - smoothstep(0.0, 0.3, explosionProgress);
@@ -245,8 +258,11 @@ void main()
 	float baseRotation = TIME * speed * rotDir * rotSpeed * tendrilRotationSpeed;
 	
 	float tendrils = 0.0;
-	if (tendrilLength > 0.0 && numTendrils > 0.0)
+	if (tendrilLength > 0.0 && numTendrils > 0.0 && radius > 0.1) // Only show tendrils when sphere is visible
 	{
+		// Scale tendril intensity with radius (fade in as sphere grows)
+		float tendrilIntensityScale = smoothstep(0.1, 0.5, radius);
+		
 		int maxIterations = int(ceil(max(tendrilMinCount, tendrilMaxCount)));
 		for (int i = 0; i < 16; i++)
 		{
@@ -260,34 +276,40 @@ void main()
 			float pulse = (sin(TIME * speed * 4.0 + float(i)) * 0.5 + 0.5) * 
 			              (noise(vec2(TIME * speed * 3.0 + float(i) * 0.5, float(i) * 15.0)) * 0.5 + 0.5);
 			
-			float maxReach = organicRadius + tendrilLength * 0.5;
-			float lengthFalloff = smoothstep(maxReach, organicRadius * 0.5, dist);
+			float maxReach = organicRadius + tendrilLength * 0.5 * radius; // Scale tendril reach with radius
+			float lengthFalloff = smoothstep(maxReach, organicRadius * 0.5, distSphere);  // Use distSphere
 			
-			tendrils += pow(dot_val, tendrilSharpness) * lengthFalloff * pulse;
+			tendrils += pow(dot_val, tendrilSharpness) * lengthFalloff * pulse * tendrilIntensityScale;
 		}
 		tendrils = clamp((tendrils / max(numTendrils * 0.5, 1.0)) * (energy * 0.5 + 0.5), 0.0, 0.8);
 	}
 	
-	// Motes
+	// Motes - scale with radius
 	float motes = 0.0;
 	float explosionMoteBoost = explosionProgress * explosionParticleSpeed;
+	
+	// Scale mote intensity with radius (fade in as sphere grows)
+	float moteIntensityScale = smoothstep(0.0, 0.3, radius);
 	
 	for (float i = 0.0; i < moteCount; i++)
 	{
 		float explosionOffset = pow(explosionProgress, 1.5) * 1.0;
 		vec2 motePos = vec2(sin(TIME * speed * moteSpeed * (1.0 + i * 0.2) + i * 2.0), 
-		                    cos(TIME * speed * moteSpeed * (0.8 + i * 0.3) + i * 3.0)) * min(0.3 + explosionOffset, explosionMaxMoteDistance);
+		                    cos(TIME * speed * moteSpeed * (0.8 + i * 0.3) + i * 3.0)) * min((0.3 + explosionOffset) * radius, explosionMaxMoteDistance);
 		
 		float moteFade = 1.0 - smoothstep(explosionParticleFadeStart, explosionParticleFadeEnd, explosionProgress);
-		float moteContrib = smoothstep(moteSize + hash(i) * moteSize, 0.0, length(p - motePos)) * moteFade;
+		float moteContrib = smoothstep(moteSize + hash(i) * moteSize, 0.0, length(p - motePos)) * moteFade * moteIntensityScale;
 		motes += moteContrib * (1.0 + explosionMoteBoost);
 	}
 	motes = clamp(motes, 0.0, 1.5 + explosionMoteBoost);
 	
-	// Orbs
+	// Orbs - scale with radius
 	float orbsContribution = 0.0;
 	vec3 orbColor = vec3(0.0);
 	float explosionOrbSpeed = 1.0 + explosionProgress * explosionParticleSpeed;
+	
+	// Scale orb intensity with radius (fade in as sphere grows)
+	float orbIntensityScale = smoothstep(0.0, 0.4, radius);
 	
 	for (float i = 0.0; i < orbCount; i++)
 	{
@@ -298,13 +320,13 @@ void main()
 		
 		float ang = hash(seed + 2.0) * 6.28318;
 		float explosionDistanceBoost = 1.0 + pow(explosionProgress, 1.2) * 2.0;
-		float orbDistance = min(lifetime * orbTravelDistance * explosionDistanceBoost, explosionMaxOrbDistance);
+		float orbDistance = min(lifetime * orbTravelDistance * explosionDistanceBoost * radius, explosionMaxOrbDistance);
 		vec2 orbPos = vec2(cos(ang), sin(ang)) * orbDistance;
 		orbPos += vec2(sin(orbTime * 3.0 + seed) * 0.05, cos(orbTime * 2.5 + seed) * 0.05);
 		
 		float orbExplosionFade = 1.0 - smoothstep(explosionParticleFadeStart, explosionParticleFadeEnd, explosionProgress);
 		float orbSize = (0.03 + hash(seed + 3.0) * 0.04) * (1.0 + explosionProgress * 0.8);
-		float orb = smoothstep(orbSize, orbSize * 0.2, length(p - orbPos)) * baseFade * orbExplosionFade;
+		float orb = smoothstep(orbSize, orbSize * 0.2, length(p - orbPos)) * baseFade * orbExplosionFade * orbIntensityScale;
 		
 		orbColor += orb * mix(baseColorRGB, accentColorRGB, hash(seed + 4.0)) * (2.0 + explosionProgress * 4.0);
 		orbsContribution += orb;
@@ -314,16 +336,24 @@ void main()
 	// Final composition
 	float intensity = clamp(energy * 0.5 + detail * 0.2, 0.45, 0.75);
 	
-	vec3 col = mix(baseColorRGB, coreColorRGB, coreGlow * coreGlowIntensity);
-	col = mix(col, accentColorRGB, detail * 0.35);
+	// Build sphere base color
+	vec3 sphereCol = mix(baseColorRGB, coreColorRGB, coreGlow * coreGlowIntensity);
+	sphereCol = mix(sphereCol, accentColorRGB, detail * 0.35);
+	
+	// Apply hit flash to sphere ONLY (not particles)
+	sphereCol = mix(sphereCol, vec3(1.0), hitFlash);
+	
+	// Start with sphere color
+	vec3 col = sphereCol;
 	
 	col *= mix(1.0, boundaryFadeAmount, explosionProgress * 0.5);
 	
-	col += (motes * coreColorRGB * 1.5 + orbColor * 0.8) * boundaryFadeAmount;
+	// Add particles without hit flash (they use original unshaken position)
+	col += (motes * coreColorRGB * 1.5 + orbColor * 0.8);
 	
 	if (tendrilLength > 0.0)
 	{
-		col += tendrils * accentColorRGB * 0.6 * boundaryFadeAmount;
+		col += tendrils * accentColorRGB * 0.6;
 		intensity += tendrils * 0.25;
 	}
 	
@@ -338,27 +368,29 @@ void main()
 		vec2 rotated = pNorm * makem2(float(i) * 1.5708);
 		rimNoise += noise(rotated * 4.0 + vec2(sin(TIME * speed), cos(TIME * speed)) * 2.0 + 90.0 + float(i) * 20.0);
 	}
-	float rimLight = pow(1.0 - smoothstep(organicRadius - 0.3, organicRadius + 0.1, dist), 2.0) * 
-	       (0.5 + rimNoise * 0.125) * rimLightIntensity;
-	col += rimLight * mix(baseColorRGB, accentColorRGB, 0.6) * boundaryFadeAmount;
+	// Scale rim light with radius
+	float rimIntensityScale = smoothstep(0.2, 0.6, radius);
+	float rimLight = pow(1.0 - smoothstep(organicRadius - 0.3, organicRadius + 0.1, distSphere), 2.0) *   // Use distSphere
+	       (0.5 + rimNoise * 0.125) * rimLightIntensity * rimIntensityScale;
+	col += rimLight * mix(baseColorRGB, accentColorRGB, 0.6);
 	
 	// Outer glow
-	float outerGlow = exp(-max(0.0, dist - organicRadius) * outerGlowSize) * (0.3 + sin(TIME * speed * 4.0) * 0.15 + 0.15) * outerGlowIntensity;
+	// Scale outer glow with radius
+	float outerGlowIntensityScale = smoothstep(0.1, 0.5, radius);
+	float outerGlow = exp(-max(0.0, distSphere - organicRadius) * outerGlowSize) * (0.3 + sin(TIME * speed * 4.0) * 0.15 + 0.15) * outerGlowIntensity * outerGlowIntensityScale;  // Use distSphere
 	
 	// Fade out outer glow during explosion
 	outerGlow *= 1.0 - smoothstep(0.1, 0.4, explosionProgress * outerGlowFalloff);
 	
-	col = clamp(col + outerGlow * baseColorRGB * boundaryFadeAmount, 0.0, 1.2);
+	col = clamp(col + outerGlow * baseColorRGB, 0.0, 1.2);
 	
 	if (colorSteps > 0.0)
 	{
 		col = floor(col * colorSteps) / colorSteps;
 	}
 	
-	col *= boundaryFadeAmount;
-	
 	// Alpha
-	float edgeFade = smoothstep(organicRadius + 0.3, organicRadius + 0.1, dist);
+	float edgeFade = smoothstep(organicRadius + 0.3, organicRadius + 0.1, distSphere);  // Use distSphere
 	
 	float alphaBase = sphere * (0.3 + intensity * 0.5) + outerGlow + 0.15 * sphere;
 	alphaBase *= edgeFade;

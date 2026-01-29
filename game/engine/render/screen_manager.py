@@ -91,7 +91,7 @@ class ScreenLayer():
         """
         self.game = game
         self.parallax = parallax#(x, y) parallax factor
-        self.layer = self.game.display.make_layer(self.game.window_size)
+        self.layer = self.game.display.make_layer(self.game.window_size)#TODO
         self.offset = [0, 0]
 
         self.post_process = PostProcessLayer(game.game_objects, self)
@@ -114,6 +114,7 @@ class ScreenLayer():
         self.game.game_objects.shaders['pp']['u_camera_offset'] = self.offset
         self.game.game_objects.shaders['pp']['u_scale'] = self.game.scale
         self.game.game_objects.shaders['pp']['u_screen_size'] = self.game.window_size
+
         self.game.display.render(input.texture, target, scale = self.game.scale, shader = self.game.game_objects.shaders['pp'])      
 
     def render(self, composite_target):

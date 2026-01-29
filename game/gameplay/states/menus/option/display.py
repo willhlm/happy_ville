@@ -1,5 +1,5 @@
 from engine.utils import read_files
-from gameplay.ui.managers import ui_loader
+from gameplay.ui.loaders import OptionDisplayLoader
 from ..base.base_ui import BaseUI
 
 class OptionDisplay(BaseUI):
@@ -24,7 +24,7 @@ class OptionDisplay(BaseUI):
         self._update_button()
 
     def pool(game_objects):
-        OptionDisplay.menu_ui = getattr(ui_loader, 'OptionDisplay')(game_objects)
+        OptionDisplay.menu_ui = OptionDisplayLoader(game_objects)
 
     def _update_arrow(self):
         button = self.menu_ui.buttons[self.current_button]

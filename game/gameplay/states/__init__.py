@@ -15,6 +15,7 @@ from .gameplay.fade_out import FadeOut
 from .gameplay.safe_spawn_1 import SafeSpawn_1
 from .gameplay.safe_spawn_2 import SafeSpawn_2
 from .gameplay.uis import UIs
+from .gameplay.instructions import Instructions
 
 from .facilities.bank_deposite import BankDeposite
 from .facilities.bank_widthdraw import BankWidthdraw

@@ -1,4 +1,4 @@
-from gameplay.ui.managers import ui_loader
+from gameplay.ui.loaders import OptionMenuLoader
 from ..base.base_ui import BaseUI
 
 class OptionMenu(BaseUI):
@@ -12,7 +12,7 @@ class OptionMenu(BaseUI):
         self._update_button()  # Initialize first button as active
 
     def pool(game_objects):
-        OptionMenu.menu_ui = getattr(ui_loader, 'OptionMenu')(game_objects)
+        OptionMenu.menu_ui = OptionMenuLoader(game_objects)
 
     def _update_arrow(self):
         button = self.menu_ui.buttons[self.current_button]

@@ -1,11 +1,11 @@
 from .base.base_ui import BaseUI
-from gameplay.ui.managers.ui_loader import UI_loader
+from gameplay.ui.loaders import FastTravelLoader
 from gameplay.ui.components import MenuBox
 
 class FastTravelMenu(BaseUI):
     def __init__(self, game):
         super().__init__(game)
-        self.travel_UI = UI_loader.UI_loader(self.game.game_objects,'fast_travel')
+        self.travel_UI = FastTravelLoader(self.game.game_objects)
         self.index = [0,0]
         self.define_destination()
         self.pointer = MenuBox(self.game.game_objects)

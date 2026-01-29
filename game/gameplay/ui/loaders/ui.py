@@ -1,38 +1,9 @@
 import pygame
 from engine.utils import read_files
 from gameplay.ui.components import *
-
-class UI_loader():#for map, omamori, ability, journal etc: json file should have same name as class and folder, tsx file should end with _UI
-    def __init__(self, game_objects):
-        self.game_objects = game_objects
-        self.base_resolution = (640, 360)
-
-    def load_UI_data(self, path, name):
-        map_data = read_files.read_json(path)
-        self.map_data = read_files.format_tiled_json(map_data)
-        for tileset in self.map_data['tilesets']:
-            if 'source' in tileset.keys():
-                if name + '_UI' in tileset['source']:#the name of the tmx file
-                    self.map_data['UI_firstgid'] =  tileset['firstgid']
-
-    def load_data(self):
-        pass
-
-    def _scale_position(self, pos):
-        """Scale a position from base resolution to current resolution"""
-        current_res = self.game_objects.game.window_size
-        scale_x = current_res[0] / self.base_resolution[0]
-        scale_y = current_res[1] / self.base_resolution[1]
-        return (int(pos[0] * scale_x), int(pos[1] * scale_y))
-    
-    def _scale_size(self, size):
-        """Scale a size from base resolution to current resolution"""
-        current_res = self.game_objects.game.window_size
-        scale_x = current_res[0] / self.base_resolution[0]
-        scale_y = current_res[1] / self.base_resolution[1]
-        return (int(size[0] * scale_x), int(size[1] * scale_y))        
-
-class Vendor(UI_loader):
+from .base_loader import BaseLoader
+     
+class VendorLoader(BaseLoader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
         self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('assets/ui_layouts/facilities/vendor/BG.png').convert_alpha())    
@@ -61,7 +32,7 @@ class Vendor(UI_loader):
                 new_item = entities_ui.Item(topleft_object_position,self.game_objects)
                 self.next_items.append(new_item)
 
-class Radna(UI_loader):
+class RadnaLoader(BaseLoader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
         self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('assets/ui_layouts/backpack/radna/BG.png').convert_alpha())    
@@ -114,7 +85,7 @@ class Radna(UI_loader):
             elif id == 6:#Loot_magnet
                 self.items['loot_magnet'] = topleft_object_position
 
-class Journal(UI_loader):
+class JournalLoader(BaseLoader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
         self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('assets/ui_layouts/backpack/journal/BG.png').convert_alpha())            
@@ -135,7 +106,7 @@ class Journal(UI_loader):
             elif id == 1:#name
                 self.name_pos.append(topleft_object_position)
 
-class Fast_travel(UI_loader):
+class FastTravelLoader(BaseLoader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
         self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('assets/ui_layouts/facilities/fast_travel/BG.png').convert_alpha())                    
@@ -154,7 +125,7 @@ class Fast_travel(UI_loader):
             if id == 0:#name
                 self.name_pos.append(topleft_object_position)
 
-class Inventory(UI_loader):
+class InventoryLoader(BaseLoader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
         self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('assets/ui_layouts/backpack/inventory/BG.png').convert_alpha())                    
@@ -203,7 +174,7 @@ class Inventory(UI_loader):
             elif id == 13:#heal item
                 self.items['heal_item'] = topleft_object_position
 
-class TitleMenu(UI_loader):
+class TitleMenuLoader(BaseLoader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
         self.sprites = read_files.load_sprites_dict('assets/sprites/ui/menus/title_menu/', game_objects)
@@ -238,7 +209,7 @@ class TitleMenu(UI_loader):
             elif id == 4:#arrows
                 self.arrows.append(MenuArrow(topleft_object_position, self.game_objects))
 
-class LoadMenu(UI_loader):
+class LoadMenuLoader(BaseLoader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
         path = 'assets/ui_layouts/menus/load_menu/load_menu.json'
@@ -267,7 +238,7 @@ class LoadMenu(UI_loader):
             elif id == 4:#arrows
                 self.arrows.append(MenuArrow(topleft_object_position, self.game_objects))
 
-class OptionMenu(UI_loader):
+class OptionMenuLoader(BaseLoader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
         path = 'assets/ui_layouts/menus/option_menu/option_menu.json'
@@ -296,7 +267,7 @@ class OptionMenu(UI_loader):
             elif id == 4:#arrows
                 self.arrows.append(MenuArrow(topleft_object_position, self.game_objects))
 
-class OptionDisplay(UI_loader):
+class OptionDisplayLoader(BaseLoader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
         path = 'assets/ui_layouts/menus/option_display/option_display.json'
@@ -324,12 +295,12 @@ class OptionDisplay(UI_loader):
                     if property['name'] == 'text':
                         button = property['value']
 
-                self.buttons.append(Text(self.game_objects, text = button, position = topleft_object_position))
+                self.buttons.append(Text(self.game_objects, text = button, position = topleft_object_position, size = object_size))
 
             elif id == 6:
                 self.results.append(topleft_object_position)
 
-class OptionSounds(UI_loader):
+class OptionSoundsLoader(BaseLoader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
         path = 'assets/ui_layouts/menus/option_sounds/option_sounds.json'
@@ -358,7 +329,7 @@ class OptionSounds(UI_loader):
                     if property['name'] == 'text':
                         button = property['value']
 
-                self.buttons.append(Text(self.game_objects, text = button, position = topleft_object_position))
+                self.buttons.append(Text(self.game_objects, text = button, position = topleft_object_position, size = object_size))
 
             elif id == 6:#result positions
                 self.results.append(topleft_object_position)
@@ -366,7 +337,7 @@ class OptionSounds(UI_loader):
             elif id == 8:#result positions
                 self.slider.append(Slider(self.game_objects, position = topleft_object_position))
 
-class PauseMenu(UI_loader):
+class PauseMenuLoader(BaseLoader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
         path = 'assets/ui_layouts/menus/pause_menu/pause_menu.json'
@@ -395,7 +366,7 @@ class PauseMenu(UI_loader):
             elif id == 4:#arrows
                 self.arrows.append(MenuArrow(topleft_object_position, self.game_objects))
 
-class WorldMap(UI_loader):
+class WorldMapLoader(BaseLoader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
         self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('assets/ui_layouts/backpack/maps/worldmap/BG.png').convert_alpha())
@@ -421,7 +392,7 @@ class WorldMap(UI_loader):
                 new_banner = Banner(topleft_object_position,self.game_objects,str(3),properties[0]['value'])
                 self.objects.append(new_banner)
 
-class NordvedenMap(UI_loader):
+class NordvedenMapLoader(BaseLoader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
         self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('assets/ui_layouts/backpack/maps/nordveden/BG.png').convert_alpha())
@@ -448,7 +419,7 @@ class NordvedenMap(UI_loader):
                 new_arrow = MapArrow(topleft_object_position, self.game_objects, map, direction)
                 self.objects.append(new_arrow)
 
-class DarkforestMap(UI_loader):
+class DarkforestMapLoader(BaseLoader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
         self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('assets/ui_layouts/backpack/maps/darkforest/BG.png').convert_alpha())
@@ -475,7 +446,7 @@ class DarkforestMap(UI_loader):
                 new_arrow = MapArrow(topleft_object_position, self.game_objects, map, direction)
                 self.objects.append(new_arrow)
 
-class HlifblomMap(UI_loader):
+class HlifblomMapLoader(BaseLoader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
         self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('assets/ui_layouts/backpack/maps/hlifblom/BG.png').convert_alpha())
