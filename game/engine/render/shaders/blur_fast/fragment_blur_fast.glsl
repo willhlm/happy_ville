@@ -4,34 +4,29 @@ in vec2 fragmentTexCoord;
 out vec4 color;
 
 uniform sampler2D imageTexture;
-uniform float blurRadius;
-uniform float weights[64];
-uniform vec2 direction;
+uniform int r;                 // integer radius (<= 31 recommended)
+uniform float weights[64];     // weights[0..r] used (1D gaussian, normalized)
 
 void main()
 {
-    int r = int(ceil(blurRadius));
-    vec2 texel = 1.0 / textureSize(imageTexture, 0);
+    vec2 texel = 1.0 / vec2(textureSize(imageTexture, 0));
 
     vec4 accum = vec4(0.0);
-    float totalWeight = 0.0;
+    float total = 0.0;
 
-    // Center tap
-    for (int i = -r; i <= r; ++i) {
-        vec2 offset = direction * float(i) * texel;
-        vec2 uv = clamp(fragmentTexCoord + offset, vec2(0.0), vec2(1.0));
-        vec4 sampleColor = texture(imageTexture, uv);
+    for (int y = -r; y <= r; ++y) {
+        float wy = weights[abs(y)];
+        for (int x = -r; x <= r; ++x) {
+            float wx = weights[abs(x)];
+            float w = wx * wy;
 
-        float w = weights[i + r];
-        // Input is already premultiplied in this pipeline.
-        accum.rgb += sampleColor.rgb * w;
-        accum.a   += sampleColor.a * w;
-        totalWeight += w;
+            vec4 s = texture(imageTexture, fragmentTexCoord + vec2(x, y) * texel);
+
+            // assumes PREMULTIPLIED input (recommended)
+            accum += s * w;
+            total += w;
+        }
     }
 
-    totalWeight = max(totalWeight, 1e-6);
-    accum /= totalWeight;
-
-    // Keep premultiplied output; pipeline uses premult blending.
-    color = accum;
+    color = accum / max(total, 1e-6);
 }

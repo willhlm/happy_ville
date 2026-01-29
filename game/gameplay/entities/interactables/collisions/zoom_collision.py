@@ -59,7 +59,7 @@ class ZoomCollision(Interactables):
         # Update blur for all screens
         for screen in self.game_objects.game.screen_manager.active_screens:
             screen_obj = self.game_objects.game.screen_manager.screens[screen]
-            blur_shader = screen_obj.post_process.shaders['Blur']#assumes that there is a blur pp shader
+            blur_shader = screen_obj.post_process.shaders['Blur_fast']#assumes that there is a blur pp shader
             current_blur = blur_shader.radius
             current_parallax = screen_obj.parallax
 

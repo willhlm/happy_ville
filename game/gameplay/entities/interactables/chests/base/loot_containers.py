@@ -38,9 +38,9 @@ class LootContainers(Interactables):
     def on_invincibility_timeout(self):
         self.flags['invincibility'] = False
    
-    def take_dmg(self, damage):
+    def take_dmg(self, effect):
         """Called by hit_component after modifiers run. Apply damage and effects."""
-        self.health -= damage
+        self.health -= effect.damage
         self.flags['invincibility'] = True
         
         # Play hurt sound
@@ -52,6 +52,7 @@ class LootContainers(Interactables):
         else:  # dead
             self.currentstate.handle_input('open')
             self.game_objects.world_state.state[self.game_objects.map.level_name]['loot_container'][self.ID_key] = True#write in the state dict that this has been picked up
+        return effect
 
     def hit_loot(self):#sput out amvers when hit
         for i in range(0, random.randint(1,3)):

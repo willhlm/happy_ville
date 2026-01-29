@@ -813,16 +813,12 @@ class Village(Biome):
             if parallax[0] == 1: 
                  radius = 0.01
             else:                
-                radius = functions.blur_radius(parallax)
+                radius = functions.blur_radius(parallax, max_blur = 5)
 
-            if radius > 5: 
-                downsample = 2                
-                print(layer_name)
-
-            self.level.game_objects.game.screen_manager.append_shader('Blur', [layer_name], radius = radius, downsample = downsample)   
+            self.level.game_objects.game.screen_manager.append_shader('Blur_fast', [layer_name], radius = radius)   
             if layer_name == 'bg1':     
-                self.level.game_objects.game.screen_manager.append_shader('Blur', ['player'], radius = radius)   
-                self.level.game_objects.game.screen_manager.append_shader('Blur', ['player_fg'], radius = radius)   
+                self.level.game_objects.game.screen_manager.append_shader('Blur_fast', ['player'], radius = radius)   
+                self.level.game_objects.game.screen_manager.append_shader('Blur_fast', ['player_fg'], radius = radius)   
 
     def room(self, room):#called wgen a new room is loaded
         if room in ['5']:
@@ -891,21 +887,11 @@ class Nordveden(Biome):
             }
         }           
 
-    def post_process(self, layer_name, parallax):#called at the end of group loading    
-        if self.live_blur:    
-            downsample = 1        
-            if parallax[0] == 1: 
-                 radius = 0.01
-            else:                
-                radius = functions.blur_radius(parallax)
-
-            if radius > 5: 
-                downsample = 2                
-
-            self.level.game_objects.game.screen_manager.append_shader('Blur_fast', [layer_name], radius = radius, downsample = downsample)   
-            if layer_name == 'bg1':     
-                self.level.game_objects.game.screen_manager.append_shader('Blur_fast', ['player'], radius = radius)   
-                self.level.game_objects.game.screen_manager.append_shader('Blur_fast', ['player_fg'], radius = radius)   
+    def post_process(self, layer_name, parallax):#called at the end of group loading
+        if self.live_blur:       
+            if parallax[0] == 1: return          
+            radius = functions.blur_radius(parallax, max_blur = 5)
+            self.level.game_objects.game.screen_manager.append_shader('Blur_fast', [layer_name], radius = radius)   
 
     def play_music(self):
         sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/visuals/environments/ambient/nordveden/')
