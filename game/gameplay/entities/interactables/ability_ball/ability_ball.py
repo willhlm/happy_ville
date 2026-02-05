@@ -3,7 +3,6 @@ from engine.utils import read_files
 from engine import constants as C
 from gameplay.entities.interactables.base.interactables import Interactables
 from .states import Grow
-from gameplay.entities.shared.components.hit_effects import default_attacker_hitstop
 
 class AbilityBall(Interactables):
     def __init__(self, pos, game_objects, ability):
@@ -49,8 +48,7 @@ class AbilityBall(Interactables):
             self.currentstate.handle_input('hurt')#handle if we shoudl go to hurt state
             self.game_objects.camera_manager.camera_shake(amplitude = 10, duration = 15, scale = 0.9)
         else:#if dead
-            effect.hitstop = 250
-            effect.append_callback('attacker', 'hitstop', default_attacker_hitstop)#make sure default_attacker_hitstop is there
+            effect.append_callback('attacker', 'hitstop', lambda eff: eff.attacker.hitstop.start(duration=250, callback=[knockback_callback(eff.attacker, eff.knockback, eff.meta['attacker_dir'])]))##make sure default_attacker_hitstop is there
             self.ability_ball_pickup(effect.attacker)  
         return effect
 

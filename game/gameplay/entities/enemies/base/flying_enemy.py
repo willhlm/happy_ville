@@ -3,11 +3,7 @@ from engine import constants as C
 
 from gameplay.entities.enemies.base.enemy import Enemy
 from gameplay.entities.enemies.common.flying import states_enemy_flying
-
-def sign(number):
-    if number > 0: return 1
-    elif number < 0: return -1
-    else: return 0
+from engine.utils.functions import sign
 
 class FlyingEnemy(Enemy):
     def __init__(self,pos,game_objects):

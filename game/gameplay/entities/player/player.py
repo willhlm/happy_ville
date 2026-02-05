@@ -135,14 +135,20 @@ class Player(Character):
         #self.movement_manager.clear_modifiers()#TODO probably not all should be cleared
 
     def update_render(self, dt):#called in group
-        self.hitstop_states.update_render(dt)
+        self.shader_state.update_render(dt)        
 
     def update(self, dt):
         self.prev_true_pos = self.true_pos.copy()#save previous position for interpolation
-        self.movement_manager.update(dt)#update the movement manager      
-        self.hitstop_states.update(dt)        
+        self.hitstop.update(dt)
+        scaled_dt = self.get_sim_dt(dt)
+
+        self.movement_manager.update(scaled_dt)#update the movement manager: modifers 
+        self.update_vel(scaled_dt)
+        self.currentstate.update(scaled_dt)#need to be aftre update_vel since some state transitions look at velocity
+        self.animation.update(scaled_dt)#need to be after currentstate since animation will animate the current state -> i suupose it should be in update_physcis?
+
         self.backpack.radna.update()#update the radnas
-        self.update_timers(dt)
+        self.update_timers(scaled_dt)
 
     def draw(self, target):#called in group
         alpha = self.game_objects.game.game_loop.alpha

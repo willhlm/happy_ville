@@ -22,9 +22,6 @@ class Sword(Melee):
         self.swing = 0#a flag to check which swing we are at (0 or 1)
         self.stone_states = {'enemy_collision': states_sword.Stone_states(self), 'projectile_collision': states_sword.Stone_states(self), 'slash': states_sword.Stone_states(self)}#infinity stones can change these to do specific things
 
-        particle = {'lifetime': 180,'scale': 5,'angle_spread': [13, 15],'angle_dist': 'normal','colour': C.spirit_colour,'gravity_scale': -0.1,'gradient': 1,'fade_scale': 2.2,'number_particles': 8,'vel': {'ejac': [13, 17]}}
-        self.base_effect = hit_effects.create_melee_effect(damage = self.dmg, hit_type = 'sword', knockback = [25, 10], hitstop = 5, particles = particle, attacker = self.entity, projectile = self)
-
     def use_sword(self, swing = 'light'):#called from player stetas whenswing sword
         self.stone_states['slash'].slash_speed()
         self.entity.game_objects.sound.play_sfx(self.entity.sword.sounds['swing'][0])
@@ -36,15 +33,11 @@ class Sword(Melee):
         self.currentstate.update_rect()
 
     def collision_projectile(self, eprojectile):#fprojecticle proectile collision with projectile
-        effect = self.base_effect.copy()
-        effect.meta['attacker_dir'] = self.dir#save the direction
-        effect.particles['dir'] = self.dir
+        effect = self.create_effect()
         self.stone_states['projectile_collision'].projectile_collision(eprojectile, effect)
 
     def collision_enemy(self, enemy):#latest collision version
-        effect = self.base_effect.copy()
-        effect.meta['attacker_dir'] = self.dir#save the direction
-        effect.particles['dir'] = self.dir
+        effect = self.create_effect()
         self.currentstate.sword_jump()
 
         damage_applied, modified_effect = enemy.take_hit(effect)
@@ -53,9 +46,7 @@ class Sword(Melee):
 
     def collision_interactables(self, inetractable):#latest collision version
         self.currentstate.sword_jump()
-        effect = self.base_effect.copy()
-        effect.meta['attacker_dir'] = self.dir#save the direction
-
+        effect = self.create_effect()
         damage_applied, modified_effect = inetractable.take_hit(effect)
 
     def level_up(self):#called when the smith imporoves the sword
@@ -65,3 +56,30 @@ class Sword(Melee):
 
     def draw(self, target):
         pass
+
+    def create_effect(self):
+        """Create sword hit effect with current damage values"""
+        particle = {
+            'lifetime': 180,
+            'scale': 5,
+            'angle_spread': [13, 15],
+            'angle_dist': 'normal',
+            'colour': C.spirit_colour,
+            'gravity_scale': -0.1,
+            'gradient': 1,
+            'fade_scale': 2.2,
+            'number_particles': 8,
+            'vel': {'ejac': [13, 17]},
+            'dir': self.dir
+        }
+        
+        return hit_effects.create_melee_effect(
+            damage=self.dmg,
+            hit_type='sword',
+            knockback=[25, 10],
+            hitstop=5,
+            particles=particle,
+            attacker=self.entity,
+            projectile=self,
+            meta = {'attacker_dir': self.dir},#save direction
+        )

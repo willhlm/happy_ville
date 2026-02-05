@@ -1,5 +1,5 @@
 from engine import constants as C
-from gameplay.entities.shared.states import hitstop_states, states_shader
+from gameplay.entities.shared.states import states_shader
 
 from gameplay.entities.base.platform_entity import PlatformEntity
 from gameplay.entities.visuals.particles import particles
@@ -12,18 +12,20 @@ class Character(PlatformEntity):#enemy, NPC,player
         self.friction = C.friction.copy()
         self.max_vel = C.max_vel.copy()
 
-        self.shader_state = states_shader.Idle(self)
-        self.hitstop_states = hitstop_states.Idle(self)
+        self.shader_state = states_shader.Idle(self)        
         self.hit_component = HitComponent(self)
         self.flags = {'invincibility': False}
 
     def update(self, dt):
-        self.update_vel(dt)
-        self.currentstate.update(dt)#need to be aftre update_vel since some state transitions look at velocity
-        self.animation.update(dt)#need to be after currentstate since animation will animate the current state
+        self.hitstop.update(dt)
+        scaled_dt = self.get_sim_dt(dt)
+
+        self.update_vel(scaled_dt)
+        self.currentstate.update(scaled_dt)#need to be aftre update_vel since some state transitions look at velocity
+        self.animation.update(scaled_dt)#need to be after currentstate since animation will animate the current state
 
     def update_render(self, dt):
-        self.shader_state.update_render(dt)
+        self.shader_state.update_render(dt)    
 
     def update_vel(self, dt):#called from hitsop_states
         self.velocity[1] += dt * (self.acceleration[1] - self.velocity[1] * self.friction[1])#gravity
@@ -71,9 +73,3 @@ class Character(PlatformEntity):#enemy, NPC,player
 
     def on_hurt_timeout(self):#starts when entering hurt state, and make sure that you don't eneter again until timer runs out
         self.flags['hurt_state_able'] = True
-
-    def apply_hitstop(self, lifetime=10, call_back = None):#called from aila sword, hut_effect
-        if call_back:            
-            self.hitstop_states.enter_state('Stop', lifetime=lifetime, call_back=(lambda: self.knock_back(**call_back['knock_back'])))
-        else:                 
-            self.hitstop_states.enter_state('Stop', lifetime=lifetime)

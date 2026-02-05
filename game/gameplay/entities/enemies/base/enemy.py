@@ -26,10 +26,16 @@ class Enemy(Character):
         self.contact_effect = hit_effects.create_contact_effect(damage = 1, knockback = [20, 0], hitstop = 5, attacker = self)#collision with player
 
     def update_render(self, dt):
-        self.hitstop_states.update_render(dt)
+        self.shader_state.update_render(dt)#need to be after animation
 
     def update(self, dt):
-        self.hitstop_states.update(dt)
+        self.hitstop.update(dt)
+        scaled_dt = self.get_sim_dt(dt)
+
+        self.update_vel(scaled_dt)
+        self.currentstate.update(scaled_dt)#need to be aftre update_vel since some state transitions look at velocity
+        self.animation.update(scaled_dt)#need to be after currentstate since animation will animate the current state
+
         self.group_distance()
 
     def player_collision(self, player):#when player collides with enemy

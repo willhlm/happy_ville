@@ -5,6 +5,7 @@ Hit Effects System
 
 Defines:
 - HitEffect: Data structure for hit information
+- Callback builders: Reusable callback functions
 - Default callbacks: Standard behavior when hits occur
 - Factory functions: Create pre-configured effects
 """
@@ -19,7 +20,7 @@ class HitEffect():
         self.hit_type = kwargs.get('hit_type', 'sword')
         self.particles = kwargs.get('particles', {})        
         self.projectile = kwargs.get('projectile', None)
-        self.meta = {}
+        self.meta = kwargs.get('meta', {})
         
         self.result = HitResult.CONNECTED  # Default result
 
@@ -37,8 +38,8 @@ class HitEffect():
         new_effect.knockback = self.knockback[:]
         new_effect.hitstop = self.hitstop
         new_effect.result = self.result
-        new_effect.hit_type = self.hit_type  # Copy key
-        new_effect.particles = self.particles
+        new_effect.hit_type = self.hit_type
+        new_effect.particles = self.particles.copy()
         new_effect.meta = self.meta.copy()
         new_effect.defender_callbacks = self.defender_callbacks.copy()
         new_effect.attacker_callbacks = self.attacker_callbacks.copy()
@@ -49,7 +50,7 @@ class HitEffect():
 
     def append_callback(self, target, callback_type, callback_func):
         """
-        Append or replace a callback with optional arguments.
+        Append or replace a callback.
         
         Args:
             target: 'attacker' or 'defender'
@@ -65,11 +66,30 @@ class HitEffect():
         elif target == 'attacker':
             callback_dict = self.attacker_callbacks
         
-        # If no kwargs, store the function directly (backward compatible)
         callback_dict[callback_type] = callback_func
 
 # ============================================================================
-# DEFAULT _execute_defender_feedback and _execute_attacker_feedback
+# CALLBACK BUILDERS - Reusable functions that return callbacks
+# ============================================================================
+
+def knockback_callback(entity, knockback, direction):
+    """Returns a knockback callback"""
+    return lambda: entity.knock_back(amp=knockback, dir=direction)
+
+def screen_shake_callback(camera, intensity=5, duration=300):
+    """Returns a screen shake callback"""
+    return lambda: camera.shake(intensity=intensity, duration=duration)
+
+def spawn_particles_callback(entity, **particle_kwargs):
+    """Returns a particle spawn callback"""
+    return lambda: entity.emit_particles(**particle_kwargs)
+
+def play_sound_callback(sound_manager, sound, volume=1.0):
+    """Returns a sound play callback"""
+    return lambda: sound_manager.play_sfx(sound, vol=volume)
+
+# ============================================================================
+# DEFAULT CALLBACKS - Standard behavior when hits occur
 # ============================================================================
 
 def default_defender_sound(effect):
@@ -83,19 +103,9 @@ def default_defender_particles(effect):
     """Spawn hit particles"""
     effect.defender.emit_particles(**effect.particles)
 
-def default_defender_hitstop(effect):
-    """Hitstop with knockback"""
-    callback = {'knock_back': {'amp': effect.knockback, 'dir': effect.meta['attacker_dir']}}
-    effect.defender.apply_hitstop(lifetime=effect.hitstop, call_back=callback)
-
 def default_defender_visual(effect):
     """Visual feedback (hurt flash)"""
     effect.defender.shader_state.handle_input('Hurt')
-
-def default_attacker_hitstop(effect):
-    """Attacker hitstop - works for projectiles AND entities"""    
-    #entity = getattr(effect.attacker, 'entity', effect.attacker)# If projectile: use .entity; if entity: use itself
-    effect.attacker.apply_hitstop(lifetime=effect.hitstop, call_back=None)
 
 def default_attacker_particles(effect):
     """Clash particles (projectile-specific)"""
@@ -105,26 +115,35 @@ def default_sound_dynamic(effect):
     """Dynamically resolve and play hit sound"""        
     material = getattr(effect.defender, 'material', 'flesh')
     sound = effect.defender.game_objects.sound.get_sfx(effect.hit_type, material)[0]
-    effect.defender.game_objects.sound.play_sfx(sound, vol = 1)
+    effect.defender.game_objects.sound.play_sfx(sound, vol=1)
 
 # ============================================================================
-# FACTORY FUNCTIONS
+# FACTORY FUNCTIONS - Create pre-configured effects
 # ============================================================================
-def create_melee_effect(**kwargs):#e.g. aila sword
+
+def create_melee_effect(**kwargs):
     """Factory for melee weapons (sword, hammer, etc.)"""
     effect = HitEffect(**kwargs)
     
-    # Set up defender callbacks (executed on enemy/player getting hit)
+    # Defender callbacks (executed on enemy/player getting hit)
     effect.defender_callbacks = {
-        'hitstop': default_defender_hitstop,  # Includes knockback
+        'hitstop': lambda eff: eff.defender.hitstop.start(
+            duration=eff.hitstop,
+            callback=[
+                knockback_callback(eff.defender, eff.knockback, eff.meta['attacker_dir'])
+            ]
+        ),
         'particles': default_defender_particles,        
         'visual': default_defender_visual,
         'sound': default_defender_sound,
     }
     
-    # Set up attacker callbacks (executed on sword wielder)
+    # Attacker callbacks (executed on sword wielder)
     effect.attacker_callbacks = {
-        'hitstop': default_attacker_hitstop,#without knock back
+        'hitstop': lambda eff: eff.attacker.hitstop.start(
+            duration=eff.hitstop,
+            callback=[]  # No callbacks, just hitstop
+        ),
         'particles': default_attacker_particles,
         'sound': default_sound_dynamic,
     }
@@ -136,13 +155,18 @@ def create_projectile_effect(**kwargs):
     effect = HitEffect(**kwargs)
     
     effect.defender_callbacks = {        
-        'hitstop': default_defender_hitstop,  # Includes knockback
+        'hitstop': lambda eff: eff.defender.hitstop.start(
+            duration=eff.hitstop,
+            callback=[
+                knockback_callback(eff.defender, eff.knockback, eff.meta['attacker_dir'])
+            ]
+        ),
         'particles': default_defender_particles,
         'visual': default_defender_visual,
         'sound': default_defender_sound,
     }
     
-    # Projectiles don't have attacker hitstop
+    # Projectiles don't hitstop the attacker
     effect.attacker_callbacks = {
         'particles': default_attacker_particles,
         'sound': default_sound_dynamic,
@@ -150,19 +174,27 @@ def create_projectile_effect(**kwargs):
     
     return effect
 
-def create_contact_effect(**kwargs):#when enemy collides with player
+def create_contact_effect(**kwargs):
     """Factory for contact damage (enemy touching player)"""
     effect = HitEffect(**kwargs)
     
     # Defender callbacks (player getting hit by contact)
     effect.defender_callbacks = {
-        'hitstop': default_defender_hitstop,        
+        'hitstop': lambda eff: eff.defender.hitstop.start(
+            duration=eff.hitstop,
+            callback=[
+                knockback_callback(eff.defender, eff.knockback, eff.meta['attacker_dir'])
+            ]
+        ),
         'sound': default_defender_sound,        
     }
     
-    # No attacker callbacks (enemy doesn't get feedback from contact)
+    # Attacker callbacks (enemy gets hitstop on contact)
     effect.attacker_callbacks = {
-        'hitstop': default_attacker_hitstop,
+        'hitstop': lambda eff: eff.attacker.hitstop.start(
+            duration=eff.hitstop,
+            callback = []
+        ),
     }
     
-    return effect    
+    return effect

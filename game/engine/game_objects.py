@@ -137,7 +137,10 @@ class GameObjects():
         self.collisions.platform_collision(self.npcs, dt)
         self.collisions.platform_collision(self.loot, dt)
 
-    def update(self, dt):
+    def update(self, dt):        
+        self.platforms.update(dt)
+        self.platforms_ramps.update(dt)
+
         #things that shuodl collide
         self.players.update(dt)
         self.entity_pause.update(dt)#should be before enemies, npcs and interactable groups
@@ -156,8 +159,7 @@ class GameObjects():
 
         #update cosmetics and BGs
         self.timer_manager.update(dt)
-        self.platforms.update(dt)
-        self.platforms_ramps.update(dt)
+
         self.layer_pause.update(dt)#should be before all_bgs and all_fgs
         self.all_bgs.update(dt)
         self.bg_interact.update(dt)

@@ -1,5 +1,6 @@
 from gameplay.entities.base.animated_entity import AnimatedEntity
 from engine import constants as C
+from gameplay.entities.shared.components.hitstop_component import HitstopComponent
 
 class PlatformEntity(AnimatedEntity):#Things to collide with platforms
     def __init__(self,pos,game_objects):
@@ -7,6 +8,7 @@ class PlatformEntity(AnimatedEntity):#Things to collide with platforms
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
         self.go_through = {'ramp': True, 'one_way':True}#a flag for entities to go through ramps from side or top
         self.velocity = [0, 0]
+        self.hitstop = HitstopComponent()
 
     def update_hitbox(self):
         self.hitbox.midbottom = self.rect.midbottom
@@ -71,3 +73,6 @@ class PlatformEntity(AnimatedEntity):#Things to collide with platforms
 
     def limit_y(self):#limits the velocity on ground, onewayup. But not on ramps to make a smooth drop
         self.velocity[1] = 1.2#assume at least 60 fps -> 1
+
+    def get_sim_dt(self, dt):
+        return dt * self.hitstop.get_time_scale()        
