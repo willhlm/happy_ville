@@ -1,6 +1,7 @@
 from gameplay.entities.base.animated_entity import AnimatedEntity
 from gameplay.entities.shared.states import states_shader
 from gameplay.entities.shared.components.hit_component import HitComponent
+from gameplay.entities.shared.components.hitstop_component import HitstopComponent
 
 class Interactables(AnimatedEntity):#interactables
     def __init__(self, pos, game_objects):
@@ -10,6 +11,7 @@ class Interactables(AnimatedEntity):#interactables
         self.true_pos = self.rect.topleft
         self.shader_state = states_shader.Idle(self)
         self.hit_component = HitComponent(self)
+        self.hitstop = HitstopComponent()
         self.flags = {'invincibility': True}
 
     def update(self, dt):
@@ -43,9 +45,9 @@ class Interactables(AnimatedEntity):#interactables
         pass
 
     def seed_collision(self, seed):#if seed hits
-        pass
+        pass     
 
-    def apply_hitstop(self, lifetime=10, call_back=None):#from hit component effects
+    def knock_back(self, amp, dir):#from hit component
         pass
 
     def emit_particles(self, **kwargs):#from hit component effects

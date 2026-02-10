@@ -8,14 +8,13 @@ class DefeatedBoss(StaticEntity):
         super().__init__([0, 0], game_objects)
         self.boss = boss
         self.game_objects.signals.subscribe('ability_ball', self.ability_ball_pickup)
-        self.game_objects.signals.subscribe('ability_ball_grown', self.stop_particles)
 
         self.game_objects.world_state.increase_progress()
         self.game_objects.world_state.mark_boss_defeated(str(type(boss).__name__).lower())
-        self.game_objects.world_state.cutscene_complete('boss_enconuter')#so not to trigger the cutscene again    
+        self.game_objects.world_state.cutscene_complete('boss_enconuter')#so not to trigger the cutscene again. TODO need to be spacific for the boss 
         
         self.time = 0    
-        self.emit_particles_bool = True
+        self.timescale = 1
 
     def release_texture(self):
         pass
@@ -32,16 +31,12 @@ class DefeatedBoss(StaticEntity):
             self.game_objects.cosmetics_bg.add(obj1)#_bg is behind entities
 
     def update(self, dt):
-        self.time += dt
-        if self.time > 10 and self.emit_particles_bool:
+        self.time += dt * self.timescale
+        if self.time > 10:
             self.emit_particles(lifetime = 70, scale=3, colour = C.spirit_colour, gravity_scale = 0.5, gradient = 1, fade_scale = 3,  number_particles = 1, vel = {'wave': [0, -1]})
             self.time = 0
 
     def ability_ball_pickup(self):#signal emiteed when abilty ball is pciked up
         self.game_objects.game.state_manager.enter_state(state_name = 'instructions')              
         self.game_objects.game.state_manager.enter_state(state_name = 'defeated_boss')#the particle stuff        
-        self.stop_particles()
-
-    def stop_particles(self):#signal emitted from ball states
-        """Called when ability ball finishes growing"""
-        self.emit_particles_bool = False        
+        self.timescale = 0

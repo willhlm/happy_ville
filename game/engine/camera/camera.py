@@ -53,7 +53,7 @@ class Camera():#default camera
         self.prev_true_scroll = self.true_scroll.copy()
         self.interp_scroll = self.true_scroll.copy()
         self.y_offset = 30
-        self.center = [game_objects.map.PLAYER_CENTER[0] - game_objects.player.rect[2]*0.5, game_objects.map.PLAYER_CENTER[1] - game_objects.player.rect[3]*0.5 + self.y_offset]
+        self.center = [game_objects.game.viewport_center[0] - game_objects.player.rect[2]*0.5, game_objects.game.viewport_center[1] - game_objects.player.rect[3]*0.5 + self.y_offset]
         self.original_center = self.center.copy()
         self.target = self.original_center.copy()#is set by camera stop, the target position of center for the centraliser
 
@@ -104,11 +104,13 @@ class Camera_shake_decorator():
     def __init__(self, current_camera, **kwarg):
         self.current_camera = current_camera
         self.amp = kwarg.get('amplitude', 10)
+        self.original_amp = self.amp
         self.duration = kwarg.get('duration', 100)
+        self.length = self.duration
         self.scale = kwarg.get('scale', 0.98)
 
     def update(self, dt):
-        self.amp *= self.scale
+        self.amp = (self.original_amp - (1 - self.duration/self.length))*dt#need to be this compicated one to respect any time freeze
         self.current_camera.true_scroll[0] += random.uniform(-self.amp, self.amp)#only stuff relying on scroll will be affected, true scroll like player is not
         self.current_camera.true_scroll[1] += random.uniform(-self.amp, self.amp)
         

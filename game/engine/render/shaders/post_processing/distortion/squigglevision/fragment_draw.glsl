@@ -5,7 +5,7 @@ uniform sampler2D imageTexture; // main texture
 uniform sampler2D noiseTexture; // noise texture for squiggle effect
 
 // Squiggle parameters
-uniform vec2 scale = vec2(1.0);//size of the chunks
+uniform vec2 scale = vec2(1);//size of the chunks
 uniform float strength =0.5;//intensity
 uniform float fps = 0.1;//refresh rate
 uniform float time; // You'll need to pass this from your application

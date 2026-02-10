@@ -69,14 +69,14 @@ class InventoryUI(BaseUI):
 
         for key in self.game_objects.player.backpack.inventory.items.keys():#blit the items there is in inventory
             item = self.game_objects.player.backpack.inventory.get_item(key)    
-            item.animation.update()
+            item.animation.update(dt = 1)
             self.game_objects.game.display.render(item.image, self.game_objects.ui.screen, position = self.iventory_UI.items[key])#shader render
-            
+
             quantity = self.game_objects.player.backpack.inventory.get_quantity(key)
-            number = self.game_objects.font.render(text = '' + str(quantity))
+            text = '' + str(quantity)
             topleft = self.iventory_UI.items[key]
-            self.game_objects.game.display.render(number, self.game_objects.ui.screen, position = [topleft[0] + item.rect[2], topleft[1] + item.rect[3]])#shader render
-            number.release()
+            position = [topleft[0] + 50, topleft[1] ]
+            self.game_objects.game.display.render_text(self.game_objects.font.font_atals, self.game_objects.ui.screen, text = text, letter_frame = 9999, color = (255,255,255,255), position = position)            
 
     def blit_sword(self):        
         self.game_objects.game.display.render(self.iventory_UI.items['sword'].image, self.game_objects.ui.screen, position = self.iventory_UI.items['sword'].rect.topleft)#shader render

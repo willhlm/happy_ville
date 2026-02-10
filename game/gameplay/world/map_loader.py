@@ -15,7 +15,9 @@ from gameplay.entities.visuals.environments import *
 from engine.utils import functions
 from gameplay.entities.spawners.area_spawner import AreaSpawner
 
-class Level():
+from time import perf_counter
+
+class MapLoader():
     def __init__(self, game_objects):
         self.game_objects = game_objects
         self.PLAYER_CENTER = [game_objects.game.window_size[0] * 0.5, game_objects.game.window_size[1] * 0.5]
@@ -25,7 +27,26 @@ class Level():
         self.area_change = True#a flag to chenge if we change area/biome
         self.biome = Biome(self)
 
-    def load_map(self, map_name, spawn):
+        self.game_objects.signals.subscribe('fade_out', self.load_map2)
+
+    def load_map(self, previous_state, map_name, spawn = '1', fade = True):#called from path_col
+        if fade:#for cutscenes
+            kwarg = {'previous_state': previous_state, 'map_name': map_name,'spawn':spawn, 'fade': fade }
+            self.game_objects.game.state_manager.enter_state('fade_out', **kwarg)
+        else:
+            self.load_map2(map_name, spawn, fade)
+
+    def load_map2(self, map_name, spawn = '1', fade = True):#called from fadeout or load_map above
+        self.game_objects.clean_groups()
+        t1_start = perf_counter()
+        self.loading_map(map_name, spawn)#memory leak somwehre here
+        t1_stop = perf_counter()
+        print(t1_stop-t1_start)
+
+        if fade:#for cutscenes
+            self.game_objects.game.state_manager.enter_state('fade_in')
+
+    def loading_map(self, map_name, spawn):
         self.game_objects.game.screen_manager.clear_screens()
         self.game_objects.player.shader_state.handle_input('idle')#reset any shaders that might be on        
         self.references = {'bg_fade': []}#to save some stuff so that it can be organisesed later in case e.g. some things needs to be loaded in order: needs to be cleaned after each map loading
@@ -151,16 +172,17 @@ class Level():
                 continue
 
             id = obj['gid'] - self.map_data['statics_firstgid']
-            if id == 0:  # Player
+            if id == 0:  # Player                
                 if self.spawned: continue#skip if player has already spawned
                 for property in properties:
                     if property['name'] == 'spawn':#determine spawn type and set position accordingly
                         if isinstance(self.spawn, str):# Normal load case
                             if property['value'] != self.spawn:
                                 continue
-
+                            
                             self.game_objects.player.set_pos(object_position)
                         else:#coordinate-based spawn
+                            
                             self.game_objects.player.set_pos(self.spawn)
 
                         self.game_objects.player.reset_movement()

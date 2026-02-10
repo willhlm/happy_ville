@@ -135,12 +135,13 @@ class Player(Character):
         #self.movement_manager.clear_modifiers()#TODO probably not all should be cleared
 
     def update_render(self, dt):#called in group
-        self.shader_state.update_render(dt)        
+        scaled_dt = self.hitstop.get_sim_dt(dt)
+        self.shader_state.update_render(scaled_dt)        
 
     def update(self, dt):
         self.prev_true_pos = self.true_pos.copy()#save previous position for interpolation
         self.hitstop.update(dt)
-        scaled_dt = self.get_sim_dt(dt)
+        scaled_dt = self.hitstop.get_sim_dt(dt)
 
         self.movement_manager.update(scaled_dt)#update the movement manager: modifers 
         self.update_vel(scaled_dt)

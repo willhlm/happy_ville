@@ -130,7 +130,6 @@ class InventoryLoader(BaseLoader):
         super().__init__(game_objects)
         self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('assets/ui_layouts/backpack/inventory/BG.png').convert_alpha())                    
         path = 'assets/ui_layouts/backpack/inventory/inventory.json'
-        self.registry = {'playstation': Playstation, 'keyboard': Keyboard, 'xbox': Xbox}
         self.load_UI_data(path, 'inventory')
         self.load_data()
 
@@ -146,18 +145,17 @@ class InventoryLoader(BaseLoader):
 
             if id == 0:#sword
                 self.items['sword'] = Sword(topleft_object_position,self.game_objects)
-
             elif id == 4:#a button
-                new_button = self.registry[self.game_objects.controller.controller_type[-1]](topleft_object_position,self.game_objects,'a')
+                new_button = Controllers(topleft_object_position,self.game_objects,'a', self.game_objects.controller.controller_type[-1])
                 self.buttons['a'] = new_button
             elif id == 5:#b button
-                new_button = self.registry[self.game_objects.controller.controller_type[-1]](topleft_object_position,self.game_objects,'b')
+                new_button = Controllers(topleft_object_position,self.game_objects,'b', self.game_objects.controller.controller_type[-1])
                 self.buttons['b'] = new_button
             elif id == 6:#lb button
-                new_button = self.registry[self.game_objects.controller.controller_type[-1]](topleft_object_position,self.game_objects,'lb')
+                new_button = Controllers(topleft_object_position,self.game_objects,'lb', self.game_objects.controller.controller_type[-1])
                 self.buttons['lb'] = new_button
             elif id == 7:#rb button
-                new_button = self.registry[self.game_objects.controller.controller_type[-1]](topleft_object_position,self.game_objects,'rb')
+                new_button = Controllers(topleft_object_position,self.game_objects,'rb', self.game_objects.controller.controller_type[-1])                
                 self.buttons['rb'] = new_button
 
             elif id == 10:#Container
@@ -168,11 +166,11 @@ class InventoryLoader(BaseLoader):
                 self.containers.append(InventoryContainer(topleft_object_position, self.game_objects, item))
 
             elif id == 11:#money
-                self.items['amber_droplet'] = topleft_object_position
+                self.items['amberdroplet'] = topleft_object_position
             elif id == 12:#bone
                 self.items['bone'] = topleft_object_position
             elif id == 13:#heal item
-                self.items['heal_item'] = topleft_object_position
+                self.items['healitem'] = topleft_object_position
 
 class TitleMenuLoader(BaseLoader):
     def __init__(self, game_objects):

@@ -31,15 +31,24 @@ class Death(CutsceneEngine):#when aila dies
         self.game.state_manager.exit_state()
 
     def state1(self):
-        if self.game.game_objects.player.backpack.map.spawn_point.get('bone', False):#respawn by bone
-            map = self.game.game_objects.player.backpack.map.spawn_point['bone']['map']
+        if self.game.game_objects.player.backpack.map.spawn_point.get('bone', False):
+            map_name = self.game.game_objects.player.backpack.map.spawn_point['bone']['map']
             point = self.game.game_objects.player.backpack.map.spawn_point['bone']['point']
             del self.game.game_objects.player.backpack.map.spawn_point['bone']
-        else:#normal resawn
-            map = self.game.game_objects.player.backpack.map.spawn_point['map']
-            point =  self.game.game_objects.player.backpack.map.spawn_point['point']        
-        self.game.game_objects.load_map(self, map, point)
+        else:
+            map_name = self.game.game_objects.player.backpack.map.spawn_point['map']
+            point = self.game.game_objects.player.backpack.map.spawn_point['point']
+
+        # Instead of self.game.game_objects.map.load_map(...)
+        self.game.game_objects.transition.run(
+            previous_state=self,                   
+            style="fade_black",
+            action=lambda: self.game.game_objects.map.load_now(map_name, point),
+            after=lambda: self.game.game_objects.player.currentstate.enter_state("invisible"),
+        )
+
         self.stage = 1
+
 
     def handle_events(self,input):
         input.processed()

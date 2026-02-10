@@ -76,9 +76,9 @@ def knockback_callback(entity, knockback, direction):
     """Returns a knockback callback"""
     return lambda: entity.knock_back(amp=knockback, dir=direction)
 
-def screen_shake_callback(camera, intensity=5, duration=300):
+def screen_shake_callback(camera, **kwargs):
     """Returns a screen shake callback"""
-    return lambda: camera.shake(intensity=intensity, duration=duration)
+    return lambda: camera.camera_shake(**kwargs)
 
 def spawn_particles_callback(entity, **particle_kwargs):
     """Returns a particle spawn callback"""

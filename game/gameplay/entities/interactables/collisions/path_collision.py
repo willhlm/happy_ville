@@ -37,5 +37,5 @@ class PathCollision(Interactables):
 
     def on_collision(self, player):
         self.player_movement(player)
-        self.game_objects.load_map(self.game_objects.game.state_manager.state_stack[-1], self.destination, self.spawn)#nned to send previous state so that we can update and render for exampe gameplay or title screeen while fading
+        self.game_objects.map.load_map(self.game_objects.game.state_manager.state_stack[-1], self.destination, self.spawn)#nned to send previous state so that we can update and render for exampe gameplay or title screeen while fading
 

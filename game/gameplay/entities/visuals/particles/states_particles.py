@@ -60,6 +60,7 @@ class Circle_converge_2(Basic_states):
     def check_collision(self):
         distance = ((self.entity.true_pos[0] - self.entity.game_objects.player.hitbox.center[0])**2+(self.entity.true_pos[1] - self.entity.game_objects.player.hitbox.center[1])**2)**0.5
         if distance < 5:#light up the room brifly
+            self.entity.game_objects.signals.emit('partilcles_absrobed')
             self.entity.light.colour = [1,1,1,1]#change the colour of the light
             self.entity.light.updates.append(self.entity.light.expand)
             self.entity.light.updates.append(self.entity.light.fade)

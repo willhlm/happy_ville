@@ -72,7 +72,4 @@ class PlatformEntity(AnimatedEntity):#Things to collide with platforms
         self.currentstate.handle_input('ceiling')
 
     def limit_y(self):#limits the velocity on ground, onewayup. But not on ramps to make a smooth drop
-        self.velocity[1] = 1.2#assume at least 60 fps -> 1
-
-    def get_sim_dt(self, dt):
-        return dt * self.hitstop.get_time_scale()        
+        self.velocity[1] = 1.2#assume at least 60 fps -> 1 

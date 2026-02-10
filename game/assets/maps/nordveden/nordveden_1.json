@@ -873,8 +873,8 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":4720,
-                         "y":864
+                         "x":3424,
+                         "y":880
                         }, 
                         {
                          "gid":11,
@@ -931,7 +931,7 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"village_ola_3"
+                                 "value":"village_3"
                                 }, 
                                 {
                                  "name":"spawn",
@@ -1756,7 +1756,7 @@
                         {
                          "gid":2,
                          "height":16,
-                         "id":1087,
+                         "id":1135,
                          "name":"",
                          "properties":[
                                 {
@@ -1768,7 +1768,7 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":3712,
+                         "x":3648,
                          "y":880
                         }],
                  "opacity":1,
@@ -1820,7 +1820,7 @@
          "y":0
         }],
  "nextlayerid":110,
- "nextobjectid":1135,
+ "nextobjectid":1136,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

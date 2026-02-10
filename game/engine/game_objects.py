@@ -1,24 +1,24 @@
 import pygame
 from engine.utils import read_files
-from engine.system import collisions, save_load, groups, object_pool, controller, lights, timer, signals, time_manager, alphabet, input_interpreter
+from engine.system import collisions, save_load, groups, object_pool, controller, lights, timer, signals, time_manager, alphabet, input_interpreter, transition_controller
 from engine.sound import game_audio
 from gameplay.entities.player import player
 from engine.render import post_process
 from engine.camera import camera
 
 from gameplay.world import map_loader, world_state
+from gameplay.world.map.map_coordinator import MapCoordinator
 from gameplay.world.weather import weather
 from engine import constants as C
 from gameplay.ui.managers import ui
 from gameplay.narrative.quests_events.manager import QuestsEventsManager
 from gameplay.registry.registry_manager import RegistryManager
 
-from time import perf_counter
-
 class GameObjects():
     def __init__(self, game):
         self.game = game
-        self.font = alphabet.Alphabet(self)#intitilise the alphabet class, scale of alphabet
+        self.font = alphabet.Alphabet(self)#intitilise the alphabet class, scale of alphabet          
+        self.signals = signals.Signals()        
         self.shaders = read_files.load_shaders_dict(self)#load all shaders aavilable into a dict
         self.controller = controller.Controller()
         self.object_pool = object_pool.Object_pool(self)
@@ -28,13 +28,13 @@ class GameObjects():
         self.create_groups()
         self.weather = weather.Weather(self)
         self.collisions = collisions.Collisions(self)
-        self.map = map_loader.Level(self)
-        self.camera_manager = camera.Camera_manager(self)
+        self.transition = transition_controller.TransitionController(self)
+        self.map = MapCoordinator(self)#map_loader.MapLoader(self)#  
+        self.camera_manager = camera.Camera_manager(self)                    
         self.world_state = world_state.World_state(self)#save/handle all world state stuff here
         self.ui = ui.UiManager(self)
         self.save_load = save_load.Save_load(self)#contains save and load attributes to load and save game
-        self.quests_events = QuestsEventsManager(self)
-        self.signals = signals.Signals()
+        self.quests_events = QuestsEventsManager(self)        
         self.input_interpreter = input_interpreter.InputInterpreter(self)
         self.time_manager = time_manager.Time_manager(self)
         self.post_process = post_process.PostProcess(self)
@@ -66,23 +66,6 @@ class GameObjects():
         self.player = player.Player([0,0],self)
         self.players = groups.Group()#blits on float positions
         self.players.add(self.player)
-
-    def load_map(self, previous_state, map_name, spawn = '1', fade = True):#called from path_col
-        if fade:#for cutscenes
-            kwarg = {'previous_state': previous_state, 'map_name': map_name,'spawn':spawn, 'fade': fade }
-            self.game.state_manager.enter_state('fade_out', **kwarg)
-        else:
-            self.load_map2(map_name, spawn, fade)
-
-    def load_map2(self, map_name, spawn = '1', fade = True):#called from fadeout or load_map above
-        self.clean_groups()
-        t1_start = perf_counter()
-        self.map.load_map(map_name, spawn)#memory leak somwehre here
-        t1_stop = perf_counter()
-        print(t1_stop-t1_start)
-
-        if fade:#for cutscenes
-            self.game.state_manager.enter_state('fade_in')
 
     def clean_groups(self):#called wgen changing map
         self.npcs.empty()

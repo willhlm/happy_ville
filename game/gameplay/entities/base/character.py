@@ -18,7 +18,7 @@ class Character(PlatformEntity):#enemy, NPC,player
 
     def update(self, dt):
         self.hitstop.update(dt)
-        scaled_dt = self.get_sim_dt(dt)
+        scaled_dt = self.hitstop.get_sim_dt(dt)
 
         self.update_vel(scaled_dt)
         self.currentstate.update(scaled_dt)#need to be aftre update_vel since some state transitions look at velocity

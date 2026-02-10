@@ -3,6 +3,7 @@ from engine.utils import read_files
 from engine import constants as C
 from gameplay.entities.interactables.base.interactables import Interactables
 from .states import Grow
+from gameplay.entities.shared.components.hit_effects import screen_shake_callback
 
 class AbilityBall(Interactables):
     def __init__(self, pos, game_objects, ability):
@@ -38,7 +39,6 @@ class AbilityBall(Interactables):
         self.flags['invincibility'] = False
 
     def take_dmg(self, effect):
-        if self.flags['invincibility']: return
         self.health -= effect.damage#take damage
         self.flags['invincibility'] = True
 
@@ -46,18 +46,25 @@ class AbilityBall(Interactables):
             self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)            
             self.shader_state.handle_input('hurt')#turn white and shake
             self.currentstate.handle_input('hurt')#handle if we shoudl go to hurt state
+
             self.game_objects.camera_manager.camera_shake(amplitude = 10, duration = 15, scale = 0.9)
+            self.game_objects.time_manager.modify_time(time_scale = 0, duration = 10)  
+            #effect.append_callback('defender', 'hitstop', lambda eff: eff.defender.hitstop.start(duration=10, callback=[screen_shake_callback(self.game_objects.camera_manager, amplitude = 10, scale = 0.9, duration = 15)]))##make sure default_attacker_hitstop is there                        
+            #effect.append_callback('attacker', 'hitstop', lambda eff: eff.attacker.hitstop.start(duration=10))##make sure default_attacker_hitstop is there                        
         else:#if dead
-            effect.append_callback('attacker', 'hitstop', lambda eff: eff.attacker.hitstop.start(duration=250, callback=[knockback_callback(eff.attacker, eff.knockback, eff.meta['attacker_dir'])]))##make sure default_attacker_hitstop is there
+            self.game_objects.time_manager.modify_time(time_scale = 0, duration = 50)            
             self.ability_ball_pickup(effect.attacker)  
         return effect
 
-    def update_render(self, dt):        
-        self.time += dt * 0.1  
+    def update_render(self, dt):    
+        scaled_dt = self.hitstop.get_sim_dt(dt)
+        self.time += dt * 0.1 * scaled_dt  
         self.currentstate.update_render(dt)
 
     def update(self, dt):
-        self.currentstate.update(dt)
+        self.hitstop.update(dt)      
+        scaled_dt = self.hitstop.get_sim_dt(dt)                  
+        self.currentstate.update(scaled_dt)
 
     def draw(self, target):
         self.game_objects.shaders['ability_ball']['hitFlash'] = self.flash

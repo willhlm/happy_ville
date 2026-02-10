@@ -62,6 +62,11 @@ class Game():
         else: scale = 1
         self.display.render(texture, self.display.screen, scale = scale)
 
+    @property
+    def viewport_center(self):
+        w, h = self.window_size
+        return [w * 0.5, h * 0.5]
+
 class GameLoop():
     def __init__(self, game):
         self.game = game
