@@ -387,7 +387,7 @@ class ObjectSpawner:
                     elif property['name'] == 'quest':
                         kwarg['quest'] = property['value']
 
-                new_loot = getattr(entities, loot)(object_position, self.game_objects, **kwarg)
+                new_loot = self.game_objects.registry.fetch('items', loot)(object_position, self.game_objects)
                 self.game_objects.loot.add(new_loot)
 
             elif id == 7:#normal collision blocks
@@ -1105,9 +1105,9 @@ class Rhoutta_encounter(Biome):
             if self.level.game_objects.world_state.events.get('guide', False):#if guide interaction has happened
                 self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,200/255],interact = False)
 
-    def set_camera(self, ctx):
-        if ctx.level_name == 'rhoutta_encounter_1' and ctx.spawn == '1':#if it a new game
-            self.level.game_objects.game.state_manager.enter_state('start_game')
+    #def set_camera(self, ctx):
+    #    if ctx.level_name == 'rhoutta_encounter_1' and ctx.spawn == '1':#if it a new game
+    #        self.level.game_objects.game.state_manager.enter_state('start_game')
 
     def load_objects(self, data, parallax, offset, ctx: LoadContext, map_def: MapDefinition, layer_name: str, viewport_center):
         for obj in data['objects']:
@@ -1439,7 +1439,7 @@ class Tall_trees(Biome):
         for obj in data['objects']:
             object_position, object_size = calculate_object_position(obj, parallax, offset, viewport_center)
             properties = obj.get('properties',[])
-            id = obj['gid'] - self.level.map_data['objects_firstgid']
+            id = obj['gid'] - map_def.objects_firstgid
 
             if id == 10:#packun
                 kwarg = {}
@@ -1472,6 +1472,19 @@ class Tall_trees(Biome):
                 new_platofrm = TallTrees_1( self.level.game_objects, object_position)
                 self.level.game_objects.platforms.add(new_platofrm)
 
+            elif id == 14:#dissapera when standing on it
+                kwarg= {}
+                for property in properties:
+                    if property['name'] == 'direction':
+                        kwarg['direction'] = property['value']
+                    elif property['name'] == 'distance':
+                        kwarg['distance'] = property['value']
+                    elif property['name'] == 'speed':
+                        kwarg['speed'] = property['value']
+
+                new_platofrm = TallTrees2(object_position,  self.level.game_objects, **kwarg)
+                self.level.game_objects.platforms.add(new_platofrm)                
+
 class Wakeup_forest(Biome):
     def __init__(self, level):
         super().__init__(level)
@@ -1493,4 +1506,8 @@ class Wakeup_forest(Biome):
         for obj in data['objects']:
             object_position, object_size = calculate_object_position(obj, parallax, offset, viewport_center)
             properties = obj.get('properties',[])
-            id = obj['gid'] - self.level.map_data['objects_firstgid']
+            id = obj['gid'] - map_def.objects_firstgid
+
+            if id == 0:#tsatue
+                new_int = RhouttaStatue(object_position, self.level.game_objects)
+                self.level.game_objects.interactables.add(new_int)

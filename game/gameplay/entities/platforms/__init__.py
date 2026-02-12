@@ -12,6 +12,7 @@ from .collisions.collision_right_angle import CollisionRightAngle
 from .dynamic.bubble import Bubble
 from .dynamic.dark_forest_2 import DarkForest_2
 from .dynamic.smacker.smacker import Smacker
+from .dynamic.tall_trees.tall_trees_2 import TallTrees2
 
 from .shadow_light.shadow_light_1 import ShadowLight_1
 from .shadow_light.dark_forest_1 import DarkForest_1

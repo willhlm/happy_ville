@@ -1009,7 +1009,8 @@ class DashGroundPre(PhaseBase):
         #self.entity.velocity[0] = self.entity.dir[0] * max(C.dash_vel,abs(self.entity.velocity[0]))#max horizontal speed
         self.entity.game_objects.cosmetics.add(FadeEffect(self.entity, alpha = 100))
         self.dash_length -= dt
-        self.entity.emit_particles(lifetime = 40, scale=3, colour = C.spirit_colour, gravity_scale = 0.5, gradient = 1, fade_scale = 7,  number_particles = 1, vel = {'wave': [-10*self.entity.dir[0], -2]})
+        self.entity.game_objects.particles.emit("spirit_aura", pos = self.entity.hitbox.center, n=1, colour=C.spirit_colour)
+        #self.entity.emit_particles(lifetime = 40, scale=3, colour = C.spirit_colour, gravity_scale = 0.5, gradient = 1, fade_scale = 7,  number_particles = 1, vel = {'wave': [-10*self.entity.dir[0], -2]})
         self.exit_state()
 
     def exit_state(self):
@@ -1141,7 +1142,7 @@ class DashJumpPre(PhaseBase):#enters from ground dash pre
         super().enter_state(state, **kwarg)
         self.entity.shader_state.handle_input('idle')
 
-    def update(self, dt):
+    def update(self, dt):        
         self.entity.emit_particles(lifetime = 40, scale=3, colour = C.spirit_colour, gravity_scale = 0.5, gradient = 1, fade_scale = 7,  number_particles = 1, vel = {'wave': [-10*self.entity.dir[0], -2]})
         self.entity.game_objects.cosmetics.add(FadeEffect(self.entity, alpha = 100))
         self.buffer_time -= dt

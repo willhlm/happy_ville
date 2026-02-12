@@ -13,9 +13,9 @@ class TransitionController:
         self.game_objects.signals.subscribe("fade_covered", self._on_fade_covered)
         self.game_objects.signals.subscribe("fade_in_finished", self._on_fade_in_finished)
 
-    def run(self,previous_state,*,style: str = "fade_black",action: Optional[Callable[[], Any]] = None,after: Optional[Callable[[], Any]] = None,**fade_kwargs,):
+    def run(self,previous_state,*,style: str = "fade_black", action: Optional[Callable[[], Any]] = None, after: Optional[Callable[[], Any]] = None, **fade_kwargs):
         if self._busy:
-            return  # or queue; up to you
+            return  # or queue
 
         self._busy = True
         self._fade_in_started = False
@@ -26,9 +26,9 @@ class TransitionController:
         # self.game_objects.freeze("transition")
 
         # Start fade out (fade state will emit fade_covered when fully black)
-        self.game_objects.game.state_manager.enter_state("fade_out",previous_state=previous_state,style=style,**fade_kwargs)
+        self.game_objects.game.state_manager.enter_state("fade_out", previous_state = previous_state, style = style, **fade_kwargs)
 
-    def _on_fade_covered(self, *args, **kwargs):
+    def _on_fade_covered(self, **kwargs):
         if not self._busy or self._fade_in_started:
             return
 
@@ -40,7 +40,7 @@ class TransitionController:
         self._fade_in_started = True
         self.game_objects.game.state_manager.enter_state("fade_in")
 
-    def _on_fade_in_finished(self, *args, **kwargs):
+    def _on_fade_in_finished(self, **kwargs):
         if not self._busy or not self._fade_in_started:
             return
 

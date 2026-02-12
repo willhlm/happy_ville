@@ -28,11 +28,10 @@ class MapCoordinator:
 
     def load_map(self, previous_state, map_name: str, spawn="1", fade=True):
         map_name = map_name.lower()
-        self.game_objects.transition.run(previous_state, style="fade_black", action=lambda: self.load_now(map_name, spawn))
+        self.game_objects.transition.run(previous_state, style = "fade_black", action = lambda: self.load_now(map_name, spawn))
 
-    # ---- public API ----
     def load_now(self, map_name: str, spawn="1"):
-        """Blocking load. Call this ONLY when screen is already black."""
+        """Call this ONLY when screen is already black."""
         map_name = map_name.lower()
         self.level_name = map_name
         self._do_load(map_name, spawn)

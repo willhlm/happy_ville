@@ -12,7 +12,6 @@ from gameplay.entities.visuals.effects.fade_effect import FadeEffect
 from gameplay.ui.components.overlay import point_arrow
 from gameplay.entities.interactables import AbilityBall
 
-
 class Object_pool():#a class that contains the objecte one may one to spawn duirng the game: it preloads stiff that needs to be loaded from file
     def __init__(self, game_objects):
         #loot
@@ -98,3 +97,10 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         OptionSounds.pool(game_objects)
 
 
+
+        #temp
+        from gameplay.entities.visuals.particles.component_based.particles import Circle, Spark, Goop
+
+        Circle.pool(game_objects)
+        Spark.pool(game_objects)
+        Goop.pool(game_objects)

@@ -1,120 +1,100 @@
-import pygame
-import math
-import random
+"""
+Component-based particle system.
+Particles are pure data + position. Components handle all behavior.
+"""
+import pygame, random, math
 from engine.system import animation
 from engine.utils import read_files
-from . import states_particles
-from .motion import MotionFactory
-from .state_manager import StateManager
-from .angle_generator import AngleGenerator
 
-class Particles(pygame.sprite.Sprite):
-    """Base particle class with composition-based motion and state management."""
+class Particle(pygame.sprite.Sprite):
+    """
+    Base particle class - just data and rendering.
+    All behavior is handled by components.
+    """
     
-    def __init__(self, pos, game_objects, **kwarg):
+    def __init__(self, pos, game_objects, **kwargs):
         super().__init__()
         self.game_objects = game_objects
+        
+        # Position
         self.spawn_point = [pos[0], pos[1]]
+        self.true_pos = [pos[0], pos[1]]
+        self.velocity = [0, 0]
         
-        # Particle properties
-        self.lifetime = kwarg.get('lifetime', 60)
-        self.colour = list(kwarg.get('colour', [255, 255, 255, 255]))
-        self.fade_scale = kwarg.get('fade_scale', 1)
-        
-        # Angle and position setup
-        angle_degrees = AngleGenerator.generate(
-            dir=kwarg.get('dir', 'isotropic'),
-            angle_spread=kwarg.get('angle_spread', [30, 30]),
-            angle_dist=kwarg.get('angle_dist', None)
-        )
-        self.angle = -(2 * math.pi * angle_degrees) / 360
-        
-        distance = kwarg.get('distance', 0)
-        self.true_pos = [
-            pos[0] + distance * math.cos(self.angle),
-            pos[1] + distance * math.sin(self.angle)
-        ]
-        
-        # Velocity setup
-        vel = kwarg.get('vel', {'linear': [7, 15]})
-        motion_type = list(vel.keys())[0]
-        amp = random.uniform(min(vel[motion_type]), max(vel[motion_type]))
-        self.velocity = [-amp * math.cos(self.angle), -amp * math.sin(self.angle)]
+        # Visual properties
+        self.colour = list(kwargs.get('colour', [255, 255, 255, 255]))
+                
+        # Physics properties (used by some components)
+        self.angle = 0
         self.phase = random.uniform(-math.pi, math.pi)
         
-        # Composition: Motion behavior
-        self.gravity_scale = kwarg.get('gravity_scale', 1)
-        self.motion = MotionFactory.create(motion_type, self, gravity_scale=self.gravity_scale)
-        
-        # Composition: State management
-        state_name = kwarg.get('state', 'Idle')
-        initial_state = getattr(states_particles, state_name)
-        self.state_manager = StateManager(self, initial_state)
+        # Component system
+        self.components = []
     
-    def update(self, dt):
-        """Non-rendering update."""
-        pass
+    def add_component(self, component):
+        """Add a component to this particle."""
+        self.components.append(component)
+        component.on_add()
+        return component
     
-    def update_render(self, dt):
-        """Main update loop with rendering."""
-        self._update_position(dt)
-        self.lifetime -= dt
-        self.state_manager.update_render(dt)
+    def remove_component(self, component):
+        """Remove a component from this particle."""
+        if component in self.components:
+            component.on_remove()
+            self.components.remove(component)
     
-    def _update_position(self, dt):
-        """Update particle position based on velocity."""
+    def get_component(self, component_type):
+        """Get first component of specific type."""
+        for comp in self.components:
+            if isinstance(comp, component_type):
+                return comp
+        return None
+    
+    def update_position(self, dt):
+        """Update position based on velocity."""
         self.true_pos[0] += self.velocity[0] * dt
         self.true_pos[1] += self.velocity[1] * dt
         self.rect.center = self.true_pos
         self.hitbox.center = self.true_pos
     
-    def fading(self, dt):
-        """Gradually fade out particle alpha."""
-        self.colour[-1] -= self.fade_scale * dt
-        self.colour[-1] = max(self.colour[-1], 0)
-    
-    def destroy(self):
-        """Remove particle when lifetime expires."""
-        if self.lifetime < 0:
-            self.kill()
+    def update_render(self, dt):
+        self.update_position(dt)
+        self.update_components(dt)
+
+    def update_components(self, dt):
+        components_to_remove = []
+        for component in self.components:
+            if component.update(dt):
+                components_to_remove.append(component)
+
+        for component in components_to_remove:
+            self.remove_component(component)
+
+    def update(self, dt):
+        pass
     
     def draw(self, target):
-        """Draw particle with camera offset and shader."""
+        """Draw particle with camera offset."""       
         camera_scroll = self.game_objects.camera_manager.camera.scroll
-        pos = (
-            int(self.rect[0] - camera_scroll[0]),
-            int(self.rect[1] - camera_scroll[1])
-        )
-        self.game_objects.game.display.render(
-            self.image, target, position=pos, shader=self.shader
-        )
-    
-    def release_texture(self):
-        """Hook for texture cleanup."""
-        pass
+        pos = (int(self.rect[0] - camera_scroll[0]), int(self.rect[1] - camera_scroll[1]))        
+        self.game_objects.game.display.render(self.image, target, position=pos, shader=self.shader)
 
-
-class ShaderParticle(Particles):
-    """Base class for particles that use shaders for rendering."""
-    
+class ShaderParticle(Particle):
+    """Particle that uses a shader for rendering."""    
     def __init__(self, pos, game_objects, shader_name, image, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
         self.image = image
-        self.rect = pygame.Rect(0, 0, self.image.width, self.image.height)
+        self.rect = pygame.Rect(0, 0, image.width, image.height)
         self.rect.center = self.true_pos
         self.hitbox = self.rect.copy()
         self.shader = game_objects.shaders[shader_name]
 
-
 class Circle(ShaderParticle):
-    """Circular particle rendered with circle shader."""
-    
+    """Circular particle rendered with circle shader."""        
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, 'circle', Circle.image, **kwarg)
-        
         scale = kwarg.get('scale', 3)
         self.radius = random.randint(max(scale - 1, 1), round(scale + 1))
-        self.fade_scale = kwarg.get('fade_scale', 2)
         self.gradient = kwarg.get('gradient', 0)
     
     def draw(self, target):
@@ -127,16 +107,34 @@ class Circle(ShaderParticle):
     
     @staticmethod
     def pool(game_objects):
-        """Pre-allocate texture for all Circle particles."""
+        """Initialize shared texture."""
         Circle.image = game_objects.game.display.make_layer((50, 50)).texture
+
+class Spark(ShaderParticle):
+    """Spark particle with velocity-based rendering."""
+    
+    def __init__(self, pos, game_objects, **kwarg):
+        super().__init__(pos, game_objects, 'spark', Spark.image, **kwarg)
+        self.shader['size'] = self.image.size
+        self.shader['scale'] = kwarg.get('scale', 1)
+    
+    def draw(self, target):
+        """Configure shader with current velocity and draw."""
+        self.shader['colour'] = self.colour
+        self.shader['velocity'] = self.velocity
+        super().draw(target)
+    
+    @staticmethod
+    def pool(game_objects):
+        """Pre-allocate texture for Spark particles."""
+        Spark.image = game_objects.game.display.make_layer((50, 50)).texture
 
 
 class Goop(ShaderParticle):
     """Distorted circle particle using noise-based shader effects."""
     
     def __init__(self, pos, game_objects, **kwarg):
-        super().__init__(pos, game_objects, 'goop', Goop.circle, **kwarg)
-        
+        super().__init__(pos, game_objects, 'goop', Goop.circle, **kwarg)        
         self.empty = Goop.image2
         self.noise_layer = Goop.image3
         self.fade_scale = 0
@@ -185,35 +183,25 @@ class Goop(ShaderParticle):
         Goop.image3 = game_objects.game.display.make_layer((50, 50))
         Goop.circle = game_objects.game.display.make_layer((50, 50))
 
-
-class Spark(ShaderParticle):
-    """Spark particle with velocity-based rendering."""
+class SpriteParticle(Particle):
+    """Particle that uses sprite textures."""
+    def __init__(self, pos, game_objects, sprite_path, colour=None):
+        super().__init__(pos, game_objects, colour=colour)
+        self.sprites = read_files.load_sprites_dict(sprite_path, game_objects)
+        self.animation = animation.Animation(self, framerate=0.7)
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.rect.center = self.true_pos
+        self.hitbox = self.rect.copy()
     
-    def __init__(self, pos, game_objects, **kwarg):
-        super().__init__(pos, game_objects, 'spark', Spark.image, **kwarg)
-        
-        self.fade_scale = kwarg.get('fade_scale', 1)
-        self.shader['size'] = self.image.size
-        self.shader['scale'] = kwarg.get('scale', 1)
-    
-    def draw(self, target):
-        """Configure shader with current velocity and draw."""
-        self.shader['colour'] = self.colour
-        self.shader['velocity'] = self.velocity
-        super().draw(target)
-    
-    @staticmethod
-    def pool(game_objects):
-        """Pre-allocate texture for Spark particles."""
-        Spark.image = game_objects.game.display.make_layer((50, 50)).texture
+    def update(self, dt):
+        self.animation.update(dt)
+        super().update(dt)
 
-
-class FloatyParticles(Particles):
+class FloatyParticles(SpriteParticle):
     """Animated texture-based particles with color shader effects."""
-    
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
-        
         self.animation = animation.Animation(self, framerate=0.7)
         self.sprites = FloatyParticles.sprites
         self.image = self.sprites['idle'][0]
@@ -261,13 +249,10 @@ class FloatyParticles(Particles):
             game_objects
         )
 
-
-class Offset(Particles):
+class Offset(SpriteParticle):
     """Particle with sinusoidal offset motion (not fully implemented)."""
-    
     def __init__(self, pos, game_objects, **kwarg):
-        super().__init__(pos, game_objects, **kwarg)
-        
+        super().__init__(pos, game_objects, **kwarg)        
         self.sprites = Offset.sprites
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)

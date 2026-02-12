@@ -31,20 +31,25 @@ class BaseDynamic(BaseTexture):
             entity.left_collision(self)
         entity.update_rect_x()
 
-    def collide_y(self, entity):  # Handles vertical collision
+    def collide_y(self, entity):#vertical collision
         if entity.hitbox.bottom >= self.hitbox.top and entity.old_hitbox.bottom <= self.old_hitbox.top:
+
+            # Carry: apply platform delta to the entity's TRUE position, then push it into rect/hitbox (works even during hitstop)            
+            entity.true_pos[0] += self.delta[0]
+            entity.rect.left = round(entity.true_pos[0])
+            
+            # Optional vertical carry (usually only upward to avoid "dragging down")
+            #if self.delta[1] < 0:
+            #TODO, we need to call it outside the collision, every frame. Need to store the platofrm in that acse
+            entity.true_pos[1] += self.delta[1]
+            entity.rect.top = round(entity.true_pos[1])
+
+            entity.update_hitbox()
+
+            # Now resolve as grounded
             entity.down_collision(self)
             entity.limit_y()
-            
-            #hitstop stuff. When entity is now moving (in hitstop), it still needs to be carried:
-            #entity.true_pos[0] += self.delta[0]#horizontal carry while grounded”
-            #entity.update_rect_x()
-            #entity.hitbox.left = entity.rect.left  # if update_rect_x doesn't do it
 
-            #if dy < 0:
-            #    entity.true_pos[1] += dy
-            #    entity.update_rect_y()            
-
-        if entity.hitbox.top <= self.hitbox.bottom and entity.old_hitbox.top >= self.old_hitbox.bottom:
+        elif entity.hitbox.top <= self.hitbox.bottom and entity.old_hitbox.top >= self.old_hitbox.bottom:
             entity.top_collision(self)
         entity.update_rect_y()  # Update player’s vertical position

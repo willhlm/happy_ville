@@ -13,6 +13,7 @@ from engine import constants as C
 from gameplay.ui.managers import ui
 from gameplay.narrative.quests_events.manager import QuestsEventsManager
 from gameplay.registry.registry_manager import RegistryManager
+from engine.particles.particle_system import ParticleSystem
 
 class GameObjects():
     def __init__(self, game):
@@ -39,6 +40,7 @@ class GameObjects():
         self.time_manager = time_manager.Time_manager(self)
         self.post_process = post_process.PostProcess(self)
         self.registry = RegistryManager()
+        self.particles = ParticleSystem(self)
 
     def create_groups(self):#define all sprite groups
         self.enemies = groups.Group()#enemies

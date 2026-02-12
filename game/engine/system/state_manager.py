@@ -33,6 +33,10 @@ class State_manager():
         """Handle events in the current active state."""
         self.state_stack[-1].handle_events(input)
 
+    def peek_below_top(self):
+        'return the state just below the current one'
+        return self.state_stack[-2]
+
 REGISTERY = {
     # Menus
     "load_menu": LoadMenu,
