@@ -2,7 +2,6 @@ import pygame, math
 from gameplay.entities.projectiles.base.projectiles import Projectiles
 from engine.utils import read_files
 from . import seed_spawner
-from gameplay.entities.visuals.particles import particles
 
 class Arrow(Projectiles):#should it be called seed?
     def __init__(self, pos, game_objects, **kwarg):
@@ -35,11 +34,7 @@ class Arrow(Projectiles):#should it be called seed?
         super().update(dt)
         self.update_vel(dt)
         self.angle = self._get_trajectory_angle()
-        self.emit_particles(lifetime = 50, dir = self.dir, vel = {'linear': [self.velocity[0] * 0.1, self.velocity[1] * 0.1]}, scale = 0.5, fade_scale = 5)
-
-    def emit_particles(self, type = 'Circle', **kwarg):
-        obj1 = getattr(particles, type)(self.hitbox.center, self.game_objects, **kwarg)
-        self.game_objects.cosmetics.add(obj1)
+        self.game_objects.particles.emit('tiny_trail', self.hitbox.center, dir=self.dir,vx=self.velocity[0],vy=self.velocity[1])
 
     def _get_trajectory_angle(self):
         return math.degrees(math.atan2(self.velocity[1], self.velocity[0]))

@@ -24,6 +24,22 @@ from engine.utils import functions
 
 from .map_data import MapDefinition, LoadContext
 
+def resolve_tileset(map_def: MapDefinition, gid: int):
+    chosen = None
+    for firstgid, source in map_def.tileset_ranges:
+        if firstgid <= gid:
+            chosen = (firstgid, source)
+        else:
+            break
+    if chosen is None:
+        return None, None, None
+    firstgid, source = chosen
+    local_id = gid - firstgid
+    return source, firstgid, local_id
+
+def props_list_to_dict(properties):
+    return {p["name"]: p.get("value") for p in (properties or [])}
+
 def calculate_object_position(obj, parallax, offset, viewport_center):
     new_map_diff = [-viewport_center[0], -viewport_center[1]]
     object_size = [int(obj["width"]), int(obj["height"])]
@@ -62,6 +78,7 @@ class MapDataLoader:
         statics_firstgid = 0
         interactables_firstgid = 0
         objects_firstgid = 0
+        platforms_firstgid = 0
 
         for tileset in map_data.get("tilesets", []):
             source = tileset.get("source")
@@ -73,11 +90,21 @@ class MapDataLoader:
                 interactables_firstgid = tileset["firstgid"]
             elif "objects" in source:
                 objects_firstgid = tileset["firstgid"]
+            elif "platforms" in source:
+                platforms_firstgid = tileset["firstgid"]                
 
         # store back too (so existing logic that expects these keys still works)
         map_data["statics_firstgid"] = statics_firstgid
         map_data["interactables_firstgid"] = interactables_firstgid
         map_data["objects_firstgid"] = objects_firstgid
+        map_data["platforms_firstgid"] = platforms_firstgid
+
+        tileset_ranges = []
+        for tileset in map_data.get("tilesets", []):
+            source = tileset.get("source")
+            if source:
+                tileset_ranges.append((tileset["firstgid"], source))
+        tileset_ranges.sort(key=lambda x: x[0])
 
         return MapDefinition(
             level_name=level_name,
@@ -86,6 +113,8 @@ class MapDataLoader:
             statics_firstgid=statics_firstgid,
             interactables_firstgid=interactables_firstgid,
             objects_firstgid=objects_firstgid,
+            platforms_firstgid=platforms_firstgid,
+            tileset_ranges = tileset_ranges,
         )
 
     def read_all_spritesheets(self, level_name: str, map_data: dict) -> Dict[int, pygame.Surface]:
@@ -195,23 +224,65 @@ class SceneBuilder:
             biome_mgr.configure_weather(group, parallax)
             biome_mgr.post_process(group, parallax)
 
-    def _load_objects(self, data, parallax, offset, position: str, ctx: LoadContext, biome_mgr: BiomeManager, map_def: MapDefinition, layer_name: str, viewport_center):
+    def _load_objects(
+        self, data, parallax, offset, position: str,
+        ctx: LoadContext, biome_mgr: BiomeManager, map_def: MapDefinition,
+        layer_name: str, viewport_center
+    ):
         """
-        Keeps your semantics:
-        - 'statics' and 'interactables' only load in the front pass.
+        Semantics:
+        - 'statics', 'interactables', 'platforms', 'paths' load only in front pass.
         - biome objects can exist in both passes under 'back'/'front'.
         """
-        for objkey in data.keys():
-            if objkey in ("statics", "interactables"):
-                if position == "back":
-                    continue
-                if objkey == "statics":
-                    self.spawner.load_statics(data[objkey], parallax, offset, ctx=ctx, map_def=map_def, biome_mgr=biome_mgr, layer_name=layer_name, viewport_center = viewport_center)
-                else:
-                    self.spawner.load_interactables_objects(data[objkey], parallax, offset, ctx=ctx, map_def=map_def, biome_mgr=biome_mgr, layer_name=layer_name, viewport_center = viewport_center)
-            else:
-                if objkey == position:
-                    biome_mgr.load_biome_objects(data[objkey], parallax, offset, ctx=ctx, map_def=map_def, layer_name=layer_name, viewport_center = viewport_center)
+        # Back pass: only biome back objects
+        if position == "back":
+            if "back" in data:
+                biome_mgr.load_biome_objects(
+                    data["back"], parallax, offset,
+                    ctx=ctx, map_def=map_def, layer_name=layer_name,
+                    viewport_center=viewport_center
+                )
+            return
+
+        # Front pass:
+        # 1) paths FIRST
+        if "paths" in data:
+            self.spawner.load_paths(
+                data["paths"], parallax, offset,
+                ctx=ctx, map_def=map_def, biome_mgr=biome_mgr,
+                layer_name=layer_name, viewport_center=viewport_center
+            )
+
+        # 2) statics / interactables / platforms (order as you prefer)
+        if "statics" in data:
+            self.spawner.load_statics(
+                data["statics"], parallax, offset,
+                ctx=ctx, map_def=map_def, biome_mgr=biome_mgr,
+                layer_name=layer_name, viewport_center=viewport_center
+            )
+
+        if "interactables" in data:
+            self.spawner.load_interactables_objects(
+                data["interactables"], parallax, offset,
+                ctx=ctx, map_def=map_def, biome_mgr=biome_mgr,
+                layer_name=layer_name, viewport_center=viewport_center
+            )
+
+        if "platforms" in data:
+            self.spawner.load_platforms(
+                data["platforms"], parallax, offset,
+                ctx=ctx, map_def=map_def, biome_mgr=biome_mgr,
+                layer_name=layer_name, viewport_center=viewport_center
+            )
+
+        # 3) biome front objects
+        if "front" in data:
+            biome_mgr.load_biome_objects(
+                data["front"], parallax, offset,
+                ctx=ctx, map_def=map_def, layer_name=layer_name,
+                viewport_center=viewport_center
+            )
+
 
     def _load_layers(self, data, parallax, offset, ctx: LoadContext, map_def: MapDefinition, layer_name: str, biome, viewport_center):
         'Tiled design notes: all tile layers and objects need to be in a group (including statics and other object layers).'
@@ -316,6 +387,157 @@ class ObjectSpawner:
         self.tile_size = C.tile_size
         self.viewport_center = self.game_objects.game.viewport_center
 
+        self.platform_defaults = {
+            # collision
+            "solid": True,
+            "oneway_up": False,
+            "damage": False,
+            "damage_on_land": False,
+
+            # behavior
+            "move": False,            
+            "disappear_on_stand": False,
+            "breakable": False,
+            
+            # signals
+            "signal_id": "",
+
+            'name': 'default'#sprite name
+        }
+
+    def _bool(self, v, default=False):
+        if v is None:
+            return default
+        if isinstance(v, bool):
+            return v
+        if isinstance(v, (int, float)):
+            return bool(v)
+        s = str(v).strip().lower()
+        return s in ("1", "true", "yes", "y", "on")
+
+    def _components_from_flags(self, props: dict) -> str:      
+        comps = []
+
+        # choose ONE collision behavior (priority order)
+        if self._bool(props.get("damage_on_land")):
+            comps.append("damage_on_land")
+        elif self._bool(props.get("damage")):
+            comps.append("damage")
+        elif self._bool(props.get("oneway_up")):
+            comps.append("oneway_up")
+        else:
+            if self._bool(props.get("solid"), default=True):
+                comps.append("solid")
+
+        # extra behaviors
+        if self._bool(props.get("move")) or props.get("path_points"):
+            comps.append("move")  # uses direction/speed/distance
+            comps.append("carry_on_top")
+        if self._bool(props.get("disappear_on_stand")):
+            comps.append("disappear_on_stand")
+        if self._bool(props.get("breakable")):
+            comps.append("breakable")
+        if props.get("signal_id") not in (None, "", 0, False):
+            comps.append("signal_toggle")
+        return comps
+
+    def load_platforms(self, data, parallax, offset, ctx, map_def, biome_mgr, layer_name, viewport_center):
+        """
+        Load platforms placed as tile-objects in a dedicated 'platforms' object layer.
+
+        Expected properties (bool flags + params):
+          spawn: "generic_platform" (optional; default behavior is generic if tile is in platforms layer)
+          entity/class: if set, spawns a special platform entity via registry (e.g. Bubble)
+
+          solid: bool (default True)
+          oneway_up: bool
+          damage: bool + dmg/knockback params
+          damage_on_land: bool + dmg/knockback_y
+          breakable: bool + health
+          move: bool + direction/axis/speed/distance
+          disappear_on_stand: bool + disappear_time/respawn_time
+          signal_id: string/int (mapped to ID for SignalToggle)
+          path: (object ref)
+        """
+        for obj in data.get("objects", []):
+            object_position, object_size = calculate_object_position(obj, parallax, offset, viewport_center)
+
+            obj_props = props_list_to_dict(obj.get("properties", []))
+
+            props = dict(self.platform_defaults)
+            props.update(obj_props)
+
+            # Resolve linked path (object reference id)
+            path_ref = props.get("path")
+            path_data = None
+            if path_ref:
+                path_data = ctx.references.get("paths_by_id", {}).get(int(path_ref))
+
+            # Attach points + closed flag
+            props["path_points"] = path_data["points"] if path_data else None
+            props["path_closed"] = path_data.get("closed", False) if path_data else False
+
+            # Merge path-level defaults (smooth/loop/pingpong/etc) into platform props
+            # Platform object props should override path props.
+            if path_data:
+                path_props = path_data.get("props", {}) or {}
+                for k, v in path_props.items():
+                    if k not in props or props[k] in (None, ""):
+                        props[k] = v
+
+            # If platform is moving AND has a path, auto switch move_type to 'path'
+            if props.get("path_points"):
+                props["move"] = True
+                props["move_type"] = "path"
+                # optional: if no speed on platform, allow path to define it
+                # (already handled by merge rule above)
+
+            components = self._components_from_flags(props)
+
+            plat = GenericPlatform(object_position, self.game_objects, components=components, **props)
+            self.game_objects.platforms.add(plat)
+
+    def load_paths(self, data, parallax, offset, ctx, map_def, biome_mgr, layer_name, viewport_center):
+        '''
+        draw path with polygons in paths pbject layer. Connect platforms using the object costume property. Platforms can override any of properties below, but you don’t have to.
+        smooth: bool (default False)
+        samples_per_segment: int (default 10) ← higher = smoother
+        loop: bool (default False)
+        pingpong: bool (default True) ← if true, it bounces (loop ignored)
+        snap_to_path: bool (default True)
+        start_index: int (default 0)
+        speed: float (px/s)
+        
+        '''
+        ctx.references.setdefault("paths_by_id", {})
+
+        for obj in data.get("objects", []):
+            if "polyline" not in obj and "polygon" not in obj:
+                continue
+
+            base_pos = self._shape_object_position(obj, parallax, offset, viewport_center)
+
+            pts = obj.get("polyline") or obj.get("polygon")
+            world_points = [(base_pos[0] + p["x"], base_pos[1] + p["y"]) for p in pts]
+
+            path_props = props_list_to_dict(obj.get("properties", []))
+
+            ctx.references["paths_by_id"][obj["id"]] = {
+                "points": world_points,
+                "closed": ("polygon" in obj),
+                "name": obj.get("name", ""),
+                "props": path_props,  # <- IMPORTANT
+            }
+
+
+    def _shape_object_position(self, obj, parallax, offset, viewport_center):
+        new_map_diff = [-viewport_center[0], -viewport_center[1]]
+        return [
+            int(obj["x"]) - math.ceil((1 - parallax[0]) * new_map_diff[0]) + offset[0],
+            int(obj["y"]) - math.ceil((1 - parallax[1]) * new_map_diff[1]) + offset[1],
+        ]
+
+
     def load_statics(self, data, parallax, offset, ctx: LoadContext, map_def: MapDefinition, biome_mgr: BiomeManager, layer_name: str, viewport_center):#load statics and collision
         for obj in data['objects']:
             object_position, object_size = calculate_object_position(obj, parallax, offset, viewport_center)
@@ -331,7 +553,10 @@ class ObjectSpawner:
                 self.game_objects.platforms_ramps.add(new_block)
                 continue
 
-            id = obj['gid'] - map_def.statics_firstgid
+            source, firstgid, local_id = resolve_tileset(map_def, obj["gid"])
+            if "static" not in source: continue 
+            id = local_id
+            
             if id == 0:  # Player
                 if ctx.spawned: continue#skip if player has already spawned
                 for property in properties:
@@ -340,10 +565,8 @@ class ObjectSpawner:
                             if property['value'] != ctx.spawn:
                                 continue
 
-                            print(object_position)
                             self.game_objects.player.set_pos(object_position)
                         else:#coordinate-based spawn
-                            print(self.spawn, 'ef')
                             self.game_objects.player.set_pos(ctx.spawn)
 
                         self.game_objects.player.reset_movement()
@@ -692,7 +915,10 @@ class ObjectSpawner:
             object_position, object_size = calculate_object_position(obj, parallax, offset, viewport_center)
             properties = obj.get('properties',[])
             
-            id = obj['gid'] - map_def.interactables_firstgid
+            source, firstgid, local_id = resolve_tileset(map_def, obj["gid"])
+            if "interactables" not in source: continue 
+            id = local_id
+
             if id == 2:#save point
                 new_int = SavePoint(object_position,self.game_objects,self.game_objects.map.level_name)                  
                 self.game_objects.interactables.add(new_int)
@@ -907,7 +1133,10 @@ class Village(Biome):
         for obj in data['objects']:
             object_position, object_size = calculate_object_position(obj, parallax, offset, viewport_center)
             properties = obj.get('properties',[])
-            id = obj['gid'] - map_def.objects_firstgid
+
+            source, firstgid, local_id = resolve_tileset(map_def, obj["gid"])
+            if "objects" not in source: continue 
+            id = local_id
 
             if id == 0:
                 thor_mtn = ThorMountain(object_position, self.level.game_objects, parallax, layer_name, self.live_blur)
@@ -915,10 +1144,6 @@ class Village(Biome):
                     self.level.game_objects.all_fgs.add(layer_name,thor_mtn)
                 else:
                     self.level.game_objects.all_bgs.add(layer_name,thor_mtn)
-
-            elif id == 1:#boulder
-                new_tree = Boulder(object_position, self.level.game_objects)
-                self.level.game_objects.platforms.add(new_tree)
 
             elif id == 2:# locked door
                 kwarg = {}
@@ -982,27 +1207,26 @@ class Nordveden(Biome):
             object_position, object_size = calculate_object_position(obj, parallax, offset, viewport_center)
             properties = obj.get('properties',[])
             
-            id = obj['gid'] - map_def.objects_firstgid
-            if id == 2:#light forest tree tree                
-                new_tree = NordvedenTree_1(object_position, self.level.game_objects, parallax, layer_name)
+            source, firstgid, local_id = resolve_tileset(map_def, obj["gid"])
+            if "objects" not in source: continue 
+            id = local_id
+
+           # id = obj['gid'] - map_def.objects_firstgid
+            if id == 2:#light forest tree tree      
+                name = 'nordveden/tree_1/'                        
+                new_tree = GeneralTree(object_position, self.level.game_objects, parallax, layer_name, name)
                 if layer_name.startswith('fg'):
                     self.level.game_objects.all_fgs.add(layer_name, new_tree)
                 else:
                     self.level.game_objects.all_bgs.add(layer_name, new_tree)
 
             elif id == 3:#light forest tree tree
-                new_tree = NordvedenTree_2(object_position, self.level.game_objects, parallax, layer_name)
+                name = 'nordveden/tree_2/'        
+                new_tree = GeneralTree(object_position, self.level.game_objects, parallax, layer_name, name)
                 if layer_name.startswith('fg'):
                     self.level.game_objects.all_fgs.add(layer_name,new_tree)
                 else:
                     self.level.game_objects.all_bgs.add(layer_name,new_tree)
-
-            elif id == 4:#light forest breakable collisio block
-                new_plarform = BreakableBlock_1(object_position,self.level.game_objects)
-                if layer_name.startswith('fg'):
-                    self.level.game_objects.platforms.add(new_plarform)
-                else:
-                    self.level.game_objects.platforms.add(new_plarform)
 
             elif id == 5:#grind
                 kwarg = {}
@@ -1043,34 +1267,7 @@ class Nordveden(Biome):
 
             elif id == 8:#cocoon
                 new_boss = self.level.game_objects.registry.fetch('enemies', 'cocoon_boss')(object_position, self.level.game_objects)
-                self.level.game_objects.interactables.add(new_boss)
-
-            elif id == 9:#one side brakable
-                for property in properties:
-                    if property['name'] == 'ID':
-                        ID_key = property['value']
-
-                if not self.level.game_objects.world_state.state[ctx.level_name]['breakable_platform'].get(str(ID_key), False):
-                    platform = BreakableOnesideLeft(object_position, self.level.game_objects, str(ID_key), 'assets/sprites/entities/platforms/breakable/nordveden/type2/')
-                    self.level.game_objects.platforms.add(platform)
-
-            elif id == 10:#dissapera when standing on it
-                for property in properties:
-                    if property['name'] == 'ID':
-                        ID_key = property['value']
-
-                if not self.level.game_objects.world_state.state[ctx.level_name]['breakable_platform'].get(str(ID_key), False):
-                    platform = Nordveden_1(object_position, self.level.game_objects, str(ID_key))
-                    self.level.game_objects.platforms.add(platform)  
-
-            elif id == 11:#one side brakable
-                for property in properties:
-                    if property['name'] == 'ID':
-                        ID_key = property['value']
-
-                if not self.level.game_objects.world_state.state[ctx.level_name]['breakable_platform'].get(str(ID_key), False):
-                    platform = BreakableOnesideRight(object_position, self.level.game_objects, str(ID_key), 'assets/sprites/entities/platforms/breakable/nordveden/type3/')
-                    self.level.game_objects.platforms.add(platform)                                                           
+                self.level.game_objects.interactables.add(new_boss)                                                       
 
 class Rhoutta_encounter(Biome):
     def __init__(self, level):
@@ -1113,16 +1310,10 @@ class Rhoutta_encounter(Biome):
         for obj in data['objects']:
             object_position, object_size = calculate_object_position(obj, parallax, offset, viewport_center)
             properties = obj.get('properties',[])
-            id = obj['gid'] - self.level.map_data['objects_firstgid']
+            source, firstgid, local_id = resolve_tileset(map_def, obj["gid"])
+            if "objects" not in source: continue 
+            id = local_id
 
-            if id == 2:#time collision
-                types = 'dust'
-                for property in properties:
-                    if property['name'] == 'particles':
-                        types = property['value']
-
-                new_platofrm = RhouttaEncounter_1( self.level.game_objects, object_position, types)
-                self.level.game_objects.platforms.add(new_platofrm)
 
 class Hlifblom(Biome):
     def __init__(self, level):
@@ -1141,7 +1332,9 @@ class Hlifblom(Biome):
         for obj in data['objects']:
             object_position, object_size = calculate_object_position(obj, parallax, offset, viewport_center)
             properties = obj.get('properties',[])
-            id = obj['gid'] - map_def.objects_firstgid
+            source, firstgid, local_id = resolve_tileset(map_def, obj["gid"])
+            if "objects" not in source: continue 
+            id = local_id
 
             if id == 0:#cave grass
                 if parallax == [1,1]:#if BG1 layer
@@ -1226,7 +1419,9 @@ class Golden_fields(Biome):
         for obj in data['objects']:
             object_position, object_size = calculate_object_position(obj, parallax, offset, viewport_center)
             properties = obj.get('properties',[])
-            id = obj['gid'] - map_def.objects_firstgid
+            source, firstgid, local_id = resolve_tileset(map_def, obj["gid"])
+            if "objects" not in source: continue 
+            id = local_id
 
             if id == 2:#bridge that is built when the reindeer dies
                 new_bridge = Bridge(object_position, self.level.game_objects)
@@ -1258,7 +1453,9 @@ class Crystal_mines(Biome):
         for obj in data['objects']:
             object_position, object_size = calculate_object_position(obj, parallax, offset, viewport_center)
             properties = obj.get('properties',[])
-            id = obj['gid'] - map_def.objects_firstgid
+            source, firstgid, local_id = resolve_tileset(map_def, obj["gid"])
+            if "objects" not in source: continue 
+            id = local_id
 
             if id == 7:#Conveyor_belt
                 kwarg = {}
@@ -1282,10 +1479,6 @@ class Crystal_mines(Biome):
                 new_smacker = Smacker(object_position, self.level.game_objects, **kwarg)
                 #self.level.game_objects.dynamic_platforms.add(new_smacker)
                 self.level.game_objects.platforms.add(new_smacker)
-
-            elif id == 9:#platform
-                new_platofrm = CrystalMines_1(self.level.game_objects, object_position)
-                self.level.game_objects.platforms.add(new_platofrm)
 
             elif id == 10:#crystal emitter
                 kwarg = {}
@@ -1384,7 +1577,9 @@ class Dark_forest(Biome):
         for obj in data['objects']:
             object_position, object_size = calculate_object_position(obj, parallax, offset, viewport_center)
             properties = obj.get('properties',[])
-            id = obj['gid'] - map_def.objects_firstgid
+            source, firstgid, local_id = resolve_tileset(map_def, obj["gid"])
+            if "objects" not in source: continue 
+            id = local_id
 
             if id == 9:#vines
                 new_viens = Vines_1(object_position, self.level.game_objects, parallax)
@@ -1412,18 +1607,6 @@ class Dark_forest(Biome):
                 new_lantern = ShadowLightLantern(object_position, self.level.game_objects, **kwarg)
                 self.level.game_objects.interactables.add(new_lantern)
 
-            elif id == 13:
-                kwarg = {}
-                for property in properties:
-                    if property['name'] == 'ID':
-                        kwarg['ID'] = property['value']
-                    elif property['name'] == 'erect':
-                        kwarg['erect'] = property['value']
-
-                new_platform = DarkForest_2(object_position, self.level.game_objects, **kwarg)
-                #self.level.game_objects.dynamic_platforms.add(new_platform)
-                self.level.game_objects.platforms.add(new_platform)
-
             elif id == 14:
                 new_boss = self.game_objects.registry.fetch('enemies', 'reindeer')(object_position, self.game_objects)
                 self.level.game_objects.enemies.add(new_boss)
@@ -1439,7 +1622,9 @@ class Tall_trees(Biome):
         for obj in data['objects']:
             object_position, object_size = calculate_object_position(obj, parallax, offset, viewport_center)
             properties = obj.get('properties',[])
-            id = obj['gid'] - map_def.objects_firstgid
+            source, firstgid, local_id = resolve_tileset(map_def, obj["gid"])
+            if "objects" not in source: continue 
+            id = local_id
 
             if id == 10:#packun
                 kwarg = {}
@@ -1448,42 +1633,7 @@ class Tall_trees(Biome):
                         kwarg['direction'] = property['value']
 
                 new_enemy = self.level.game_objects.registry.fetch('enemies', 'packun')(object_position, self.level.game_objects, **kwarg)
-                self.level.game_objects.enemies.add(new_enemy)
-
-            elif id == 11:#one side brakable
-                for property in properties:
-                    if property['name'] == 'ID':
-                        ID_key = property['value']
-
-                if not self.level.game_objects.world_state.state[ctx.level_name]['breakable_platform'].get(str(ID_key), False):
-                    platform = BreakableOnesideRight(object_position, self.level.game_objects, str(ID_key), 'assets/sprites/entities/platforms/breakable/nordveden/type2/')
-                    self.level.game_objects.platforms.add(platform)      
-
-            elif id == 12:#one side brakable
-                for property in properties:
-                    if property['name'] == 'ID':
-                        ID_key = property['value']
-
-                if not self.level.game_objects.world_state.state[ctx.level_name]['breakable_platform'].get(str(ID_key), False):
-                    platform = BreakableOnesideLeft(object_position, self.level.game_objects, str(ID_key), 'assets/sprites/entities/platforms/breakable/nordveden/type3/')
-                    self.level.game_objects.platforms.add(platform)                       
-
-            elif id == 13:#dissapera when standing on it
-                new_platofrm = TallTrees_1( self.level.game_objects, object_position)
-                self.level.game_objects.platforms.add(new_platofrm)
-
-            elif id == 14:#dissapera when standing on it
-                kwarg= {}
-                for property in properties:
-                    if property['name'] == 'direction':
-                        kwarg['direction'] = property['value']
-                    elif property['name'] == 'distance':
-                        kwarg['distance'] = property['value']
-                    elif property['name'] == 'speed':
-                        kwarg['speed'] = property['value']
-
-                new_platofrm = TallTrees2(object_position,  self.level.game_objects, **kwarg)
-                self.level.game_objects.platforms.add(new_platofrm)                
+                self.level.game_objects.enemies.add(new_enemy)                              
 
 class Wakeup_forest(Biome):
     def __init__(self, level):
@@ -1506,7 +1656,9 @@ class Wakeup_forest(Biome):
         for obj in data['objects']:
             object_position, object_size = calculate_object_position(obj, parallax, offset, viewport_center)
             properties = obj.get('properties',[])
-            id = obj['gid'] - map_def.objects_firstgid
+            source, firstgid, local_id = resolve_tileset(map_def, obj["gid"])
+            if "objects" not in source: continue 
+            id = local_id
 
             if id == 0:#tsatue
                 new_int = RhouttaStatue(object_position, self.level.game_objects)

@@ -44,7 +44,7 @@ class WaveMotion(MotionComponent):
     def _update(self, dt):
         self.time += dt
         time_factor = self.time * self.frequency
-        angle_phase = self.particle.angle + self.particle.phase
+        angle_phase = self.particle.phase
         self.particle.velocity = [
             self.amplitude * math.sin(time_factor + angle_phase),
             -self.gravity_scale

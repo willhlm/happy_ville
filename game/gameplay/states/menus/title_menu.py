@@ -102,14 +102,14 @@ class TitleMenu(BaseUI):
             #self.game.state_manager.enter_state('new_game')
 
             #load new game level
-            #self.game.game_objects.map.load_map(self,'village_1','1')
+            #self.game.game_objects.map.load_map(self,'village_5','1')
             #self.game.game_objects.map.load_map(self,'wakeup_forest_0','1')
             #self.game.game_objects.map.load_map(self,'spirit_world_1','1')
             #self.game.game_objects.map.load_map(self,'crystal_mines_1','1')
             #self.game.game_objects.map.load_map(self,'village_5','1')
             #self.game.game_objects.map.load_map(self,'nordveden_windtest','1')
-            #self.game.game_objects.map.load_map(self,'nordveden_1','1')
-            self.game.game_objects.map.load_map(self,'tall_trees_1','1')
+            self.game.game_objects.map.load_map(self,'nordveden_1','1')
+            #self.game.game_objects.map.load_map(self,'tall_trees_1','1')
             #self.game.game_objects.map.load_map(self,'dark_forest_1','5')
             #self.game.game_objects.map.load_map(self,'hlifblom_1','1')
             #self.game.game_objects.map.load_map(self,'rhoutta_encounter_3','1')

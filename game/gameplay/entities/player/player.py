@@ -95,7 +95,7 @@ class Player(Character):
             self.shader_state.handle_input('Invincibile')#blink a bit
             #self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state or interupt attacks?
             effect.defender_callbacks.pop('particles', None)#remove any partitlce effect set by the projectile
-            self.game_objects.particles.emit("black_burst", pos = self.hitbox.center, n=60)
+            self.game_objects.particles.emit("burst", pos = self.hitbox.center, n=60, colour = [0, 0, 0, 255])
             #self.emit_particles(lifetime = 40, scale = 3, colour=[0,0,0,255], fade_scale = 7,  number_particles = 60 )
             self.game_objects.cosmetics.add(Slash(self.hitbox.center,self.game_objects))#make a slash animation
 

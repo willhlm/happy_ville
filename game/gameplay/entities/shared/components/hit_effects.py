@@ -19,6 +19,7 @@ class HitEffect():
         self.hitstop = kwargs.get('hitstop', 10)                        
         self.hit_type = kwargs.get('hit_type', 'sword')
         self.particles = kwargs.get('particles', {})        
+        self.attacker_particles = kwargs.get('attacker_particles', {})        
         self.projectile = kwargs.get('projectile', None)
         self.meta = kwargs.get('meta', {})
         
@@ -80,9 +81,9 @@ def screen_shake_callback(camera, **kwargs):
     """Returns a screen shake callback"""
     return lambda: camera.camera_shake(**kwargs)
 
-def spawn_particles_callback(entity, **particle_kwargs):
+def spawn_particles_callback(game_objects, **particle_kwargs):
     """Returns a particle spawn callback"""
-    return lambda: entity.emit_particles(**particle_kwargs)
+    return lambda: game_objects.particles.emit(**particle_kwargs)
 
 def play_sound_callback(sound_manager, sound, volume=1.0):
     """Returns a sound play callback"""
@@ -101,7 +102,7 @@ def default_defender_sound(effect):
 
 def default_defender_particles(effect):
     """Spawn hit particles"""
-    effect.defender.emit_particles(**effect.particles)
+    effect.defender.game_objects.particles.emit(effect.particles['preset'], effect.defender.hitbox.center, effect.particles['n'], **effect.particles['args'])
 
 def default_defender_visual(effect):
     """Visual feedback (hurt flash)"""
@@ -109,7 +110,7 @@ def default_defender_visual(effect):
 
 def default_attacker_particles(effect):
     """Clash particles (projectile-specific)"""
-    effect.projectile.clash_particles(effect.defender.hitbox.center, number_particles=5)
+    effect.defender.game_objects.particles.emit(effect.attacker_particles['preset'], effect.defender.hitbox.center, effect.attacker_particles['n'],  **effect.attacker_particles['args'])
 
 def default_sound_dynamic(effect):
     """Dynamically resolve and play hit sound"""        

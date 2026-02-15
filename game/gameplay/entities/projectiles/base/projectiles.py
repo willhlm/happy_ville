@@ -19,7 +19,7 @@ class Projectiles(PlatformEntity):#projectiels
             self.kill()
 
     #collisions
-    def collision_platform(self, collision_plat):#collision platform
+    def collision_platform(self, collision_plat):#collision platform      
         collision_plat.take_dmg(self)
 
     def collision_projectile(self, eprojectile):#fprojecticle proectile collision with eprojecitile: called from collisions
@@ -57,16 +57,16 @@ class Projectiles(PlatformEntity):#projectiels
         pass
 
     def right_collision(self, block, type = 'Wall'):
-        self.collision_platform(block)
+        pass
 
     def left_collision(self, block, type = 'Wall'):
-        self.collision_platform(block)
+        pass
 
     def down_collision(self, block):
-        self.collision_platform(block)
+        pass
 
     def top_collision(self, block):
-        self.collision_platform(block)
+        pass
 
     def limit_y(self):#limits the velocity on ground, onewayup. But not on ramps: it makes a smooth drop
         pass

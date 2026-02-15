@@ -1,7 +1,6 @@
 import pygame
 from engine.utils import read_files
 from gameplay.entities.interactables.base.interactables import Interactables
-from gameplay.entities.visuals.particles import particles
 
 class InteractableCaveGrass(Interactables):
     def __init__(self,pos,game_objects):
@@ -24,9 +23,7 @@ class InteractableCaveGrass(Interactables):
         self.flags['invincibility'] = True                          
 
     def release_particles(self, number_particles = 12):#should release particles when hurt and death
-        for i in range(0, number_particles):
-            obj1 = getattr(particles, 'Circle')(self.hitbox.center,self.game_objects, distance=30, lifetime=300, vel = {'wave': [3, 14]}, scale=2, fade_scale = 1.5)
-            self.game_objects.cosmetics.add(obj1)        
+        self.game_objects.particles.emit('circle_wave', self.hitbox.center, n = 12, distance = 30, colour = [180,220,255,255])    
 
     def on_noncollision(self, entity):
         self.currentstate.handle_input('Idle')

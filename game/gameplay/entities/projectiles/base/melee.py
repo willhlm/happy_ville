@@ -1,7 +1,6 @@
 import random
 from gameplay.entities.projectiles.base.projectiles import Projectiles
 from engine.utils.functions import sign
-from gameplay.entities.visuals.particles import particles
 
 class Melee(Projectiles):
     def __init__(self, entity, **kwarg):
@@ -33,10 +32,3 @@ class Melee(Projectiles):
 
     def update_rect_x(self):
         pass
-
-    def clash_particles(self, pos, number_particles=12):
-        angle = random.randint(-180, 180)#the erection anglex
-        color = [255, 255, 255, 255]
-        for i in range(0,number_particles):
-            obj1 = getattr(particles, 'Spark')(pos, self.game_objects, distance = 0, lifetime = 10, vel = {'linear':[5,7]}, dir = angle, scale = 0.8, fade_scale = 7, colour = color)
-            self.entity.game_objects.cosmetics.add(obj1)

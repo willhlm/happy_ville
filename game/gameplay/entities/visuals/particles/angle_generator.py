@@ -52,8 +52,7 @@ class AngleGenerator:
             return random.randrange(0 - angle_spread[0], 0 + angle_spread[1])
         elif dir[0] == 1:  # Left hit
             return random.randrange(180 - angle_spread[1], 180 + angle_spread[0])
-        else:
-            # Fallback for other directions
+        else:            
             if dir[0] == 0:
                 return 90
             else:
@@ -77,7 +76,6 @@ class AngleGenerator:
             sigma = (angle_spread[0] + angle_spread[1]) / 2
             return random.normalvariate(mu=mean, sigma=sigma)
         else:
-            # Fallback
             if dir[0] == 0:
                 return 90
             else:

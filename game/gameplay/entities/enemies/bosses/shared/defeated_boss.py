@@ -1,5 +1,4 @@
 import random
-from gameplay.entities.visuals.particles import particles
 from gameplay.entities.base.static_entity import StaticEntity
 from engine import constants as C
 
@@ -21,14 +20,6 @@ class DefeatedBoss(StaticEntity):
 
     def draw(self, target):
         pass
-
-    def emit_particles(self, type = 'Circle', number_particles = 20, **kwarg):
-        for i in range(0, number_particles):
-            rect = self.boss.hitbox
-            position = [rect.centerx + random.uniform(-rect[2] * 0.5, rect[2] * 0.5), rect.centery + random.uniform(rect[3]*0.1,rect[3]*0.5)]
-
-            obj1 = getattr(particles, type)(position, self.game_objects, **kwarg)
-            self.game_objects.cosmetics_bg.add(obj1)#_bg is behind entities
 
     def update(self, dt):
         self.time += dt * self.timescale

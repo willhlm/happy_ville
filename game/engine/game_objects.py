@@ -108,6 +108,7 @@ class GameObjects():
         self.collisions.simple_collision(self.eprojectiles, self.fprojectiles, callback_name = 'collision_projectile')
         self.collisions.simple_collision(self.enemies, self.fprojectiles, callback_name = 'collision_enemy')
         self.collisions.simple_collision(self.players, self.eprojectiles, callback_name = 'collision_enemy')
+        self.collisions.simple_collision(self.platforms, self.fprojectiles, callback_name = 'collision_platform')
 
         self.collisions.simple_collision(self.interactables, self.fprojectiles, callback_name = 'collision_interactables')
         self.collisions.simple_collision(self.interactables_fg,self.fprojectiles, callback_name = 'collision_interactables_fg')

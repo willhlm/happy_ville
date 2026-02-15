@@ -1,6 +1,6 @@
 from gameplay.entities.visuals.environments import Leaves, BackgroundDroplet
 from gameplay.ui.components import MenuArrow, LogoLoading
-from gameplay.entities.visuals.particles import particles, screen_particles
+from gameplay.entities.visuals.particles import screen_particles
 from gameplay.world.weather import weather
 from gameplay.states import Bank, OptionMenu, OptionDisplay, OptionSounds
 from gameplay.entities.enemies import Reindeer, CultistWarrior, CultistRogue
@@ -79,11 +79,6 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         Leaves.pool(game_objects)
         BackgroundDroplet.pool(game_objects)
 
-        particles.Circle.pool(game_objects)
-        particles.Spark.pool(game_objects)
-        particles.Goop.pool(game_objects)
-        particles.FloatyParticles.pool(game_objects)
-
         weather.FlashFX.pool(game_objects)
 
         #platform
@@ -99,8 +94,9 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
 
 
         #temp
-        from gameplay.entities.visuals.particles.component_based.particles import Circle, Spark, Goop
+        from gameplay.entities.visuals.particles.component_based.particles import Circle, Spark, Goop, FloatyParticles
 
         Circle.pool(game_objects)
         Spark.pool(game_objects)
         Goop.pool(game_objects)
+        FloatyParticles.pool(game_objects)

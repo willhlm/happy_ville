@@ -25,7 +25,6 @@ class Particle(pygame.sprite.Sprite):
         self.colour = list(kwargs.get('colour', [255, 255, 255, 255]))
                 
         # Physics properties (used by some components)
-        self.angle = 0
         self.phase = random.uniform(-math.pi, math.pi)
         
         # Component system
@@ -185,14 +184,8 @@ class Goop(ShaderParticle):
 
 class SpriteParticle(Particle):
     """Particle that uses sprite textures."""
-    def __init__(self, pos, game_objects, sprite_path, colour=None):
-        super().__init__(pos, game_objects, colour=colour)
-        self.sprites = read_files.load_sprites_dict(sprite_path, game_objects)
-        self.animation = animation.Animation(self, framerate=0.7)
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
-        self.rect.center = self.true_pos
-        self.hitbox = self.rect.copy()
+    def __init__(self, pos, game_objects, **kwarg):
+        super().__init__(pos, game_objects, **kwarg)
     
     def update(self, dt):
         self.animation.update(dt)
@@ -215,16 +208,7 @@ class FloatyParticles(SpriteParticle):
         self.colour1 = (0, 0.5 * random_value, 1 * random_value, 1)
         self.colour2 = (1, 1, 1, 1)
         self.colour3 = (1, 0, 0, 1)
-    
-    def update(self, dt):
-        self.animation.update(dt)
-        self._update_position(dt)
-        self._update_velocity(dt)
-    
-    def _update_velocity(self, dt):
-        """Custom velocity update for floaty motion."""
-        self.velocity[1] += dt * 0.01
-    
+        
     def _update_uniforms(self):
         """Update shader uniforms for rendering."""
         self.shader['colour1'] = self.colour1

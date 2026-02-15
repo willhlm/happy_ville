@@ -1,4 +1,4 @@
-import pygame
+import pygame, random
 
 from gameplay.entities.projectiles.base.melee import Melee
 from engine.utils import read_files
@@ -49,37 +49,42 @@ class Sword(Melee):
         effect = self.create_effect()
         damage_applied, modified_effect = inetractable.take_hit(effect)
 
+    def create_effect(self):
+        """Create sword hit effect with current damage values"""
+        defender_particle = {
+            "preset": "sword_hit",
+            "n": 8,
+            "args": {
+                "dir": self.dir,
+                "colour": C.spirit_colour,                    
+            },
+        }
+
+        attacker_particles= {
+            "preset": "sword_clash",
+            "n": 5,  
+            "args": {
+                "angle": random.randint(-180, 180),  # old clash random angle
+                "colour": [255, 255, 255, 255],            
+            },
+        }
+
+        return hit_effects.create_melee_effect(
+            damage=self.dmg,
+            hit_type='sword',
+            knockback=[25, 10],
+            hitstop=5,
+            particles=defender_particle,#defender
+            attacker_particles = attacker_particles,
+            attacker=self.entity,
+            projectile=self,
+            meta = {'attacker_dir': self.dir},#save direction
+        )
+
     def level_up(self):#called when the smith imporoves the sword
         self.entity.inventory['Tungsten'] -= self.tungsten_cost
         self.dmg *= 1.2
         self.tungsten_cost += 2#1, 3, 5 tungstes to level up
 
     def draw(self, target):
-        pass
-
-    def create_effect(self):
-        """Create sword hit effect with current damage values"""
-        particle = {
-            'lifetime': 180,
-            'scale': 5,
-            'angle_spread': [13, 15],
-            'angle_dist': 'normal',
-            'colour': C.spirit_colour,
-            'gravity_scale': -0.1,
-            'gradient': 1,
-            'fade_scale': 2.2,
-            'number_particles': 8,
-            'vel': {'ejac': [13, 17]},
-            'dir': self.dir
-        }
-        
-        return hit_effects.create_melee_effect(
-            damage=self.dmg,
-            hit_type='sword',
-            knockback=[25, 10],
-            hitstop=5,
-            particles=particle,
-            attacker=self.entity,
-            projectile=self,
-            meta = {'attacker_dir': self.dir},#save direction
-        )
+        pass        

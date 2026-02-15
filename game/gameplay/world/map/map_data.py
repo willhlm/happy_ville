@@ -13,6 +13,8 @@ class MapDefinition:
     statics_firstgid: int
     interactables_firstgid: int
     objects_firstgid: int
+    platforms_firstgid: int
+    tileset_ranges: list
 
 @dataclass
 class LoadContext:

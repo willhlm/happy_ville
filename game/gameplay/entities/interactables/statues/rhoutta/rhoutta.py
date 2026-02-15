@@ -3,7 +3,6 @@ from engine import constants as C
 from engine.utils import read_files
 from engine.utils.functions import track_distance
 from gameplay.entities.interactables.base.interactables import Interactables
-from gameplay.entities.visuals.particles import particles
 
 class RhouttaStatue(Interactables):#interact with it to get air dash
     def __init__(self, pos, game_objects):
@@ -22,7 +21,12 @@ class RhouttaStatue(Interactables):#interact with it to get air dash
     def update(self, dt):
         super().update(dt)
         amplitude = track_distance(self.game_objects.player.hitbox.center, self.hitbox.center)
-        self.emit_particles(lifetime = 70, scale=3, colour =[0,0,0,255], gravity_scale = 0.5, gradient = 1, fade_scale = 3,  number_particles = 1, vel = {'wave': [0, -1]})
+        self.emit_particles()
+
+    def emit_particles(self):
+        rect = self.hitbox
+        position = [rect.centerx + random.uniform(-rect[2] * 0.5, rect[2] * 0.5), rect.centery + random.uniform(rect[3]*0.1,rect[3]*0.5)]
+        self.game_objects.particles.emit('spirit_wisp', position, colour =[0,0,0,255])
 
     def draw(self, target):
         super().draw(target)
@@ -32,11 +36,3 @@ class RhouttaStatue(Interactables):#interact with it to get air dash
         self.interacted = True
         self.game_objects.signals.emit('open')
         #self.game_objects.map.load_map(self.game_objects.game.state_manager.state_stack[-1],'rhoutta_encounter_1','1')
-
-    def emit_particles(self, type = 'Circle', number_particles = 20, **kwarg):        
-        for i in range(0, number_particles):
-            rect = self.hitbox
-            position = [rect.centerx + random.uniform(-rect[2] * 0.5, rect[2] * 0.5), rect.centery + random.uniform(rect[3]*0.1,rect[3]*0.5)]
-
-            obj1 = getattr(particles, type)(position, self.game_objects, **kwarg)
-            self.game_objects.cosmetics.add(obj1)

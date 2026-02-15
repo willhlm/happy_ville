@@ -5,7 +5,7 @@ Makes particle creation clean and explicit.
 import math
 import random
 from .angle_generator import AngleGenerator
-from .particles import Circle, Spark, Goop
+from .particles import Circle, Spark, Goop, FloatyParticles
 from .motion_components import LinearMotion, GravityMotion, WaveMotion, EjacMotion, OrbitalMotion
 from .effect_components import (
     FadeComponent, LifetimeComponent, HomingComponent, 
@@ -54,7 +54,7 @@ class ParticleBuilder:
         self._angle_rad = 0.0
     
     # Particle type selection
-    def circle(self, radius=None, scale=3, gradient=0, colour=None):
+    def circle(self, radius=None, scale=3, gradient=0, colour=[255,255,255,255]):
         self.particle_type = Circle
         self.particle_kwargs = {
             'radius': radius,
@@ -75,6 +75,11 @@ class ParticleBuilder:
         self.particle_type = Goop
         self.particle_kwargs = {'colour': colour, 'gradient': gradient}
         return self
+
+    def floaty_particles(self, colour = None):
+        self.particle_type = FloatyParticles
+        self.particle_kwargs = {'colour': colour}
+        return self        
     
     # Velocity setup
     def velocity(self, speed, angle_degrees):
@@ -161,7 +166,7 @@ class ParticleBuilder:
         self.components.append(('wave', {
             'frequency': frequency,
             'amplitude': amplitude,
-            'gravity_scale': gravity_scale
+            'gravity_scale': gravity_scale,
         }))
         return self
     

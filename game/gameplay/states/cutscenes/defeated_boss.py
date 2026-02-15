@@ -1,5 +1,4 @@
 from .base.cutscene_engine import CutsceneEngine
-from gameplay.entities.visuals.particles import particles
 
 class DefeatedBoss(CutsceneEngine):#cut scene to play when a boss dies
     def __init__(self,objects):

@@ -41,9 +41,7 @@ class WaveMotion(Motion):
     def update(self, dt):
         time_factor = self.particle.lifetime * 0.1
         angle_phase = self.particle.angle + self.particle.phase
-        self.particle.velocity = [
-            0.5 * math.sin(time_factor + angle_phase),-self.gravity_scale
-        ]
+        self.particle.velocity = [0.5 * math.sin(time_factor + angle_phase), -self.gravity_scale]
 
 
 class EjacMotion(Motion):

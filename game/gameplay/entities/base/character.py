@@ -2,7 +2,6 @@ from engine import constants as C
 from gameplay.entities.shared.states import states_shader
 
 from gameplay.entities.base.platform_entity import PlatformEntity
-from gameplay.entities.visuals.particles import particles
 from gameplay.entities.shared.components.hit_component import HitComponent
 
 class Character(PlatformEntity):#enemy, NPC,player
@@ -55,11 +54,6 @@ class Character(PlatformEntity):#enemy, NPC,player
     def knock_back(self, amp, dir):
         self.velocity[0] = dir[0] * amp[0]
         self.velocity[1] = -dir[1] * amp[1]
-
-    def emit_particles(self, type = 'Circle', number_particles = 20, **kwarg):
-        for i in range(0, number_particles):
-            obj1 = getattr(particles, type)(self.hitbox.center, self.game_objects, **kwarg)
-            self.game_objects.cosmetics.add(obj1)
 
     def draw(self, target):
         self.blit_pos = [int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1])]

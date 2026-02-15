@@ -16,12 +16,12 @@ class BaseDynamic(BaseTexture):
 
     def update_true_pos_x(self, dt):
         self.true_pos[0] += dt*self.velocity[0]
-        self.rect.left = int(self.true_pos[0])#should be int
+        self.rect.left = int(self.true_pos[0])
         self.hitbox.left = self.rect.left
 
     def update_true_pos_y(self, dt):
         self.true_pos[1] += dt*self.velocity[1]
-        self.rect.top = int(self.true_pos[1])#should be int
+        self.rect.top = int(self.true_pos[1])
         self.hitbox.top = self.rect.top
 
     def collide_x(self, entity):  # Handles horizontal collision
