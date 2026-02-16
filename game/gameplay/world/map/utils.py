@@ -402,7 +402,7 @@ class ObjectSpawner:
             # signals
             "signal_id": "",
 
-            'name': 'default'#sprite name
+            'sprite_path': ''#sprite path/name rellative from assets/sprites/entities/platforms/
         }
 
     def _bool(self, v, default=False):
@@ -489,8 +489,6 @@ class ObjectSpawner:
             if props.get("path_points"):
                 props["move"] = True
                 props["move_type"] = "path"
-                # optional: if no speed on platform, allow path to define it
-                # (already handled by merge rule above)
 
             components = self._components_from_flags(props)
 
@@ -1158,6 +1156,10 @@ class Village(Biome):
                 door_i = DoorInteract(object_position, self.level.game_objects, door)
                 self.level.game_objects.platforms.add(door)
                 self.level.game_objects.interactables.add(door_i)
+
+            elif id == 3:#boulder
+                new_tree = Boulder(object_position, self.level.game_objects)
+                self.level.game_objects.platforms.add(new_tree)                
 
 class Nordveden(Biome):
     def __init__(self, level):

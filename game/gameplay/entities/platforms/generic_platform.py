@@ -1,6 +1,6 @@
 from engine.utils import read_files
-from gameplay.entities.platforms.core.dynamic_platform import DynamicPlatform
-from gameplay.entities.platforms.components.components import COMPONENTS  # your registry
+from gameplay.entities.platforms.base.dynamic_platform import DynamicPlatform
+from gameplay.entities.platforms.components.components import COMPONENTS
 
 def parse_components(components):
     if isinstance(components, (list, tuple)):
@@ -15,8 +15,8 @@ class GenericPlatform(DynamicPlatform):
         super().__init__(pos, game_objects, size=props.get('size', (16, 16)), components=[])
         self.props = props
 
-        name = props.get("name", "default")
-        self.sprites = read_files.load_sprites_dict(f"assets/sprites/entities/platforms/generic/{name}", game_objects)
+        name = props.get("sprite_path", "generic/default/")
+        self.sprites = read_files.load_sprites_dict(f"assets/sprites/entities/platforms/{name}" + '/', game_objects)
         self.image = self.sprites["idle"][0]
 
         # sync rect/hitbox to image size

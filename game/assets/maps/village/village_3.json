@@ -341,9 +341,9 @@
                  "name":"front",
                  "objects":[
                         {
-                         "gid":39646,
+                         "gid":39648,
                          "height":64,
-                         "id":303,
+                         "id":311,
                          "name":"",
                          "rotation":0,
                          "type":"",
@@ -660,8 +660,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":110,
- "nextobjectid":310,
+ "nextlayerid":111,
+ "nextobjectid":312,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

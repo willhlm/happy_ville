@@ -31,8 +31,11 @@
  </tile>
  <tile id="7">
   <properties>
-   <property name="lifetime" value=""/>
+   <property name="disappear_on_stand" type="bool" value="true"/>
+   <property name="disappear_time" value=""/>
+   <property name="respawn_time" value=""/>
+   <property name="sprite_path" value="bubble"/>
   </properties>
-  <image width="32" height="32" source="../../../sprites/entities/platforms/timer/bubble/idle/idle.png"/>
+  <image width="32" height="32" source="../../../sprites/entities/platforms/bubble/idle/idle.png"/>
  </tile>
 </tileset>

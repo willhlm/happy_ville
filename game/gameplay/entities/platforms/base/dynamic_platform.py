@@ -1,11 +1,10 @@
 from engine.system import animation
-from gameplay.entities.platforms.core.platform_entity import PlatformEntity
+from .platform import Platform
 
-import traceback
-
-class DynamicPlatform(PlatformEntity):
+class DynamicPlatform(Platform):
     def __init__(self, pos, game_objects, size=(16,16), components=None):
-        super().__init__(pos, game_objects, size=size)
+        super().__init__(pos, size=size)
+        self.game_objects = game_objects
         self.velocity = [0.0, 0.0]
         self.delta = [0.0, 0.0]
         self.components = components or []

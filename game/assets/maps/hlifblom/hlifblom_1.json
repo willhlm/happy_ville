@@ -500,6 +500,40 @@
                 }, 
                 {
                  "draworder":"topdown",
+                 "id":56,
+                 "name":"platforms",
+                 "objects":[
+                        {
+                         "gid":39199,
+                         "height":32,
+                         "id":1944,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"disappear_on_stand",
+                                 "type":"bool",
+                                 "value":true
+                                }, 
+                                {
+                                 "name":"sprite_path",
+                                 "type":"string",
+                                 "value":"bubble"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":5040,
+                         "y":1648
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
+                 "x":0,
+                 "y":0
+                }, 
+                {
+                 "draworder":"topdown",
                  "id":46,
                  "name":"back",
                  "objects":[
@@ -1793,8 +1827,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":56,
- "nextobjectid":1942,
+ "nextlayerid":57,
+ "nextobjectid":1945,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

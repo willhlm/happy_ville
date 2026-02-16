@@ -25,7 +25,7 @@ uniform float branch_sway = 0.03;
 uniform float cross_wind_amount = 0.2;      // How much perpendicular movement (0-1)
 
 // Anchor point
-uniform vec2 anchor_point = vec2(0.5, 0.2);
+uniform vec2 anchor_point = vec2(0.5,0.2);
 
 out vec4 color;
 
@@ -68,9 +68,7 @@ vec2 voronoiID(vec2 p) {
     return cell_id;
 }
 
-// Extract depth from texture
-// Brighter pixels = closer (foreground leaves)
-// Darker pixels = further (background, branches)
+// Extract depth from texture with filtering to reduce artifacts
 float getDepth(vec2 uv) {
     vec4 texel = texture(imageTexture, uv);
     
@@ -83,9 +81,26 @@ float getDepth(vec2 uv) {
     return luminance;
 }
 
-// Quantize depth into discrete layers
-float quantizeDepth(float depth, float num_layers) {
-    return floor(depth * num_layers) / num_layers;
+// Smooth depth sampling with filtering to reduce banding
+float getDepthFiltered(vec2 uv) {
+    // Sample depth at multiple nearby points and average
+    float depth = 0.0;
+    float total_weight = 0.0;
+    
+    const float filter_size = 0.002;  // Small filter to smooth transitions
+    
+    for (int y = -1; y <= 1; y++) {
+        for (int x = -1; x <= 1; x++) {
+            vec2 offset = vec2(float(x), float(y)) * filter_size;
+            vec2 sample_uv = clamp(uv + offset, 0.0, 1.0);
+            
+            float weight = 1.0 / (1.0 + length(offset) * 100.0);
+            depth += getDepth(sample_uv) * weight;
+            total_weight += weight;
+        }
+    }
+    
+    return depth / total_weight;
 }
 
 void main()
@@ -111,16 +126,14 @@ void main()
     vec2 global_sway = dir * branch_offset * movement_strength * wind_strength;
     
     // ============================================
-    // SAMPLE INITIAL DEPTH
+    // SAMPLE DEPTH FROM ORIGINAL UV (KEY FIX!)
     // ============================================
-    // Get depth from current position
-    vec2 base_uv = uv + global_sway;
-    float raw_depth = getDepth(base_uv);
+    // Sample depth from the ORIGINAL position, not displaced position
+    // This prevents depth from jumping as the tree sways
+    float raw_depth = getDepthFiltered(uv);  // Use filtered depth for smoothness
     
-    // Optional: quantize into discrete layers for more obvious effect
-    // Comment out this line for smooth depth gradient
-    float depth = quantizeDepth(raw_depth, depth_layers);
-    // Uncomment for smooth: float depth = raw_depth;
+    // Use SMOOTH depth instead of quantized to eliminate banding
+    float depth = raw_depth;
     
     // ============================================
     // VORONOI CELL (for variation within same depth)
@@ -137,22 +150,15 @@ void main()
     // ============================================
     // DEPTH-BASED PARALLAX DISPLACEMENT
     // ============================================
-    // Key concept: Closer layers (higher depth) move MORE
-    // Further layers (lower depth) move LESS
-    
     // Parallax multiplier based on depth
-    // depth = 0.0 (dark/far) → multiplier = 0.0 (no movement)
-    // depth = 1.0 (bright/near) → multiplier = 1.0 (full movement)
     float parallax_factor = depth;
     
-    // Apply depth-scaled movement
-    vec2 depth_offset = global_sway * parallax_factor * depth_separation;
+    // Apply depth-scaled movement (reduced slightly to minimize artifacts)
+    vec2 depth_offset = global_sway * parallax_factor * depth_separation * 0.7;
     
     // ============================================
     // WAVE MOTION (scaled by depth)
     // ============================================
-    // Foreground leaves wave more than background
-    
     // Primary wave (along wind direction)
     float primary_wave = sin(cell_time * 2.0) * (1.0 + sin(cell_time * 0.6) * 0.3);
     
@@ -187,26 +193,15 @@ void main()
     // ============================================
     // COMBINE ALL DISPLACEMENTS
     // ============================================
-    vec2 total_offset = depth_offset  // Parallax (depth-based)
-                      + wave          // Wave motion (depth-scaled)
-                      + shimmer;      // Flutter (foreground only)
+    vec2 total_offset = global_sway        // Global branch sway
+                      + depth_offset       // Parallax (depth-based)
+                      + wave               // Wave motion (depth-scaled)
+                      + shimmer;           // Flutter (foreground only)
     
     // ============================================
-    // ITERATIVE DEPTH SAMPLING (Parallax Occlusion)
+    // FINAL UV CALCULATION
     // ============================================
-    // This creates proper layering by resampling depth
-    
-    vec2 final_uv = base_uv + total_offset;
-    
-    // Optionally resample depth at new position for better parallax
-    // This makes layers "slide over" each other more convincingly
-    float resampled_depth = getDepth(final_uv);
-    
-    // If we moved to a different depth layer, adjust slightly
-    float depth_difference = resampled_depth - depth;
-    vec2 depth_correction = total_offset * depth_difference * 0.3;
-    
-    final_uv -= depth_correction;
+    vec2 final_uv = uv + total_offset;
     
     // Clamp to texture bounds
     final_uv = clamp(final_uv, 0.0, 1.0);
@@ -227,11 +222,4 @@ void main()
     brightness += motion * 0.12;
     
     color.rgb *= brightness;
-    
-    // ============================================
-    // DEBUG: Visualize depth layers (optional)
-    // ============================================
-    // Uncomment to see depth layers as colored overlays
-    // float layer = quantizeDepth(raw_depth, depth_layers);
-    // color.rgb = mix(color.rgb, vec3(layer), 0.3);
 }

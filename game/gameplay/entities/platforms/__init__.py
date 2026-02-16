@@ -19,6 +19,4 @@ from .texture.door.door import Door
 from .texture.gate.gate_1 import Gate_1
 from .texture.gate.gate_2 import Gate_2
 
-from .timer.bubble_static import BubbleStatic
-
 from .generic_platform import GenericPlatform

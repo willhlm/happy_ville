@@ -66,7 +66,6 @@ class Gone(Basic_states):
         if input == "re_appear":
             self.enter_state("Transition_2")
 
-
 class Transition_2(Basic_states):
     anim_name = "transition_2"
     def __init__(self, entity):
