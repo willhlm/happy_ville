@@ -1,9 +1,9 @@
 import pygame
 from engine import constants as C
-from gameplay.entities.interactables.base.interactables import Interactables
+from .base_collisions import BaseCollisions
 from engine.utils import functions
 
-class ZoomCollision(Interactables):
+class ZoomCollision(BaseCollisions):
     def __init__(self, pos, game_objects, size, **kwarg):
         super().__init__(pos, game_objects)
         self.rect = pygame.Rect(pos, size)

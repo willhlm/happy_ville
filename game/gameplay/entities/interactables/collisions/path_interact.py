@@ -1,7 +1,7 @@
 import pygame
-from gameplay.entities.interactables.base.interactables import Interactables
+from .base_collisions import BaseCollisions
 
-class PathInteract(Interactables):
+class PathInteract(BaseCollisions):
     def __init__(self, pos, game_objects, size, destination, spawn, image):
         super().__init__(pos, game_objects)
         self.rect = pygame.Rect(pos, size)
@@ -15,12 +15,6 @@ class PathInteract(Interactables):
         pass
 
     def draw(self, target):
-        pass
-
-    def update(self, dt):
-        self.group_distance()
-
-    def update_render(self, dt):
         pass
 
     def interact(self):

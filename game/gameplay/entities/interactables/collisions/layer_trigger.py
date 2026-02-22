@@ -1,9 +1,9 @@
 import pygame
-from gameplay.entities.interactables.base.interactables import Interactables
+from .base_collisions import BaseCollisions
 
 'append some shader to specified screen layers'
 
-class LayerTrigger(Interactables):
+class LayerTrigger(BaseCollisions):
     def __init__(self, pos, game_objects, size, **kwargs):
         super().__init__(pos, game_objects)
         self.rect = pygame.Rect(pos,size)
@@ -14,9 +14,6 @@ class LayerTrigger(Interactables):
         pass
 
     def release_texture(self):
-        pass
-
-    def update(self, dt):
         pass
 
     def collision(self, entity):#append some shader to specified screen layers

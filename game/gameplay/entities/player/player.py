@@ -37,7 +37,7 @@ class Player(Character):
         self.sword = Sword(self)
         self.abilities = AbilityManager(self)#spirit (thunder,migawari etc) and movement /dash, double jump and wall glide)
 
-        self.flags = {'ground': True, 'invincibility': False, 'shroompoline': False, 'attack_able': True, 'grounddash': True}# flags to check if on ground (used for jumpåing), #a flag to make sure you can only swing sword when this is False
+        self.flags = {'ground': True, 'shroompoline': False, 'attack_able': True, 'grounddash': True}# flags to check if on ground (used for jumpåing), #a flag to make sure you can only swing sword when this is False
         self.currentstate = StateManager(self)#states_player.Idle_main(self)
         self.death_state = states_death.Idle(self)#this one can call "normal die" or specifal death (for example cultist encounter)
 
@@ -47,6 +47,7 @@ class Player(Character):
         self.timer_jobs = {'wet': Wet(self, 60)}#these timers are activated when promt and a job is appeneded to self.timer.
 
         self.movement_manager = modifier_movement.MovementManager()
+        self.hit_component.set_invinsibility_time(C.invincibility_time_player)
         self.reset_movement()
 
         self.colliding_platform = None#save the last collising platform
@@ -86,11 +87,9 @@ class Player(Character):
     def take_dmg(self, effect):
         """Called by hit_component after modifiers run. Apply damage and effects."""
         self.health -= effect.damage
-        self.flags['invincibility'] = True
         self.game_objects.ui.hud.remove_hearts(effect.damage)# * self.dmg_scale)#update UI
 
         if self.health > 0:  # Still alive
-            self.game_objects.timer_manager.start_timer(C.invincibility_time_player, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
             self.shader_state.handle_input('Hurt')#turn white and shake
             self.shader_state.handle_input('Invincibile')#blink a bit
             #self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state or interupt attacks?

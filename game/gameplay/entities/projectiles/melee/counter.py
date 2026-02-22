@@ -5,7 +5,7 @@ class Counter(Melee):
         super().__init__(entity, **kwarg)
         self.hitbox = self.entity.hitbox.copy()
         self.dmg = 0
-        self.entity.flags['invincibility'] = True#make the player invincible
+        self.entity.flags['invincibility'] = True
 
     def update(self, dt):
         self.lifetime -= dt

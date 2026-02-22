@@ -14,6 +14,7 @@ class DamageManager():
             'tjasolmais_embrace': ShieldModifier,
             'parry_window': ParryModifier,
             'super_armor': SuperArmorModifier,
+            'block_damage': BlockDamageModifier,
         }
 
     def add_modifier(self, modifier_name, priority=0, **kwargs):
@@ -49,6 +50,14 @@ class HitModifier():
         """Modify the hit effect. Can change damage, cancel hit, etc."""
         pass
 
+class BlockDamageModifier(HitModifier):
+    """Reduces damage by half"""
+    def __init__(self, priority=0):
+        super().__init__(priority)
+
+    def modify_hit(self, effect):
+        effect.result = HitResult.BLOCKED
+
 class HalfDamageModifier(HitModifier):
     """Reduces damage by half"""
     def __init__(self, priority=0):
@@ -65,7 +74,7 @@ class ShieldModifier(HitModifier):
 
     def modify_hit(self, effect):
         # Shield takes damage instead
-        self.entity.abilities.spirit_abilities['Shield'].shield.take_damage(effect.damage)
+        self.entity.abilities.spirit_abilities['Shield'].shield.take_dmg(effect.damage)
         effect.result = HitResult.BLOCKED  # Cancel damage to main entity
 
 class ParryModifier(HitModifier):

@@ -1,7 +1,7 @@
 import pygame 
-from gameplay.entities.interactables.base.interactables import Interactables
+from .base_collisions import BaseCollisions
 
-class SafeSpawn(Interactables):#area which gives the coordinates which will make aila respawn at after falling into a hole
+class SafeSpawn(BaseCollisions):#area which gives the coordinates which will make aila respawn at after falling into a hole
     def __init__(self, pos, game_objects, size, position):
         super().__init__(pos, game_objects)
         self.rect = pygame.Rect(pos, size)
@@ -14,12 +14,6 @@ class SafeSpawn(Interactables):#area which gives the coordinates which will make
 
     def draw(self, target):
         pass
-
-    def update_render(self, dt):
-        pass
-
-    def update(self, dt):
-        self.group_distance()
 
     def collision(self, entity):
         entity.backpack.map.save_safespawn(self.position)

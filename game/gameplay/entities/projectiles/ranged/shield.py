@@ -23,12 +23,10 @@ class Shield(Projectiles):#a protection shield
         self.progress = 0
 
     def take_dmg(self, dmg):#called when entity takes damage
-        if self.flags['invincibility']: return
         self.health -= dmg
 
-        self.flags['invincibility'] = True
         if self.health > 0:#TODO make it red momentary or something to indicate that it too damage
-            self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
+            pass
         else:
             self.game_objects.timer_manager.start_timer(100, self.time_out)#adds a timer to timer_manager and sets self.invincible to false after a while
             #TODO make it blink or something to indicate that it will die soon

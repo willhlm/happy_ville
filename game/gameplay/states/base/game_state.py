@@ -22,6 +22,3 @@ class GameState():
 
     def release_texture(self):#in the final version, this should not be needed sinec we wil not dynamically make layers
         pass
-
-    def update_render(self, dt):#for fade
-        pass

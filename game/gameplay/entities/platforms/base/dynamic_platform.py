@@ -56,9 +56,18 @@ class DynamicPlatform(Platform):
     def reset_timer(self):
         self.currentstate.increase_phase()
 
-    def take_dmg(self, entity):        
-        for c in self.components:
-            c.take_dmg(entity)        
+    def take_hit(self, effect):
+        effect.attacker_callbacks.pop('hitstop', None)
+        effect.defender_callbacks.pop('visual', None)#depends on if we want shader state
+        effect.defender_callbacks.pop('hitstop', None)
+        effect.defender_callbacks.pop('particles', None)
+        effect.attacker_callbacks.pop('sword_jump', None)
+        return self.hit_component.take_hit(effect)
+
+    def take_dmg(self, effect):#called from hit copmentn
+        for component in self.components:
+            effect = component.take_dmg(effect)
+        return effect
 
 class _NullState:
 

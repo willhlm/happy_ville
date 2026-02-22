@@ -3,7 +3,7 @@ import pygame, math, random
 class Lights():
     def __init__(self, game_objects):
         self.game_objects = game_objects
-        self.ambient = [0, 0, 0, 0]#ambient colour
+        self.set_ambiance([1, 1, 1, 1])        
         self.lights_sources = []#append lights
         self.shaders = {'light':game_objects.shaders['light'],'blur':game_objects.shaders['blur'],'blend':game_objects.shaders['blend']}
 
@@ -18,9 +18,12 @@ class Lights():
         self.max_light_sources = 20#a valuehard coded in light shader
         self.update_render(0)
 
+    def set_ambiance(self, colour):        
+        self.ambient = colour#ambient colour
+
     def new_map(self):#called when loading a new map from map loader
         self.clear_lights()
-        self.ambient = [0, 0, 0, 0]
+        self.set_ambiance([1,  1, 1, 1])    
 
     def clear_normal_map(self):#called at the begning of draw in game objects
         self.normal_map.clear(0, 0, 0, 0)

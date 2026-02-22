@@ -15,6 +15,7 @@ class SFXLibrary:
             ("sword", "metal"): self.sounds.get('sword_metal'),
             ("sword", "wood"): self.sounds.get('sword_wood'),
             ("stone", "flesh"): self.sounds.get('stone_flesh'),
+            ("sword", "stone"): self.sounds.get('sword_stone'),
             # Add more mappings as needed
         }
         

@@ -64,7 +64,6 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         FallingRock.pool(game_objects)
         Projectile_1.pool(game_objects)
         PoisonBlob.pool(game_objects)
-        Sword.pool(game_objects)
         Arrow.pool(game_objects)
         Wind.pool(game_objects)
         Shield.pool(game_objects)

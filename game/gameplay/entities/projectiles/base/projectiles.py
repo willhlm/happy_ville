@@ -7,7 +7,6 @@ class Projectiles(PlatformEntity):#projectiels
         self.lifetime = kwarg.get('lifetime', 300)
         self.flags = {'invincibility': False, 'charge_blocks': kwarg.get('charge_blocks', False), 'aggro': True}#if they can break special blocks        
         self.dmg = kwarg.get('dmg', 1)
-        self.base_effect = hit_effects.HitEffect(damage = self.dmg, attacker = self)            
 
     def update(self, dt):
         super().update(dt)
@@ -19,20 +18,23 @@ class Projectiles(PlatformEntity):#projectiels
             self.kill()
 
     #collisions
-    def collision_platform(self, collision_plat):#collision platform      
-        collision_plat.take_dmg(self)
+    def collision_platform(self, collision_plat):#collision platform   
+        effect = self.create_effect()
+        damage_applied, modified_effect = collision_plat.take_hit(effect)            
 
     def collision_projectile(self, eprojectile):#fprojecticle proectile collision with eprojecitile: called from collisions
-        eprojectile.take_dmg(self.dmg)
+        effect = self.create_effect()
+        damage_applied, modified_effect = eprojectile.take_hit(effect)            
 
     def collision_enemy(self, collision_enemy):#projecticle enemy collision (including player)
-        if self.flags['aggro']:      
-            collision_enemy.take_hit(self.base_effect)
+        effect = self.create_effect()
+        damage_applied, modified_effect = collision_enemy.take_hit(effect)    
 
-    def collision_interactables(self,interactable):#collusion interactables
-        interactable.take_dmg(self)#some will call clash_particles but other will not. So sending self to interactables
+    def collision_interactables(self, inetractable):#latest collision version
+        effect = self.create_effect()
+        damage_applied, modified_effect = inetractable.take_hit(effect)
 
-    def collision_interactables_fg(self,interactable):#collusion interactables
+    def collision_interactables_fg(self,interactable):#2d water, 
         pass
 
     def reflect(self, dir, pos, clamp_value = 10):#projectile collision when purple infinity stone is equipped: pos, dir are aila sword
@@ -48,6 +50,9 @@ class Projectiles(PlatformEntity):#projectiels
 
     def take_hit(self, effect):
         pass
+
+    def create_effect(self):
+        return hit_effects.HitEffect(self.game_objects, damage = self.dmg, attacker = self)            
 
     #pltform, ramp collisions.
     def ramp_top_collision(self, ramp):#called from collusion in clollision_ramp

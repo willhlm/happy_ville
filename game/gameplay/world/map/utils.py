@@ -1164,6 +1164,7 @@ class Village(Biome):
 class Nordveden(Biome):
     def __init__(self, level):
         super().__init__(level)
+        #self.live_blur = True
         self.weather_config = {
             "wind": {                                
                 "layers": {
@@ -1191,7 +1192,7 @@ class Nordveden(Biome):
     def post_process(self, layer_name, parallax):#called at the end of group loading
         if self.live_blur:       
             if parallax[0] == 1: return          
-            radius = functions.blur_radius(parallax, max_blur = 5)
+            radius = functions.blur_radius(parallax)
             self.level.game_objects.game.screen_manager.append_shader('Blur_fast', [layer_name], radius = radius)   
 
     def play_music(self):
@@ -1199,9 +1200,8 @@ class Nordveden(Biome):
         self.level.game_objects.sound.play_background_sound(sounds['idle'][0], index = 1, loop = -1, fade = 1000, volume = 0.2)
 
     def room(self, room):#called wgen a new room is loaded
-        return
         if room in ['11', '8', '7', '6', '5']:
-            self.level.game_objects.lights.ambient = (100/255,100/255,100/255,255/255)
+            self.level.game_objects.lights.set_ambiance(100/255,100/255,100/255,255/255)      
             self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,200/255], interact = False)
 
     def load_objects(self, data, parallax, offset, ctx: LoadContext, map_def: MapDefinition, layer_name: str, viewport_center):

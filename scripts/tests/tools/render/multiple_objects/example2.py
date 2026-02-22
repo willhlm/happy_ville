@@ -1,8 +1,7 @@
-from random import randint, uniform
 from time import time
 import pygame
 from pygame_render import RenderEngine
-import math
+import numpy as np
 
 # Initialize pygame
 pygame.init()
@@ -17,12 +16,19 @@ tex = engine.load_texture("sprite.png")
 # Clock
 clock = pygame.time.Clock()
 
-# Positions
-num_sprites = 4500
-positions = [(randint(0, width), randint(0, height)) for _ in range(num_sprites)]
+# Instance data
+num_sprites = 200000
+rng = np.random.default_rng(42)
+indices = np.arange(num_sprites)
+positions = np.empty((num_sprites, 2))
+positions[:, 0] = rng.uniform(0, width, size=num_sprites)
+positions[:, 1] = rng.uniform(0, height, size=num_sprites)
 
-# Load shader
-shader_glow = engine.load_shader_from_path("vertex.glsl", "fragment_glow.glsl")
+# Load fragment shader by path; engine reads + compiles it.
+shader_glow = engine.load_fragment_shader_from_path(
+    "fragment_glow.glsl",
+    instanced=True,
+)
 
 # Main game loop
 running = True
@@ -44,30 +50,35 @@ while running:
     shader_glow["time"] = total_time
 
     # Render texture to screen
-    angle = total_time * 0.05
+    sprite_scale = (16.0 * np.sin(indices * 0.1))
+    scales = np.empty((num_sprites, 2))
+    scales[:, 0] = sprite_scale
+    scales[:, 1] = sprite_scale
 
-    #clear
-    transforms = []
-    tints = []
-    glow_strengths = []
-    for i in range(num_sprites):
-        transforms.append({
-            "position": positions[i],
-            "scale": 16 * math.sin(i*0.1),
-            "angle": total_time * math.sin(i*0.001),
-        })
-        tints.append((math.sin(i*0.1),math.sin(i*0.1),math.sin(i*0.1),math.sin(i*0.1)))
-        glow_strengths.append(math.sin(0.4 * i + i * 0.001))
-    
-    engine.render_batch_unique(
+    angles = (
+        (total_time * np.sin(indices * 0.001)) * np.pi / 180.0
+    ).reshape(-1, 1)
+
+    base_tint = np.sin(indices * 0.1)
+    tints = np.empty((num_sprites, 4))
+    tints[:, 0] = base_tint
+    tints[:, 1] = base_tint
+    tints[:, 2] = base_tint
+    tints[:, 3] = base_tint
+
+    glow_strengths = np.sin(0.4 * indices + indices * 0.001).reshape(-1, 1)
+
+    engine.render_batch_instanced(
         tex,
         engine.screen,
-        transforms=transforms,
+        positions=positions,
+        scales=scales,
+        angles=angles,
         shader=shader_glow,
-        instance_uniforms={
-                "tint": tints,
-                "glow": glow_strengths,
-            }     
+        instance_attributes={
+            "tint": tints,
+            "glow": glow_strengths,
+        },
     )
 
     # Update the display

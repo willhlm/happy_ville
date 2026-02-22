@@ -1,6 +1,8 @@
 import math, pygame
 from .states_time_collision import Idle
 from gameplay.entities.shared.components import hit_effects
+from gameplay.entities.shared.components.hit_results import HitResult
+
 # ----------------------------
 # Component base
 # ----------------------------
@@ -31,8 +33,8 @@ class PlatformComponent:
     def collide_y(self, entity):
         pass
 
-    def take_dmg(self, projectile):
-        pass
+    def take_dmg(self, effect):
+        return effect
 
 # ----------------------------
 # Collision components
@@ -569,20 +571,14 @@ class Breakable(PlatformComponent):
     def on_added(self):
         self.health = int(self.props.get("health", 3))
         self.inv_time = int(self.props.get("invincibility_time", 30))
-
-        sides = self.props.get("vulnerable_sides", "all")
+        sides = str(self.props.get("vulnerable_sides", "all")).strip().lower()
         if sides == "all":
             self.vuln = {"top", "bottom", "left", "right"}
         else:
-            self.vuln = sides
+            self.vuln = {s.strip() for s in sides.split(",") if s.strip()}
 
-        self.inv = False
-
-        self.timers = self.p.game_objects.timer_manager
         self.camera = self.p.game_objects.camera_manager
-
-    def _inv_off(self):
-        self.inv = False
+        self.p.hit_component.damage_manager.remove_modifier('block_damage')
 
     def _get_hit_side(self, src) -> str | None:
         # Require rects
@@ -610,26 +606,25 @@ class Breakable(PlatformComponent):
         else:
             # Vertical collision
             return "top" if b.centery < a.centery else "bottom"
-                
-    def take_dmg(self, source):
+
+    def take_dmg(self, effect):
         """
         Only applies damage if hit direction is allowed by vulnerable_sides.
         """
-        if self.inv: return
-            
-        hit_side = self._get_hit_side(source)
-        if hit_side not in self.vuln: return            
+        source = getattr(effect, "projectile", None) or getattr(effect, "attacker", None)
+        if source is not None and hasattr(source, "hitbox"):
+            hit_side = self._get_hit_side(source)
+            if hit_side not in self.vuln:               
+                self.p.material = 'stone'#different sounds depedning on if the hit lands
+                return effect
 
-        dmg = getattr(source, "dmg", 1)
-        self.health -= int(dmg)
-
-        self.inv = True
-        self.timers.start_timer(self.inv_time, self._inv_off)
-
+        self.health -= int(effect.damage)
         self.camera.camera_shake(amplitude=3, duration=10)
+        self.p.material = 'flesh'#different sounds depedning on if the hit lands
 
         if self.health <= 0:
             self.p.kill()
+        return effect
 
 #not used
 class ActiveGate(PlatformComponent):
@@ -686,4 +681,3 @@ COMPONENTS = {
     "disappear_on_stand": DisappearOnStand,
     "breakable": Breakable,
 }
-

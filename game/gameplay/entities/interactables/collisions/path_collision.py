@@ -1,8 +1,8 @@
 import pygame
-from gameplay.entities.interactables.base.interactables import Interactables
+from .base_collisions import BaseCollisions
 from engine import constants as C
 
-class PathCollision(Interactables):
+class PathCollision(BaseCollisions):
     def __init__(self, pos, game_objects, size, destination, spawn):
         super().__init__(pos,game_objects)
         self.rect = pygame.Rect(pos,size)
@@ -17,13 +17,6 @@ class PathCollision(Interactables):
 
     def draw(self, target):
         pass
-
-    def update_render(self, dt):
-        pass
-
-    def update(self, dt):
-        pass
-        #self.group_distance()
 
     def player_movement(self, player):#the movement aila does when colliding
         if self.rect[3] > self.rect[2]:#if player was trvelling horizontally, enforce running in that direction

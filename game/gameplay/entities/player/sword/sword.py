@@ -38,14 +38,12 @@ class Sword(Melee):
 
     def collision_enemy(self, enemy):#latest collision version
         effect = self.create_effect()
-        self.currentstate.sword_jump()
 
         damage_applied, modified_effect = enemy.take_hit(effect)
         if damage_applied:#if damage was applied
             self.stone_states['enemy_collision'].enemy_collision()
 
     def collision_interactables(self, inetractable):#latest collision version
-        self.currentstate.sword_jump()
         effect = self.create_effect()
         damage_applied, modified_effect = inetractable.take_hit(effect)
 
@@ -69,7 +67,7 @@ class Sword(Melee):
             },
         }
 
-        return hit_effects.create_melee_effect(
+        effect = hit_effects.create_melee_effect(self.entity.game_objects,
             damage=self.dmg,
             hit_type='sword',
             knockback=[25, 10],
@@ -80,6 +78,9 @@ class Sword(Melee):
             projectile=self,
             meta = {'attacker_dir': self.dir},#save direction
         )
+
+        effect.attacker_callbacks['sword_jump'] = lambda eff: eff.projectile.currentstate.sword_jump()#add sword jump
+        return effect
 
     def level_up(self):#called when the smith imporoves the sword
         self.entity.inventory['Tungsten'] -= self.tungsten_cost

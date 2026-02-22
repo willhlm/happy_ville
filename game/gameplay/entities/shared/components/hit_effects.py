@@ -12,8 +12,9 @@ Defines:
 
 class HitEffect():
     """Represents a hit with all its properties"""
-    def __init__(self, **kwargs):
+    def __init__(self, game_objects, **kwargs):
         # Gameplay properties
+        self.game_objects = game_objects
         self.damage = kwargs.get('damage', 1)
         self.knockback = kwargs.get('knockback', [25, 10])
         self.hitstop = kwargs.get('hitstop', 10)                        
@@ -35,12 +36,14 @@ class HitEffect():
     
     def copy(self):
         new_effect = HitEffect.__new__(HitEffect)
+        new_effect.game_objects = self.game_objects
         new_effect.damage = self.damage
         new_effect.knockback = self.knockback[:]
         new_effect.hitstop = self.hitstop
         new_effect.result = self.result
         new_effect.hit_type = self.hit_type
         new_effect.particles = self.particles.copy()
+        new_effect.attacker_particles = self.attacker_particles.copy()
         new_effect.meta = self.meta.copy()
         new_effect.defender_callbacks = self.defender_callbacks.copy()
         new_effect.attacker_callbacks = self.attacker_callbacks.copy()
@@ -96,13 +99,13 @@ def play_sound_callback(sound_manager, sound, volume=1.0):
 def default_defender_sound(effect):
     """Play hurt sound"""
     try:
-        effect.defender.game_objects.sound.play_sfx(effect.defender.sounds['hurt'][0], vol=0.2)
+        effect.game_objects.sound.play_sfx(effect.defender.sounds['hurt'][0], vol=0.2)
     except:
         pass
 
 def default_defender_particles(effect):
     """Spawn hit particles"""
-    effect.defender.game_objects.particles.emit(effect.particles['preset'], effect.defender.hitbox.center, effect.particles['n'], **effect.particles['args'])
+    effect.game_objects.particles.emit(effect.particles['preset'], effect.defender.hitbox.center, effect.particles['n'], **effect.particles['args'])
 
 def default_defender_visual(effect):
     """Visual feedback (hurt flash)"""
@@ -110,21 +113,21 @@ def default_defender_visual(effect):
 
 def default_attacker_particles(effect):
     """Clash particles (projectile-specific)"""
-    effect.defender.game_objects.particles.emit(effect.attacker_particles['preset'], effect.defender.hitbox.center, effect.attacker_particles['n'],  **effect.attacker_particles['args'])
+    effect.game_objects.particles.emit(effect.attacker_particles['preset'], effect.projectile.hitbox.center, effect.attacker_particles['n'],  **effect.attacker_particles['args'])
 
 def default_sound_dynamic(effect):
     """Dynamically resolve and play hit sound"""        
     material = getattr(effect.defender, 'material', 'flesh')
-    sound = effect.defender.game_objects.sound.get_sfx(effect.hit_type, material)[0]
-    effect.defender.game_objects.sound.play_sfx(sound, vol=1)
+    sound = effect.game_objects.sound.get_sfx(effect.hit_type, material)[0]
+    effect.game_objects.sound.play_sfx(sound, vol=1)
 
 # ============================================================================
 # FACTORY FUNCTIONS - Create pre-configured effects
 # ============================================================================
 
-def create_melee_effect(**kwargs):
+def create_melee_effect(game_objects, **kwargs):
     """Factory for melee weapons (sword, hammer, etc.)"""
-    effect = HitEffect(**kwargs)
+    effect = HitEffect(game_objects, **kwargs)
     
     # Defender callbacks (executed on enemy/player getting hit)
     effect.defender_callbacks = {
@@ -144,16 +147,16 @@ def create_melee_effect(**kwargs):
         'hitstop': lambda eff: eff.attacker.hitstop.start(
             duration=eff.hitstop,
             callback=[]  # No callbacks, just hitstop
-        ),
+        ),        
         'particles': default_attacker_particles,
         'sound': default_sound_dynamic,
     }
     
     return effect
 
-def create_projectile_effect(**kwargs):
+def create_projectile_effect(game_objects, **kwargs):
     """Factory for projectiles (no attacker hitstop)"""
-    effect = HitEffect(**kwargs)
+    effect = HitEffect(game_objects, **kwargs)
     
     effect.defender_callbacks = {        
         'hitstop': lambda eff: eff.defender.hitstop.start(
@@ -175,9 +178,9 @@ def create_projectile_effect(**kwargs):
     
     return effect
 
-def create_contact_effect(**kwargs):
+def create_contact_effect(game_objects, **kwargs):
     """Factory for contact damage (enemy touching player)"""
-    effect = HitEffect(**kwargs)
+    effect = HitEffect(game_objects, **kwargs)
     
     # Defender callbacks (player getting hit by contact)
     effect.defender_callbacks = {

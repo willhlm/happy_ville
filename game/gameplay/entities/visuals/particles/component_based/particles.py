@@ -78,6 +78,9 @@ class Particle(pygame.sprite.Sprite):
         pos = (int(self.rect[0] - camera_scroll[0]), int(self.rect[1] - camera_scroll[1]))        
         self.game_objects.game.display.render(self.image, target, position=pos, shader=self.shader)
 
+    def release_texture(self):
+        pass
+
 class ShaderParticle(Particle):
     """Particle that uses a shader for rendering."""    
     def __init__(self, pos, game_objects, shader_name, image, **kwarg):

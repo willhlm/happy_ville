@@ -1,7 +1,7 @@
 import pygame
-from gameplay.entities.interactables.base.interactables import Interactables
+from .base_collisions import BaseCollisions
 
-class EventTrigger(Interactables):
+class EventTrigger(BaseCollisions):
     def __init__(self, pos, game_objects, size, **kwarg):
         super().__init__(pos, game_objects)
         self.rect = pygame.Rect(pos, size)
@@ -14,9 +14,6 @@ class EventTrigger(Interactables):
 
     def draw(self, target):
         pass
-
-    def update(self, dt):
-        self.group_distance()
 
     def on_collision(self, entity):
         if type(entity).__name__ != 'Player': return#only player trigger

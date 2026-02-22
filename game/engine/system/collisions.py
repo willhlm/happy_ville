@@ -30,6 +30,19 @@ class Collisions():
                 self.game_objects.player.velocity[1] = offset#so that it looks more natural (cannot be 0, needs to be finite)
                 self.game_objects.player.go_through['ramp'] = ramp.go_through#a flag that determines if one can go through
 
+    #npc player conversation, when pressing t
+    def check_interaction_collision(self):
+        npc =  pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.npcs,Collisions.collided)#check collision
+        interactable = pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.interactables,Collisions.collided)#check collision
+        loot = pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.loot,Collisions.collided)#check collision
+
+        if npc:
+            npc.interact()
+        elif interactable:
+            interactable.interact()
+        elif loot:
+            loot.interact(self.game_objects.player)
+
     def entity_collision(self, entities, target_group):
         """
         Track collisions using object references.
@@ -37,15 +50,12 @@ class Collisions():
         - on_collision(entity): called ONCE when entity enters
         - on_noncollision(entity): called ONCE when entity exits
         """
-        entity_list = list(entities.sprites())
-        active_targets = set(target_group.sprites())
-
-        for target in active_targets:
+        for target in target_group:
             previous = self._collision_state.get(target, set())
             current = set()
 
             # Find current collisions
-            for entity in entity_list:
+            for entity in entities:
                 if self.collided(entity, target):
                     target.collision(entity)
                     current.add(entity)
@@ -85,22 +95,9 @@ class Collisions():
                 callback = getattr(target, callback_name)
                 callback(entity)
 
-    #npc player conversation, when pressing t
-    def check_interaction_collision(self):
-        npc =  pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.npcs,Collisions.collided)#check collision
-        interactable = pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.interactables,Collisions.collided)#check collision
-        loot = pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.loot,Collisions.collided)#check collision
-
-        if npc:
-            npc.interact()
-        elif interactable:
-            interactable.interact()
-        if loot:
-            loot.interact(self.game_objects.player)
-
     #collision of player, enemy and loot: setting the flags depedning on the collisoin directions collisions between entities-groups: a dynamic and a static one    
     def platform_collision(self, dynamic_Entities, dt):
-        for entity in dynamic_Entities.sprites():
+        for entity in dynamic_Entities:
             entity.collision_types = {'top':False,'bottom':False,'right':False,'left':False, 'standing_platform': None}
             
             #move in x every dynamic sprite            

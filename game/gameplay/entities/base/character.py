@@ -13,7 +13,6 @@ class Character(PlatformEntity):#enemy, NPC,player
 
         self.shader_state = states_shader.Idle(self)        
         self.hit_component = HitComponent(self)
-        self.flags = {'invincibility': False}
 
     def update(self, dt):
         self.hitstop.update(dt)
@@ -38,10 +37,8 @@ class Character(PlatformEntity):#enemy, NPC,player
     def take_dmg(self, effect):
         """Called by hit_component after modifiers run. Apply damage and effects."""
         self.health -= effect.damage
-        self.flags['invincibility'] = True
 
         if self.health > 0:  # Still alive
-            self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)
             self.shader_state.handle_input('Hurt')
             self.currentstate.handle_input('Hurt')
             self.game_objects.camera_manager.camera_shake(amplitude=4, duration=12, scale=0.9)
@@ -58,9 +55,6 @@ class Character(PlatformEntity):#enemy, NPC,player
     def draw(self, target):
         self.blit_pos = [int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1])]
         self.game_objects.game.display.render(self.image, target, position = self.blit_pos, flip = self.dir[0] > 0, shader = self.shader)#shader render
-
-    def on_invincibility_timeout(self):#runs when sword timer runs out
-        self.flags['invincibility'] = False
 
     def on_attack_timeout(self):#when attack cooldown timer runs out
         self.flags['attack_able'] = True
