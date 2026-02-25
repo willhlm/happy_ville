@@ -23,7 +23,7 @@ class OptionMenu(BaseUI):
                 arrow.set_pos((bx + bw + 10, by))  # +10 px padding
             else:# left arrow, align to left edge of button                
                 arrow.set_pos((bx - arrow.rect.width - 10, by))  # -10 px padding
-        arrow.play_SFX()
+        self.game.game_objects.sound.play_ui_sound('on_select')
 
     def update_render(self, dt):
         self.game.game_objects.ui.uis['menu'].update_time(dt)
@@ -78,7 +78,7 @@ class OptionMenu(BaseUI):
             if event[-1] == 'start':
                 self.game.state_manager.exit_state()
             elif event[-1] in ('return', 'a'):
-                self.menu_ui.arrows[0].pressed()
+                self.game.game_objects.sound.play_ui_sound('select')
                 self.update_options()
 
     def update_options(self):

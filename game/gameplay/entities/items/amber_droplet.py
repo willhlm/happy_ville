@@ -16,10 +16,10 @@ class AmberDroplet(EnemyDrop):
         self.true_pos = list(self.rect.topleft)
         self.description = 'moneyy'
 
-    def player_collision(self,player):#when the player collides with this object
-        super().player_collision(player)
+    def on_collision(self, entity):#when the player collides with this object
+        super().on_collision(entity)
         self.game_objects.world_state.update_statistcis('amber_droplet')
-        tot_amber = player.backpack.inventory.get_quantity(self)
+        tot_amber = entity.backpack.inventory.get_quantity('amberdroplet')
         self.game_objects.ui.hud.update_money(tot_amber)
 
     def pool(game_objects):#all things that should be saved in object pool

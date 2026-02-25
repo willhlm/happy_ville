@@ -1,35 +1,41 @@
-import pygame
+import random
 from engine.utils import read_files
 
 class SFXLibrary:
     """Manages game sound effects"""
     
-    def __init__(self, sounds_path='assets/audio/sfx/entities/shared/'):
-        self.sounds = read_files.load_sounds_dict(sounds_path)
-        self._build_sound_maps()
+    def __init__(self):
+        impact_sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/shared/')
+        ui_sounds = read_files.load_sounds_dict('assets/audio/sfx/ui/')
+        self._build_sound_maps(impact_sounds, ui_sounds)
     
-    def _build_sound_maps(self):
+    def _build_sound_maps(self, impact_sounds, ui_sounds):
         self.impact_sounds = {
-            ("sword", "flesh"): self.sounds.get('sword_flesh'),
-            ("bow", "flesh"): self.sounds.get('arrow_flesh'),
-            ("sword", "metal"): self.sounds.get('sword_metal'),
-            ("sword", "wood"): self.sounds.get('sword_wood'),
-            ("stone", "flesh"): self.sounds.get('stone_flesh'),
-            ("sword", "stone"): self.sounds.get('sword_stone'),
+            ("sword", "flesh"): impact_sounds.get('sword_flesh'),
+            ("bow", "flesh"): impact_sounds.get('arrow_flesh'),
+            ("sword", "metal"): impact_sounds.get('sword_metal'),
+            ("sword", "wood"): impact_sounds.get('sword_wood'),
+            ("stone", "flesh"): impact_sounds.get('stone_flesh'),
+            ("sword", "stone"): impact_sounds.get('sword_stone'),
             # Add more mappings as needed
         }
         
         self.ui_sounds = {
-            "menu_select": self.sounds.get('menu_select'),
-            "menu_confirm": self.sounds.get('menu_confirm'),
+            "select": ui_sounds.get('select'),
+            "confirm": ui_sounds.get('confirm'),
+            "on_select": ui_sounds.get('on_select'),
+            "narrative_text": ui_sounds.get('narrative_text'),
             # Add UI sounds
         }
+
+    def _pick_sound(self, sound_or_list):
+        return random.choice(sound_or_list)
     
     def get_impact_sound(self, weapon_type, material):
-        return self.impact_sounds.get((weapon_type, material))
+        return self._pick_sound(self.impact_sounds.get((weapon_type, material)))
     
     def get_ui_sound(self, ui_event):
-        return self.ui_sounds.get(ui_event)
+        return self._pick_sound(self.ui_sounds.get(ui_event))
     
     def get_sound(self, sound_type, *args):
         if sound_type == "impact":

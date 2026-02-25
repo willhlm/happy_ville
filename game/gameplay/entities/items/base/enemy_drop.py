@@ -22,8 +22,8 @@ class EnemyDrop(Item):
         if self.lifetime < 0:#remove after a while
             self.kill()
 
-    def player_collision(self, player):#when the player collides with this object
-        if self.currentstate.__class__.__name__ == 'Death': return#enter only once
+    def on_collision(self, entity):#when the player collides with this object
         self.game_objects.sound.play_sfx(self.sounds['death'][0])#should be in states        
         self.currentstate.handle_input('Death')
-        player.backpack.inventory.add(self)   
+        entity.backpack.inventory.add(self)  
+         

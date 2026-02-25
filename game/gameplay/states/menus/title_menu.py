@@ -6,7 +6,7 @@ class TitleMenu(BaseUI):
     def __init__(self,game):
         super().__init__(game)
         self.menu_ui = TitleMenuLoader(game.game_objects)
-        self.play_music()
+        self._play_music()
         self.game_title = self.menu_ui.sprites['title'][0]
 
         self.current_button = 0
@@ -49,7 +49,7 @@ class TitleMenu(BaseUI):
                 arrow.set_pos((bx + bw + 10, y_pos))  # +10 px padding
             else:# left arrow, align to left edge of button
                 arrow.set_pos((bx - arrow.rect.width - 10, y_pos))  # -10 px padding
-        arrow.play_SFX()
+        self.game.game_objects.sound.play_ui_sound('on_select')
 
     def _update_button(self):
         """Handle button state transitions when selection changes"""
@@ -91,24 +91,26 @@ class TitleMenu(BaseUI):
                 pygame.quit()
                 sys.exit()
 
-    def play_music(self):
-        self.channel = self.game.game_objects.sound.play_background_sound(self.menu_ui.sounds['main'][0], index = 0, loop = -1, fade = 700, volume = 0.3)
-        self.channel = self.game.game_objects.sound.play_background_sound(self.menu_ui.sounds['whisper'][0], index = 1, loop = -1, fade = 700, volume = 0.1)
+    def _play_music(self):
+        self.channel1 = self.game.game_objects.sound.play_background_sound(self.menu_ui.sounds['main'][0], index = 0, loop = -1, fade = 700, volume = 0.3)
+        self.channel2 = self.game.game_objects.sound.play_background_sound(self.menu_ui.sounds['whisper'][0], index = 1, loop = -1, fade = 700, volume = 0.1)
 
     def change_state(self):
         if self.current_button == 0:#new game
-            self.menu_ui.arrows[0].pressed('new')#if we want to make it e.g. glow or something
+            self.game.game_objects.sound.play_ui_sound('confirm', volume =0.2)
+            self.game.game_objects.sound.fade_channel(self.channel1)
+            self.game.game_objects.sound.fade_channel(self.channel2)            
             self.game.state_manager.enter_state('gameplay')                               
             #self.game.state_manager.enter_state('new_game')
 
             #load new game level
             #self.game.game_objects.map.load_map(self,'village_5','1')
-            #self.game.game_objects.map.load_map(self,'wakeup_forest_0','1')
+            self.game.game_objects.map.load_map(self,'wakeup_forest_0','1')
             #self.game.game_objects.map.load_map(self,'spirit_world_1','1')
             #self.game.game_objects.map.load_map(self,'crystal_mines_1','1')
             #self.game.game_objects.map.load_map(self,'village_5','1')
             #self.game.game_objects.map.load_map(self,'nordveden_windtest','1')
-            self.game.game_objects.map.load_map(self,'nordveden_1','1')
+            #self.game.game_objects.map.load_map(self,'nordveden_6','1')
             #self.game.game_objects.map.load_map(self,'tall_trees_1','1')
             #self.game.game_objects.map.load_map(self,'dark_forest_1','5')
             #self.game.game_objects.map.load_map(self,'hlifblom_1','1')
@@ -117,11 +119,11 @@ class TitleMenu(BaseUI):
             #self.game.game_objects.map.load_map(self,'collision_map_4','1')
 
         elif self.current_button == 1:
-            self.menu_ui.arrows[0].pressed()
+            self.game.game_objects.sound.play_ui_sound('select')
             self.game.state_manager.enter_state('load_menu')
 
         elif self.current_button == 2:
-            self.menu_ui.arrows[0].pressed()
+            self.game.game_objects.sound.play_ui_sound('select')
             self.game.state_manager.enter_state('option_menu')
 
         elif self.current_button == 3:

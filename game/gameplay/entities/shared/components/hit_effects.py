@@ -118,8 +118,7 @@ def default_attacker_particles(effect):
 def default_sound_dynamic(effect):
     """Dynamically resolve and play hit sound"""        
     material = getattr(effect.defender, 'material', 'flesh')
-    sound = effect.game_objects.sound.get_sfx(effect.hit_type, material)[0]
-    effect.game_objects.sound.play_sfx(sound, vol=1)
+    sound = effect.game_objects.sound.play_weapon_hit(effect.hit_type, material)
 
 # ============================================================================
 # FACTORY FUNCTIONS - Create pre-configured effects

@@ -11,8 +11,6 @@ class InteractableCaveGrass(Interactables):
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)        
         self.hitbox.midbottom = self.rect.midbottom
 
-        self.flags['invincibility'] = False
-
     def on_collision(self, entity):
         self.currentstate.handle_input('Once',animation_name ='hurt', next_state = 'Idle')
         self.release_particles()
@@ -20,7 +18,6 @@ class InteractableCaveGrass(Interactables):
     def take_dmg(self, damage):
         self.currentstate.handle_input('Death')
         self.release_particles(3)
-        self.flags['invincibility'] = True                          
 
     def release_particles(self, number_particles = 12):#should release particles when hurt and death
         self.game_objects.particles.emit('circle_wave', self.hitbox.center, n = 12, distance = 30, colour = [180,220,255,255])    

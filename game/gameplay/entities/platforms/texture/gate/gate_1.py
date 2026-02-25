@@ -4,27 +4,25 @@ from engine.system import animation
 from engine.utils import read_files
 from . import states_gate
 
-class Gate_1(BaseTexture):#a gate. The ones that are owned by the lever will handle if the gate should be erect or not by it
+class Gate_1(BaseTexture):
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects)
         self.init()
 
-        self.ID_key = kwarg.get('ID', 'None')#an ID to match with the gate
-        if game_objects.world_state.quests.get(self.ID_key[:self.ID_key.rfind('_')], False):#if quest accodicated with it has been completed
-            state = 'down'
-        elif game_objects.world_state.events.get(self.ID_key[:self.ID_key.rfind('_')], False):#if the event has been completed
-            state = 'down'
-        else:
-            state = {True: 'erect', False: 'down'}[kwarg.get('erect', False)]#a flag that can be specified in titled
-        self.image = self.sprites[state][0]
-        self.rect = pygame.Rect(pos[0], pos[1], self.image.width,self.image.height)#hitbox is set in state
+        self.ID_key = kwarg.get("ID", None)                
+        erect = self.game_objects.world_state.load_bool(self.game_objects.map.level_name, "gate", self.ID_key, initial=kwarg.get("erect", False))
+        state = "erect" if erect else "down"
 
+        self.image = self.sprites[state][0]
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.animation = animation.Animation(self)
-        self.currentstate = {'erect': states_gate.Erect, 'down': states_gate.Down}[state](self)
-        self.game_objects.signals.subscribe(self.ID_key, self.lever_hit)
+        self.currentstate = {"erect": states_gate.Erect, "down": states_gate.Down}[state](self)
+    
+        self.game_objects.signals.subscribe(self.ID_key, self.lever_hit)# Lever emits on this channel; gate listens and toggles itself
 
     def init(self):
-        self.sprites = read_files.load_sprites_dict('assets/sprites/entities/platforms/gates/gate_1/', self.game_objects)
+        self.sprites = read_files.load_sprites_dict("assets/sprites/entities/platforms/gates/gate_1/", self.game_objects)
 
     def lever_hit(self):
-        self.currentstate.handle_input('transform')
+        self.game_objects.world_state.toggle_bool(self.game_objects.map.level_name, "gate", self.ID_key)
+        self.currentstate.handle_input("transform")

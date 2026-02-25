@@ -719,12 +719,7 @@ class ObjectSpawner:
                     self.game_objects.all_bgs.add(layer_name,god_rays)
 
             elif id == 19:#trigger
-                kwarg = {}
-                for property in properties:
-                    if property['name'] == 'event':
-                        kwarg['event'] = property['value']
-                    elif property['name'] == 'new_state':
-                        kwarg['new_state'] = property['value']
+                kwarg = props_list_to_dict(properties)
 
                 if self.game_objects.world_state.is_cutscene_complete(kwarg['event']): continue#if the cutscene has been shown before, return.
                 if self.game_objects.world_state.is_event_complete(kwarg['event']): continue#if event has already been done 
@@ -1201,7 +1196,7 @@ class Nordveden(Biome):
 
     def room(self, room):#called wgen a new room is loaded
         if room in ['11', '8', '7', '6', '5']:
-            self.level.game_objects.lights.set_ambiance(100/255,100/255,100/255,255/255)      
+            self.level.game_objects.lights.set_ambiance([100/255,100/255,100/255,255/255])      
             self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,200/255], interact = False)
 
     def load_objects(self, data, parallax, offset, ctx: LoadContext, map_def: MapDefinition, layer_name: str, viewport_center):
@@ -1640,14 +1635,34 @@ class Tall_trees(Biome):
 class Wakeup_forest(Biome):
     def __init__(self, level):
         super().__init__(level)
-        self.wrapping_enabled = False
-        self.world_width = 0         
+        intro_blocks = {
+            "intro_lore": ["Before frost found the earth…",
+                            "there was only song.",
+                            "The world was a great dream.",
+                            "Until shadow took root.",
+                            "It grew within a child.",
+                            "The ground beneath her wept.",
+                            "To save the dream…",
+                            "they laid her beneath the roots.",
+                            "The roots still breathe.",
+                            "And something beneath them stirs."]
+        }     
+
+        self.level.game_objects.ui.overlay.overlay_library.add_text_blocks(intro_blocks)
+
+        #titles = {
+        #"biome_wakeup_forest": {"tex": "assets/ui/titlecards/wakeup_forest.png"},
+        #"boss_idja": {"tex": "assets/ui/titlecards/boss_idja.png"},
+        #}
+        #game_objects.ui.overlay.overlay_library.add_title_cards(titles)
 
     def room(self, room = 1):
-        if room in ['3', '4']:
-            self.level.game_objects.lights.ambient = (30/255,30/255,30/255,230/255)#230
+        self.level.game_objects.lights.set_ambiance([200/255,200/255,200/255,255/255])      
+        self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,255/255], normal_interact = False)
+        if room in ['99']:
+            self.level.game_objects.lights.ambient = (30/255,20030/255,30/255,230/255)#230
             if self.level.game_objects.world_state.events.get('guide', False):#if guide interaction has happened
-                self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,200/255],interact = False)
+                self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,255/255], interact = False)
 
     def play_music(self):
         super().play_music()

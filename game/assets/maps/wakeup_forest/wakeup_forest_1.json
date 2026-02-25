@@ -866,24 +866,6 @@
                          "y":656
                         }, 
                         {
-                         "gid":1,
-                         "height":16,
-                         "id":294,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"spawn",
-                                 "type":"string",
-                                 "value":"1"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":4496,
-                         "y":592
-                        }, 
-                        {
                          "gid":8,
                          "height":80,
                          "id":297,

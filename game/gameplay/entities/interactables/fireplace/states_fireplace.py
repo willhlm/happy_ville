@@ -29,15 +29,10 @@ class Idle(Basic_states):
         if input == 'Interact':
             self.enter_state('Interact')
 
-    def set_animation_name(self,name):#called for UI abilities
-        self.entity.state = name
-        self.entity.animation.frame = 0
-
 class Interact(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.make_light()
-        self.entity.channel = self.entity.game_objects.sound.play_sfx(self.entity.sounds['idle'][0], loop = -1, vol = 0.3)
+        self.entity.turn_on()
 
     def increase_phase(self):
         self.enter_state('Interacted')
@@ -53,10 +48,7 @@ class Interacted(Basic_states):
 class Pre_idle(Basic_states):#fire palce
     def __init__(self,entity):
         super().__init__(entity)
-        for light in self.entity.light_sources:
-            self.entity.game_objects.lights.remove_light(light)
-        self.entity.light_sources = []   
-        self.entity.channel.fadeout(400) 
+        self.entity.turn_off()
 
     def increase_phase(self):
         self.enter_state('Idle')

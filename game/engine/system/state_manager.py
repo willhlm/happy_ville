@@ -9,12 +9,13 @@ class State_manager():
         """Push a new state onto the stack."""
         # Get the state class dynamically and instantiate it
         state = REGISTERY[state_name](self.game, **kwarg)        
+        self.state_stack[-1].on_exit()  # Resume the previous state
         self.state_stack.append(state)        
 
     def exit_state(self):
         """Pop the current state off the stack."""
         state = self.state_stack.pop()
-        state.on_exit()  # Call on_exit for the state we're exiting
+        state.on_pop()  # Call on_exit for the state we're exiting
         self.state_stack[-1].on_resume()  # Resume the previous state
 
     def update(self, dt):

@@ -12,6 +12,7 @@ from gameplay.world.weather import weather
 from engine import constants as C
 from gameplay.ui.managers import ui
 from gameplay.narrative.quests_events.manager import QuestsEventsManager
+
 from gameplay.registry.registry_manager import RegistryManager
 from engine.particles.particle_system import ParticleSystem
 
@@ -93,12 +94,12 @@ class GameObjects():
 
     def collide_all(self, dt):
         self.platform_collision(dt)
-
-        self.collisions.simple_collision(self.players, self.loot, callback_name = 'player_collision')
+        
         self.collisions.simple_collision(self.players, self.enemies, callback_name = 'player_collision')
         self.collisions.simple_collision(self.players, self.bg_fade, callback_name = 'player_collision')
 
         #checks colliions and non collisions
+        self.collisions.entity_collision(self.players, self.loot)
         self.collisions.entity_collision(self.players, self.interactables)
         self.collisions.entity_collision(self.players, self.interactables_fg)
         self.collisions.entity_collision(self.players, self.npcs)
@@ -163,6 +164,7 @@ class GameObjects():
         self.all_bgs.update_render(dt)
         self.bg_interact.update_render(dt)
         self.all_fgs.update_render(dt)
+        self.sound.update_render(self.player.hitbox.center)#for emitters and tracking distance for sound
         self.players.update_render(dt)
         self.enemies.update_render(dt)
         self.npcs.update_render(dt)
@@ -176,10 +178,10 @@ class GameObjects():
 
     def draw(self):#called from render states
         self.lights.clear_normal_map()
-        self.all_bgs.draw(self.game.screen_manager.screens)#returns the last layer
+        self.all_bgs.draw(self.game.screen_manager.screens)
 
         #bg1:
-        layer = self.all_bgs.get_topmost_screen()
+        layer = self.all_bgs.get_topmost_screen()#returns the last layer
         last_bg_screen = self.game.screen_manager.screens[layer].layer
         self.platforms.draw(last_bg_screen)
         self.interactables.draw(last_bg_screen)#should be before bg_interact
@@ -200,7 +202,7 @@ class GameObjects():
         self.cosmetics.draw(plater_fg_screen)
 
         #fgs
-        self.all_fgs.draw(self.game.screen_manager.screens)#returns the last layer
+        self.all_fgs.draw(self.game.screen_manager.screens)
         #self.camera_blocks.draw()
 
         #temporaries draws. Shuold be removed
