@@ -20,9 +20,9 @@ class IdleMain(PhaseBase):
 
     def enter(self, **kwarg):
         self.entity.animation.play('idle', f_rate = 0.1667)
-        self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
+        self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times        
 
-    def update(self, dt):
+    def update(self, dt):        
         if not self.entity.collision_types['bottom']:
             self.enter_state('fall')
             self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
@@ -647,7 +647,7 @@ class JumpSprintPre(PhaseAirBase):
             self.entity.velocity[1] = C.jump_vel_player
             self.entity.velocity[0] = self.entity.dir[0] * 10
         else:
-            self.enter_phase('main', air_timer = self.entity.colliding_platform.jumped())
+            self.enter_phase('main')
 
 class JumpSprintMain(PhaseAirBase):
     def __init__(self, entity):
@@ -732,7 +732,8 @@ class FallPre(PhaseAirBase):
         if event[-1] == 'a':
             if self.entity.flags['ground']:
                 input.processed()
-                self.enter_state('jump', air_timer = self.entity.colliding_platform.jumped())
+                self.enter_state('jump')
+                        
         elif event[-1]=='b':
             input.processed()
             self.do_ability()
@@ -751,7 +752,7 @@ class FallPre(PhaseAirBase):
         event = input.output()
         if event[-1]=='a':
             input.processed()
-
+           
     def handle_input(self, input, **kwarg):
         if input == 'Wall':
             self.enter_state('wall_glide', **kwarg)
@@ -861,7 +862,7 @@ class WallGlide(PhaseBase):
     def enter(self, **kwarg):
         self.entity.animation.play(self.animation_name)#the name of the class
         self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
-        self.entity.movement_manager.add_modifier('wall_glide')
+        self.entity.movement_manager.add_modifier('wall_glide', authoritative = True)
         if self.entity.collision_types['right']:
             self.dir = [1,0]
         else:#left
@@ -925,7 +926,7 @@ class BeltGlide(PhaseBase):#same as wall glide but only jump if wall_glide has b
     def enter(self, **kwarg):
         self.entity.animation.play(self.animation_name)#the name of the class
         self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
-        self.entity.movement_manager.add_modifier('wall_glide')
+        self.entity.movement_manager.add_modifier('wall_glide', authoritative = True)
         if self.entity.collision_types['right']:
             self.dir = [1,0]
         else:
@@ -995,7 +996,7 @@ class DashGroundPre(PhaseBase):
         self.entity.game_objects.cosmetics.add(Dusts(self.entity.hitbox.center, self.entity.game_objects, dir = self.entity.dir, state = 'one'))#dust
         self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
         self.jump_dash_timer = C.jump_dash_timer
-        self.entity.movement_manager.add_modifier('dash', entity = self.entity)
+        self.entity.movement_manager.add_modifier('dash', entity = self.entity, authoritative = True)
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0], vol = 1)
         self.wall_buffer = 3
         self.entity.dir[0] = kwarg.get('dir', self.entity.dir[0])
@@ -1115,7 +1116,7 @@ class DashJumpPre(PhaseBase):#enters from ground dash pre
         if int(self.entity.velocity[0]) == 0:
             self.dash_length += 1
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0])
-        self.entity.movement_manager.add_modifier('dash_jump', entity = self.entity)
+        self.entity.movement_manager.add_modifier('dash_jump', entity = self.entity, authoritative = True)
         self.entity.shader_state.handle_input('motion_blur')
         self.entity.flags['ground'] = False
         self.buffer_time = C.jump_dash_wall_timer
@@ -1539,7 +1540,7 @@ class DashAirPre(PhaseBase):
         self.entity.game_objects.cosmetics.add(Dusts(self.entity.hitbox.center, self.entity.game_objects, dir = self.entity.dir, state = 'one'))#dust
         self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
         self.jump_dash_timer = C.jump_dash_timer
-        self.entity.movement_manager.add_modifier('dash', entity = self.entity)
+        self.entity.movement_manager.add_modifier('dash', entity = self.entity, authoritative = True)
         self.entity.velocity[1] *= 0
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0], vol = 1)
         wall_dir = kwarg.get('wall_dir', False)

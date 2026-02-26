@@ -1,13 +1,12 @@
 import pygame
-from engine import constants as C
 from gameplay.entities.shared.components.hit_component import HitComponent
 
 class Platform(pygame.sprite.Sprite):
     def __init__(self, pos, size=(16, 16), run_particle = 'dust'):
         super().__init__()
-        self.true_pos = [float(pos[0]), float(pos[1])]
-        self.rect = pygame.Rect(round(self.true_pos[0]), round(self.true_pos[1]), size[0], size[1])
+        self.rect = pygame.Rect(pos[0], pos[1], size[0], size[1])
         self.hitbox = self.rect.copy()
+        self.true_pos = self.rect.topleft
         self.material = 'stone'
         self.hit_component = HitComponent(self)
         self.hit_component.damage_manager.add_modifier('block_damage')#always block
@@ -39,6 +38,3 @@ class Platform(pygame.sprite.Sprite):
 
     def release_texture(self):#called when .kill() and empty group
         pass        
-
-    def jumped(self):#called from player states jump_main
-        return C.air_timer

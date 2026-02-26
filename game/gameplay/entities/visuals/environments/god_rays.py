@@ -24,7 +24,6 @@ class GodRays(StaticEntity):
         self.shader['position'] = self.position
         self.shader['falloff'] = self.falloff
         self.shader['time'] = self.time
-        self.shader['size'] = self.image.size
         self.shader['color'] = self.colour
 
         pos = (int(self.true_pos[0]-self.parallax[0]*self.game_objects.camera_manager.camera.interp_scroll[0]),int(self.true_pos[1]-self.parallax[0]*self.game_objects.camera_manager.camera.interp_scroll[1]))

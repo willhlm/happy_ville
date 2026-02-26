@@ -33,6 +33,8 @@ class Player(Character):
         self.health = 20
         self.spirit = 2
 
+        self.movement_manager = modifier_movement.MovementManager()
+
         self.projectiles = game_objects.fprojectiles
         self.sword = Sword(self)
         self.abilities = AbilityManager(self)#spirit (thunder,migawari etc) and movement /dash, double jump and wall glide)
@@ -46,11 +48,10 @@ class Player(Character):
         self.timers = []#a list where timers are append whe applicable, e.g. wet status
         self.timer_jobs = {'wet': Wet(self, 60)}#these timers are activated when promt and a job is appeneded to self.timer.
 
-        self.movement_manager = modifier_movement.MovementManager()
         self.hit_component.set_invinsibility_time(C.invincibility_time_player)
         self.reset_movement()
 
-        self.colliding_platform = None#save the last collising platform
+        self.colliding_platform = None#save the last collising platform        
 
     def ramp_down_collision(self, ramp):#when colliding with platform beneth
         super().ramp_down_collision(ramp)
