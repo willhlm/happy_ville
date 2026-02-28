@@ -1924,8 +1924,8 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":720,
-                         "x":2976,
+                         "width":1040,
+                         "x":2656,
                          "y":816
                         }, 
                         {
@@ -1955,7 +1955,7 @@
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"2"
+                                 "value":"1"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -1963,30 +1963,6 @@
                          "width":16,
                          "x":3568,
                          "y":624
-                        }, 
-                        {
-                         "gid":8,
-                         "height":144,
-                         "id":297,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":64,
-                         "x":3632,
-                         "y":672
-                        }, 
-                        {
-                         "gid":8,
-                         "height":32,
-                         "id":298,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":160,
-                         "x":3536,
-                         "y":528
                         }, 
                         {
                          "gid":19,
@@ -2037,30 +2013,6 @@
                          "y":592
                         }, 
                         {
-                         "height":0,
-                         "id":334,
-                         "name":"",
-                         "polygon":[
-                                {
-                                 "x":0,
-                                 "y":0
-                                }, 
-                                {
-                                 "x":-240,
-                                 "y":144
-                                }, 
-                                {
-                                 "x":0,
-                                 "y":144
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":0,
-                         "x":2976,
-                         "y":672
-                        }, 
-                        {
                          "gid":15,
                          "height":16,
                          "id":335,
@@ -2091,53 +2043,6 @@
                          "y":848
                         }, 
                         {
-                         "height":0,
-                         "id":337,
-                         "name":"",
-                         "polygon":[
-                                {
-                                 "x":0,
-                                 "y":0
-                                }, 
-                                {
-                                 "x":144,
-                                 "y":-80
-                                }, 
-                                {
-                                 "x":0,
-                                 "y":-80
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":0,
-                         "x":2672,
-                         "y":672
-                        }, 
-                        {
-                         "gid":11,
-                         "height":224,
-                         "id":338,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"path_to",
-                                 "type":"string",
-                                 "value":"wakeup_forest_3"
-                                }, 
-                                {
-                                 "name":"spawn",
-                                 "type":"string",
-                                 "value":"2"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":2768,
-                         "y":816
-                        }, 
-                        {
                          "gid":15,
                          "height":848,
                          "id":339,
@@ -2154,24 +2059,6 @@
                          "width":16,
                          "x":2608,
                          "y":912
-                        }, 
-                        {
-                         "gid":1,
-                         "height":16,
-                         "id":340,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"spawn",
-                                 "type":"string",
-                                 "value":"1"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":2832,
-                         "y":688
                         }],
                  "opacity":1,
                  "type":"objectgroup",
