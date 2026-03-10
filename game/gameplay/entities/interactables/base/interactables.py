@@ -1,4 +1,4 @@
-from gameplay.entities.shared.states import states_shader
+from gameplay.entities.shared.render.entity_shader_manager import EntityShaderManager
 from gameplay.entities.shared.components.hit_component import HitComponent
 from gameplay.entities.base.animated_entity import AnimatedEntity
 
@@ -9,7 +9,7 @@ class Interactables(AnimatedEntity):#interactables
         self.pause_group = game_objects.entity_pause
         self.true_pos = self.rect.topleft
 
-        self.shader_state = states_shader.Idle(self)
+        self.shader_state = EntityShaderManager(self)
         self.hit_component = HitComponent(self)
 
     def update(self, dt):
@@ -19,15 +19,15 @@ class Interactables(AnimatedEntity):#interactables
     def update_render(self, dt):        
         self.shader_state.update_render(dt)
 
-    def draw(self, target):#called just before draw in group
-        self.shader_state.draw()
-        super().draw(target)
+    def draw(self, target):
+        self.blit_pos = [int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1])]
+        self.shader_state.draw(self.image, target, self.blit_pos, flip = self.dir[0] > 0)
 
     def on_collision(self, entity):#one time collision
-        self.shader_state.handle_input('outline')
-
+        self.shader_state.add_shader('outline')
+        
     def on_noncollision(self, entity):#one time none collision
-        self.shader_state.handle_input('idle')   
+        self.shader_state.remove_shader('outline')
 
     def take_hit(self, effect):
         """Delegate to hit component"""      

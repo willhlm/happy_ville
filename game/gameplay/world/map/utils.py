@@ -629,10 +629,8 @@ class ObjectSpawner:
                         destination = property['value']
                     elif property['name'] == 'spawn':
                         spawn = property['value']
-                    elif property['name'] == 'image':
-                        image = property['value']
 
-                new_path = PathInteract(object_position,self.game_objects, object_size, destination, spawn, image)
+                new_path = PathInteract(object_position,self.game_objects, object_size, destination, spawn)
                 self.game_objects.interactables.add(new_path)
 
             elif id == 10:
@@ -1679,3 +1677,7 @@ class Wakeup_forest(Biome):
             if id == 0:#tsatue
                 new_int = RhouttaStatue(object_position, self.level.game_objects)
                 self.level.game_objects.interactables.add(new_int)
+
+            if id == 1:#tsatue
+                new_int = VerveTree(object_position, self.level.game_objects)
+                self.level.game_objects.interactables.add(new_int)                

@@ -1,8 +1,8 @@
 from engine import constants as C
-from gameplay.entities.shared.states import states_shader
 
 from gameplay.entities.base.platform_entity import PlatformEntity
 from gameplay.entities.shared.components.hit_component import HitComponent
+from gameplay.entities.shared.render.entity_shader_manager import EntityShaderManager
 
 class Character(PlatformEntity):#enemy, NPC,player
     def __init__(self,pos,game_objects):
@@ -11,7 +11,7 @@ class Character(PlatformEntity):#enemy, NPC,player
         self.friction = C.friction.copy()
         self.max_vel = C.max_vel.copy()
 
-        self.shader_state = states_shader.Idle(self)        
+        self.shader_state = EntityShaderManager(self)
         self.hit_component = HitComponent(self)
 
     def update(self, dt):
@@ -54,10 +54,14 @@ class Character(PlatformEntity):#enemy, NPC,player
 
     def draw(self, target):
         self.blit_pos = [int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1])]
-        self.game_objects.game.display.render(self.image, target, position = self.blit_pos, flip = self.dir[0] > 0, shader = self.shader)#shader render
+        self.shader_state.draw(self.image, target, self.blit_pos, flip = self.dir[0] > 0)
 
     def on_attack_timeout(self):#when attack cooldown timer runs out
         self.flags['attack_able'] = True
 
     def on_hurt_timeout(self):#starts when entering hurt state, and make sure that you don't eneter again until timer runs out
         self.flags['hurt_state_able'] = True
+
+    def release_texture(self):#called when .kill() and empty group
+        self.shader_state.clear_textures()   
+        super().release_texture()        

@@ -5,7 +5,6 @@ from gameplay.entities.enemies.common.shared.states.state_manager import StateMa
 from .config import ENEMY_CONFIG as HEDGE_CONFIG
 
 from .states import Sleep, WakeUp
-from gameplay.entities.player.entity_shader_manager import EntityShaderManager
 
 HEDGE_STATES = {
     'sleep': Sleep,
@@ -27,8 +26,6 @@ class Hedge(Enemy):
 
         self.currentstate = StateManager(self, custom_states = HEDGE_STATES, custom_deciders = None)
 
-        self.shader_state = EntityShaderManager(self)
-        self.shader_state.define_size(self.image.size)        
         self.shader_state.add_shader('aura', colour = [0,0,0], size = 0.3, fall_off = 4, noise_intensity = 3)
         self.time = 0
 
@@ -43,7 +40,3 @@ class Hedge(Enemy):
             position = [rect.centerx + random.uniform(-rect[2] * 0.5, rect[2] * 0.5), rect.centery + random.uniform(rect[3]*0.1,rect[3]*0.5)]
             self.game_objects.particles.emit("spirit_wisp", pos=position, n=1, colour=(0,0,0,255))            
             self.time = 0
-
-    def draw(self, target):
-        self.blit_pos = [int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1])]
-        self.shader_state.draw(self.image, target, self.blit_pos, flip = self.dir[0] > 0)

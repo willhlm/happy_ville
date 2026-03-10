@@ -1,22 +1,20 @@
 from . import shader_states
 from engine.render.post_process import PostProcess
-from engine.system import shaders
+from . import shaders
 
 class EntityShaderManager():
     def __init__(self, entity, default = 'idle', **kwargs):
         self.entity = entity
-        self.enter_state(default, **kwargs)
+        self.state = None
         self.effects = EntityProcess(entity)               # Overlay effects pipeline
-
-    def define_size(self, size):
-        self.effects.define_size(size)
+        self.enter_state(default, **kwargs)
 
     # --- State handling ---
     def enter_state(self, new_state, **kwargs):
-        self.states = getattr(shader_states, new_state.capitalize())(self.entity, **kwargs)#make a class based on the name of the newstate: need to import sys
+        self.state = getattr(shader_states, new_state.capitalize())(self.entity, **kwargs)#make a class based on the name of the newstate: need to import sys
 
     def handle_input(self, input, **kwargs):
-        self.states.handle_input(input, **kwargs)
+        self.state.handle_input(input, **kwargs)
 
     # --- Effect handling ---
     def add_shader(self, name, **kwargs):
@@ -26,33 +24,54 @@ class EntityShaderManager():
         self.effects.remove_shader(name)
 
     def update_render(self, dt):
-        self.states.update_render(dt)
+        self.state.update_render(dt)
         self.effects.update_render(dt)
 
     # --- Drawing ---
     def draw(self, base_texture, target, position, flip = False):        
         if not self.effects.shaders:
-            self.states.draw(base_texture, target, position, flip)# If no overlay effects, render base shader directly
+            self.state.draw(base_texture, target, position, flip)# If no overlay effects, render base shader directly
             return
-                
+
         self.effects.draw(base_texture, target, position, flip) # Pass through overlay pipeline
+
+    def clear_textures(self):#called when release_texture is called.
+        self.effects.clear_textures()
 
 class EntityProcess(PostProcess):#for entity overlay effects
     def __init__(self, entity):   
         self.entity = entity             
         self.shaders = {}
+        self.size = None
+        self.base_layer = None
+        self.temp_layer = None
 
-    def define_size(self, size):
+    def clear_textures(self):
+        if self.base_layer:
+            self.base_layer.release()
+            self.base_layer = None
+        if self.temp_layer:
+            self.temp_layer.release()
+            self.temp_layer = None
+        self.size = None
+
+    def _define_size(self, size):
+        self.size = tuple(size)
         self.base_layer = self.entity.game_objects.game.display.make_layer(size)
-        self.temp_layer = self.entity.game_objects.game.display.make_layer(size)        
+        self.temp_layer = self.entity.game_objects.game.display.make_layer(size)
+
+    def _ensure_size(self, size):
+        if self.size is None:
+            self._define_size(size)
 
     def draw(self, base_texture, target, position, flip):
         """Apply overlay shaders to base_texture, last shader draws to target."""  
+        self._ensure_size(base_texture.size)
         self.base_layer.clear(0, 0, 0, 0)
         self.temp_layer.clear(0, 0, 0, 0)        
         
         dst = self.temp_layer
-        src = self.entity.shader_state.states.draw(base_texture, self.base_layer, position = (0, 0), flip = False)        
+        src = self.entity.shader_state.state.draw(base_texture, self.base_layer, position = (0, 0), flip = False)        
 
         shader_items = list(self.shaders.items())
 

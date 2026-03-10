@@ -2,7 +2,6 @@ import pygame
 
 from gameplay.entities.base.character import Character
 from engine.utils import read_files
-from gameplay.entities.player.entity_shader_manager import EntityShaderManager
 from gameplay.entities.player.player_states.state_manager import StateManager
 from gameplay.entities.player import states_death
 from gameplay.entities.player.backpack import backpack
@@ -21,8 +20,6 @@ class Player(Character):
         self.sprites = read_files.load_sprites_dict('assets/sprites/entities/player/texture/', game_objects)
         self.normal_maps = read_files.load_sprites_dict('assets/sprites/entities/player/normal/', game_objects)
         self.image = self.sprites['idle'][0]
-        self.shader_state = EntityShaderManager(self)
-        self.shader_state.define_size(self.image.size)
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 35)
         self.rect.midbottom = self.hitbox.midbottom#match the positions of hitboxes

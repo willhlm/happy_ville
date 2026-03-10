@@ -16,6 +16,8 @@ from gameplay.narrative.quests_events.manager import QuestsEventsManager
 from gameplay.registry.registry_manager import RegistryManager
 from engine.particles.particle_system import ParticleSystem
 
+from gameplay.world.transforms.world_transform_controller import WorldTransformController
+
 class GameObjects():
     def __init__(self, game):
         self.game = game
@@ -42,6 +44,7 @@ class GameObjects():
         self.post_process = post_process.PostProcess(self)
         self.registry = RegistryManager()
         self.particles = ParticleSystem(self)
+        self.world_transform_controller = WorldTransformController(self)
 
     def _create_groups(self):#define all sprite groups
         self.enemies = groups.Group()#enemies
