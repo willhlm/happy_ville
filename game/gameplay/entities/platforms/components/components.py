@@ -257,7 +257,7 @@ class MovePath(PlatformComponent):
                 # closest point on the path (segment projection)
                 px, py = self.p.true_pos[0], self.p.true_pos[1]
                 sx, sy, seg_i = self._snap_closest(px, py)
-                self.i = max(0, min(seg_i, len(self.points) - 2))
+                self.i = max(0, min(seg_i, len(self.points) - 2))                
                 self._set_platform_pos(sx, sy)
 
             # zero velocity so no kick on the first integrate

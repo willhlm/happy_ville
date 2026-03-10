@@ -320,16 +320,24 @@ class Slowmotion(Shaders):
 
 #For entities
 class Aura(Shaders):
-    def __init__(self, game_objects):
+    def __init__(self, game_objects, **kwarg):
         self.game_objects = game_objects    
         self.time = 0
+        self.colour = kwarg.get('colour', [0.3, 0.7, 1.0])
+        self.size = kwarg.get('size', 0.2)
+        self.fall_off = kwarg.get('fall_off', 2)
+        self.noise_intensity = kwarg.get('noise_intensity', 5)
 
     def update_render(self, dt):
         self.time += dt * 0.1
  
     def set_uniforms(self):
         self.game_objects.shaders['aura']['TIME'] = self.time
-        self.game_objects.shaders['aura']['AuraProgres'] = 1     
+        self.game_objects.shaders['aura']['AuraProgres'] = 1 
+        self.game_objects.shaders['aura']['aura_color'] = self.colour 
+        self.game_objects.shaders['aura']['AuraSize'] = self.size 
+        self.game_objects.shaders['aura']['AuraFalloff'] = self.fall_off 
+        self.game_objects.shaders['aura']['NoiseIntensity'] = self.noise_intensity 
 
     def draw(self, source_texture, composite_screen):
         """For intermediate rendering in pipeline"""

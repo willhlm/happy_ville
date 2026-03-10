@@ -18,5 +18,6 @@ from .texture.door.door_right_orient import DoorRightOrient
 from .texture.door.door import Door
 from .texture.gate.gate_1 import Gate_1
 from .texture.gate.gate_2 import Gate_2
+from .texture.gate.evil_gate import EvilGate
 
 from .generic_platform import GenericPlatform

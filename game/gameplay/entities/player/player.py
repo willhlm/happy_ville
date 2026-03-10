@@ -52,7 +52,7 @@ class Player(Character):
         self.reset_movement()
 
         self.colliding_platform = None#save the last collising platform        
-
+        
     def ramp_down_collision(self, ramp):#when colliding with platform beneth
         super().ramp_down_collision(ramp)
         self.movement_manager.handle_input('ground')
@@ -144,6 +144,7 @@ class Player(Character):
         self.hitstop.update(dt)
         scaled_dt = self.hitstop.get_sim_dt(dt)
 
+        self.abilities.update(scaled_dt)
         self.movement_manager.update(scaled_dt)#update the movement manager: modifers 
         self.update_vel(scaled_dt)
         self.currentstate.update(scaled_dt)#need to be aftre update_vel since some state transitions look at velocity

@@ -38,7 +38,7 @@ class Interactables(AnimatedEntity):#interactables
         effect.attacker_callbacks.pop('sword_jump', None)
         return self.hit_component.take_hit(effect)
 
-    def take_dmg(self, effet):
+    def take_dmg(self, effect):
         return effect
 
     def interact(self):#when player press T

@@ -6,7 +6,7 @@ class Platform(pygame.sprite.Sprite):
         super().__init__()
         self.rect = pygame.Rect(pos[0], pos[1], size[0], size[1])
         self.hitbox = self.rect.copy()
-        self.true_pos = self.rect.topleft
+        self.true_pos = list(self.rect.topleft)
         self.material = 'stone'
         self.hit_component = HitComponent(self)
         self.hit_component.damage_manager.add_modifier('block_damage')#always block

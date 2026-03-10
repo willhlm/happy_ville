@@ -222,8 +222,10 @@ class TjasolmaisEmbrace(MovementModifier):
         if not self.entity.game_objects.controller.is_held('a'):
             return
 
-        context.gravity *= 0.1
-        context.air_timer *= 2
+        #context.gravity *= 0.1
+        #context.friction[1] *= 2
+        self.entity.velocity[1]  *= 0.8
+        self.entity.game_objects.particles.emit("spirit_wisp", pos=self.entity.hitbox.center, n=1, colour=C.spirit_colour)    
 
 #authorivie ones.
 class WallGlide(MovementModifier):

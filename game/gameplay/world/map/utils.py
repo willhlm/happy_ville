@@ -687,15 +687,17 @@ class ObjectSpawner:
                 else:
                     self.game_objects.all_bgs.add(layer_name, new_shader_screen(self.game_objects, parallax, 20))
 
-            elif id == 16:
-                print(object_position)
-
-            #elif id == 17:#leaves
-            #    information = [object_position,object_size]
-            #    if layer_name.startswith('fg')
-            #        entities_parallax.create_leaves(information,parallax,self.game_objects.all_fgs)
-            #    else:
-            #        entities_parallax.create_leaves(information,parallax,self.game_objects.all_bgs)
+            elif id == 16:#evil gate
+                kwarg = {}
+                for property in properties:
+                    if property['name'] == 'ID':
+                        kwarg['ID'] = property['value']
+                    elif property['name'] == 'erect':
+                        kwarg['erect'] = property['value']
+                    elif property['name'] == 'vertical':
+                        kwarg['vertical'] = property['value']                        
+                gate = EvilGate(object_position,self.game_objects, object_size, **kwarg)
+                self.game_objects.platforms.add(gate)
 
             elif id  == 18:#god rays
                 prop = {}
@@ -1022,10 +1024,6 @@ class ObjectSpawner:
                 statue = AirDashStatue(object_position, self.game_objects)
                 self.game_objects.interactables.add(statue)
 
-            elif id == 17:#thunder dive statue
-                statue = ThunderDiveStatue(object_position, self.game_objects)
-                self.game_objects.interactables.add(statue)
-
             elif id == 18:
                 state = self.game_objects.world_state.state[self.game_objects.map.level_name]['loot_container'].get(str(loot_container), False)
                 amber_rock = AmberRock(object_position, self.game_objects, state, str(loot_container))
@@ -1035,6 +1033,7 @@ class ObjectSpawner:
             elif id == 19:#collision block that can only brak with charge flag on projectile
                 platform = BreakableBlockCharge_1(object_position, self.game_objects)
                 self.game_objects.platforms.add(platform)
+
 
 
 # ----------------------------
@@ -1191,8 +1190,9 @@ class Nordveden(Biome):
             self.level.game_objects.game.screen_manager.append_shader('Blur_fast', [layer_name], radius = radius)   
 
     def play_music(self):
-        sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/visuals/environments/ambient/nordveden/')
-        self.level.game_objects.sound.play_background_sound(sounds['idle'][0], index = 1, loop = -1, fade = 1000, volume = 0.2)
+        sounds = read_files.load_sounds_dict('assets/audio/music/maps/nordveden/')
+        self.level.game_objects.sound.play_background_sound(sounds['music'][0], index = 1, loop = -1, fade = 1000, volume = 0.1)
+        self.level.game_objects.sound.play_background_sound(sounds['ambient'][0], index = 2, loop = -1, fade = 1000, volume = 0.2)
 
     def room(self, room):#called wgen a new room is loaded
         if room in ['11', '8', '7', '6', '5']:
@@ -1311,15 +1311,14 @@ class Rhoutta_encounter(Biome):
             if "objects" not in source: continue 
             id = local_id
 
-
 class Hlifblom(Biome):
     def __init__(self, level):
         super().__init__(level)
 
     def play_music(self):
         super().play_music()
-        sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/visuals/environments/ambient/light_forest_cave/')
-        #self.level.game_objects.sound.play_background_sound(sounds['idle'][0], index = 1, loop = -1, fade = 1000, volume = 0.1)
+        sounds = read_files.load_sounds_dict('assets/audio/music/maps/hlifblom/')
+        self.level.game_objects.sound.play_background_sound(sounds['music'][0], index = 1, loop = -1, fade = 1000, volume = 0.1)
 
     def room(self, room = 1):
         self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [255/255,255/255,255/255,255/255], normal_interact = False)
@@ -1439,8 +1438,8 @@ class Crystal_mines(Biome):
 
     def play_music(self):
         super().play_music()
-        sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/visuals/environments/ambient/crystal_mines')
-        self.level.game_objects.sound.play_background_sound(sounds['idle'][0], index = 1, loop = -1, fade = 1000, volume = 0.2)
+        sounds = read_files.load_sounds_dict('assets/audio/music/maps/crystal_mines')
+        self.level.game_objects.sound.play_background_sound(sounds['ambient'][0], index = 1, loop = -1, fade = 1000, volume = 0.2)
 
     def room(self, room = 1):
         self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [255/255,255/255,255/255,255/255], normal_interact = False)
@@ -1666,8 +1665,8 @@ class Wakeup_forest(Biome):
 
     def play_music(self):
         super().play_music()
-        sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/visuals/environments/ambient/light_forest_cave/')
-        #self.level.game_objects.sound.play_background_sound(sounds['idle'][0], index = 1, loop = -1, fade = 1000, volume = 0.1)
+        sounds = read_files.load_sounds_dict('assets/audio/music/maps/wake_up_forest/')
+        self.level.game_objects.sound.play_background_sound(sounds['ambient'][0], index = 1, loop = -1, fade = 1000, volume = 0.1)
 
     def load_objects(self, data, parallax, offset, ctx: LoadContext, map_def: MapDefinition, layer_name: str, viewport_center):
         for obj in data['objects']:

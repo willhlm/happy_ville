@@ -1,10 +1,11 @@
-import pygame
+import pygame, random
 from gameplay.entities.enemies.base.enemy import Enemy
 from engine.utils import read_files
 from gameplay.entities.enemies.common.shared.states.state_manager import StateManager
 from .config import ENEMY_CONFIG as HEDGE_CONFIG
 
 from .states import Sleep, WakeUp
+from gameplay.entities.player.entity_shader_manager import EntityShaderManager
 
 HEDGE_STATES = {
     'sleep': Sleep,
@@ -25,3 +26,24 @@ class Hedge(Enemy):
         self.aggro_distance = self.config['distances']['aggro']
 
         self.currentstate = StateManager(self, custom_states = HEDGE_STATES, custom_deciders = None)
+
+        self.shader_state = EntityShaderManager(self)
+        self.shader_state.define_size(self.image.size)        
+        self.shader_state.add_shader('aura', colour = [0,0,0], size = 0.3, fall_off = 4, noise_intensity = 3)
+        self.time = 0
+
+    def update_render(self, dt):
+        super().update_render(dt)
+        self.release_particles(dt)
+
+    def release_particles(self, dt):
+        self.time += dt 
+        if self.time > 40:
+            rect = self.hitbox
+            position = [rect.centerx + random.uniform(-rect[2] * 0.5, rect[2] * 0.5), rect.centery + random.uniform(rect[3]*0.1,rect[3]*0.5)]
+            self.game_objects.particles.emit("spirit_wisp", pos=position, n=1, colour=(0,0,0,255))            
+            self.time = 0
+
+    def draw(self, target):
+        self.blit_pos = [int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1])]
+        self.shader_state.draw(self.image, target, self.blit_pos, flip = self.dir[0] > 0)

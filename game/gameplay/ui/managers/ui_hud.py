@@ -30,17 +30,8 @@ class HUD():
 
     def init_ability(self):
         self.ability_hud = []#the hud
-        #for i in range(0,self.game_objects.player.abilities.number):
         self.ability_hud.append(MovementHud(self.game_objects.player))#the ability object
-
-        #self.ability_hud = entities_ui.Movement_hud(self.game_objects.player)
-
-        self.abilities = []
-        for key in self.game_objects.player.abilities.movement_dict.keys():
-            self.abilities.append(self.game_objects.player.abilities.movement_dict[key])#the ability object
-            if len(self.abilities) == len(self.ability_hud):
-                break
-
+        
     def init_money(self):
         self.money_frame = MoneyFrame(self.game_objects.player)
         self.money = 0
@@ -58,8 +49,6 @@ class HUD():
             spirit.update(dt)
         for ability_hud in self.ability_hud:
             ability_hud.update(dt)
-        for ability in self.abilities:
-            ability.update(dt)
 
         self.update_overlay(dt)
 

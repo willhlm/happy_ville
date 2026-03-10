@@ -49,7 +49,7 @@ class TwoDLiquid(StaticEntity):#inside interactables_fg group. fg because in fro
 
         #water
         self.game_objects.shaders['twoD_liquid']['refraction_map'] = self.noise_layer.texture
-        self.game_objects.shaders['twoD_liquid']['SCREEN_TEXTURE'] = screen_copy.texture#for some reason, the water fall there, making it flicker. offsetting the cutout part, the flickering appears when the waterfall enetrs
+        self.game_objects.shaders['twoD_liquid']['SCREEN_TEXTURE'] = screen_copy.texture
         self.game_objects.shaders['twoD_liquid']['TIME'] = self.time * 0.01
 
         pos = (int(self.true_pos[0] - self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.game_objects.camera_manager.camera.scroll[1]))
