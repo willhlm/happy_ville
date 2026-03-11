@@ -43,9 +43,15 @@ class Item(PlatformEntity):#
     def interact(self, player):#when player press T
         pass
 
-    def player_collision(self, player):#when the player collides with this object
+    def on_collision(self, entity):#when the player collides with this object
         pass
 
+    def collision(self, entity):#when the player collides with this object
+        pass      
+
+    def on_noncollision(self, entity):
+        pass    
+    
     def release_texture(self):#stuff that have pool shuold call this
         pass
 

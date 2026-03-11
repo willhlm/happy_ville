@@ -33,11 +33,13 @@ class Player(Character):
         self.health = 20
         self.spirit = 2
 
+        self.movement_manager = modifier_movement.MovementManager()
+
         self.projectiles = game_objects.fprojectiles
         self.sword = Sword(self)
         self.abilities = AbilityManager(self)#spirit (thunder,migawari etc) and movement /dash, double jump and wall glide)
 
-        self.flags = {'ground': True, 'invincibility': False, 'shroompoline': False, 'attack_able': True, 'grounddash': True}# flags to check if on ground (used for jumpåing), #a flag to make sure you can only swing sword when this is False
+        self.flags = {'ground': True, 'shroompoline': False, 'attack_able': True, 'grounddash': True, 'go_through': False}# flags to check if on ground (used for jumpåing), #a flag to make sure you can only swing sword when this is False
         self.currentstate = StateManager(self)#states_player.Idle_main(self)
         self.death_state = states_death.Idle(self)#this one can call "normal die" or specifal death (for example cultist encounter)
 
@@ -46,7 +48,7 @@ class Player(Character):
         self.timers = []#a list where timers are append whe applicable, e.g. wet status
         self.timer_jobs = {'wet': Wet(self, 60)}#these timers are activated when promt and a job is appeneded to self.timer.
 
-        self.movement_manager = modifier_movement.MovementManager()
+        self.hit_component.set_invinsibility_time(C.invincibility_time_player)
         self.reset_movement()
 
         self.colliding_platform = None#save the last collising platform
@@ -86,16 +88,15 @@ class Player(Character):
     def take_dmg(self, effect):
         """Called by hit_component after modifiers run. Apply damage and effects."""
         self.health -= effect.damage
-        self.flags['invincibility'] = True
         self.game_objects.ui.hud.remove_hearts(effect.damage)# * self.dmg_scale)#update UI
 
         if self.health > 0:  # Still alive
-            self.game_objects.timer_manager.start_timer(C.invincibility_time_player, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
             self.shader_state.handle_input('Hurt')#turn white and shake
             self.shader_state.handle_input('Invincibile')#blink a bit
             #self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state or interupt attacks?
             effect.defender_callbacks.pop('particles', None)#remove any partitlce effect set by the projectile
-            self.emit_particles(lifetime = 40, scale = 3, colour=[0,0,0,255], fade_scale = 7,  number_particles = 60 )
+            self.game_objects.particles.emit("burst", pos = self.hitbox.center, n=60, colour = [0, 0, 0, 255])
+            #self.emit_particles(lifetime = 40, scale = 3, colour=[0,0,0,255], fade_scale = 7,  number_particles = 60 )
             self.game_objects.cosmetics.add(Slash(self.hitbox.center,self.game_objects))#make a slash animation
 
             self.game_objects.time_manager.modify_time(time_scale = 0, duration = 20)
@@ -135,14 +136,21 @@ class Player(Character):
         #self.movement_manager.clear_modifiers()#TODO probably not all should be cleared
 
     def update_render(self, dt):#called in group
-        self.hitstop_states.update_render(dt)
+        scaled_dt = self.hitstop.get_sim_dt(dt)
+        self.shader_state.update_render(scaled_dt)
 
     def update(self, dt):
         self.prev_true_pos = self.true_pos.copy()#save previous position for interpolation
-        self.movement_manager.update(dt)#update the movement manager      
-        self.hitstop_states.update(dt)        
+        self.hitstop.update(dt)
+        scaled_dt = self.hitstop.get_sim_dt(dt)
+
+        self.movement_manager.update(scaled_dt)#update the movement manager: modifers
+        self.update_vel(scaled_dt)
+        self.currentstate.update(scaled_dt)#need to be aftre update_vel since some state transitions look at velocity
+        self.animation.update(scaled_dt)#need to be after currentstate since animation will animate the current state -> i suupose it should be in update_physcis?
+
         self.backpack.radna.update()#update the radnas
-        self.update_timers(dt)
+        self.update_timers(scaled_dt)
 
     def draw(self, target):#called in group
         alpha = self.game_objects.game.game_loop.alpha
@@ -165,6 +173,9 @@ class Player(Character):
     def on_cayote_timeout(self):
         self.flags['ground'] = False
         self.colliding_platform = None
+
+    def on_go_through_timeout(self):
+        self.flags['go_through'] = False
 
     def on_shroomjump_timout(self):
         self.flags['shroompoline'] = False

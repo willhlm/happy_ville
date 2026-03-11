@@ -16,11 +16,10 @@ class LootContainers(Interactables):
 
         self.health = 3
         self.ID_key = ID_key#an ID key to identify which item that the player is intracting within the world
-        self.flags = {'invincibility': False}
 
         if state:
             self.currentstate = loot_container_states.Interacted(self)
-            self.flags['invincibility'] = True
+            self.hit_component.set_invinsibility(True)
         else:
             self.currentstate = loot_container_states.Idle(self)
 
@@ -34,23 +33,19 @@ class LootContainers(Interactables):
                 obj.spawn_position()
                 self.game_objects.loot.add(obj)
             self.inventory[key]=0
-
-    def on_invincibility_timeout(self):
-        self.flags['invincibility'] = False
    
     def take_dmg(self, effect):
         """Called by hit_component after modifiers run. Apply damage and effects."""
         self.health -= effect.damage
-        self.flags['invincibility'] = True
         
         # Play hurt sound
         self.shader_state.handle_input('Hurt', colour = [1,1,1,1], direction = [1,0.5])
         self.hit_loot()        
         
         if self.health > 0:  # Still alive
-            self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
+            pass
         else:  # dead
-            self.currentstate.handle_input('open')
+            self.currentstate.handle_input('open')        
             self.game_objects.world_state.state[self.game_objects.map.level_name]['loot_container'][self.ID_key] = True#write in the state dict that this has been picked up
         return effect
 

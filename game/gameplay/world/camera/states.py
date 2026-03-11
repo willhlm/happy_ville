@@ -24,9 +24,9 @@ class Idle_right(Basic_states):
         #self.entity.game_objects.camera_manager.camera.center[0] = self.entity.game_objects.map.PLAYER_CENTER[0] #- self.entity.game_objects.player.rect[2]*0.5
 
     def update(self, dt):
-        
+
         distance = [self.entity.rect.left - self.entity.game_objects.player.true_pos[0],self.entity.rect.centery - self.entity.game_objects.player.true_pos[1]]
-        if distance[0] < -self.entity.offset*16: return        
+        if distance[0] < -self.entity.offset*16: return
 
         if abs(distance[1]) < self.entity.size[1] * 0.5 and abs(distance[0]) < self.entity.game_objects.game.window_size[0]*0.5 +  self.entity.game_objects.player.rect[2]*0.5:#if on screen on y and coser than half screen on x
             print('sio')
@@ -50,9 +50,9 @@ class Idle_left(Basic_states):
         super().__init__(entity)
         #self.entity.game_objects.camera_manager.camera.center[0] =  self.entity.game_objects.map.PLAYER_CENTER[0] - self.entity.game_objects.player.rect[2]*0.5
 
-    def update(self, dt):        
+    def update(self, dt):
         distance = [self.entity.rect.right - self.entity.game_objects.player.true_pos[0] - self.entity.game_objects.player.rect[2]*0.5, self.entity.rect.centery - self.entity.game_objects.player.true_pos[1]]
-        if distance[0] > self.entity.offset*16: return    
+        if distance[0] > self.entity.offset*16: return
 
         if abs(distance[1]) < self.entity.size[1] * 0.5 and abs(distance[0]) < self.entity.game_objects.game.window_size[0]*0.5: #- self.entity.game_objects.player.rect[2]*0.5:#if on screen on y and coser than half screen on x
             self.enter_state('Stop_left')
@@ -62,7 +62,7 @@ class Stop_left(Basic_states):
         super().__init__(entity)
         self.entity.game_objects.camera_manager.camera.center[0] =  self.entity.game_objects.player.true_pos[0] - self.entity.rect.right #- self.entity.game_objects.player.rect[2]*0.5
 
-    def update(self, dt):  
+    def update(self, dt):
         distance = [self.entity.rect.right - self.entity.game_objects.player.true_pos[0],self.entity.rect.centery - self.entity.game_objects.player.true_pos[1]]
         if abs(distance[1]) < self.entity.size[1] and abs(distance[0]) < self.entity.game_objects.game.window_size[0]*0.5 - self.entity.game_objects.player.rect[2]*0.5:#if on screen on y and coser than half screen on x
             self.entity.game_objects.camera_manager.camera.target[0] = self.entity.game_objects.player.true_pos[0] - self.entity.rect.right #- self.entity.game_objects.player.rect[2] * 0.5
@@ -79,7 +79,7 @@ class Idle_bottom(Basic_states):
         distance = [self.entity.rect.centerx - self.entity.game_objects.player.hitbox.centerx,self.entity.rect.top - self.entity.game_objects.player.hitbox.centery]
         if distance[1] < -self.entity.offset*16: return
 
-        if abs(distance[0]) < self.entity.size[0]*0.5 and abs(distance[1]) < self.entity.game_objects.game.window_size[1]*0.5 + self.y_offset:#if on screen on y and coser than half screen on x
+        if abs(distance[0]) < self.entity.size[0]*0.5 and abs(distance[1]) < self.entity.game_objects.game.window_size[1]*0.5:# + self.y_offset:#if on screen on y and coser than half screen on x
             self.enter_state('Stop_bottom')
 
 class Stop_bottom(Basic_states):

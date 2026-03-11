@@ -29,7 +29,7 @@ class World_state():
         self.statistics[key] += 1#increaase total money, deaths etc
 
     def init_state_file(self, level_name):#make a state file if it is the first time loading this map, state of different interactables
-        self.state[level_name] = {'loot_container': {}, 'lever': {}, 'soul_essence': {}, 'runestone': {}, 'interactable_items': {}, 'breakable_platform': {}, 'bg_fade': {}}#a place holder for things that should depend on map state
+        self.state[level_name] = {'loot_container': {}, 'lever': {}, 'gate': {}, 'soul_essence': {}, 'runestone': {}, 'interactable_items': {}, 'breakable_platform': {}, 'bg_fade': {}}#a place holder for things that should depend on map state
 
     def mark_boss_defeated(self, boss_id):
         """Mark a boss as defeated"""
@@ -47,3 +47,36 @@ class World_state():
     def is_cutscene_complete(self, cutscene_name):
         """Check if a cutscene has been played"""
         return self.cutscenes_complete.get(cutscene_name, False)
+
+    # states of obejcts: called from things to check its state
+    def _bucket(self, level_name: str, bucket: str) -> dict:
+        """Return the dict for e.g. state[level]['gate'] and ensure it exists."""
+        self.state[level_name].setdefault(bucket, {})
+        return self.state[level_name][bucket]
+
+    def load_bool(self, level_name: str, bucket: str, key, *, initial: bool | None = None) -> bool:
+        """
+        Load a persisted bool.
+        If no saved value exists:
+            - `initial` MUST be provided
+            - value is persisted
+        """
+
+        d = self._bucket(level_name, bucket)
+
+        # Saved value always wins
+        if key in d:
+            return bool(d[key])        
+
+        d[key] = bool(initial)
+        return d[key]
+
+    def set_bool(self, level_name: str, bucket: str, key, value: bool) -> bool:
+        d = self._bucket(level_name, bucket)
+        d[key] = bool(value)
+        return d[key]
+
+    def toggle_bool(self, level_name: str, bucket: str, key) -> bool:
+        d = self._bucket(level_name, bucket)
+        d[key] = not bool(d[key])
+        return d[key]

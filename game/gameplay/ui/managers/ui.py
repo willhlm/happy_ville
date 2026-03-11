@@ -1,6 +1,7 @@
 from . import ui_backpack  # Inventory, map, etc.
 from . import ui_hud  # HUD elements like health bar, timers, etc.
 from .background_menu import BackgroundMenu
+from .overlay_manager import OverlayManager
 
 class UiManager():#initialised in game_objects, keep common UIs always in memory
     def __init__(self, game_objects):
@@ -13,6 +14,7 @@ class UiManager():#initialised in game_objects, keep common UIs always in memory
             'radna':     ui_backpack.RadnaUI(game_objects),
             'journal':     ui_backpack.JournalUI(game_objects),    
             'menu': BackgroundMenu(game_objects), 
+            'overlay': OverlayManager(), 
         }
         self.index = 1#start at inventory
         self.backpack = list(game_objects.player.backpack.holdings.keys())#the things player has access to
@@ -43,3 +45,7 @@ class UiManager():#initialised in game_objects, keep common UIs always in memory
     @property
     def hud(self):
         return self.uis['hud']        
+
+    @property
+    def overlay(self):
+        return self.uis['overlay']            

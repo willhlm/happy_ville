@@ -1,6 +1,6 @@
 from gameplay.entities.visuals.environments import Leaves, BackgroundDroplet
 from gameplay.ui.components import MenuArrow, LogoLoading
-from gameplay.entities.visuals.particles import particles, screen_particles
+from gameplay.entities.visuals.particles import screen_particles
 from gameplay.world.weather import weather
 from gameplay.states import Bank, OptionMenu, OptionDisplay, OptionSounds
 from gameplay.entities.enemies import Reindeer, CultistWarrior, CultistRogue
@@ -11,7 +11,6 @@ from gameplay.entities.visuals.cosmetics import *
 from gameplay.entities.visuals.effects.fade_effect import FadeEffect
 from gameplay.ui.components.overlay import point_arrow
 from gameplay.entities.interactables import AbilityBall
-
 
 class Object_pool():#a class that contains the objecte one may one to spawn duirng the game: it preloads stiff that needs to be loaded from file
     def __init__(self, game_objects):
@@ -65,7 +64,6 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         FallingRock.pool(game_objects)
         Projectile_1.pool(game_objects)
         PoisonBlob.pool(game_objects)
-        Sword.pool(game_objects)
         Arrow.pool(game_objects)
         Wind.pool(game_objects)
         Shield.pool(game_objects)
@@ -80,11 +78,6 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         Leaves.pool(game_objects)
         BackgroundDroplet.pool(game_objects)
 
-        particles.Circle.pool(game_objects)
-        particles.Spark.pool(game_objects)
-        particles.Goop.pool(game_objects)
-        particles.FloatyParticles.pool(game_objects)
-
         weather.FlashFX.pool(game_objects)
 
         #platform
@@ -98,3 +91,11 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         OptionSounds.pool(game_objects)
 
 
+
+        #temp
+        from gameplay.entities.visuals.particles.component_based.particles import Circle, Spark, Goop, FloatyParticles
+
+        Circle.pool(game_objects)
+        Spark.pool(game_objects)
+        Goop.pool(game_objects)
+        FloatyParticles.pool(game_objects)

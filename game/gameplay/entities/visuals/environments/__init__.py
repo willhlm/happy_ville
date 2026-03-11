@@ -23,8 +23,7 @@ from .dynamic.leaves import Leaves
 
 from .grass.cave_grass import BackgroundCaveGrass 
 
-from .trees.nordveden_tree_1 import NordvedenTree_1 
-from .trees.nordveden_tree_2 import NordvedenTree_2
+from .trees.tree import GeneralTree 
 
 from .vines.vines_1 import Vines_1
 from .vines.vines_2 import Vines_2

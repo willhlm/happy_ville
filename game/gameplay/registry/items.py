@@ -8,6 +8,7 @@ REGISTER_ITEMS = {
     'half_damage': HalfDamage,
     'rings': Rings,
     'soul_essence': SoulEssence,
-    'red_infinity_stone': RedInfinityStone
+    'red_infinity_stone': RedInfinityStone,
+    'memory_shard': MemoryShard,
 
 }

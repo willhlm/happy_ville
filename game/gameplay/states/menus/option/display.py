@@ -158,5 +158,4 @@ class OptionDisplay(BaseUI):
         read_files.write_json(self.game_settings, 'config/game_settings.json')
 
     def play_click_sound(self):
-        for arrow in self.menu_ui.arrows:
-            arrow.play_SFX() 
+        self.game.game_objects.sound.play_ui_sound('on_select')

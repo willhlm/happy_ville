@@ -1,4 +1,5 @@
 import pygame, math
+from engine import constants as C
 
 class Collisions():
     def __init__(self,game_objects):
@@ -16,6 +17,10 @@ class Collisions():
         offset = 1#looks better if it is 1, but if it is 1, the fall through doesn't work when going dow the ramp
         hitbox.bottom += offset
 
+        if self.game_objects.player.flags['ground']:
+            self.game_objects.player.flags['go_through'] = True
+            self.game_objects.timer_manager.start_timer(C.go_through_timer, self.game_objects.player.on_go_through_timeout, ID = 'go_through')
+
         ramp = None
         for ramps in self.game_objects.platforms_ramps.sprites():
             if hitbox.colliderect(ramps.hitbox):
@@ -30,6 +35,19 @@ class Collisions():
                 self.game_objects.player.velocity[1] = offset#so that it looks more natural (cannot be 0, needs to be finite)
                 self.game_objects.player.go_through['ramp'] = ramp.go_through#a flag that determines if one can go through
 
+    #npc player conversation, when pressing t
+    def check_interaction_collision(self):
+        npc =  pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.npcs,Collisions.collided)#check collision
+        interactable = pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.interactables,Collisions.collided)#check collision
+        loot = pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.loot,Collisions.collided)#check collision
+
+        if npc:
+            npc.interact()
+        elif interactable:
+            interactable.interact()
+        elif loot:
+            loot.interact(self.game_objects.player)
+
     def entity_collision(self, entities, target_group):
         """
         Track collisions using object references.
@@ -37,15 +55,12 @@ class Collisions():
         - on_collision(entity): called ONCE when entity enters
         - on_noncollision(entity): called ONCE when entity exits
         """
-        entity_list = list(entities.sprites())
-        active_targets = set(target_group.sprites())
-
-        for target in active_targets:
+        for target in target_group:
             previous = self._collision_state.get(target, set())
             current = set()
 
             # Find current collisions
-            for entity in entity_list:
+            for entity in entities:
                 if self.collided(entity, target):
                     target.collision(entity)
                     current.add(entity)
@@ -67,13 +82,13 @@ class Collisions():
             if current:
                 self._collision_state[target] = current
             elif target in self._collision_state:
-                del self._collision_state[target] 
+                del self._collision_state[target]
 
     #check for entity collision
     def simple_collision(self, entities, target_group, callback_name = 'collision'):
         """
         Generic collision check that calls a named method on targets.
-        
+
         Args:
             entities: Group of entities to check
             target_group: Group of targets
@@ -85,35 +100,24 @@ class Collisions():
                 callback = getattr(target, callback_name)
                 callback(entity)
 
-    #npc player conversation, when pressing t
-    def check_interaction_collision(self):
-        npc =  pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.npcs,Collisions.collided)#check collision
-        interactable = pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.interactables,Collisions.collided)#check collision
-        loot = pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.loot,Collisions.collided)#check collision
-
-        if npc:
-            npc.interact()
-        elif interactable:
-            interactable.interact()
-        if loot:
-            loot.interact(self.game_objects.player)
-
-    #collision of player, enemy and loot: setting the flags depedning on the collisoin directions collisions between entities-groups: a dynamic and a static one    
+    #collision of player, enemy and loot: setting the flags depedning on the collisoin directions collisions between entities-groups: a dynamic and a static one
     def platform_collision(self, dynamic_Entities, dt):
-        for entity in dynamic_Entities.sprites():
+        for entity in dynamic_Entities:
             entity.collision_types = {'top':False,'bottom':False,'right':False,'left':False, 'standing_platform': None}
-            
-            #move in x every dynamic sprite            
+
+            #move in x every dynamic sprite
             entity.old_hitbox = entity.hitbox.copy()#save old position
-            entity.update_true_pos_x(dt)#it sets the true pos and update the hitbox
+
+            entity_dt = entity.hitstop.get_sim_dt(dt)#hitstop can set it to 0
+            entity.update_true_pos_x(entity_dt)#it sets the true pos and update the hitbox
             static_entities_x = pygame.sprite.spritecollide(entity, self.game_objects.platforms, False, Collisions.collided)
-            for static_entity_x in static_entities_x:                
-                static_entity_x.collide_x(entity)            
+            for static_entity_x in static_entities_x:
+                static_entity_x.collide_x(entity)
 
             #move in y every dynamic sprite
-            entity.update_true_pos_y(dt)#it sets the true pos and update the hitbox              
-            static_entities_y = pygame.sprite.spritecollide(entity, self.game_objects.platforms, False, Collisions.collided)                        
-            for static_entity_y in static_entities_y:                
+            entity.update_true_pos_y(entity_dt)#it sets the true pos and update the hitbox
+            static_entities_y = pygame.sprite.spritecollide(entity, self.game_objects.platforms, False, Collisions.collided)
+            for static_entity_y in static_entities_y:
                 static_entity_y.collide_y(entity)
 
             ramps = pygame.sprite.spritecollide(entity, self.game_objects.platforms_ramps, False, Collisions.collided)
@@ -121,7 +125,7 @@ class Collisions():
                 for ramp in ramps:
                     ramp.collide(entity)
             else:
-                entity.go_through['ramp'] = False       
+                entity.go_through['ramp'] = False
 
     def sprite_collide(self, sprite, group):
         return pygame.sprite.spritecollide(sprite, group, False, Collisions.collided)
@@ -166,4 +170,4 @@ class Collisions():
 #    self.enemies: 'collision_enemy',
 #    self.interactables: 'collision_interactables',
 #    self.interactables_fg: 'collision_interactables_fg',
-#})        
+#})

@@ -33,7 +33,7 @@ class Idle(Basic_states):
 class Grow(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.grow_speed = 0.001
+        self.grow_speed = 0.01
 
     def update_render(self, dt):
         self.entity.radius += dt * self.grow_speed
@@ -41,8 +41,7 @@ class Grow(Basic_states):
         if self.entity.radius >= 0.4:
             self.grow_speed = 0.005
 
-        if self.entity.radius >= 1:
-            self.entity.game_objects.signals.emit('ability_ball_grown')
+        if self.entity.radius >= 1:            
             self.enter_state('idle')     
 
     def handle_input(self,input,**kwarg):
@@ -53,9 +52,10 @@ class Hurt(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.time = 0
-        self.scale = 0.93
         self.amplitude = 0.2
+        self.original_amplitude = self.amplitude
         self.flashed = False
+        self.length = 30
 
     def update(self, dt):
         if self.time <= 20:
@@ -64,11 +64,11 @@ class Hurt(Basic_states):
         else:
             self.entity.flash -= dt * 0.1
             self.entity.flash = max(self.entity.flash, 0)
-        self.amplitude *= self.scale
+        self.amplitude = (self.original_amplitude * (1 - self.time/self.length)) * dt
         self.entity.shake = [random.uniform(-self.amplitude,self.amplitude), random.uniform(-self.amplitude,self.amplitude)]
         
         self.time += dt
-        if self.time > 30:
+        if self.time > self.length:
             if self.entity.radius < 1:
                 self.enter_state('grow')
             else:

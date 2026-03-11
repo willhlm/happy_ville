@@ -16,3 +16,5 @@ from .rings import Rings
 
 from .soul_essence import SoulEssence
 
+from .memory_shard import MemoryShard
+

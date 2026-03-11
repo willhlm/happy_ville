@@ -3,6 +3,7 @@ import warnings
 import numbers
 from math import sin, cos
 import math
+import re
 
 import moderngl
 from moderngl import Texture, Context, NEAREST
@@ -29,6 +30,34 @@ class RenderEngine:
     configuring OpenGL with ModernGL, and loading shaders for drawing. It provides a simple interface
     for creating and managing rendering layers, as well as drawing operations using shaders.
     """
+    _DEFAULT_INSTANCED_ATTRS = (("position", 2), ("scale", 2), ("angle", 1))
+    # Reserved / engine-owned names that must not be used as instance attribute names.
+    _RESERVED_INSTANCE_ATTR_NAMES = {
+        "vertexPos",
+        "vertexTexCoord",
+        "fragmentTexCoord",
+        "position",
+        "scale",
+        "angle",
+                "screenSize",
+        "gl_Position",
+    }
+
+    def _validate_instance_attribute_name(self, name: str) -> None:
+        # Prevent collisions with engine-defined symbols and varyings.
+        if name in self._RESERVED_INSTANCE_ATTR_NAMES:
+            raise ValueError(
+                f"Instance attribute name '{name}' is reserved by the engine."
+            )
+        if name.startswith("v_"):
+            raise ValueError(
+                "Instance attribute names must not start with 'v_' (reserved for varyings)."
+            )
+        if not re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", name):
+            raise ValueError(
+                f"Instance attribute name '{name}' is not a valid GLSL identifier."
+            )
+
 
     def __init__(
         self,
@@ -112,12 +141,20 @@ class RenderEngine:
         # Read draw shader source files
         vertex_src = resources.read_text("pygame_render", "vertex.glsl")
         fragment_src_draw = resources.read_text("pygame_render", "fragment_draw.glsl")
+        self._instanced_vertex_template = resources.read_text(
+            "pygame_render", "vertex_instanced_template.glsl"
+        )
 
         # Create draw shader program
         prog_draw = self._ctx.program(
             vertex_shader=vertex_src, fragment_shader=fragment_src_draw
         )
         self._shader_draw = Shader(prog_draw)
+        self._shader_draw_instanced = self.compile_shader(
+            fragment_source=fragment_src_draw,
+            instanced=True,
+            instanced_uv_rect=True,
+        )
 
         # Read the tone mapping shader
         fragment_src_tonemap = resources.read_text(
@@ -129,6 +166,11 @@ class RenderEngine:
             vertex_shader=vertex_src, fragment_shader=fragment_src_tonemap
         )
         self._shader_tonemap = Shader(prog_tonemap)
+        self._shader_tonemap_instanced = self.compile_shader(
+            fragment_source=fragment_src_tonemap,
+            instanced=True,
+            instanced_uv_rect=True,
+        )
         self._exposure: float
         self.HDR_exposure = 0.1
 
@@ -157,6 +199,39 @@ class RenderEngine:
             vertex_shader=vertex_src, fragment_shader=fragment_src_text
         )
         self._shader_text = Shader(prog_text)
+
+        # Shared resources for unique instanced rendering
+        base_quad_pos = np.array(
+            [
+                [-0.5, -0.5],
+                [0.5, -0.5],
+                [-0.5, 0.5],
+                [-0.5, 0.5],
+                [0.5, -0.5],
+                [0.5, 0.5],
+            ],
+            dtype=np.float32,
+        )
+        base_quad_uv = np.array(
+            [
+                [0.0, 1.0],
+                [1.0, 1.0],
+                [0.0, 0.0],
+                [0.0, 0.0],
+                [1.0, 1.0],
+                [1.0, 0.0],
+            ],
+            dtype=np.float32,
+        )
+        self._instanced_base_pos_vbo = self._ctx.buffer(base_quad_pos.tobytes())
+        self._instanced_base_uv_vbo = self._ctx.buffer(base_quad_uv.tobytes())
+        self._instanced_vao_cache: dict[
+            tuple[int, tuple[tuple[str, int], ...]], dict
+        ] = {}
+        self._instanced_shader_variant_cache: dict[tuple[int, tuple[tuple[str, int], ...], bool, str], Shader] = {}
+
+        self._quad_vbo = self._ctx.buffer(reserve=24 * 4)
+        self._quad_vao_cache = {}  # key: shader.program.glo -> vao   
 
     @property
     def screen(self) -> Layer:
@@ -263,7 +338,103 @@ class RenderEngine:
         fbo = self.ctx.framebuffer([tex])
         return Layer(tex, fbo)
 
-    def make_shader(self, vertex_src: str, fragment_src: str) -> Shader:
+    def _generate_instanced_vertex_source(
+        self,
+        instance_varyings: dict[str, int] | None = None,
+        vertex_hook: str = "",
+        instanced_uv_rect: bool = False,
+    ) -> str:
+        varying_decl_in = []
+        varying_decl_out = []
+        varying_assign = []
+        for name, components in (instance_varyings or {}).items():
+            if components < 1 or components > 4:
+                raise ValueError(
+                    f"instance_varyings['{name}'] must have 1-4 components"
+                )
+            glsl_type = "float" if components == 1 else f"vec{components}"
+            varying_decl_in.append(f"in {glsl_type} a_{name};")
+            varying_decl_out.append(f"out {glsl_type} v_{name};")
+            varying_decl_out.append(f"out {glsl_type} {name};")
+            varying_assign.append(f"    v_{name} = a_{name};")
+            varying_assign.append(f"    {name} = a_{name};")
+
+        uv_decl = ""
+        uv_apply = ""
+        if instanced_uv_rect:
+            uv_decl = "in vec2 uv_offset;\nin vec2 uv_scale;"
+            uv_apply = "fragmentTexCoord = vertexTexCoord * uv_scale + uv_offset;"
+
+        source = self._instanced_vertex_template
+        source = source.replace(
+            "// <AUTO_VARYINGS_ATTR_IN>", "\n".join(varying_decl_in) or ""
+        )
+        source = source.replace("// <AUTO_UVRECT_ATTR_IN>", uv_decl)
+        source = source.replace(
+            "// <AUTO_VARYINGS_OUT>", "\n".join(varying_decl_out) or ""
+        )
+        source = source.replace("// <AUTO_UVRECT_APPLY>", uv_apply)
+        source = source.replace(
+            "// <AUTO_VARYINGS_ASSIGN>", "\n".join(varying_assign) or ""
+        )
+        source = source.replace("// <USER_HOOK>", vertex_hook or "")
+        return source
+
+    def _infer_instance_varyings(
+        self, instance_attributes: dict[str, np.ndarray] | None
+    ) -> dict[str, int]:
+        inferred: dict[str, int] = {}
+        for name, values in (instance_attributes or {}).items():
+            self._validate_instance_attribute_name(name)
+            arr = np.asarray(values, dtype=np.float32)
+            if arr.ndim == 1:
+                arr = arr.reshape(-1, 1)
+            components = int(arr.shape[1])
+            if components < 1 or components > 4:
+                raise ValueError(
+                    f"Instance attribute '{name}' must have 1-4 components"
+                )
+            inferred[name] = components
+        return inferred
+
+    def _infer_instance_varyings_from_fragment_source(
+        self, fragment_source: str
+    ) -> dict[str, int]:
+        """
+        Infer instance varyings from fragment inputs named either `v_<name>`
+        or `<name>`. Example: `in vec4 v_tint;` or `in vec4 tint;`.
+        """
+        type_to_components = {
+            "float": 1,
+            "vec2": 2,
+            "vec3": 3,
+            "vec4": 4,
+        }
+        inferred: dict[str, int] = {}
+        pattern = re.compile(
+            r"^\s*(?:layout\s*\([^)]+\)\s*)?in\s+(float|vec[2-4])\s+([A-Za-z_]\w*)\s*;",
+            re.MULTILINE,
+        )
+        for glsl_type, raw_name in pattern.findall(fragment_source):
+            if raw_name == "fragmentTexCoord":
+                continue
+            name = raw_name[2:] if raw_name.startswith("v_") else raw_name
+            self._validate_instance_attribute_name(name)
+            inferred[name] = type_to_components[glsl_type]
+        return inferred
+
+    def make_shader(
+        self,
+        vertex_source: str | None = None,
+        fragment_source: str | None = None,
+        vertex_src: str | None = None,
+        fragment_src: str | None = None,
+        *,
+        instanced: bool = False,
+        instance_varyings: dict[str, int] | None = None,
+        vertex_hook: str = "",
+        instanced_uv_rect: bool = False,
+    ) -> Shader:
         """
         Creates a shader program using the provided vertex and fragment shader source code.
 
@@ -277,14 +448,86 @@ class RenderEngine:
         Note: If you want to load the shader source code from a file path, consider using the
         'load_shader_from_path' method instead.
         """
-        prog = self.ctx.program(vertex_shader=vertex_src, fragment_shader=fragment_src)
+        if vertex_source is None and vertex_src is not None:
+            vertex_source = vertex_src
+        if fragment_source is None and fragment_src is not None:
+            fragment_source = fragment_src
+
+        if fragment_source is None:
+            raise ValueError("fragment_source cannot be None")
+        if instanced and vertex_source is None:
+            vertex_source = self._generate_instanced_vertex_source(
+                instance_varyings=instance_varyings,
+                vertex_hook=vertex_hook,
+                instanced_uv_rect=instanced_uv_rect,
+            )
+        if vertex_source is None:
+            raise ValueError("vertex_source cannot be None when instanced is False")
+
+        prog = self.ctx.program(
+            vertex_shader=vertex_source,
+            fragment_shader=fragment_source,
+        )
         shader = Shader(prog)
+        return shader
+
+    def compile_shader(
+        self,
+        fragment_source: str | None = None,
+        vertex_source: str | None = None,
+        fragment_src: str | None = None,
+        vertex_src: str | None = None,
+        vertex_hook: str = "",
+        instanced: bool = False,
+        instance_varyings: dict[str, int] | None = None,
+        instanced_uv_rect: bool = False,
+    ) -> Shader:
+        """
+        Compile a shader using either a provided vertex shader or an auto-generated
+        instanced vertex shader.
+        """
+        if fragment_source is None:
+            fragment_source = fragment_src
+        if vertex_source is None:
+            vertex_source = vertex_src
+        if fragment_source is None:
+            raise ValueError("fragment_source cannot be None")
+        if instanced and vertex_source is None and instance_varyings is None:
+            instance_varyings = self._infer_instance_varyings_from_fragment_source(
+                fragment_source
+            )
+
+        shader = self.make_shader(
+            vertex_source=vertex_source,
+            fragment_source=fragment_source,
+            instanced=instanced,
+            instance_varyings=instance_varyings,
+            vertex_hook=vertex_hook,
+            instanced_uv_rect=instanced_uv_rect,
+        )
+        if instanced and vertex_source is None:
+            shader._instanced_auto_vertex = True
+            shader._instanced_fragment_source = fragment_source
+            shader._instanced_vertex_hook = vertex_hook
+            shader._instanced_uv_rect = instanced_uv_rect
+            if instance_varyings is None:
+                # Enable lazy varying inference from instance_attributes in render_batch_instanced.
+                shader._instanced_auto_infer_varyings = True
         return shader
 
     def make_font_atlas(self, font_path: str = None, font_size: int = 64) -> FontAtlas:
         return FontAtlas(self, font_path, font_size)
 
-    def load_shader_from_path(self, vertex_path: str, fragment_path: str) -> Shader:
+    def load_shader_from_path(
+        self,
+        vertex_path: str,
+        fragment_path: str,
+        *,
+        instanced: bool = False,
+        instance_varyings: dict[str, int] | None = None,
+        vertex_hook: str = "",
+        instanced_uv_rect: bool = False,
+    ) -> Shader:
         """
         Loads shader source code from specified file paths and creates a shader program.
 
@@ -300,7 +543,68 @@ class RenderEngine:
         with open(fragment_path) as f:
             fragment_src = f.read()
 
-        return self.make_shader(vertex_src, fragment_src)
+        return self.make_shader(
+            vertex_source=vertex_src,
+            fragment_source=fragment_src,
+            instanced=instanced,
+            instance_varyings=instance_varyings,
+            vertex_hook=vertex_hook,
+            instanced_uv_rect=instanced_uv_rect,
+        )
+
+    def load_fragment_shader_from_path(
+        self,
+        fragment_path: str,
+        *,
+        instanced: bool = True,
+        vertex_source: str | None = None,
+        vertex_hook: str = "",
+        instance_varyings: dict[str, int] | None = None,
+        instanced_uv_rect: bool = False,
+    ) -> Shader:
+        """
+        Load a fragment shader from disk.
+
+        By default (`instanced=True`), the engine auto-generates an instanced vertex
+        shader when `vertex_source` is not provided.
+
+        Parameters:
+        - fragment_path: Path to a fragment shader source file.
+        - instanced: If True, use the engine's auto-instanced vertex pipeline.
+        - vertex_source: Optional custom vertex shader source. If provided, this is
+          used directly instead of generating one.
+        - vertex_hook: Optional raw GLSL snippet inserted into `main()` of the
+          auto-generated instanced vertex shader (at `// <USER_HOOK>`).
+        - instance_varyings: Optional explicit mapping of extra per-instance
+          attributes to component counts, e.g. `{"tint": 4, "glow": 1}`.
+          If omitted, the engine can infer from fragment `in` declarations.
+        - instanced_uv_rect: If True, the generated vertex shader includes
+          `uv_offset` and `uv_scale` per-instance attributes for sub-rect / atlas UVs.
+
+        Example:
+        ```python
+        shader = engine.load_fragment_shader_from_path(
+            "fragment_glow.glsl",
+            instanced=True,
+            vertex_hook=\"\"\"
+                // wobble in clip space
+                gl_Position.xy += vec2(0.0, sin(position.x * 0.02) * 0.01);
+            \"\"\",
+            instance_varyings={"tint": 4, "glow": 1},
+            instanced_uv_rect=True,
+        )
+        ```        
+        """
+        with open(fragment_path) as f:
+            fragment_src = f.read()
+        return self.compile_shader(
+            fragment_source=fragment_src,
+            vertex_source=vertex_source,
+            vertex_hook=vertex_hook,#raw glsl code noe can suplplycan
+            instanced=instanced,
+            instance_varyings=instance_varyings,#if one wants to be explicity and not rely on autmatic one in engine
+            instanced_uv_rect=instanced_uv_rect,#useful for spriteet
+        )
 
     def reserve_uniform_block(self, shader: Shader, ubo_name: str, nbytes: int) -> None:
         """
@@ -361,7 +665,7 @@ class RenderEngine:
         - flip (tuple[bool, bool] | bool): Whether to flip the texture. Can be a tuple (flip x axis, flip y axis) or a boolean (flip x axis). Default is (False, False).
         - section (pygame.Rect | None): The section of the texture to render. If None, the entire texture is rendered. Default is None.
         - shader (Shader): The shader program to use for rendering. If None, a default shader is used. Default is None.
-        - hdr_render (bool): Whether to apply HDR tonemapping.
+        - hdr_render (bool): Whether to render using HDR texture with tone mapping. Default is False (SDR).
 
         Returns:
         None
@@ -375,362 +679,283 @@ class RenderEngine:
         - If hdr_render is True, it uses an HDR texture with tone mapping applied.
         """
 
-        self.render_batch(
-            tex,
-            layer,
-            transforms=[
-                {
-                    "position": position,
-                    "scale": scale,
-                    "angle": angle,
-                    "flip": flip,
-                    "section": section,
-                }
-            ],
-            shader=shader,
-            hdr_render=hdr_render,
+        # Create section rect if none
+        if section == None:
+            section = pygame.Rect(0, 0, tex.width, tex.height)
+
+        # If the scale is not a tuple but a scalar, convert it into a tuple
+        if isinstance(scale, numbers.Number):
+            scale = (scale, scale)
+
+        # If flip is not a tuple but a boolean, convert it into a tuple
+        if isinstance(flip, bool):
+            flip = (flip, False)
+
+        if hdr_render:
+            shader = self._shader_tonemap
+
+        # Get the vertex coordinates of a rectangle that has been rotated,
+        # scaled, and translated, in world coordinates
+        dest_vertices = create_rotated_rect(
+            position, section.width, section.height, scale, angle, flip
         )
+
+        # Convert the section rectangle into a list of vertices
+        section_vertices = [
+            (section.x, section.y),
+            (section.x + section.width, section.y),
+            (section.x, section.y + section.height),
+            (section.x + section.width, section.y + section.height),
+        ]
+
+        # Render the texture
+        self.render_from_vertices(tex, layer, dest_vertices, section_vertices, shader)
 
     def render_from_vertices(
         self,
         tex: Texture,
         layer: Layer,
-        dest_vertices: list[(float, float)],
-        section_vertices: list[(float, float)],
+        dest_vertices: list[tuple[float, float]],
+        section_vertices: list[tuple[float, float]],
+        shader: Shader = None,
+    ) -> None:
+        if shader is None:
+            shader = self._shader_draw
+
+        # Convert to destination coordinates (NDC)
+        vertex_coords = [to_dest_coords(p, layer.width, layer.height) for p in dest_vertices]
+        p1, p2, p3, p4 = vertex_coords
+        vertex_data = np.array([p3, p4, p2, p2, p4, p1], dtype=np.float32)  # (6,2)
+
+        # Texture UVs
+        section_coords = [to_source_coords(p, tex.width, tex.height) for p in section_vertices]
+        p1, p2, p3, p4 = section_coords
+        section_data = np.array([p3, p4, p1, p1, p4, p2], dtype=np.float32)  # (6,2)
+
+        # Interleave into (6,4): [x,y,u,v]
+        buffer_data = np.hstack([vertex_data, section_data]).astype(np.float32, copy=False)
+
+        # Upload
+        self._quad_vbo.orphan(buffer_data.nbytes)
+        self._quad_vbo.write(buffer_data.tobytes())
+
+        # IMPORTANT: bind target + texture + sampler uniforms (this is what you were missing)
+        layer.framebuffer.use()
+        tex.use()
+        shader.bind_sampler2D_uniforms()
+
+        # VAO cache per program
+        key = shader.program.glo
+        vao = self._quad_vao_cache.get(key)
+        if vao is None:
+            vao = self._ctx.vertex_array(
+                shader.program,
+                [(self._quad_vbo, "2f 2f", "vertexPos", "vertexTexCoord")],
+            )
+            self._quad_vao_cache[key] = vao
+
+        vao.render(moderngl.TRIANGLES)
+        shader.clear_sampler2D_uniforms()
+
+    def _coerce_instance_array(
+        self, name: str, data, n_instances: int, components: int | None = None
+    ) -> np.ndarray:
+        arr = np.asarray(data, dtype=np.float32)
+        if arr.ndim == 1:
+            arr = arr.reshape(-1, 1)
+        if arr.shape[0] != n_instances:
+            raise ValueError(
+                f"Length mismatch for '{name}': expected {n_instances}, got {arr.shape[0]}"
+            )
+        if components is not None and arr.shape[1] != components:
+            raise ValueError(
+                f"Component mismatch for '{name}': expected {components}, got {arr.shape[1]}"
+            )
+        return np.ascontiguousarray(arr, dtype=np.float32)
+
+    def _resolve_instanced_shader(
+        self,
+        shader: Shader | None,
+        hdr_render: bool,
+        inferred_varyings: dict[str, int],
+        instanced_uv_rect: bool,
+    ) -> Shader:
+        if shader is None:
+            return self._shader_tonemap_instanced if hdr_render else self._shader_draw_instanced
+
+        if not inferred_varyings:
+            return shader
+
+        if not getattr(shader, "_instanced_auto_infer_varyings", False):
+            return shader
+
+        key = (
+            shader.program.glo,
+            tuple(sorted(inferred_varyings.items())),
+            instanced_uv_rect,
+            getattr(shader, "_instanced_vertex_hook", ""),
+        )
+        cached = self._instanced_shader_variant_cache.get(key)
+        if cached is not None:
+            return cached
+
+        variant = self.compile_shader(
+            fragment_source=shader._instanced_fragment_source,
+            instanced=True,
+            instance_varyings=inferred_varyings,
+            vertex_hook=shader._instanced_vertex_hook,
+            instanced_uv_rect=instanced_uv_rect,
+        )
+        self._instanced_shader_variant_cache[key] = variant
+        return variant
+
+    def _shader_instance_attribute_name(self, shader: Shader, name: str) -> str:
+        if name in ("uv_offset", "uv_scale"):
+            return name
+        if bool(getattr(shader, "_instanced_auto_vertex", False)):
+            return f"a_{name}"
+        return name
+
+    def render_batch_instanced(
+        self,
+        tex: Texture,
+        layer: Layer,
+        positions: np.ndarray,
+        scales: np.ndarray,
+        angles: np.ndarray,
         shader: Shader = None,
         hdr_render: bool = False,
+        instance_attributes: dict[str, np.ndarray] | None = None,
+        uv_offset: np.ndarray | None = None,
+        uv_scale: np.ndarray | None = None,
     ) -> None:
         """
-        Render a texture onto a layer given lists of vertices.
+        Render a sprite batch using GPU instancing.
 
-        Parameters:
-        - tex (Texture): The texture to render.
-        - layer (Layer): The layer to render onto.
-        - dest_vertices (list[(float, float)]): The destination coordinates on the target layer.
-        - section_vertices (list[(float, float)]): The section of the texture to render.
-        - shader (Shader): The shader program to use for rendering. If None, a default shader is used. Default is None.
-        - hdr_render (bool): Whether to apply HDR tonemapping.
-
-        Returns:
-        None
+        Angles are in radians. Built-in instanced shaders expect:
+        - in vec2 position;
+        - in vec2 scale;
+        - in float angle;
+        Extra attributes can be forwarded to the fragment shader as v_<name>.
         """
+        positions = np.asarray(positions, dtype=np.float32)
+        if positions.ndim != 2 or positions.shape[1] != 2:
+            raise ValueError("positions must be shaped (N, 2)")
+        n_instances = positions.shape[0]
+        if n_instances == 0:
+            return
+        positions = self._coerce_instance_array(
+            "position", positions, n_instances, components=2
+        )
+        scales = self._coerce_instance_array("scale", scales, n_instances, components=2)
+        angles = self._coerce_instance_array("angle", angles, n_instances, components=1)
 
-        self.render_batch_from_vertices(
-            tex,
-            layer,
-            dest_vertices_list=[dest_vertices],
-            section_vertices_list=[section_vertices],
+        # UV rect attributes must be supplied together.
+        if (uv_offset is None) ^ (uv_scale is None):
+            raise ValueError("uv_offset and uv_scale must be provided together")
+
+        inferred_varyings = self._infer_instance_varyings(instance_attributes)
+        use_instanced_uv_rect = uv_offset is not None and uv_scale is not None
+        shader = self._resolve_instanced_shader(
             shader=shader,
             hdr_render=hdr_render,
+            inferred_varyings=inferred_varyings,
+            instanced_uv_rect=use_instanced_uv_rect,
         )
 
-    def render_batch(
-        self,
-        tex: Texture,
-        layer: Layer,
-        transforms: list[dict],
-        shader: Shader = None,
-        hdr_render: bool = False,
-    ) -> None:
-        """
-        Efficiently render multiple instances of a texture using batched vertex data.
+        attr_layout = list(self._DEFAULT_INSTANCED_ATTRS)
+        attr_data = [positions, scales, angles]
 
-        Parameters:
-        - tex (Texture): The texture to render.
-        - layer (Layer): The layer to render onto.
-        - transforms (list[dict]): Each dict should contain:
-            - position
-            - scale
-            - angle
-            - flip
-            - section
-        - shader (Shader): Optional shader. If None, uses internal.
-        - hdr_render (bool): Whether to apply HDR tonemapping.
+        extras = dict(instance_attributes or {})
+        if uv_offset is not None:
+            extras["uv_offset"] = uv_offset
+        if uv_scale is not None:
+            extras["uv_scale"] = uv_scale
 
-        Returns:
-        None
-        """
-
-        dest_vertices_list = []
-        section_vertices_list = []
-
-        for tf in transforms:
-            position = tf.get("position", (0, 0))
-            scale = tf.get("scale", (1.0, 1.0))
-            angle = tf.get("angle", 0.0)
-            flip = tf.get("flip", (False, False))
-            section = tf.get("section")
-
-            if isinstance(scale, numbers.Number):
-                scale = (scale, scale)
-            if isinstance(flip, bool):
-                flip = (flip, False)
-            if section is None:
-                section = pygame.Rect(0, 0, tex.width, tex.height)
-
-            dest_vertices = create_rotated_rect(
-                position, section.width, section.height, scale, angle, flip
+        for name, values in extras.items():
+            self._validate_instance_attribute_name(name)
+            arr = self._coerce_instance_array(name, values, n_instances)
+            if arr.shape[1] < 1 or arr.shape[1] > 4:
+                raise ValueError(
+                    f"Instance attribute '{name}' must have 1-4 components"
+                )
+            attr_layout.append(
+                (self._shader_instance_attribute_name(shader, name), int(arr.shape[1]))
             )
-            section_vertices = [
-                (section.x, section.y),
-                (section.x + section.width, section.y),
-                (section.x, section.y + section.height),
-                (section.x + section.width, section.y + section.height),
-            ]
+            attr_data.append(arr)
 
-            dest_vertices_list.append(dest_vertices)
-            section_vertices_list.append(section_vertices)
+        total_floats = sum(components for _, components in attr_layout)
+        stride_bytes = total_floats * np.dtype(np.float32).itemsize
+        interleaved = np.empty((n_instances, total_floats), dtype=np.float32)
+        offset = 0
+        for arr in attr_data:
+            components = arr.shape[1]
+            interleaved[:, offset : offset + components] = arr
+            offset += components
 
-        self.render_batch_from_vertices(
-            tex, layer, dest_vertices_list, section_vertices_list, shader, hdr_render
+        cache_key = (
+            shader.program.glo,
+            tuple(attr_layout),
+            use_instanced_uv_rect,
+            stride_bytes,
         )
+        cache = self._instanced_vao_cache.get(cache_key)
 
-    def render_batch_from_vertices(
-        self,
-        tex: Texture,
-        layer: Layer,
-        dest_vertices_list: list[list[tuple[float, float]]],
-        section_vertices_list: list[list[tuple[float, float]]],
-        shader: Shader = None,
-        hdr_render: bool = False,
-    ) -> None:
-        """
-        Render multiple quads from raw vertex and texture coordinates.
-
-        Parameters:
-        - tex (Texture): The texture to render.
-        - layer (Layer): The target framebuffer.
-        - dest_vertices_list (list[tuple[float, float]]): List of destination vertices for all quads (6 per quad).
-        - section_vertices_list (list[tuple[float, float]]): List of texture coordinates for all quads (6 per quad).
-        - shader (Shader): Shader to use. Defaults to _shader_draw.
-        - hdr_render (bool): Whether to apply HDR tonemapping.
-
-        Returns:
-        None
-        """
-
-        if hdr_render:
-            shader = self._shader_tonemap
-        elif shader is None:
-            shader = self._shader_draw
-
-        all_dest_coords = []
-        all_section_coords = []
-
-        for dest_vertices, section_vertices in zip(
-            dest_vertices_list, section_vertices_list
-        ):
-            # Convert screen coordinates to texture space
-            vertex_coords = [
-                to_dest_coords(p, layer.width, layer.height) for p in dest_vertices
-            ]
-            section_coords = [
-                to_source_coords(p, tex.width, tex.height) for p in section_vertices
-            ]
-
-            # Triangle order: p3, p4, p2, p2, p4, p1
-            p1, p2, p3, p4 = vertex_coords
-            all_dest_coords.extend([p3, p4, p2, p2, p4, p1])
-
-            p1, p2, p3, p4 = section_coords
-            all_section_coords.extend([p3, p4, p1, p1, p4, p2])
-
-        # Interleave and upload
-        vertex_data = np.array(all_dest_coords, dtype=np.float32)
-        section_data = np.array(all_section_coords, dtype=np.float32)
-        buffer_data = np.hstack([vertex_data, section_data])
-
-        vbo = self._ctx.buffer(buffer_data)
-        vao = self._ctx.vertex_array(
-            shader.program,
-            [(vbo, "2f 2f", "vertexPos", "vertexTexCoord")],
-        )
-
-        tex.use()
-        shader.bind_sampler2D_uniforms()
-        layer.framebuffer.use()
-
-        vao.render(moderngl.TRIANGLES)
-
-        shader.clear_sampler2D_uniforms()
-        vbo.release()
-        vao.release()        
-
-    def render_batch_unique(
-        self,
-        tex: Texture,
-        layer: Layer,
-        transforms: list[dict],
-        shader: Shader = None,
-        hdr_render: bool = False,
-        instance_uniforms: dict[str, list] = None,
-    ) -> None:
-    
-        if hdr_render:
-            shader = self._shader_tonemap
-        elif shader is None:
-            shader = self._shader_draw
-
-        # Static base quad (normalized to [-0.5, 0.5])
-        base_quad = np.array([
-            [-0.5, -0.5], [0.0, 1.0],
-            [ 0.5, -0.5], [1.0, 1.0],
-            [-0.5,  0.5], [0.0, 0.0],
-            [-0.5,  0.5], [0.0, 0.0],
-            [ 0.5, -0.5], [1.0, 1.0],
-            [ 0.5,  0.5], [1.0, 0.0],
-        ], dtype=np.float32)
-
-        base_vbo = self._ctx.buffer(base_quad.tobytes())
-        vao_bindings = [(base_vbo, "2f 2f", "vertexPos", "vertexTexCoord")]
-
-        # Per-instance VBOs
-        instance_vbos = []
-
-        positions = []
-        scales = []
-        angles = []
-
-        for tf in transforms:
-            positions.append(tf.get("position", (0, 0)))
-            base_scale = tf.get("scale", 1.0)
-            if isinstance(base_scale, (float, int)):
-                base_scale = (base_scale, base_scale)
-
-            section = tf.get("section", pygame.Rect(0, 0, tex.width, tex.height))
-            pixel_scale = (section.width * base_scale[0] * 1, section.height * base_scale[1]*1)
-            scales.append(pixel_scale)
-            angle_in_radians = math.radians(tf.get('angle', 0.0))
-            angles.append(angle_in_radians)
-
-        def add_instance_attr(name, data, fmt):
-            arr = np.array(data, dtype=np.float32)
-            buf = self._ctx.buffer(arr)
-            vao_bindings.append((buf, f"{fmt}/i", name))
-            instance_vbos.append(buf)
-
-        add_instance_attr("position", positions, "2f")
-        add_instance_attr("scale", scales, "2f")
-        add_instance_attr("angle", angles, "1f")
-
-        if instance_uniforms:
-            for name, values in instance_uniforms.items():
-                first = values[0]
-                if isinstance(first, (float, int)):
-                    fmt = "1f"
-                    data = np.array(values, dtype=np.float32).reshape(-1, 1)
-                elif isinstance(first, (tuple, list)):
-                    fmt = f"{len(first)}f"
-                    data = np.array(values, dtype=np.float32)
-                else:
-                    raise TypeError(f"Unsupported type for '{name}'")
-                add_instance_attr(name, data, fmt)
-
-        vao = self._ctx.vertex_array(shader.program, vao_bindings)
-
-        tex.use()
-        shader.bind_sampler2D_uniforms()
-        layer.framebuffer.use()
-
-        shader["screenSize"] = (layer.width, layer.height)
-
-        vao.render(moderngl.TRIANGLES, instances=len(positions))
-
-        shader.clear_sampler2D_uniforms()
-        vao.release()
-        base_vbo.release()
-        for buf in instance_vbos:
-            buf.release()
-
-    def render_batch_a_bit_faster(
-        self,
-        tex: Texture,
-        layer: Layer,
-        transforms: list[dict],
-        shader: Shader = None,
-        hdr_render: bool = False,
-    ) -> None:
-        """
-        Efficiently render multiple instances of a texture with various transforms in a single GPU call.
-
-        Parameters:
-        - tex (Texture): The texture to render.
-        - layer (Layer): The layer to render onto.
-        - transforms (list[dict]): Each dict should have:
-            - position (tuple[float, float])
-            - scale (tuple[float, float] | float)
-            - angle (float)
-            - flip (tuple[bool, bool] | bool)
-            - section (pygame.Rect | None)
-        - shader (Shader): The shader to use. Defaults to internal shader.
-        - hdr_render (bool): Whether to render using HDR tone mapping.
-
-        Returns:
-        None
-        """
-
-        if shader is None:
-            shader = self._shader_tonemap if hdr_render else self._shader_draw
-
-        all_vertex_data = []
-        all_section_data = []
-
-        for tf in transforms:
-            position = tf.get("position", (0, 0))
-            scale = tf.get("scale", (1.0, 1.0))
-            angle = tf.get("angle", 0.0)
-            flip = tf.get("flip", (False, False))
-            section = tf.get("section")
-
-            if isinstance(scale, numbers.Number):
-                scale = (scale, scale)
-            if isinstance(flip, bool):
-                flip = (flip, False)
-            if section is None:
-                section = pygame.Rect(0, 0, tex.width, tex.height)
-
-            dest_vertices = create_rotated_rect(
-                position, section.width, section.height, scale, angle, flip
+        if cache is None:
+            instance_vbo = self._ctx.buffer(reserve=max(stride_bytes, 4))
+            format_str = " ".join(f"{components}f" for _, components in attr_layout)
+            attr_names = [name for name, _ in attr_layout]
+            vao = self._ctx.vertex_array(
+                shader.program,
+                [
+                    (self._instanced_base_pos_vbo, "2f", "vertexPos"),
+                    (self._instanced_base_uv_vbo, "2f", "vertexTexCoord"),
+                    (instance_vbo, f"{format_str}/i", *attr_names),
+                ],
             )
-            section_vertices = [
-                (section.x, section.y),
-                (section.x + section.width, section.y),
-                (section.x, section.y + section.height),
-                (section.x + section.width, section.y + section.height),
-            ]
+            cache = {
+                "instance_vbo": instance_vbo,
+                "vao": vao,
+                "capacity": 1,
+                "stride_bytes": stride_bytes,
+            }
+            self._instanced_vao_cache[cache_key] = cache
 
-            # Convert to screen and texture coordinates
-            vertex_coords = [to_dest_coords(p, layer.width, layer.height) for p in dest_vertices]
-            section_coords = [to_source_coords(p, tex.width, tex.height) for p in section_vertices]
+        if cache["stride_bytes"] != stride_bytes:
+            raise RuntimeError("Instanced cache stride mismatch")
 
-            # Order as triangles: [p3, p4, p2], [p2, p4, p1]
-            p1, p2, p3, p4 = vertex_coords
-            all_vertex_data.extend([p3, p4, p2, p2, p4, p1])
+        if cache["capacity"] < n_instances:
+            while cache["capacity"] < n_instances:
+                cache["capacity"] *= 2
+            cache["vao"].release()
+            cache["instance_vbo"].release()
+            instance_vbo = self._ctx.buffer(
+                reserve=max(cache["capacity"] * stride_bytes, 4)
+            )
+            format_str = " ".join(f"{components}f" for _, components in attr_layout)
+            attr_names = [name for name, _ in attr_layout]
+            cache["vao"] = self._ctx.vertex_array(
+                shader.program,
+                [
+                    (self._instanced_base_pos_vbo, "2f", "vertexPos"),
+                    (self._instanced_base_uv_vbo, "2f", "vertexTexCoord"),
+                    (instance_vbo, f"{format_str}/i", *attr_names),
+                ],
+            )
+            cache["instance_vbo"] = instance_vbo
 
-            p1, p2, p3, p4 = section_coords
-            all_section_data.extend([p3, p4, p1, p1, p4, p2])
-
-        # Combine and upload
-        vertex_data = np.array(all_vertex_data, dtype=np.float32)
-        section_data = np.array(all_section_data, dtype=np.float32)
-
-        buffer_data = np.hstack([vertex_data, section_data])
-
-        vbo = self._ctx.buffer(buffer_data)
-        vao = self._ctx.vertex_array(
-            shader.program,
-            [(vbo, "2f 2f", "vertexPos", "vertexTexCoord")],
-        )
+        cache["instance_vbo"].orphan(max(cache["capacity"] * stride_bytes, 4))
+        cache["instance_vbo"].write(interleaved.tobytes())
 
         tex.use()
         shader.bind_sampler2D_uniforms()
         layer.framebuffer.use()
-        vao.render(moderngl.TRIANGLES)
+        try:
+            shader["screenSize"] = (layer.width, layer.height)
+        except KeyError:
+            pass
+        cache["vao"].render(moderngl.TRIANGLES, instances=n_instances)
         shader.clear_sampler2D_uniforms()
-
-        vbo.release()
-        vao.release()
-
 
     def render_primitive(
         self,
@@ -1066,13 +1291,36 @@ class RenderEngine:
         - This method is automatically called by the garbage collector,
           so there is no need to do it manually.
         """
+        for cache in self._instanced_vao_cache.values():
+            cache["vao"].release()
+            cache["instance_vbo"].release()
+        self._instanced_vao_cache.clear()
+        for shader in self._instanced_shader_variant_cache.values():
+            shader.release()
+        self._instanced_shader_variant_cache.clear()
+        self._instanced_base_pos_vbo.release()
+        self._instanced_base_uv_vbo.release()
+
         self._shader_draw.release()
+        self._shader_draw_instanced.release()
+        self._shader_tonemap.release()
+        self._shader_tonemap_instanced.release()
+        self._shader_text.release()
         self._screen.framebuffer.release()
         self._ctx.release()
 
         self._shader_draw = None
+        self._shader_draw_instanced = None
+        self._shader_tonemap = None
+        self._shader_tonemap_instanced = None
+        self._shader_text = None
         self._screen = None
         self._ctx = None
+
+        for vao in self._quad_vao_cache.values():
+            vao.release()
+        self._quad_vao_cache.clear()
+        self._quad_vbo.release()             
 
     def __del__(self):
         # Check if ctx is None to avoid double-freeing

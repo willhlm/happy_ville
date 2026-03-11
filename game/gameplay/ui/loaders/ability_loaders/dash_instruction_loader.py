@@ -11,26 +11,26 @@ class DashInstructionLoader(BaseLoader):
         self.load_data()
 
     def load_data(self):
-        self.buttons = {}
+        self.buttons = []
         self.text = []
         for obj in self.map_data['elements']:
             object_size = [int(obj['width']),int(obj['height'])]
             topleft_object_position = [int(obj['x']), int(obj['y'])-int(obj['height'])]
             properties = obj.get('properties',[])
             id = obj['gid'] - self.map_data['UI_firstgid']
-
+            
             if id == 4:#a button
-                new_button = self.registry[self.game_objects.controller.controller_type[-1]](topleft_object_position,self.game_objects,'a')
-                self.buttons['a'] = new_button
+                new_button = Controllers(topleft_object_position,self.game_objects,'a', self.game_objects.controller.controller_type[-1])
+                self.buttons.append(new_button)
             elif id == 5:#b button
-                new_button = self.registry[self.game_objects.controller.controller_type[-1]](topleft_object_position,self.game_objects,'b')
-                self.buttons['b'] = new_button
+                new_button = Controllers(topleft_object_position,self.game_objects,'b', self.game_objects.controller.controller_type[-1])
+                self.buttons.append(new_button)
             elif id == 6:#lb button
-                new_button = self.registry[self.game_objects.controller.controller_type[-1]](topleft_object_position,self.game_objects,'lb')
-                self.buttons['lb'] = new_button
+                new_button = Controllers(topleft_object_position,self.game_objects,'lb', self.game_objects.controller.controller_type[-1])
+                self.buttons.append(new_button)
             elif id == 7:#rb button
-                new_button = self.registry[self.game_objects.controller.controller_type[-1]](topleft_object_position,self.game_objects,'rb')
-                self.buttons['rb'] = new_button
+                new_button = Controllers(topleft_object_position,self.game_objects,'rb', self.game_objects.controller.controller_type[-1])
+                self.buttons.append(new_button)
 
             elif id == 10:#text
                 for property in properties:

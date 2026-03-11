@@ -1,6 +1,5 @@
 import pygame
 from engine import constants as C
-from gameplay.entities.visuals.particles import particles
 from gameplay.entities.base.static_entity import StaticEntity
 from . import states_two_d_liquid
 
@@ -64,7 +63,8 @@ class TwoDLiquid(StaticEntity):#inside interactables_fg group. fg because in fro
     def on_collision(self, entity):#player collision
         entity.movement_manager.add_modifier('two_d_liquid')
         vel_scale = entity.velocity[1] / C.max_vel[1]
-        self.splash(entity.hitbox.midbottom, lifetime = 100, dir = [0,1], colour = [self.currentstate.liquid_tint[0]*255, self.currentstate.liquid_tint[1]*255, self.currentstate.liquid_tint[2]*255, 255], vel = {'gravity': [7 * vel_scale, 14 * vel_scale]}, fade_scale = 0.3, gradient=0)
+        self.splash(entity.hitbox.midbottom, vel_scale)
+        #self.splash(entity.hitbox.midbottom, lifetime = 100, dir = [0,1], colour = [self.currentstate.liquid_tint[0]*255, self.currentstate.liquid_tint[1]*255, self.currentstate.liquid_tint[2]*255, 255], vel = {'gravity': [7 * vel_scale, 14 * vel_scale]}, fade_scale = 0.3, gradient=0)
         entity.timer_jobs['wet'].deactivate()#stop dropping if inside the water again
         self.currentstate.player_collision(entity)
 
@@ -72,13 +72,12 @@ class TwoDLiquid(StaticEntity):#inside interactables_fg group. fg because in fro
         entity.movement_manager.remove_modifier('two_d_liquid')
         entity.timer_jobs['wet'].activate(self.currentstate.liquid_tint)#water when player leaves
         vel_scale = abs(entity.velocity[1] / C.max_vel[1])
-        self.splash(entity.hitbox.midbottom, lifetime = 100, dir = [0,1], colour = [self.currentstate.liquid_tint[0]*255, self.currentstate.liquid_tint[1]*255, self.currentstate.liquid_tint[2]*255, 255], vel = {'gravity': [10 * vel_scale, 14 * vel_scale]}, fade_scale = 0.3, gradient=0)
+        self.splash(entity.hitbox.midbottom, vel_scale)
+        #self.splash(entity.hitbox.midbottom, lifetime = 100, dir = [0,1], colour = [self.currentstate.liquid_tint[0]*255, self.currentstate.liquid_tint[1]*255, self.currentstate.liquid_tint[2]*255, 255], vel = {'gravity': [10 * vel_scale, 14 * vel_scale]}, fade_scale = 0.3, gradient=0)
         self.currentstate.player_noncollision()
 
-    def splash(self,  pos, number_particles=20, **kwarg):#called from states, upoin collusions
-        for i in range(0, number_particles):
-            obj1 = particles.Circle(pos, self.game_objects, **kwarg)
-            self.game_objects.cosmetics.add(obj1)
+    def splash(self,  pos, vel_scale, number_particles=20):#called from states, upoin collusions
+        self.game_objects.particles.emit('liquid_splash', pos, number_particles, colour = [self.currentstate.liquid_tint[0]*255, self.currentstate.liquid_tint[1]*255, self.currentstate.liquid_tint[2]*255, 255],vel_scale = vel_scale)
 
     def seed_collision(self, seed):
         vel_scale = [abs(seed.velocity[0])/20,abs(seed.velocity[1])/ 20]

@@ -43,16 +43,13 @@ class HUD():
 
     def init_money(self):
         self.money_frame = MoneyFrame(self.game_objects.player)
-
-        string = '0'
-        self.money_image = self.game_objects.font.render((50,20),string)
+        self.money = 0
 
         self.money_pos = (self.offset, 50)
         self.number_pos = (self.offset + 24, 55)
 
     def update_money(self, num):
-        string = str(num)
-        self.money_image = self.game_objects.font.render((50,20), string)
+        self.money = num
 
     def update(self, dt):
         for heart in self.hearts:
@@ -64,14 +61,17 @@ class HUD():
         for ability in self.abilities:
             ability.update(dt)
 
+        self.update_overlay(dt)
+
+    def update_overlay(self, dt):
+        self.game_objects.ui.overlay.update(dt)
+
     def draw(self, composite_screen):
         h_pos = (14, 12)
         s_pos = (12, 12)
         frame_width = self.ability_hud[0].rect.width
         self.blur_screen.clear(0,0,0,0)
         self.screen.clear(0,0,0,0)
-
-        #self.game_objects.game.display.render(ability_frame.image, heart.image, self.screen, position=(16 * index, 0))
 
         for index,ability_hud in enumerate(self.ability_hud):#draw movement ability_hud
             self.game_objects.game.display.render(ability_hud.image,self.blur_screen, position = (self.offset, self.offset))
@@ -91,16 +91,19 @@ class HUD():
                 pos = (s_pos[0]+self.offset, s_pos[1] * index + frame_width - 5+self.offset)
             self.game_objects.game.display.render(spirit.image,self.blur_screen, position = pos)
 
-        self.game_objects.game.display.render(self.money_frame.image,self.blur_screen, position = self.money_pos)
-        self.game_objects.game.display.render(self.money_image,self.blur_screen, position = self.number_pos)
-
-        #for index,ability in enumerate(self.abilities):#draw ability symbols
-        #    self.game_objects.game.display.render(ability.image,self.screen, position = (32*index,60))        
+        self.game_objects.game.display.render(self.money_frame.image, self.blur_screen, position = self.money_pos)
+        self.game_objects.game.display.render_text(self.game_objects.font.font_atals, self.blur_screen, str(self.money), position=self.number_pos, color=(255, 255, 255, 255), letter_frame=None)
 
         self.game_objects.shaders['blur_outline']['blurRadius'] = 1
         self.game_objects.game.display.render(self.blur_screen.texture, self.screen, shader = self.game_objects.shaders['blur_outline'])
-        self.render_fps()#render on scren, witout blur
-        self.game_objects.game.display.render(self.screen.texture, composite_screen, scale = self.game_objects.game.scale)
+        self.render_fps()#render on scren, witout blur             
+        self.render_overlay(self.screen)        
+        self.game_objects.game.display.render(self.screen.texture, composite_screen, scale = self.game_objects.game.scale)         
+
+    def render_overlay(self, target):
+        self.game_objects.game.display.use_premultiplied_alpha_mode()   
+        self.game_objects.ui.overlay.draw(target)
+        self.game_objects.game.display.use_standard_alpha_mode()
 
     def render_fps(self):
         if self.game_objects.game.RENDER_FPS_FLAG:
@@ -122,7 +125,6 @@ class HUD():
         if self.game_objects.player.health - i - 1 == 0.5:
             self.hearts[i+1].currentstate.enter_state('Idle')
             self.hearts[i+1].take_dmg(0.5)
-
 
     def remove_spirits(self,spirit):
         index = self.game_objects.player.spirit + spirit - 1

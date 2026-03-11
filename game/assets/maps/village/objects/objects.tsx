@@ -4,14 +4,14 @@
  <tile id="0">
   <image width="32" height="64" source="thor_mtn1.png"/>
  </tile>
- <tile id="1">
-  <image width="64" height="64" source="../../../sprites/entities/platforms/boulder/erect/boulder.png"/>
- </tile>
  <tile id="2">
   <properties>
    <property name="erect" type="bool" value="false"/>
    <property name="key" value=""/>
   </properties>
   <image width="48" height="64" source="../../../sprites/entities/interactables/doors/door_right/erect/door_right01.png"/>
+ </tile>
+ <tile id="3">
+  <image width="64" height="64" source="../../../sprites/entities/platforms/boulder/erect/boulder.png"/>
  </tile>
 </tileset>

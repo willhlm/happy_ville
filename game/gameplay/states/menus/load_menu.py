@@ -29,7 +29,7 @@ class LoadMenu(BaseUI):
                 arrow.set_pos((bx + bw + 10, y_pos))  # +10 px padding
             else:# left arrow, align to left edge of button
                 arrow.set_pos((bx - arrow.rect.width - 10, y_pos))  # -10 px padding
-        arrow.play_SFX()
+        self.game.game_objects.sound.play_ui_sound('on_select')
     
     def _update_button(self):
         """Handle button state transitions when selection changes"""

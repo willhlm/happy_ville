@@ -2,7 +2,6 @@ from gameplay.states.gameplay.gameplay import Gameplay
 from gameplay.entities.visuals.cosmetics import SpawnEffect
 from engine.utils import read_files
 from engine.system import animation
-from gameplay.entities.visuals.particles import particles
 
 class CutsceneEngine(Gameplay):#cut scenens that is based on game engien
     def __init__(self,game):

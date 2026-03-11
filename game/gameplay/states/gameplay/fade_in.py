@@ -1,40 +1,34 @@
-from gameplay.states import Gameplay
+from gameplay.states.base.game_state import GameState
 
-class FadeIn(Gameplay):
-    def __init__(self, game):
+class FadeIn(GameState):
+    def __init__(self, game, **kwargs):
         super().__init__(game)
         self.count = 0
-        self.fade_length = 25
-        self.init()
-        self.fade_surface = self.game.display.make_layer(self.game.window_size)#TODO
-        self.fade_surface.clear(0,0,0,255)
+        self.fade_length = kwargs.get("fade_length", 25)
 
-    def init(self):
-        self.aila_state = 'idle'#for respawn after death
-        for state in self.game.state_manager.state_stack:
-            if 'Death' == type(state).__name__:
-                self.aila_state = 'invisible'
-                self.game.game_objects.player.currentstate.enter_state('invisible')
-                break
+        self.fade_surface = self.game.display.make_layer(self.game.window_size)
+        self.fade_surface.clear(0, 0, 0, 255)        
 
-    def update_render(self, dt):
-        self.fade_update(dt)#so that it doesn't collide with collision path
+    def update(self, dt):
+        under_state = self.game.state_manager.peek_below_top()        
+        under_state.update(dt)        
         self.count += dt
         if self.count > self.fade_length:
             self.exit()
 
+    def update_render(self, dt):
+        under_state = self.game.state_manager.peek_below_top()  
+        under_state.update_render(dt)
+
     def exit(self):
-        self.game.game_objects.player.reset_movement()
-        self.game.game_objects.player.currentstate.enter_state(self.aila_state)
         self.fade_surface.release()
         self.game.state_manager.exit_state()
+        self.game.game_objects.signals.emit("fade_in_finished")
 
     def render(self):
-        super().render()#gameplay render
-        alpha = max(int((self.fade_length - self.count)*(255/self.fade_length)),0)
-        self.fade_surface.clear(0,0,0,alpha)
+        under_state = self.game.state_manager.peek_below_top()  
+        under_state.render()
+
+        alpha = max(int((self.fade_length - self.count) * (255 / self.fade_length)), 0)
+        self.fade_surface.clear(0, 0, 0, alpha)
         self.game.render_display(self.fade_surface.texture)
-
-    def handle_movement(self):#to prevent controller inputs on aila movement
-        pass
-

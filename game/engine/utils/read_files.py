@@ -1,7 +1,6 @@
 import pygame, json
 from os import listdir, walk
-from os.path import isfile, join
-#from posixpath import join
+from os.path import isfile, join, basename, isdir
 
 def default(dict):
     if hasattr(dict, 'to_json'):
@@ -74,25 +73,28 @@ def load_shaders_dict(game_objects):#returns a dicy with "state" as key and shad
     shader_dict = {}
     base_path = 'engine/render/shaders/'
     for subdir in [d[0] for d in walk(base_path) if d[0] != base_path]:
-        shader_dict[subdir.split("/")[-1]] = load_shader_list(subdir,game_objects)
+        if '_old' in subdir: continue  # skip _old folder        
+        subdirs_in_current = [d for d in listdir(subdir) if isdir(join(subdir, d))]# Only process leaf directories (folders with no subdirectories)
+        if len(subdirs_in_current) > 0:continue  # Skip folders that contain other folders: to support subfold structure                  
+        shader_dict[basename(subdir)] = load_shader_list(subdir, game_objects)        
     return shader_dict
 
-def load_shader_list(path_to_folder, game_objects):#use this to load multiple sprites in a path_to_folder
+def load_shader_list(path_to_folder, game_objects):#use this to load multiple sprites in a path_to_folder           
     list_of_shader = []
     for f in listdir(path_to_folder):
         if not isfile(join(path_to_folder, f)): continue#skip the folders
-        if '.DS_Store' in join(path_to_folder, f): continue#skip this file
-        if '.gitkeep' in join(path_to_folder, f): continue#skip this file
+        if '.DS_Store' in f or '.gitkeep' in f: continue#skip this file
         list_of_shader.append(join(path_to_folder, f))
-    list_of_shader.sort(reverse = True)
-    return game_objects.game.display.load_shader_from_path(list_of_shader[0],list_of_shader[1])#vertex first
+    
+    list_of_shader.sort(reverse=True)
+    return game_objects.game.display.load_shader_from_path(list_of_shader[0], list_of_shader[1])#vertex first
 
 'sound loader'
 def load_sounds_dict(base_path):#returns a dict with "stae" as key, the sound file as value
     sound_dict = {}
     for subdir in [d[0] for d in walk(base_path)]:
         if subdir == base_path:
-            pass
+            pass        
         sound_dict[subdir.split("/")[-1]] = load_sounds_list(subdir)
     return sound_dict
 

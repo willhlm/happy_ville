@@ -1,7 +1,7 @@
 import pygame
 from engine.utils import read_files
 from gameplay.entities.items.base.item import Item
-from gameplay.entities.visuals.particles import particles
+#from gameplay.entities.visuals.particles import particles
 
 class SoulEssence(Item):#genkidama
     def __init__(self, pos, game_objects, ID_key = None):
@@ -21,8 +21,9 @@ class SoulEssence(Item):#genkidama
 
     def update(self, dt):
         super().update(dt)
-        obj1 = getattr(particles, 'Spark')(self.rect.center, self.game_objects, distance = 100, lifetime=20, vel={'linear':[2,4]}, fade_scale = 10)
-        self.game_objects.cosmetics.add(obj1)
+        self.game_objects.particles.emit('spark_scatter',self.rect.center, colour = [255,255,255,255] )
+        #obj1 = getattr(particles, 'Spark')(self.rect.center, self.game_objects, distance = 100, lifetime=20, vel={'linear':[2,4]}, fade_scale = 10)
+        #self.game_objects.cosmetics.add(obj1)
 
     def update_vel(self, dt):
         pass

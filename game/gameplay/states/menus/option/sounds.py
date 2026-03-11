@@ -40,7 +40,7 @@ class OptionSounds(BaseUI):
                 arrow.set_pos((20 + x_pos, y_pos))  # +10 px padding
             else:# left arrow, align to left edge of button
                 arrow.set_pos((bx - arrow.rect.width - 10 , y_pos))  # -10 px padding
-        arrow.play_SFX()
+        self.game.game_objects.sound.play_ui_sound('on_select')
 
     def _get_option_display_text(self, button_index):
         """Get the current value text for each option"""
@@ -132,8 +132,4 @@ class OptionSounds(BaseUI):
         # Update playing sounds immediately
         self.game.game_objects.sound.sound_player.update_all_volumes()
         
-        self.play_click_sound()
-
-    def play_click_sound(self):
-        for arrow in self.menu_ui.arrows:
-            arrow.play_SFX()
+        self.game.game_objects.sound.play_ui_sound('on_select')

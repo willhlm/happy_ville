@@ -40,6 +40,7 @@ from .statues.abilities.air_dash_statue import AirDashStatue
 from .statues.abilities.thunder_dive_statue import ThunderDiveStatue
 from .statues.quests.quest_statue import QuestStatue
 from .statues.quests.stone_wood import StoneWood
+from .statues.rhoutta.rhoutta import RhouttaStatue
 
 from .traps.grind.grind import Grind
 from .traps.lightning_spikes import LightningSpikes

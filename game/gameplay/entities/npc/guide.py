@@ -1,5 +1,4 @@
 from gameplay.entities.npc.base.npc import NPC
-from gameplay.entities.visuals.particles import particles
 
 class Guide(NPC):
     def __init__(self, pos,game_objects):
@@ -12,11 +11,7 @@ class Guide(NPC):
     def buisness(self):#enters after conversation
         self.shader_state.enter_state('Teleport')
         self.give_light()
-        for i in range(0, 10):#should maybe be the number of abilites Aila can aquire?
-            particle = getattr(particles, 'Circle')(self.hitbox.center, self.game_objects, distance=0, lifetime = -1, vel = {'linear':[7,15]}, dir='isotropic', scale=5, colour=[100,200,255,255], state = 'Circle_converge',gradient = 1)
-            light = self.game_objects.lights.add_light(particle, colour = [100/255,200/255,255/255,255/255], radius = 20)
-            particle.light = light#add light reference
-            self.game_objects.cosmetics.add(particle)
+        self.game_objects.particles.emit('converging_soul', pos = self.hitbox.center, n = 10, player = self.game_objects.player)
 
     def give_light(self):#called when teleport shader is finished
         self.game_objects.lights.add_light(self.game_objects.player, colour = [200/255,200/255,200/255,200/255])

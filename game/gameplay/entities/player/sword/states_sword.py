@@ -64,7 +64,6 @@ class Slash_down(Basic_states):
         self.entity.hitbox[2] = 40
         self.entity.hitbox[3] = 35
         self.entity.dir = [sign(self.entity.dir[0]), -1]#sword dir
-        self.check_pogo = True
 
         if self.entity.dir[0] > 0:
             self.offset = 45
@@ -75,9 +74,7 @@ class Slash_down(Basic_states):
         self.entity.rect.center = [self.entity.hitbox.center[0] + self.offset, self.entity.hitbox.center[1] - 4]
 
     def sword_jump(self):
-        if self.check_pogo:
-            self.entity.entity.velocity[1] = C.pogo_vel
-            self.check_pogo = False
+        self.entity.entity.velocity[1] = C.pogo_vel
 
 #states for the stones (the stones alters the sword properties)
 class Stone_states():
@@ -109,7 +106,9 @@ class Projectile_collision(Stone_states):#pirpöle stone ca nset this state
 
     def projectile_collision(self, eprojecitile, effect):
         eprojecitile.reflect(self.entity.dir, self.entity.hitbox.center)
-        self.entity.sword_jump()
+
+    def sword_jump(self):
+        self.entity.entity.velocity[1] = C.pogo_vel
 
 class Slash(Stone_states):#green stone can set this
     def __init__(self, entity):

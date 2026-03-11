@@ -8,9 +8,10 @@ class TjasolmaisEmbrace(Ability):#makes the shield, water god
         self.sprites = read_files.load_sprites_dict('assets/sprites/ui/elements/abilities/tjasolmais_embrace/',entity.game_objects)
         self.description = ['shield','hits one additional target','one additional damage','imba']
         self.shield = None#-> higher level can reflect projectiles? or maybe hurt enemy?
+        self.entity.movement_manager.add_modifier('tjasolmais_embrace', entity = self.entity)#this shoudl be appdended when abilty is added
 
     def shield_expire(self):#called when the shield is destroyed
-        self.entity.movement_manager.remove_modifier('tjasolmais_embrace')
+        #self.entity.movement_manager.remove_modifier('tjasolmais_embrace')
         self.entity.hit_component.damage_manager.remove_modifier('tjasolmais_embrace')
         self.shield = None
 
@@ -20,7 +21,7 @@ class TjasolmaisEmbrace(Ability):#makes the shield, water god
     def initiate(self):#called when using the abilty
         if self.shield: self.shield.kill()    #kill the old one
         self.shield = Shield(self.entity)
-        self.entity.movement_manager.add_modifier('tjasolmais_embrace', entity = self.entity)
+        #self.entity.movement_manager.add_modifier('tjasolmais_embrace', entity = self.entity)
         self.entity.hit_component.damage_manager.add_modifier('tjasolmais_embrace', entity = self.entity)
 
         self.entity.projectiles.add(self.shield)

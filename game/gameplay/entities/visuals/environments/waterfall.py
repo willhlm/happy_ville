@@ -8,33 +8,38 @@ class Waterfall(StaticEntity):
         self.layer_name = layer_name
 
         self.size = size
+        self.rect[2], self.rect[3] = size[0], size[1]   
+
         self.empty = game_objects.game.display.make_layer(size)
         self.noise_layer = game_objects.game.display.make_layer(size)
         self.blur_layer = game_objects.game.display.make_layer(size)
         self.time = 5*100#offset the time
 
         sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/visuals/environments/waterfall/')
-        self.channel = self.game_objects.sound.play_sfx(sounds['idle'][0], loop = -1, vol = 0.04)
-        self.set_volume()
+
+        px, py = self.parallax
+        p_factor = 0.5 * (px + py)
+        self.spatial_emitter_id = game_objects.sound.register_spatial_rect(
+            sound=sounds['idle'][0],
+            get_rect=lambda: self.rect,       
+            base_volume=1 * p_factor,
+            loops=-1,
+            min_dist=96 * p_factor,
+            max_dist=700 * p_factor,
+            listener_transform=lambda p: (
+                p[0] - px * self.game_objects.camera_manager.camera.interp_scroll[0],
+                p[1] - py * self.game_objects.camera_manager.camera.interp_scroll[1],
+            ),
+        )
 
     def release_texture(self):
         self.empty.release()
         self.noise_layer.release()
         self.blur_layer.release()
-        self.channel.fadeout(300)
-
-    def set_volume(self):
-        width = self.game_objects.game.window_size[0]
-        height = self.game_objects.game.window_size[1]
-        center_blit_pos = [self.true_pos[0] + self.size[0]*0.5-self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0], self.true_pos[1]+ self.size[1]*0.5-self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
-        distance_to_screencenter = ((center_blit_pos[0] - width * 0.5)**2 + (center_blit_pos[1]-height * 0.5) ** 2)**0.5
-        max_distance = ((width*0.5)**2 + (height*0.5)**2)**0.5
-        normalized_distance = max(0, min(1, 1 - (distance_to_screencenter / max_distance)))#clamp it to 0, 1
-        self.channel.set_volume(0.5 * normalized_distance)
+        self.game_objects.sound.unregister_emitter(self.spatial_emitter_id)
 
     def update(self, dt):
         self.time += dt * 0.01
-        self.set_volume()
 
     def draw(self, target):
         #noise

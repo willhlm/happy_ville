@@ -1,50 +1,52 @@
 import pygame
 from engine.utils import read_files
-from engine.system import collisions, save_load, groups, object_pool, controller, lights, timer, signals, time_manager, alphabet, input_interpreter
+from engine.system import collisions, save_load, groups, object_pool, controller, lights, timer, signals, time_manager, alphabet, input_interpreter, transition_controller
 from engine.sound import game_audio
 from gameplay.entities.player import player
 from engine.render import post_process
 from engine.camera import camera
 
-from gameplay.world import map_loader, world_state
+from gameplay.world import world_state
+from gameplay.world.map.map_coordinator import MapCoordinator
 from gameplay.world.weather import weather
 from engine import constants as C
 from gameplay.ui.managers import ui
 from gameplay.narrative.quests_events.manager import QuestsEventsManager
-from gameplay.registry.registry_manager import RegistryManager
 
-from time import perf_counter
+from gameplay.registry.registry_manager import RegistryManager
+from engine.particles.particle_system import ParticleSystem
 
 class GameObjects():
     def __init__(self, game):
         self.game = game
-        self.font = alphabet.Alphabet(self)#intitilise the alphabet class, scale of alphabet
+        self.font = alphabet.Alphabet(self)#intitilise the alphabet class, scale of alphabet          
+        self.signals = signals.Signals()        
         self.shaders = read_files.load_shaders_dict(self)#load all shaders aavilable into a dict
         self.controller = controller.Controller()
         self.object_pool = object_pool.Object_pool(self)
         self.sound = game_audio.GameAudio()
         self.lights = lights.Lights(self)
         self.timer_manager = timer.Timer_manager(self)
-        self.create_groups()
+        self._create_groups()
         self.weather = weather.Weather(self)
         self.collisions = collisions.Collisions(self)
-        self.map = map_loader.Level(self)
-        self.camera_manager = camera.Camera_manager(self)
+        self.transition = transition_controller.TransitionController(self)
+        self.map = MapCoordinator(self) 
+        self.camera_manager = camera.Camera_manager(self)                    
         self.world_state = world_state.World_state(self)#save/handle all world state stuff here
         self.ui = ui.UiManager(self)
         self.save_load = save_load.Save_load(self)#contains save and load attributes to load and save game
-        self.quests_events = QuestsEventsManager(self)
-        self.signals = signals.Signals()
+        self.quests_events = QuestsEventsManager(self)        
         self.input_interpreter = input_interpreter.InputInterpreter(self)
         self.time_manager = time_manager.Time_manager(self)
         self.post_process = post_process.PostProcess(self)
         self.registry = RegistryManager()
+        self.particles = ParticleSystem(self)
 
-    def create_groups(self):#define all sprite groups
+    def _create_groups(self):#define all sprite groups
         self.enemies = groups.Group()#enemies
         self.npcs = groups.Group()#npcs
         self.platforms = groups.Group()#platforms
-        self.special_shaders = groups.Group()#portal use it for the drawing: draw not called normally but in different gameplay state
         self.platforms_ramps = groups.Group()#ramps
         self.all_bgs = groups.LayeredGroup()#[]
         self.all_fgs = groups.LayeredGroup()#[]
@@ -63,26 +65,9 @@ class GameObjects():
         self.layer_pause = groups.PauseLayer()#like eneitty pause but for those at different parallax layers
 
         #initiate player
-        self.player = player.Player([0,0],self)
-        self.players = groups.Group()#blits on float positions
+        self.player = player.Player([0,0], self)
+        self.players = groups.Group()
         self.players.add(self.player)
-
-    def load_map(self, previous_state, map_name, spawn = '1', fade = True):#called from path_col
-        if fade:#for cutscenes
-            kwarg = {'previous_state': previous_state, 'map_name': map_name,'spawn':spawn, 'fade': fade }
-            self.game.state_manager.enter_state('fade_out', **kwarg)
-        else:
-            self.load_map2(map_name, spawn, fade)
-
-    def load_map2(self, map_name, spawn = '1', fade = True):#called from fadeout or load_map above
-        self.clean_groups()
-        t1_start = perf_counter()
-        self.map.load_map(map_name, spawn)#memory leak somwehre here
-        t1_stop = perf_counter()
-        print(t1_stop-t1_start)
-
-        if fade:#for cutscenes
-            self.game.state_manager.enter_state('fade_in')
 
     def clean_groups(self):#called wgen changing map
         self.npcs.empty()
@@ -100,7 +85,6 @@ class GameObjects():
         self.cosmetics_bg.empty()
         self.layer_pause.empty()
         self.bg_fade.empty()
-        self.special_shaders.empty()
         self.eprojectiles.empty()
         self.interactables_fg.empty()
         self.fprojectiles.empty()
@@ -110,12 +94,12 @@ class GameObjects():
 
     def collide_all(self, dt):
         self.platform_collision(dt)
-
-        self.collisions.simple_collision(self.players, self.loot, callback_name = 'player_collision')
+        
         self.collisions.simple_collision(self.players, self.enemies, callback_name = 'player_collision')
         self.collisions.simple_collision(self.players, self.bg_fade, callback_name = 'player_collision')
 
         #checks colliions and non collisions
+        self.collisions.entity_collision(self.players, self.loot)
         self.collisions.entity_collision(self.players, self.interactables)
         self.collisions.entity_collision(self.players, self.interactables_fg)
         self.collisions.entity_collision(self.players, self.npcs)
@@ -123,6 +107,7 @@ class GameObjects():
         self.collisions.simple_collision(self.eprojectiles, self.fprojectiles, callback_name = 'collision_projectile')
         self.collisions.simple_collision(self.enemies, self.fprojectiles, callback_name = 'collision_enemy')
         self.collisions.simple_collision(self.players, self.eprojectiles, callback_name = 'collision_enemy')
+        self.collisions.simple_collision(self.platforms, self.fprojectiles, callback_name = 'collision_platform')
 
         self.collisions.simple_collision(self.interactables, self.fprojectiles, callback_name = 'collision_interactables')
         self.collisions.simple_collision(self.interactables_fg,self.fprojectiles, callback_name = 'collision_interactables_fg')
@@ -137,7 +122,10 @@ class GameObjects():
         self.collisions.platform_collision(self.npcs, dt)
         self.collisions.platform_collision(self.loot, dt)
 
-    def update(self, dt):
+    def update(self, dt):        
+        self.platforms.update(dt)
+        self.platforms_ramps.update(dt)
+
         #things that shuodl collide
         self.players.update(dt)
         self.entity_pause.update(dt)#should be before enemies, npcs and interactable groups
@@ -156,8 +144,7 @@ class GameObjects():
 
         #update cosmetics and BGs
         self.timer_manager.update(dt)
-        self.platforms.update(dt)
-        self.platforms_ramps.update(dt)
+
         self.layer_pause.update(dt)#should be before all_bgs and all_fgs
         self.all_bgs.update(dt)
         self.bg_interact.update(dt)
@@ -167,7 +154,6 @@ class GameObjects():
         self.interactables.update(dt)
         self.weather.update(dt)
         self.interactables_fg.update(dt)#twoD water use it
-        self.special_shaders.update(dt)#portal use it
         self.lights.update_render(dt)
 
     def update_render(self, dt):#called after update_physics
@@ -178,6 +164,7 @@ class GameObjects():
         self.all_bgs.update_render(dt)
         self.bg_interact.update_render(dt)
         self.all_fgs.update_render(dt)
+        self.sound.update_render(self.player.hitbox.center)#for emitters and tracking distance for sound
         self.players.update_render(dt)
         self.enemies.update_render(dt)
         self.npcs.update_render(dt)
@@ -188,14 +175,13 @@ class GameObjects():
         self.cosmetics_bg.update_render(dt)
         self.interactables.update_render(dt)
         self.interactables_fg.update_render(dt)#twoD water use it
-        self.special_shaders.update_render(dt)#portal use it
 
     def draw(self):#called from render states
         self.lights.clear_normal_map()
-        self.all_bgs.draw(self.game.screen_manager.screens)#returns the last layer
+        self.all_bgs.draw(self.game.screen_manager.screens)
 
         #bg1:
-        layer = self.all_bgs.get_topmost_screen()
+        layer = self.all_bgs.get_topmost_screen()#returns the last layer
         last_bg_screen = self.game.screen_manager.screens[layer].layer
         self.platforms.draw(last_bg_screen)
         self.interactables.draw(last_bg_screen)#should be before bg_interact
@@ -216,7 +202,7 @@ class GameObjects():
         self.cosmetics.draw(plater_fg_screen)
 
         #fgs
-        self.all_fgs.draw(self.game.screen_manager.screens)#returns the last layer
+        self.all_fgs.draw(self.game.screen_manager.screens)
         #self.camera_blocks.draw()
 
         #temporaries draws. Shuold be removed
@@ -265,7 +251,6 @@ class GameObjects():
                     if type(obj).__name__ == 'River':
                         pygame.draw.rect(image, (0,0,255), (int(obj.reflect_rect[0]),int(obj.reflect_rect[1]),obj.reflect_rect[2],obj.reflect_rect[3]),1)#draw hitbox
                         pygame.draw.rect(image, (255,0,0), (int(obj.rect[0]-obj.parallax[0]*self.camera_manager.camera.scroll[0]),int(obj.rect[1]-obj.parallax[1]*self.camera_manager.camera.scroll[1]),obj.rect[2],obj.rect[3]),1)#draw hitbox
-
 
             for reflect in self.cosmetics:
                 if type(reflect).__name__ == 'River':

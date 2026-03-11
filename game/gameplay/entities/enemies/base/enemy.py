@@ -23,13 +23,20 @@ class Enemy(Character):
         self.flags = {'aggro': True, 'invincibility': False, 'attack_able': True, 'hurt_able': True}#'attack able': a flag used as a cooldown of attack
         self.dmg = 1
         
-        self.contact_effect = hit_effects.create_contact_effect(damage = 1, knockback = [20, 0], hitstop = 5, attacker = self)#collision with player
+        self.contact_effect = hit_effects.create_contact_effect(game_objects, damage = 1, knockback = [20, 0], hitstop = 5, attacker = self)#collision with player
 
     def update_render(self, dt):
-        self.hitstop_states.update_render(dt)
+        scaled_dt = self.hitstop.get_sim_dt(dt)
+        self.shader_state.update_render(scaled_dt)#need to be after animation
 
     def update(self, dt):
-        self.hitstop_states.update(dt)
+        self.hitstop.update(dt)
+        scaled_dt = self.hitstop.get_sim_dt(dt)
+
+        self.update_vel(scaled_dt)
+        self.currentstate.update(scaled_dt)#need to be aftre update_vel since some state transitions look at velocity
+        self.animation.update(scaled_dt)#need to be after currentstate since animation will animate the current state
+
         self.group_distance()
 
     def player_collision(self, player):#when player collides with enemy

@@ -1,7 +1,5 @@
 import random 
 from gameplay.entities.shared.status.base.status import Status
-from gameplay.entities.visuals.particles import particles
-
 
 class Wet(Status):#"a wet status". activates when player baths, and spawns particles that drops from player
     def __init__(self,entity, duration):
@@ -25,5 +23,5 @@ class Wet(Status):#"a wet status". activates when player baths, and spawns parti
 
     def drop(self):
         pos = [self.entity.hitbox.centerx + random.randint(-5,5), self.entity.hitbox.centery + random.randint(-5,5)]
-        obj1 = particles.Circle(pos, self.entity.game_objects, lifetime = 50, dir = [0, -1], colour = [self.water_tint[0]*255, self.water_tint[1]*255, self.water_tint[2]*255, 255], vel = {'gravity': [0, -1]}, gravity_scale = 0.2, fade_scale = 2, gradient=0)
-        self.entity.game_objects.cosmetics.add(obj1)
+        c = [self.water_tint[0]*255, self.water_tint[1]*255, self.water_tint[2]*255, 255]
+        self.entity.game_objects.particles.emit('drop', pos,  n=1, colour=c, gravity_scale=0.2)

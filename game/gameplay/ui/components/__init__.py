@@ -24,6 +24,3 @@ from .elements.text import Text
 from .elements.slider import Slider
 
 from .elements.controllers.controllers import Controllers
-from .elements.controllers.xbox import Xbox
-from .elements.controllers.playstation import Playstation
-from .elements.controllers.keyboard import Keyboard

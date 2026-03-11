@@ -1,7 +1,7 @@
 import pygame
-from gameplay.entities.interactables.base.interactables import Interactables
+from .base_collisions import BaseCollisions
 
-class EventTrigger(Interactables):
+class EventTrigger(BaseCollisions):
     def __init__(self, pos, game_objects, size, **kwarg):
         super().__init__(pos, game_objects)
         self.rect = pygame.Rect(pos, size)
@@ -15,9 +15,6 @@ class EventTrigger(Interactables):
     def draw(self, target):
         pass
 
-    def update(self, dt):
-        self.group_distance()
-
     def on_collision(self, entity):
         if type(entity).__name__ != 'Player': return#only player trigger
         if self.new_state:#if it is an event that requires new sttae, e.g. cutscene            
@@ -27,7 +24,7 @@ class EventTrigger(Interactables):
         
         self.kill()#is this a problem in re-spawn?
 
-class ButterflyEncounter(EventTrigger):#cut scene
+class ButterflyEncounter(EventTrigger):
     def __init__(self, pos, game_objects, size, **kwarg):
         super().__init__(pos, game_objects, size, **kwarg)
 
@@ -60,6 +57,7 @@ class StopLarvParty(EventTrigger):
         self.game_objects.quests_events.active_quests['larv_party'].pause_quest()
 
 class MiniBoss(EventTrigger):   
+    ''' a general mini boss system'''
     def __init__(self, pos, game_objects, size, **kwarg):
         super().__init__(pos, game_objects, size, **kwarg)
         self.boss_id = f"{game_objects.map.level_name}_{int(pos[0])}_{int(pos[1])}"
@@ -69,3 +67,26 @@ class MiniBoss(EventTrigger):
         if self.game_objects.world_state.quests.get(self.boss_id, False): return#if the boss has been defeated
         self.game_objects.quests_events.initiate_event('mini_boss', boss_id = self.boss_id)             
         self.kill()           
+
+class Narration(EventTrigger):
+    def __init__(self, pos, game_objects, size, **kwarg):
+        super().__init__(pos, game_objects, size, **kwarg)
+        self.start_index = int(kwarg.get('start_index', 0))
+        self.count = int(kwarg.get('count', 2))
+        self.text_key = kwarg.get('text', 'intro_lore')
+        self.mode = kwarg.get('mode', 'sequential')
+
+    def on_collision(self, entity):
+        if type(entity).__name__ != 'Player':
+            return
+
+        self.game_objects.ui.overlay.play_text_block(
+            self.game_objects,
+            self.text_key,
+            start_index=self.start_index,
+            count=self.count,
+            mode=self.mode,
+            channel="narration",
+        )
+
+        self.kill()
