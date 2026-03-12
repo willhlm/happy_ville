@@ -1,19 +1,22 @@
 import pygame 
-from gameplay.entities.projectiles.base.projectiles import Projectiles
+from gameplay.entities.base.static_entity import StaticEntity
+from engine.system.time_field_manager import CircularTimeField
 
-class SlowmotionField(Projectiles):
+class SlowmotionField(StaticEntity):
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)        
         self.temp_layer = SlowmotionField.temp_layer
         self.rect = pygame.Rect((0, 0), self.temp_layer.size)
         self.rect.center = pos
         self.true_pos = [float(self.rect.left), float(self.rect.top)]
-        self.hitbox = self.rect.copy()
 
         self.progress = 0
         self.duration = kwarg.get('duration', 300)
-        self.slow_scale = kwarg.get('slow_scale', 0.1)
-        self.slow_duration = kwarg.get('slow_duration', 20)
+        slow_scale = kwarg.get('slow_scale', 0.1)
+
+        radius = self.temp_layer.size[0] * 0.5
+        self.time_field = CircularTimeField(pos, radius=radius, scale=slow_scale)
+        self.game_objects.time_field_manager.add(self.time_field)
 
     def pool(game_objects):
         size = (256, 256)
@@ -27,6 +30,7 @@ class SlowmotionField(Projectiles):
         self.progress = min(self.progress, 1)
         self.duration -= dt
         if self.duration <= 0:
+            self.game_objects.time_field_manager.remove(self.time_field)
             self.kill()
 
     def draw(self, target):
@@ -44,25 +48,4 @@ class SlowmotionField(Projectiles):
         self.game_objects.game.display.render(self.temp_layer.texture, target, position = position, shader=self.game_objects.shaders['slowmotion'])
 
     def release_texture(self):
-        pass
-
-    def apply_slow_motion(self, entity):
-        hitstop = getattr(entity, 'hitstop', None)
-        if hitstop is None: return            
-        hitstop.start(duration=self.slow_duration, scale=self.slow_scale)
-
-    #collisions
-    def collision_platform(self, collision_plat):#collision platform   
-        pass
-
-    def collision_projectile(self, eprojectile):#fprojecticle proectile collision with eprojecitile: called from collisions
-        pass
-
-    def collision_enemy(self, collision_enemy):#projecticle enemy collision (including player)
-        pass
-
-    def collision_interactables(self, inetractable):#latest collision version
-        pass
-
-    def collision_interactables_fg(self,interactable):#2d water, 
         pass

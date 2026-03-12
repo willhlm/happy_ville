@@ -1,6 +1,6 @@
 import pygame
 from engine.utils import read_files
-from engine.system import collisions, save_load, groups, object_pool, controller, lights, timer, signals, time_manager, alphabet, input_interpreter, transition_controller
+from engine.system import time_field_manager, collisions, save_load, groups, object_pool, controller, lights, timer, signals, time_manager, alphabet, input_interpreter, transition_controller
 from engine.sound import game_audio
 from gameplay.entities.player import player
 from engine.render import post_process
@@ -45,6 +45,7 @@ class GameObjects():
         self.registry = RegistryManager()
         self.particles = ParticleSystem(self)
         self.world_transform_controller = WorldTransformController(self)
+        self.time_field_manager = time_field_manager.TimeFieldManager()
 
     def _create_groups(self):#define all sprite groups
         self.enemies = groups.Group()#enemies

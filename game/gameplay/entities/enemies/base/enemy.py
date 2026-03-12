@@ -26,10 +26,13 @@ class Enemy(Character):
         self.contact_effect = hit_effects.create_contact_effect(game_objects, damage = 1, knockback = [20, 0], hitstop = 5, attacker = self)#collision with player
 
     def update_render(self, dt):
+        dt = self.game_objects.time_field_manager.get_dt_at(dt, self.hitbox.center)
         scaled_dt = self.hitstop.get_sim_dt(dt)
         self.shader_state.update_render(scaled_dt)#need to be after animation
 
     def update(self, dt):
+        dt = self.game_objects.time_field_manager.get_dt_at(dt, self.hitbox.center)
+
         self.hitstop.update(dt)
         scaled_dt = self.hitstop.get_sim_dt(dt)
 

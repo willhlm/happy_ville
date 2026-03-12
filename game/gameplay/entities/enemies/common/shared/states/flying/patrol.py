@@ -8,11 +8,11 @@ class FlyingPatrol(BaseState):
         self.entity.animation.play("walk")
         self.patrol_speed = self.entity.config['speeds']['patrol']
                 
-        self.calculate_position()# Calculate patrol target position
+        self._calculate_position()# Calculate patrol target position
         self.time = 0
         
     def update_logic(self, dt):
-        self.time += 0.02 * dt
+        self.time += 0.02
 
         distance = [self.target_position[0] - self.entity.rect.centerx,  self.target_position[1] - self.entity.rect.centery]
         total_distance = (distance[0]**2 + distance[1]**2)**0.5
@@ -20,9 +20,9 @@ class FlyingPatrol(BaseState):
         self.entity.velocity[0] += dt * ratio[0] * self.patrol_speed 
         self.entity.velocity[1] += dt * ratio[1] * self.patrol_speed
                                         
-        self.entity.sway(self.time)  # Sway animation
+        self._sway(dt)  # Sway animation
     
-    def calculate_position(self):
+    def _calculate_position(self):
         """Calculate new random patrol point around spawn"""
         angle = random.randint(0, 180)
         amp = random.randint(40, 80)
@@ -33,7 +33,11 @@ class FlyingPatrol(BaseState):
             amp * math.cos(math.pi * angle/180) + self.entity.original_pos[0],
             amp * math.sin(math.pi * angle/180) + self.entity.original_pos[1]
         ]
-        self.look_target()
+        self._look_target()
     
-    def look_target(self):
+    def _look_target(self):
         self.entity.dir[0] = sign(self.target_position[0] - self.entity.rect.centerx)
+
+    def _sway(self, dt):
+        amp = min(abs(self.entity.velocity[0]),0.3)
+        self.entity.velocity[1] += dt * amp * math.sin(5*self.time)# - self.entity.dir[1]*0.1        

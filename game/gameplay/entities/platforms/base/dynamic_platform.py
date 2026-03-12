@@ -29,7 +29,9 @@ class DynamicPlatform(Platform):
         pass
 
     def update(self, dt):
-        # 1 — animation/state        
+        dt = self.game_objects.time_field_manager.get_dt_at(dt, self.hitbox.center)
+
+        # 1 — animation/state                
         self.currentstate.update(dt)
         self.animation.update(dt)
 

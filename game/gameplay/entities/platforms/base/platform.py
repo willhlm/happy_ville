@@ -1,6 +1,5 @@
 import pygame
 from gameplay.entities.shared.components.hit_component import HitComponent
-from gameplay.entities.shared.components.hitstop_component import HitstopComponent
 
 class Platform(pygame.sprite.Sprite):
     def __init__(self, pos, size=(16, 16), run_particle = 'dust'):
@@ -10,7 +9,6 @@ class Platform(pygame.sprite.Sprite):
         self.true_pos = list(self.rect.topleft)
         self.material = 'stone'
         self.hit_component = HitComponent(self)
-        self.hitstop = HitstopComponent()
         self.hit_component.damage_manager.add_modifier('block_damage')#always block
 
     def update_hitbox(self):        

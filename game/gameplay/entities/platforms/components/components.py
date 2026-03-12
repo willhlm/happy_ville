@@ -466,8 +466,8 @@ class MovePath(PlatformComponent):
             y += uy * remaining
             remaining = 0.0
 
-        self.p.velocity[0] = (x - x0) * dt
-        self.p.velocity[1] = (y - y0) * dt
+        self.p.velocity[0] = (x - x0) /dt
+        self.p.velocity[1] = (y - y0) / dt
 
 class MoveDirectionDistance(PlatformComponent):
     """
