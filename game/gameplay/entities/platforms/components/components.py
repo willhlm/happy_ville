@@ -1,7 +1,6 @@
 import math, pygame
 from .states_time_collision import Idle
 from gameplay.entities.shared.components import hit_effects
-from gameplay.entities.shared.components.hit_results import HitResult
 
 # ----------------------------
 # Component base
@@ -114,7 +113,7 @@ class DamageCollision(PlatformComponent):
        If you only want damage on landing, use DamageOnLand instead.
     """
     def on_added(self):
-        dmg = float(self.props.get("dmg", 1))
+        dmg = float(self.props.get("damage", 1))
         self.effect = hit_effects.HitEffect(damage=dmg)
 
         # knockback defaults (can be overridden)
@@ -149,7 +148,7 @@ class DamageCollision(PlatformComponent):
 class DamageOnLand(PlatformComponent):
     """Only hurts when the entity lands from above (common 'spikes-on-top' variant)."""
     def on_added(self):
-        dmg = float(self.props.get("dmg", 1))
+        dmg = float(self.props.get("damage", 1))
         self.effect = hit_effects.HitEffect(damage=dmg)
         self.ky = float(self.props.get("knockback_y", 10))
 
@@ -173,7 +172,7 @@ class DamageOnLand(PlatformComponent):
 # ----------------------------
 
 class Move(PlatformComponent):#wrapper
-    def on_added(self):
+    def on_added(self):        
         t = str(self.props.get("move_type", "direction_distance")).lower()
 
         variants = {
@@ -208,11 +207,13 @@ class MovePath(PlatformComponent):
       eps: float (default 1.0) snapping tolerance
     """
 
-    def on_added(self):
+    def on_added(self):        
         pts = self.props.get("path_points")
         self.points = list(pts) if pts else []
 
-        self.speed = float(self.props.get("speed", 80.0)) * 100
+        # Updates run with dt scaled so ~1.0 == one 60 Hz frame.
+        # Convert designer-friendly px/s into px/frame.
+        self.speed = float(self.props.get("speed", 80.0)) / 60.0
         self.eps = float(self.props.get("eps", 1.0))
 
         self.pingpong = bool(self.props.get("pingpong", True))
@@ -465,8 +466,8 @@ class MovePath(PlatformComponent):
             y += uy * remaining
             remaining = 0.0
 
-        self.p.velocity[0] = (x - x0) / dt
-        self.p.velocity[1] = (y - y0) / dt
+        self.p.velocity[0] = (x - x0) * dt
+        self.p.velocity[1] = (y - y0) * dt
 
 class MoveDirectionDistance(PlatformComponent):
     """
@@ -623,6 +624,9 @@ class Breakable(PlatformComponent):
         self.p.material = 'flesh'#different sounds depedning on if the hit lands
 
         if self.health <= 0:
+            signal_id = self.props.get("ID", False)
+            if signal_id:
+                self.p.game_objects.signals.emit(str(signal_id), platform=self.p)
             self.p.kill()
         return effect
 

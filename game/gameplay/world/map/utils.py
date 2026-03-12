@@ -355,11 +355,16 @@ class SceneBuilder:
 
             if 'fade' in tile_layer:#add fade blocks
                 for fade in blit_fade_surfaces.keys():
-                    if 'fade' in fade:#is needed                                                
-                        bg = BgFade(pos, self.game_objects, blit_fade_surfaces[fade], parallax, blit_fade_pos[fade], data[fade]['id'])                        
-                        if layer_name.startswith('bg'): self.game_objects.all_bgs.add(layer_name,bg)#bg
-                        else: self.game_objects.all_fgs.add(layer_name,bg)
-                        self.game_objects.bg_fade.add(bg)
+                    if 'fade' in fade:#is needed         
+                        layer_props = props_list_to_dict(data[fade].get("properties", []))
+                                       
+                        bg = BgFade(pos, self.game_objects, blit_fade_surfaces[fade], parallax, blit_fade_pos[fade], data[fade]['id'], **layer_props)                        
+                        if layer_name.startswith('bg'): 
+                            self.game_objects.all_bgs.add(layer_name,bg)#bg
+                        else: 
+                            self.game_objects.all_fgs.add(layer_name,bg)
+                        
+                        self.game_objects.bg_fade.add(bg)#this layer is for collision
                         ctx.references['bg_fade'].append(bg)
 
             elif 'interact' in tile_layer:#the stuff that blits in front of interactables, e.g. grass
@@ -400,9 +405,9 @@ class ObjectSpawner:
             "breakable": False,
             
             # signals
-            "signal_id": "",
+            #"ID": "",
 
-            'sprite_path': ''#sprite path/name rellative from assets/sprites/entities/platforms/
+            #'sprite_path': ''#sprite path/name rellative from assets/sprites/entities/platforms/
         }
 
     def _bool(self, v, default=False):

@@ -2,6 +2,7 @@ from .melee.explosion import Explosion
 from .melee.hurt_box import HurtBox
 
 from .ranged.bouncy_balls import BouncyBalls
+from .ranged.slow_motion_field import SlowmotionField
 from .ranged.poison_cloud import PoisonCloud
 from .ranged.falling_rock.falling_rock import FallingRock
 from .ranged.projectile_1 import Projectile_1

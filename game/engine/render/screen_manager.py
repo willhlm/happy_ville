@@ -44,7 +44,7 @@ class ScreenManager():
             self.screens[key].render(self.composite_screen)#render to composite screen with pp precision              
         self.game.display.use_standard_alpha_mode()
 
-    def get_screen(self, layer = None, include = False):#get a copy of screen (not pixel perfect), up to a specific layer (name according to tiled), excluding the layer if include is false.
+    def get_screen(self, layer = None, include = False):#get a copy of screen (not pixel perfect corrections), up to a specific layer (name according to tiled), excluding the layer if include is false.
         self.screen_copy.clear(0, 0, 0, 0)
         self.game.display.use_premultiplied_alpha_mode()
         
@@ -65,6 +65,7 @@ class ScreenManager():
         for screen in self.screens.values():
             screen.clear(0,0,0,0)
 
+    #shader per layers
     def append_shader(self, shader, layers, **kwarg):#can append shaders to the screen (post process like stff)
         for key in layers:     
             self.screens[key].append_shader(shader, **kwarg)
@@ -91,7 +92,7 @@ class ScreenLayer():
         """
         self.game = game
         self.parallax = parallax#(x, y) parallax factor
-        self.layer = self.game.display.make_layer(self.game.window_size)#TODO
+        self.layer = self.game.display.make_layer(self.game.window_size)
         self.offset = [0, 0]
 
         self.post_process = PostProcessLayer(game.game_objects, self)

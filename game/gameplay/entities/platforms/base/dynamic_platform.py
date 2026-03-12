@@ -26,7 +26,7 @@ class DynamicPlatform(Platform):
             c.update(dt)
 
     def update_render(self, dt):
-        self.animation.update(dt)
+        pass
 
     def update(self, dt):
         # 1 — animation/state        
@@ -44,7 +44,7 @@ class DynamicPlatform(Platform):
     def begin_step(self):
         self.old_hitbox = self.hitbox.copy()
 
-    def integrate(self, dt):
+    def integrate(self, dt):        
         self.true_pos[0] += dt * self.velocity[0]
         self.true_pos[1] += dt * self.velocity[1]
         self.update_rect_from_true()

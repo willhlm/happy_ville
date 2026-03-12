@@ -824,8 +824,8 @@
                          "type":"",
                          "visible":true,
                          "width":0,
-                         "x":3584,
-                         "y":544
+                         "x":3760,
+                         "y":784
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -869,64 +869,26 @@
                          "name":"",
                          "properties":[
                                 {
-                                 "name":"direction",
-                                 "type":"string",
-                                 "value":"1,1"
-                                }, 
-                                {
                                  "name":"move",
                                  "type":"bool",
                                  "value":true
                                 }, 
                                 {
-                                 "name":"name",
-                                 "type":"string",
-                                 "value":"rock1"
-                                }, 
-                                {
                                  "name":"path",
                                  "type":"object",
                                  "value":1142
+                                }, 
+                                {
+                                 "name":"sprite_path",
+                                 "type":"string",
+                                 "value":"generic\/rock1"
                                 }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":112,
-                         "x":3296,
-                         "y":560
-                        }, 
-                        {
-                         "gid":32043,
-                         "height":64,
-                         "id":1144,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"breakable",
-                                 "type":"bool",
-                                 "value":true
-                                }, 
-                                {
-                                 "name":"name",
-                                 "type":"string",
-                                 "value":"rock1"
-                                }, 
-                                {
-                                 "name":"solid",
-                                 "type":"bool",
-                                 "value":true
-                                }, 
-                                {
-                                 "name":"vulnerable_sides",
-                                 "type":"string",
-                                 "value":"left"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":112,
-                         "x":3264,
-                         "y":880
+                         "x":3488,
+                         "y":736
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -940,6 +902,12 @@
                  "id":44,
                  "name":"bg_fade_1",
                  "opacity":1,
+                 "properties":[
+                        {
+                         "name":"sfx",
+                         "type":"bool",
+                         "value":true
+                        }],
                  "type":"tilelayer",
                  "visible":true,
                  "width":500,
@@ -1001,7 +969,7 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":3424,
+                         "x":3376,
                          "y":880
                         }, 
                         {

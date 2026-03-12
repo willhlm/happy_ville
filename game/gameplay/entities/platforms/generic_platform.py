@@ -2,6 +2,35 @@ from engine.utils import read_files
 from gameplay.entities.platforms.base.dynamic_platform import DynamicPlatform
 from gameplay.entities.platforms.components.components import COMPONENTS
 
+'''costume properties accepted from tiled:
+damage_on_land: bool
+damage: str
+knockback_x: str
+knockback_y: str
+
+dissaper_on_stand: bool
+
+move: bool
+move_type: str -> direction_distance, path
+disatnce: str
+direction: str
+phase: str
+speed: str
+pingpong: bool
+loop: bool
+
+one_way_up: bool
+solid: bool
+
+sprite_path: str
+ID: str -> emits this signal ID
+
+breakale: bool
+vulnerable_sides: str -> "top", "bottom", "left", "right"
+health: str
+invincibility_time: str
+'''
+
 def parse_components(components):
     if isinstance(components, (list, tuple)):
         return [str(x).strip() for x in components if str(x).strip()]
@@ -15,7 +44,7 @@ class GenericPlatform(DynamicPlatform):
         super().__init__(pos, game_objects, size=props.get('size', (16, 16)), components=[])
         self.props = props
 
-        name = props.get("sprite_path", "generic/default/")
+        name = props.get("sprite_path", "generic/default")    
         self.sprites = read_files.load_sprites_dict(f"assets/sprites/entities/platforms/{name}" + '/', game_objects)
         self.image = self.sprites["idle"][0]
 

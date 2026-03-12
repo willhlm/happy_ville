@@ -69,6 +69,7 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         Shield.pool(game_objects)
         ProjectileDroplet.pool(game_objects)
         SlamAttack.pool(game_objects)
+        SlowmotionField.pool(game_objects)
 
         #UI
         MenuArrow.pool(game_objects)

@@ -17,8 +17,8 @@ class FlyingPatrol(BaseState):
         distance = [self.target_position[0] - self.entity.rect.centerx,  self.target_position[1] - self.entity.rect.centery]
         total_distance = (distance[0]**2 + distance[1]**2)**0.5
         ratio = [distance[0]/total_distance, distance[1]/total_distance]
-        self.entity.velocity[0] += ratio[0] * self.patrol_speed
-        self.entity.velocity[1] += ratio[1] * self.patrol_speed
+        self.entity.velocity[0] += dt * ratio[0] * self.patrol_speed 
+        self.entity.velocity[1] += dt * ratio[1] * self.patrol_speed
                                         
         self.entity.sway(self.time)  # Sway animation
     

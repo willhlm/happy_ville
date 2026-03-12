@@ -17,8 +17,8 @@ class FlyingChase(BaseState):
             distance = (self.player_distance[0]**2 + self.player_distance[1]**2)**0.5
             # Normalize direction
             ratio = [self.player_distance[0]/distance, self.player_distance[1]/distance]
-            self.entity.velocity[0] += ratio[0] * self.chase_speed
-            self.entity.velocity[1] += ratio[1] * self.chase_speed
+            self.entity.velocity[0] += dt * ratio[0] * self.chase_speed
+            self.entity.velocity[1] += dt * ratio[1] * self.chase_speed
                 
     def look_target(self):
         self.entity.dir[0] = functions.sign(self.player_distance[0])
