@@ -32,6 +32,9 @@ class PlatformComponent:
     def collide_y(self, entity):
         pass
 
+    def pre_entity_y_collision(self, entity):
+        return False
+
     def take_dmg(self, effect):
         return effect
 
@@ -80,18 +83,30 @@ class SolidCollision(PlatformComponent):
         entity.update_rect_y()
 
 class CarryOnTop(PlatformComponent):
-    def collide_y(self, entity):
-        # landing or standing (add eps if needed)
-        eps = 2
-        on_top_now = abs(entity.hitbox.bottom - self.p.hitbox.top) <= eps
-        was_on_top = abs(entity.old_hitbox.bottom - self.p.old_hitbox.top) <= eps
+    def pre_entity_y_collision(self, entity):
+        old_platform_hitbox = getattr(self.p, "old_hitbox", None)
+        if old_platform_hitbox is None:
+            return False
 
-        if on_top_now and was_on_top:
-            entity.true_pos[0] += self.p.delta[0]
-            entity.true_pos[1] += self.p.delta[1]
-            entity.rect.left = round(entity.true_pos[0])
-            entity.rect.top  = round(entity.true_pos[1])
-            entity.update_hitbox()
+        if self.p.delta[0] == 0 and self.p.delta[1] == 0:
+            return False
+
+        eps = 2
+        was_on_top = abs(entity.old_hitbox.bottom - old_platform_hitbox.top) <= eps
+        overlap_x = (
+            entity.old_hitbox.right > old_platform_hitbox.left and
+            entity.old_hitbox.left < old_platform_hitbox.right
+        )
+
+        if not (was_on_top and overlap_x):
+            return False
+
+        entity.true_pos[0] += self.p.delta[0]
+        entity.true_pos[1] += self.p.delta[1]
+        entity.rect.left = round(entity.true_pos[0])
+        entity.rect.top = round(entity.true_pos[1])
+        entity.update_hitbox()
+        return True
 
 class OneWayUpCollision(PlatformComponent):
     """CollisionOnewayUp behavior :contentReference[oaicite:6]{index=6}"""

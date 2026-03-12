@@ -22,6 +22,9 @@ class Platform(pygame.sprite.Sprite):
     def update(self, dt):
         pass
 
+    def pre_entity_y_collision(self, entity):
+        return False
+
     def draw(self, target):
         pass
 

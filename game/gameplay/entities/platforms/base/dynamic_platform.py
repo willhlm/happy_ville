@@ -20,6 +20,12 @@ class DynamicPlatform(Platform):
         for c in self.components:
             c.collide_y(entity)
 
+    def pre_entity_y_collision(self, entity):
+        handled = False
+        for c in self.components:
+            handled = c.pre_entity_y_collision(entity) or handled
+        return handled
+
     # per-frame behavior
     def update_components(self, dt):
         for c in self.components:
