@@ -524,18 +524,14 @@ class DisappearOnStand(PlatformComponent):
       platform.respawn
     """
     def on_added(self):
-        dt = int(self.props.get("disappear_time", 60))
-        rt = int(self.props.get("respawn_time", 120))
-        self.disappear_time = dt if dt > 0 else 60
-        self.respawn_time = rt if rt > 0 else 120
+        self.disappear_time = int(self.props.get("disappear_time", 60)) 
+        self.respawn_time = int(self.props.get("respawn_time", 120))
 
         self._pending = False
 
         self.timers = self.p.game_objects.timer_manager
-
-        # ensure this platform has the right state machine
-        if self.p.currentstate.__class__.__name__ == "_NullState":
-            self.p.currentstate = Idle(self.p)        
+        
+        self.p.currentstate = Idle(self.p)# ensure this platform has the right state machine
 
     def collide_y(self, entity):
         if self._pending:
@@ -595,6 +591,7 @@ class Breakable(PlatformComponent):
 
         self.camera = self.p.game_objects.camera_manager
         self.p.hit_component.damage_manager.remove_modifier('block_damage')
+        self.signal_id = self.props.get("ID", False)
 
     def _get_hit_side(self, src) -> str | None:
         # Require rects
@@ -628,7 +625,7 @@ class Breakable(PlatformComponent):
         Only applies damage if hit direction is allowed by vulnerable_sides.
         """
         source = getattr(effect, "projectile", None) or getattr(effect, "attacker", None)
-        if source is not None and hasattr(source, "hitbox"):
+        if source is not None:
             hit_side = self._get_hit_side(source)
             if hit_side not in self.vuln:               
                 self.p.material = 'stone'#different sounds depedning on if the hit lands
@@ -639,9 +636,7 @@ class Breakable(PlatformComponent):
         self.p.material = 'flesh'#different sounds depedning on if the hit lands
 
         if self.health <= 0:
-            signal_id = self.props.get("ID", False)
-            if signal_id:
-                self.p.game_objects.signals.emit(str(signal_id), platform=self.p)
+            if self.signal_id: self.p.game_objects.signals.emit(str(signal_id), platform=self.p)                
             self.p.kill()
         return effect
 

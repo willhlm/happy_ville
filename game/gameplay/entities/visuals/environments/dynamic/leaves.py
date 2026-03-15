@@ -41,8 +41,9 @@ class Leaves(BaseDynamic):#leaves from trees
         self.colour[-1] = max(self.colour[-1],0)
 
     def update_vel(self, dt):
-        self.velocity[0] += dt*(self.game_objects.weather.wind.velocity[0]  - self.friction[0]*self.velocity[0] + math.sin(self.time*0.1+self.phase)*self.parallax[0]*0.3)
-        self.velocity[1] += dt*(self.game_objects.weather.wind.velocity[1] * self.friction[1] - self.friction[1]*self.velocity[1])
+        wind_velocity = self.game_objects.weather.wind.get_velocity(self.layer_name)
+        self.velocity[0] += dt*(wind_velocity[0]  - self.friction[0]*self.velocity[0] + math.sin(self.time*0.1+self.phase)*self.parallax[0]*0.3)
+        self.velocity[1] += dt*(wind_velocity[1] * self.friction[1] - self.friction[1]*self.velocity[1])
 
     def boundary(self):
         if self.colour[-1] < 5:

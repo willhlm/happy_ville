@@ -1,6 +1,5 @@
 import pygame
 from gameplay.entities.projectiles.base.melee import Melee
-from gameplay.entities.shared.components import hit_effects
 
 class HurtBox(Melee):#a hitbox that spawns
     def __init__(self, entity, **kwarg):

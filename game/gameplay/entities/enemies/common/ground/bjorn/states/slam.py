@@ -5,6 +5,7 @@ class SlamPre(BaseState):
     def __init__(self, entity, deciders, config_key, **kwargs):
         super().__init__(entity, deciders, config_key)
         self.entity.animation.play("slam_pre")
+        self.entity.game_objects.sound.play_sfx(random.choice(self.entity.sounds['slam']), vol = 0.8)
 
     def increase_phase(self):
         self.enter_state("slam_main")

@@ -771,7 +771,8 @@ class ObjectSpawner:
                 self.game_objects.interactables.add(new_zoom)
 
             elif id == 22:#projectile spawner     
-                kwarg = {}          
+                kwarg = props_list_to_dict(properties)
+                
                 new_spawner = AreaSpawner(object_position, self.game_objects, object_size, **kwarg)
                 self.game_objects.cosmetics.add(new_spawner)
 
@@ -1087,7 +1088,8 @@ class Biome:
         for weather_type in self.weather_config.keys():#wind, rain, for etc.
             if self.weather_config[weather_type]['layers'].get(group, False):   
                 kwarg = self.weather_config[weather_type]['layers'][group]                 
-                new_weather = getattr(weather, self._weather_registry[weather_type]['fx_class'])(self.level.game_objects, parallax = parallax, **kwarg)
+                self._weather_registry[weather_type]['manager'].configure(group, kwarg)
+                new_weather = getattr(weather, self._weather_registry[weather_type]['fx_class'])(self.level.game_objects, parallax = parallax, layer_name = group, **kwarg)
                 
                 self._weather_registry[weather_type]['manager'].add_fx(new_weather)
                 if group.startswith('fg'):
@@ -1165,9 +1167,9 @@ class Nordveden(Biome):
         self.weather_config = {
             "wind": {                                
                 "layers": {
-                    "bg1": {"velocity": [-2, 0.1], "duration_range": [3000, 7000] },
-                    "bg2": {"velocity": [-2, 0.1], "duration_range": [3000, 7000] },
-                    "bg3": {"velocity": [-2, 0.1], "duration_range": [3000, 7000] }
+                    "bg1": {"velocity": [-2, 0.1], "duration_range": [180, 420] },
+                    "bg2": {"velocity": [-2, 0.1], "duration_range": [180, 420] },
+                    "bg3": {"velocity": [-2, 0.1], "duration_range": [180, 420] }
                 }
             },
             "rain": {
@@ -1554,19 +1556,7 @@ class Dark_forest(Biome):
                 }
             }
         }      
-
-    def configure_weather(self, group, parallax):        
-        for weather_type in self.weather_config.keys():#wind, rain, for etc.
-            if self.weather_config[weather_type]['layers'].get(group, False):   
-                kwarg = self.weather_config[weather_type]['layers'][group]                  
-                new_weather = getattr(weather, self._weather_registry[weather_type]['fx_class'])(self.level.game_objects, parallax = parallax, **kwarg)
-                
-                self._weather_registry[weather_type]['manager'].add_fx(new_weather)
-                if group.startswith('fg'):
-                    self.level.game_objects.all_fgs.add(group, new_weather)
-                else:
-                    self.level.game_objects.all_bgs.add(group, new_weather)
-
+                    
     def room(self, room = 1):
         #if room == '2':
         self.level.game_objects.lights.ambient = [30/255,30/255,30/255,170/255]

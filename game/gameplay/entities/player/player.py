@@ -36,7 +36,7 @@ class Player(Character):
         self.sword = Sword(self)
         self.abilities = AbilityManager(self)#spirit (thunder,migawari etc) and movement /dash, double jump and wall glide)
 
-        self.flags = {'ground': True, 'shroompoline': False, 'attack_able': True, 'grounddash': True}# flags to check if on ground (used for jumpåing), #a flag to make sure you can only swing sword when this is False
+        self.flags = {'ground': False, 'shroompoline': False, 'attack_able': True, 'grounddash': True}# flags to check if on ground (used for jumpåing), #a flag to make sure you can only swing sword when this is False
         self.currentstate = StateManager(self)#states_player.Idle_main(self)
         self.death_state = states_death.Idle(self)#this one can call "normal die" or specifal death (for example cultist encounter)
 
@@ -46,31 +46,25 @@ class Player(Character):
         self.timer_jobs = {'wet': Wet(self, 60)}#these timers are activated when promt and a job is appeneded to self.timer.
 
         self.hit_component.set_invinsibility_time(C.invincibility_time_player)
-        self.reset_movement()
-
-        self.colliding_platform = None#save the last collising platform        
+        self.reset_movement()           
         
     def ramp_down_collision(self, ramp):#when colliding with platform beneth
         super().ramp_down_collision(ramp)
-        self.movement_manager.handle_input('ground')
-        self.colliding_platform = ramp#save the latest platform
+        self.movement_manager.handle_input('ground')        
         self.flags['ground'] = True
 
     def down_collision(self, block):#when colliding with platform beneth
         super().down_collision(block)
-        self.movement_manager.handle_input('ground')
-        self.colliding_platform = block#save the latest platform
+        self.movement_manager.handle_input('ground')        
         self.flags['ground'] = True
 
     def right_collision(self, block, type = 'Wall'):
         super().right_collision(block, type)
         self.movement_manager.handle_input('wall')
-        self.colliding_platform = block#save the latest platform
 
     def left_collision(self, block, type = 'Wall'):
         super().left_collision(block, type)
         self.movement_manager.handle_input('wall')
-        self.colliding_platform = block#save the latest platform
 
     def update_vel(self, dt):#called from hitsop_states
         context = self.movement_manager.resolve()
@@ -170,7 +164,7 @@ class Player(Character):
 
     def on_cayote_timeout(self):
         self.flags['ground'] = False
-        self.colliding_platform = None
+        self.standing_platform = None
 
     def on_shroomjump_timout(self):
         self.flags['shroompoline'] = False

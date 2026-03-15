@@ -236,6 +236,25 @@ def floaty_ambient(pos, game_objects, *, colour=(255,255,255,255)):#flower butte
         .lifetime(frames=180)
         .build()
     )
+
+
+def falling_debris_warning(pos, game_objects, *, colour=(120, 110, 100, 255)):
+    return (
+        ParticleBuilder(pos, game_objects)
+        .circle(scale=2, gradient=0, colour=list(colour))
+        .velocity_directional(
+            min_speed=1.0,
+            max_speed=2.5,
+            direction=90,
+            angle_spread=[7, 7],
+            angle_dist="normal"
+        )
+        .gravity(scale=0.25)
+        .fade(speed=1.5)
+        .lifetime(frames=36)
+        .build()
+    )
+
 PRESETS = {
     "spirit_aura": spirit_aura,
     "converging_soul": converging_soul,
@@ -249,6 +268,7 @@ PRESETS = {
     'liquid_splash': liquid_splash,
     'drop': drop,
     'floaty_ambient':floaty_ambient,
+    'falling_debris_warning': falling_debris_warning,
 }
 
 

@@ -17,7 +17,9 @@ class RoarMain(BaseState):
         center = [self.entity.rect.centerx-self.entity.game_objects.camera_manager.camera.scroll[0],self.entity.rect.centery-self.entity.game_objects.camera_manager.camera.scroll[1]]
         self.entity.game_objects.post_process.append_shader('Speed_lines', center = center)    
 
-        self.cycles = 14   
+        self.entity.game_objects.sound.play_sfx(self.entity.sounds['roar'][0], vol = 0.8)
+
+        self.cycles = 20
 
     def increase_phase(self):
         self.cycles -= 1

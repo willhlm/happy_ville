@@ -9,7 +9,6 @@ from .config import ENEMY_CONFIG as BJORN_CONFIG
 from .states import RollAttackPre, RollAttackMain, RollAttackPost, AttackPre, AttackMain, AttackPost, SlamPre, SlamMain, SlamPost, SleepMain, SleepPost, RoarPre, RoarMain, RoarPost
 from .deciders import RollAttackDecider, SlamAttackDecider
 
-from gameplay.entities.projectiles.utils.chain_spawner import ChainSpawner
 from gameplay.entities.projectiles import SlamAttack
 
 BJORN_STATES = {
@@ -31,7 +30,7 @@ BJORN_STATES = {
 
 BJORN_DECIDERS = {
     'roll_attack': RollAttackDecider,
-    'slam_attack': RollAttackDecider,
+    'slam_attack': SlamAttackDecider,
 }
 
 class Bjorn(Enemy):
@@ -39,6 +38,7 @@ class Bjorn(Enemy):
         super().__init__(pos, game_objects)
         self.config = BJORN_CONFIG['bjorn']
         self.sprites = read_files.load_sprites_dict('assets/sprites/entities/enemies/common/ground/bjorn/', game_objects, flip_x = True)
+        self.sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/enemies/common/ground/bjorn/')
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 20, 30)
@@ -46,11 +46,11 @@ class Bjorn(Enemy):
         self.health = self.config['health']    
         self.currentstate = StateManager(self, type = 'ground', custom_states = BJORN_STATES, custom_deciders = BJORN_DECIDERS)
 
-        self.flags["hurt_state_able"] = False
+        self.flags["hurt_state_able"] = False        
 
     def attack(self):#called from states, attack main
         attack = HurtBox(self, lifetime = 10, dir = self.dir, size = [64, 32])#make the object
         self.projectiles.add(attack)#add to group but in main phase         
 
     def slam(self):#called from states, attack main
-        self.game_objects.signals.emit('fall_projectiles')
+        self.game_objects.signals.emit('fall_projectiles', attack_id='bjorn_slam', source=self)

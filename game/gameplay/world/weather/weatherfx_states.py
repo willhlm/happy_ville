@@ -34,7 +34,7 @@ class Wind(WeatherFXStates):
 
         self.entity.game_objects.shaders['wind']['noiseTexture'] = self.entity.noise_layer.texture
         self.entity.game_objects.shaders['wind']['time'] = self.time * 0.01
-        self.entity.game_objects.shaders['wind']['velocity'] = self.entity.game_objects.weather.wind.velocity
-        self.entity.game_objects.shaders['wind']['lifetime'] = self.entity.game_objects.weather.wind.lifetime
+        self.entity.game_objects.shaders['wind']['velocity'] = self.entity.game_objects.weather.wind.get_velocity(self.entity.layer_name)
+        self.entity.game_objects.shaders['wind']['lifetime'] = self.entity.game_objects.weather.wind.get_lifetime(self.entity.layer_name)
         
         self.entity.game_objects.game.display.render(self.entity.image.texture, target, shader = self.entity.game_objects.shaders['wind'])              
