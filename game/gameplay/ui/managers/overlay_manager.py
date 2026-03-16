@@ -6,6 +6,7 @@ from collections import defaultdict, deque
 from typing import Deque, Dict, List, Optional
 
 from gameplay.ui.components.overlay.base_overlay import BaseOverlay
+from gameplay.ui.components.overlay.animated_image_overlay import LogoLoadingOverlay
 from gameplay.ui.components.overlay.text_overlay import TextOverlay
 
 
@@ -26,6 +27,12 @@ class OverlayLibrary:
 
     def get_title(self, key):
         return self.title_cards[key]
+
+    def add_textures(self, d):
+        self.textures.update(d)
+
+    def get_texture(self, key):
+        return self.textures[key]
 
 class OverlayManager:
     def __init__(self):
@@ -147,3 +154,6 @@ class OverlayManager:
 
     def play_title_card(self, key):
         pass
+
+    def play_logo_loading(self, game_objects, **kwargs) -> None:
+        self.add(LogoLoadingOverlay(game_objects, **kwargs))

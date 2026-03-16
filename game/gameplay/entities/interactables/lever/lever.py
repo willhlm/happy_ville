@@ -14,11 +14,11 @@ class Lever(Interactables):
 
         self.ID_key = kwarg.get('ID', None)#an ID to match with the reference (gate or platform etc) and an unique ID key to identify which item that the player is intracting within the world
 
-        on = self.game_objects.world_state.load_bool(self.game_objects.map.level_name, "lever", self.ID_key, initial=kwarg.get("on", False))
+        on = self.game_objects.world_state.objects.load_bool(self.game_objects.map.level_name, "lever", self.ID_key, initial=kwarg.get("on", False))
         self.currentstate = states_lever.On(self) if on else states_lever.Off(self)     
 
     def take_dmg(self, effect):
         self.currentstate.handle_input("Transform")
-        self.game_objects.world_state.toggle_bool(self.game_objects.map.level_name, "lever", self.ID_key)
+        self.game_objects.world_state.objects.toggle_bool(self.game_objects.map.level_name, "lever", self.ID_key)
         self.game_objects.signals.emit(self.ID_key)
         return effect

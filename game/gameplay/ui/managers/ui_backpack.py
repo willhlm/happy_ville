@@ -356,7 +356,7 @@ class JournalUI(BaseUI):
         self.select_enemies()
 
     def define_enemies(self):
-        for enemy in self.game_objects.world_state.statistics['kill']:
+        for enemy in self.game_objects.world_state.statistics_state.statistics['kill']:
             enemy = self.game_objects.registry.fetch('enemies', enemy)([0,0],self.game_objects)
             self.enemies.append(enemy)
 

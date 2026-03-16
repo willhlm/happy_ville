@@ -46,7 +46,7 @@ class LootContainers(Interactables):
             pass
         else:  # dead
             self.currentstate.handle_input('open')        
-            self.game_objects.world_state.state[self.game_objects.map.level_name]['loot_container'][self.ID_key] = True#write in the state dict that this has been picked up
+            self.game_objects.world_state.objects.get_bucket(self.game_objects.map.level_name, 'loot_container')[self.ID_key] = True#write in the state dict that this has been picked up
         return effect
 
     def hit_loot(self):#sput out amvers when hit

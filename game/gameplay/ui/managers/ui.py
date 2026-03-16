@@ -1,5 +1,5 @@
 from . import ui_backpack  # Inventory, map, etc.
-from . import ui_hud  # HUD elements like health bar, timers, etc.
+from .hud import ui_hud  # HUD elements like health bar, timers, etc.
 from .background_menu import BackgroundMenu
 from .overlay_manager import OverlayManager
 

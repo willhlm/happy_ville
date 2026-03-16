@@ -3,7 +3,6 @@
 # =========================
 from .base_overlay import BaseOverlay
 
-
 class TextOverlay(BaseOverlay):
     def __init__(
         self,

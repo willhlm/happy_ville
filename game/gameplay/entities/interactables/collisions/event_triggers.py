@@ -20,7 +20,7 @@ class EventTrigger(BaseCollisions):
         if self.new_state:#if it is an event that requires new sttae, e.g. cutscene            
             self.game_objects.game.state_manager.enter_state(self.event)              
         else:            
-            self.game_objects.quests_events.initiate_event(self.event.capitalize())#event
+            self.game_objects.quests_events.initiate_event(self.event)#event
         
         self.kill()#is this a problem in re-spawn?
 
@@ -30,7 +30,7 @@ class ButterflyEncounter(EventTrigger):
 
     def on_collision(self, entity):
         if type(entity).__name__ != 'Player': return#only player trigger
-        if not self.game_objects.world_state.statistics['kill'].get('maggot',False): return#don't do cutscene if aggro path is not chosen
+        if not self.game_objects.world_state.statistics_state.statistics['kill'].get('maggot',False): return#don't do cutscene if aggro path is not chosen
         self.game_objects.game.state_manager.enter_state(self.event)              
         
 class StartLarvParty(EventTrigger):
@@ -39,7 +39,7 @@ class StartLarvParty(EventTrigger):
 
     def on_collision(self, entity):
         if type(entity).__name__ != 'Player': return#only player trigger
-        if self.game_objects.world_state.quests.get('larv_party', False): return#completed, return
+        if self.game_objects.world_state.narrative.is_quest_completed('larv_party'): return#completed, return
         if self.game_objects.quests_events.active_quests.get('larv_party', False):
             if self.game_objects.quests_events.active_quests['larv_party'].running: return
             self.game_objects.quests_events.active_quests['larv_party'].initiate_quest()
@@ -64,7 +64,7 @@ class MiniBoss(EventTrigger):
 
     def on_collision(self, entity):
         if type(entity).__name__ != 'Player': return#only player trigger
-        if self.game_objects.world_state.quests.get(self.boss_id, False): return#if the boss has been defeated
+        if self.game_objects.world_state.narrative.is_boss_defeated(self.boss_id): return#if the boss has been defeated
         self.game_objects.quests_events.initiate_event('mini_boss', boss_id = self.boss_id)             
         self.kill()           
 

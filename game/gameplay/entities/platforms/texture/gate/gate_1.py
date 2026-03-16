@@ -10,7 +10,7 @@ class Gate_1(BaseTexture):
         self.init()
 
         self.ID_key = kwarg.get("ID", None)                
-        erect = self.game_objects.world_state.load_bool(self.game_objects.map.level_name, "gate", self.ID_key, initial=kwarg.get("erect", False))
+        erect = self.game_objects.world_state.objects.load_bool(self.game_objects.map.level_name, "gate", self.ID_key, initial=kwarg.get("erect", False))
         state = "erect" if erect else "down"
 
         self.image = self.sprites[state][0]
@@ -24,5 +24,5 @@ class Gate_1(BaseTexture):
         self.sprites = read_files.load_sprites_dict("assets/sprites/entities/platforms/gates/gate_1/", self.game_objects)
 
     def lever_hit(self):
-        self.game_objects.world_state.toggle_bool(self.game_objects.map.level_name, "gate", self.ID_key)
+        self.game_objects.world_state.objects.toggle_bool(self.game_objects.map.level_name, "gate", self.ID_key)
         self.currentstate.handle_input("transform")

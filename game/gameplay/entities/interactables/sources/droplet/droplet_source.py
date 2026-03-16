@@ -15,7 +15,7 @@ class DropletSource(LayeredObjects):
         self.rect.topleft = pos
         self.currentstate = states_droplet_source.Idle(self)
     
-        if game_objects.world_state.events.get('tjasolmai', False):#if water boss (golden fields) is dead            
+        if game_objects.world_state.narrative.events.get('tjasolmai', False):#if water boss (golden fields) is dead            
             self.shader_state = states_shader.Palette_swap(self)
             self.original_colour = [[46, 74,132, 255]]#can append more to replace more
             self.replace_colour = [[70, 210, 33, 255]]#new oclour. can append more to replace more       

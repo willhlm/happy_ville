@@ -8,7 +8,7 @@ from .menus.inventory.sword import Sword
 
 from .menus.radna.hand import Hand
 
-from .overlay.logo_loading import LogoLoading
+from .overlay.animated_image_overlay import LogoLoadingOverlay
 
 from .hud.health import Health
 from .hud.health_frame import HealthFrame

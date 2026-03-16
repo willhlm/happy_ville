@@ -1,6 +1,5 @@
 from .base_composite import CompositeState
 from .base_state import PhaseBase
-from gameplay.ui.components.overlay.point_arrow import PointArrow
 
 class BowState(CompositeState):
     def __init__(self, entity):
@@ -14,19 +13,23 @@ class BowPre(PhaseBase):
     def enter(self):
         self.entity.animation.play('bow_pre')
         self.duration = 100
-        self.arrow = PointArrow(self.entity.rect.topleft, self.entity.game_objects, dir = self.entity.dir.copy())
-        self.entity.game_objects.cosmetics.add(self.arrow)
+        self.arrow = self.entity.game_objects.ui.hud.widgets.show_point_arrow(
+            'bow',
+            self.entity.rect.topleft,
+            self.entity.dir.copy(),
+        )
         self.time = 0
 
     def update(self, dt):
         self.duration -= dt
         self.time += dt
         self.entity.velocity = [0, 0]
+        self.arrow.set_pos(self.entity.rect.topleft)
         if self.duration < 0:
             self.exit_state()
 
     def exit_state(self):
-        self.arrow.kill()
+        self.entity.game_objects.ui.hud.widgets.hide('bow')
         self.enter_phase('main', dir = [self.arrow.dir[0], -self.arrow.dir[1]], time = self.time)
 
     def handle_release_input(self, input):

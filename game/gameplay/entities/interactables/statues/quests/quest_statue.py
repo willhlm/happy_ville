@@ -13,7 +13,7 @@ class QuestStatue(Statues):#the status spawning a portal, balls etc - challange 
         self.hitbox = self.rect.copy()
 
         self.ID = ID
-        self.interacted = self.game_objects.world_state.quests.get(ID, False)
+        self.interacted = self.game_objects.world_state.narrative.is_quest_completed(ID)
         self.dialogue = dialogue.Dialogue(
             self,
             data_path = "gameplay/narrative/text/interactables/" + ID + ".json",
@@ -28,4 +28,4 @@ class QuestStatue(Statues):#the status spawning a portal, balls etc - challange 
             self.shader_state = states_shader.Idle(self)
 
     def on_conversation_complete(self):
-        self.game_objects.quests_events.initiate_quest(self.ID.capitalize(), monument = self)
+        self.game_objects.quests_events.initiate_quest(self.ID, monument = self)

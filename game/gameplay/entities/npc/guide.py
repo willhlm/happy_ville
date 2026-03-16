@@ -15,7 +15,7 @@ class Guide(NPC):
 
     def give_light(self):#called when teleport shader is finished
         self.game_objects.lights.add_light(self.game_objects.player, colour = [200/255,200/255,200/255,200/255])
-        self.game_objects.world_state.update_event('guide')
+        self.game_objects.world_state.narrative.update_event('guide')
 
     def draw(self, target):#called in group
         self.shader_state.draw()

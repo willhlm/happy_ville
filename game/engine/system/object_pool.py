@@ -1,5 +1,5 @@
 from gameplay.entities.visuals.environments import Leaves, BackgroundDroplet
-from gameplay.ui.components import MenuArrow, LogoLoading
+from gameplay.ui.components import MenuArrow, LogoLoadingOverlay
 from gameplay.entities.visuals.particles import screen_particles
 from gameplay.world.weather import weather
 from gameplay.states import Bank, OptionMenu, OptionDisplay, OptionSounds
@@ -74,8 +74,8 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
 
         #UI
         MenuArrow.pool(game_objects)
-        LogoLoading.pool(game_objects)        
         point_arrow.PointArrow.pool(game_objects)
+        LogoLoadingOverlay.pool(game_objects)
 
         Leaves.pool(game_objects)
         BackgroundDroplet.pool(game_objects)

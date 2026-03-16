@@ -52,7 +52,7 @@ class Enemy(Character):
 
     def dead(self):#called when death animation is finished
         self.loots()
-        self.game_objects.world_state.update_kill_statistics(type(self).__name__.lower())
+        self.game_objects.world_state.statistics_state.update_kill_statistics(type(self).__name__.lower())
         self.kill()
 
     def loots(self):#called when dead

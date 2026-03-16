@@ -1,7 +1,6 @@
 from .base_composite import CompositeState
 from .base_state import PhaseBase
 from gameplay.entities.visuals.effects.fade_effect import FadeEffect
-from gameplay.ui.components.overlay.point_arrow import PointArrow
 from gameplay.entities.visuals.cosmetics import ThunderBall, ThunderSpark
 
 class ThunderState(CompositeState):
@@ -19,12 +18,17 @@ class ThunderPre(PhaseBase):
         self.duration = 100
         self.entity.shader_state.enter_state('Swirl')
         if self.entity.abilities.spirit_abilities['Thunder'].level == 2:
-            self.arrow = PointArrow(self.entity.rect.topleft, self.entity.game_objects)
-            self.entity.game_objects.cosmetics.add(self.arrow)
+            self.arrow = self.entity.game_objects.ui.hud.widgets.show_point_arrow(
+                'thunder',
+                self.entity.rect.topleft,
+                [0, -1],
+            )
 
     def update(self, dt):
         self.duration -= dt
         self.entity.velocity = [0, 0]
+        if self.entity.abilities.spirit_abilities['Thunder'].level == 2:
+            self.arrow.set_pos(self.entity.rect.topleft)
         if self.duration < 0:
             self.exit_state()
 
@@ -34,7 +38,7 @@ class ThunderPre(PhaseBase):
         if self.entity.abilities.spirit_abilities['Thunder'].level == 1:
             self.enter_phase('main', dir = [0, 1])
         else:
-            self.arrow.kill()
+            self.entity.game_objects.ui.hud.widgets.hide('thunder')
             self.enter_phase('main', dir = [self.arrow.dir[0], -self.arrow.dir[1]])
 
     def handle_release_input(self, input):

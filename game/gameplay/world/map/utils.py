@@ -191,8 +191,8 @@ class SceneBuilder:
         self.spawner = ObjectSpawner(game_objects)
 
     def ensure_state_file(self, level_name: str):
-        if not self.game_objects.world_state.state.get(level_name, False):
-            self.game_objects.world_state.init_state_file(level_name)
+        if not self.game_objects.world_state.objects.has_level(level_name):
+            self.game_objects.world_state.objects.init_level(level_name)
 
     def build(self, map_def: MapDefinition, ctx: LoadContext, biome_mgr: BiomeManager):
         map_data = map_def.map_data
@@ -726,8 +726,8 @@ class ObjectSpawner:
             elif id == 19:#trigger
                 kwarg = props_list_to_dict(properties)
 
-                if self.game_objects.world_state.is_cutscene_complete(kwarg['event']): continue#if the cutscene has been shown before, return.
-                if self.game_objects.world_state.is_event_complete(kwarg['event']): continue#if event has already been done 
+                if self.game_objects.world_state.narrative.is_cutscene_complete(kwarg['event']): continue#if the cutscene has been shown before, return.
+                if self.game_objects.world_state.narrative.is_event_complete(kwarg['event']): continue#if event has already been done 
                 
                 obj = self.game_objects.registry.fetch('event_triggers',  kwarg['event'])
                 if obj:#if event is registered
@@ -926,12 +926,12 @@ class ObjectSpawner:
                 for property in properties:
                     if property['name'] == 'ID':
                         ID = property['value']
-                state = self.game_objects.world_state.state[self.game_objects.map.level_name]['runestone'].get(ID, False)
+                state = self.game_objects.world_state.objects.get_bucket(self.game_objects.map.level_name, 'runestone').get(ID, False)
                 new_rune = Runestones(object_position, self.game_objects, state, ID)
                 self.game_objects.interactables.add(new_rune)
 
             elif id == 4:#chests
-                state = self.game_objects.world_state.state[self.game_objects.map.level_name]['loot_container'].get(str(loot_container), False)
+                state = self.game_objects.world_state.objects.get_bucket(self.game_objects.map.level_name, 'loot_container').get(str(loot_container), False)
                 new_interacable = Chest(object_position,self.game_objects, state, str(loot_container))
                 self.game_objects.interactables.add(new_interacable)
                 loot_container += 1
@@ -1001,7 +1001,7 @@ class ObjectSpawner:
                 self.game_objects.interactables.add(statue)
 
             elif id == 13:#Soul_essence
-                if not self.game_objects.world_state.state[self.game_objects.map.level_name]['soul_essence'].get(soul_essence_int, False):#if it has not been interacted with
+                if not self.game_objects.world_state.objects.get_bucket(self.game_objects.map.level_name, 'soul_essence').get(soul_essence_int, False):#if it has not been interacted with
                     new_loot = SoulEssence(object_position, self.game_objects, soul_essence_int)
                     self.game_objects.loot.add(new_loot)
                 soul_essence_int += 1
@@ -1010,7 +1010,7 @@ class ObjectSpawner:
                 for property in properties:
                     if property['name'] == 'interactable_item':
                         name = property['value']
-                if not self.game_objects.world_state.state[self.game_objects.map.level_name]['interactable_items'].get(name, False):#if it has not been interacted with: (assume only one interactable)
+                if not self.game_objects.world_state.objects.get_bucket(self.game_objects.map.level_name, 'interactable_items').get(name, False):#if it has not been interacted with: (assume only one interactable)
                     obj = self.game_objects.registry.fetch('items', name)(object_position, self.game_objects, state = 'wild')      
                     self.game_objects.loot.add(obj)
 
@@ -1029,7 +1029,7 @@ class ObjectSpawner:
                 self.game_objects.interactables.add(statue)
 
             elif id == 18:
-                state = self.game_objects.world_state.state[self.game_objects.map.level_name]['loot_container'].get(str(loot_container), False)
+                state = self.game_objects.world_state.objects.get_bucket(self.game_objects.map.level_name, 'loot_container').get(str(loot_container), False)
                 amber_rock = AmberRock(object_position, self.game_objects, state, str(loot_container))
                 self.game_objects.interactables.add(amber_rock)
                 loot_container += 1
@@ -1301,7 +1301,7 @@ class Rhoutta_encounter(Biome):
     def room(self, room):
         if room == '2':
             self.level.game_objects.lights.ambient = (30/255,30/255,30/255,230/255)#230
-            if self.level.game_objects.world_state.events.get('guide', False):#if guide interaction has happened
+            if self.level.game_objects.world_state.narrative.events.get('guide', False):#if guide interaction has happened
                 self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,200/255],interact = False)
 
     #def set_camera(self, ctx):
@@ -1653,7 +1653,7 @@ class Wakeup_forest(Biome):
         self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,255/255], normal_interact = False)
         if room in ['99']:
             self.level.game_objects.lights.ambient = (30/255,20030/255,30/255,230/255)#230
-            if self.level.game_objects.world_state.events.get('guide', False):#if guide interaction has happened
+            if self.level.game_objects.world_state.narrative.events.get('guide', False):#if guide interaction has happened
                 self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,255/255], interact = False)
 
     def play_music(self):

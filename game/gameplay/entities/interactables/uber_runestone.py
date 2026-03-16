@@ -13,9 +13,9 @@ class UberRunestone(Interactables):
         self.count_runestones()
 
     def count_runestones(self):#append all runestone ID that have been activated.
-        for level in self.game_objects.world_state.state.keys():
-            for runestoneID in self.game_objects.world_state.state[level]['runestone'].keys():
-                if self.game_objects.world_state.state[level]['runestone'][runestoneID] != 'idle':
+        for level in self.game_objects.world_state.objects.state.keys():
+            for runestoneID in self.game_objects.world_state.objects.get_bucket(level, 'runestone').keys():
+                if self.game_objects.world_state.objects.get_bucket(level, 'runestone')[runestoneID] != 'idle':
                     pos = [self.rect.x+int(runestoneID)*16,self.rect.y]
                     self.game_objects.cosmetics.add(Rune_symbol(pos,runestoneID))
                     self.runestone_number += 1
@@ -23,4 +23,3 @@ class UberRunestone(Interactables):
     def interact(self):#when player press T
         if self.runestone_number == 25:
             pass#do a cutscene?
-

@@ -28,25 +28,25 @@ class Conversation():
 
         node = self.nodes_by_id[self.active_node_id]
         speaker_id = self._speaker_id()
-        progress = self.entity.game_objects.world_state.get_dialogue_progress(speaker_id, node['id']) + 1
+        progress = self.entity.game_objects.world_state.narrative.dialogue.get_progress(speaker_id, node['id']) + 1
 
         if progress >= len(node['lines']):
-            self.entity.game_objects.world_state.reset_dialogue_progress(speaker_id, node['id'])
+            self.entity.game_objects.world_state.narrative.dialogue.reset_progress(speaker_id, node['id'])
             if node.get('once', False):
-                self.entity.game_objects.world_state.consume_dialogue(speaker_id, node['id'])
+                self.entity.game_objects.world_state.narrative.dialogue.consume(speaker_id, node['id'])
             self.active_node_id = None
             return None
 
-        self.entity.game_objects.world_state.set_dialogue_progress(speaker_id, node['id'], progress)
+        self.entity.game_objects.world_state.narrative.dialogue.set_progress(speaker_id, node['id'], progress)
         return node['lines'][progress]
 
     def _speaker_id(self):
         return self.entity.name
 
     def _line_for_node(self, node):
-        progress = self.entity.game_objects.world_state.get_dialogue_progress(self._speaker_id(), node['id'])
+        progress = self.entity.game_objects.world_state.narrative.dialogue.get_progress(self._speaker_id(), node['id'])
         if progress >= len(node['lines']):
-            self.entity.game_objects.world_state.reset_dialogue_progress(self._speaker_id(), node['id'])
+            self.entity.game_objects.world_state.narrative.dialogue.reset_progress(self._speaker_id(), node['id'])
             progress = 0
         return node['lines'][progress]
 
@@ -54,7 +54,7 @@ class Conversation():
         world_state = self.entity.game_objects.world_state
         candidates = []
         for node in self.nodes:
-            if node.get('once', False) and world_state.is_dialogue_consumed(self._speaker_id(), node['id']):
+            if node.get('once', False) and world_state.narrative.dialogue.is_consumed(self._speaker_id(), node['id']):
                 continue
             if self._conditions_match(node.get('conditions', [])):
                 candidates.append(node)
@@ -76,19 +76,27 @@ class Conversation():
             value = condition.get('value', True)
 
             if kind == 'quest':
-                if world_state.quests.get(condition['name'], False) != value:
-                    return False
+                quest_name = condition['name']
+                if isinstance(value, str):
+                    if world_state.narrative.get_quest_status(quest_name) != value:
+                        return False
+                elif bool(value):
+                    if not world_state.narrative.is_quest_active(quest_name):
+                        return False
+                else:
+                    if world_state.narrative.is_quest_active(quest_name):
+                        return False
             elif kind == 'event':
-                if world_state.events.get(condition['name'], False) != value:
+                if world_state.narrative.events.get(condition['name'], False) != value:
                     return False
             elif kind == 'progress_eq':
-                if world_state.progress != value:
+                if world_state.statistics_state.progress != value:
                     return False
             elif kind == 'progress_at_least':
-                if world_state.progress < value:
+                if world_state.statistics_state.progress < value:
                     return False
             elif kind == 'progress_at_most':
-                if world_state.progress > value:
+                if world_state.statistics_state.progress > value:
                     return False
             else:
                 return False
@@ -99,7 +107,7 @@ class Dialogue(Conversation):#handles dialoage and what to say for NPC
     def __init__(self, entity, *, data_path = None, speaker_id = None, allow_comments = True):
         super().__init__(entity)
         self.speaker_id = speaker_id or self.entity.name
-        self.dialogue_data = read_files.read_json(data_path or "gameplay/narrative/text/npc/conversation/" + self.entity.name + ".json")
+        self.dialogue_data = read_files.read_json(data_path or "gameplay/narrative/text/npc/" + self.entity.name + ".json")
         self.nodes = self._build_nodes(self.dialogue_data, 'conversation_nodes', 'conversation')
         self.nodes_by_id = {node['id']: node for node in self.nodes}
         self.comment_nodes = self._build_nodes(self.dialogue_data, 'comment_nodes', 'comment') if allow_comments else []
@@ -110,7 +118,7 @@ class Dialogue(Conversation):#handles dialoage and what to say for NPC
     def get_comment(self):#random text bubbles
         candidates = []
         for node in self.comment_nodes:
-            if node.get('once', False) and self.entity.game_objects.world_state.is_dialogue_consumed(self._speaker_id(), node['id']):
+            if node.get('once', False) and self.entity.game_objects.world_state.narrative.dialogue.is_consumed(self._speaker_id(), node['id']):
                 continue
             if self._conditions_match(node.get('conditions', [])):
                 candidates.append(node)

@@ -6,7 +6,7 @@ class MrWood(NPC):#lumber jack
 
     def interact(self):#when plater press t
         self.game_objects.game.state_manager.enter_state(state_name = 'conversation', npc = self)
-        if self.game_objects.world_state.quests.get('lumberjack_radna', False):#if the quest is running
+        if self.game_objects.world_state.narrative.is_quest_active('lumberjack_radna'):#if the quest is running
             self.game_objects.quests_events.active_quests['lumberjack_radna'].complete()
 
     def load_sprites(self):

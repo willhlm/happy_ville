@@ -43,5 +43,5 @@ class DeerEncounter(CutsceneEngine):#first deer encounter in light forest by wat
     def on_exit(self):
         self.game.game_objects.camera_manager.camera.exit_state()
         self.entity.kill()
-        self.game.game_objects.world_state.cutscene_complete('deer_encounter')
+        self.game.game_objects.world_state.narrative.mark_cutscene_complete('deer_encounter')
         super().on_exit()

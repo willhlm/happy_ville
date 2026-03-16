@@ -27,7 +27,7 @@ class BgFade(BgBlock):
         else:
             self.trigger = 'collision'
         
-        if self.game_objects.world_state.load_bool(self.game_objects.map.level_name, 'bg_fade', self.id, initial = False):#if it has been interacted with already
+        if self.game_objects.world_state.objects.load_bool(self.game_objects.map.level_name, 'bg_fade', self.id, initial = False):#if it has been interacted with already
             self.interact()
 
     def make_hitbox(self, positions, offset_position):#the rect is the whole screen, need to make it correctly cover the surface part, some how
@@ -46,7 +46,7 @@ class BgFade(BgBlock):
         if self.interacted: return            
         self.shader_state.handle_input('alpha')
         self.interacted = True
-        self.game_objects.world_state.set_bool(self.game_objects.map.level_name, 'bg_fade', self.id,  True)
+        self.game_objects.world_state.objects.set_bool(self.game_objects.map.level_name, 'bg_fade', self.id,  True)
 
     def add_child(self, child):
         self.children.append(child)

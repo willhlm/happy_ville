@@ -15,7 +15,7 @@ class StoneWood(Statues):#the stone "statue" to initiate the lumberjacl quest
         self.item = item
         self.quest = quest
 
-        self.interacted = self.game_objects.world_state.quests.get(quest, False)
+        self.interacted = self.game_objects.world_state.narrative.is_quest_completed(quest)
         self.dialogue = dialogue.Dialogue(
             self,
             data_path = "gameplay/narrative/text/interactables/" + quest + ".json",

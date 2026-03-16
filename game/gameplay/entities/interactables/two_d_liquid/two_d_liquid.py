@@ -20,7 +20,7 @@ class TwoDLiquid(StaticEntity):#inside interactables_fg group. fg because in fro
 
         self.shader = game_objects.shaders['twoD_liquid']
         self.shader['u_resolution'] = self.game_objects.game.window_size
-        if game_objects.world_state.events.get('tjasolmai', False):#if water boss (golden fields) is dead
+        if game_objects.world_state.narrative.events.get('tjasolmai', False):#if water boss (golden fields) is dead
             if not properties.get('vertical', False):
                 self.hole = Hole(pos, game_objects, size)#for poison
                 self.currentstate = states_two_d_liquid.Poison(self, **properties)

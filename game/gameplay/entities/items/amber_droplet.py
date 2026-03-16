@@ -18,9 +18,9 @@ class AmberDroplet(EnemyDrop):
 
     def on_collision(self, entity):#when the player collides with this object
         super().on_collision(entity)
-        self.game_objects.world_state.update_statistcis('amber_droplet')
+        self.game_objects.world_state.statistics_state.update_statistic('amber_droplet')
         tot_amber = entity.backpack.inventory.get_quantity('amberdroplet')
-        self.game_objects.ui.hud.update_money(tot_amber)
+        self.game_objects.ui.hud.meters.update_money(tot_amber)
 
     def pool(game_objects):#all things that should be saved in object pool
         AmberDroplet.sprites = read_files.load_sprites_dict('assets/sprites/entities/items/amber_droplet/',game_objects)
