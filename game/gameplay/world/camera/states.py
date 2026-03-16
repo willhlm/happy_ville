@@ -29,7 +29,6 @@ class Idle_right(Basic_states):
         if distance[0] < -self.entity.offset*16: return        
 
         if abs(distance[1]) < self.entity.size[1] * 0.5 and abs(distance[0]) < self.entity.game_objects.game.window_size[0]*0.5 +  self.entity.game_objects.player.rect[2]*0.5:#if on screen on y and coser than half screen on x
-            print('sio')
             self.enter_state('Stop_right')
 
 class Stop_right(Basic_states):

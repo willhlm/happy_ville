@@ -57,8 +57,6 @@ REGISTERY = {
     "conversation": Conversation,
     "fade_in": FadeIn,
     "fade_out": FadeOut,
-    "safe_spawn_1": SafeSpawn_1,
-    "safe_spawn_2": SafeSpawn_2,
     "uis": UIs,
 
     # Facilities

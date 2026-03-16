@@ -2,6 +2,7 @@ import pygame
 from gameplay.entities.enemies.base.enemy import Enemy
 from engine.utils import read_files
 from . import states_rogue_cultist
+from gameplay.entities.projectiles import HurtBox
 
 class CultistRogue(Enemy):
     def __init__(self, pos, game_objects):
@@ -21,7 +22,7 @@ class CultistRogue(Enemy):
         pass
 
     def attack(self):#called from states, attack main
-        self.projectiles.add(Sword(self))#add to group
+        self.projectiles.add(HurtBox(self))#add to group
 
     def dead(self):#called when death animation is finished
         super().dead()

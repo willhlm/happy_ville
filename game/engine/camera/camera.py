@@ -152,7 +152,7 @@ class Cutscenes(Camera):
             stop.update(1)
 
     def exit_state(self):#called from cutscenes
-        self.game_objects.camera_manager.set_camera('Camera')
+        self.game_objects.camera_manager.set_camera('Camera')        
 
 class Deer_encounter(Cutscenes):
     def __init__(self, game_objects, scroll):

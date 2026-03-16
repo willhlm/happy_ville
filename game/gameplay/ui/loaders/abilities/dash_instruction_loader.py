@@ -1,6 +1,6 @@
 import pygame
 from gameplay.ui.components import *
-from gameplay.ui.loaders import BaseLoader
+from ..base_loader import BaseLoader
      
 class DashInstructionLoader(BaseLoader):
     def __init__(self, game_objects):

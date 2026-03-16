@@ -20,7 +20,7 @@ class Enemy(Character):
         self.inventory = {'amber_droplet':random.randint(1,3)}#thigs to drop wgen killed
         self.health = self.config['health']    
 
-        self.flags = {'aggro': True, 'invincibility': False, 'attack_able': True, 'hurt_able': True}#'attack able': a flag used as a cooldown of attack
+        self.flags = {'aggro': True, 'attack_able': True, 'hurt_able': True}#'attack able': a flag used as a cooldown of attack
         self.dmg = 1
         
         self.contact_effect = hit_effects.create_contact_effect(game_objects, damage = 1, knockback = [20, 0], hitstop = 5, attacker = self)#collision with player
@@ -62,12 +62,3 @@ class Enemy(Character):
                 obj.spawn_position()                                         
                 self.game_objects.loot.add(obj)
             self.inventory[key] = 0
-
-    def health_bar(self):#called from omamori Boss_HP
-        pass
-
-    def chase(self, position = [0,0]):#called from AI: when chaising
-        self.velocity[0] += self.dir[0] * self.chase_speed
-
-    def patrol(self, position = [0,0]):#called from AI: when patroling
-        self.velocity[0] += self.dir[0]*0.3      

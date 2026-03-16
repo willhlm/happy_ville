@@ -13,6 +13,10 @@ class TransitionController:
         self.game_objects.signals.subscribe("fade_covered", self._on_fade_covered)
         self.game_objects.signals.subscribe("fade_in_finished", self._on_fade_in_finished)
 
+    @property
+    def is_busy(self):
+        return self._busy
+
     def run(self,previous_state,*,style: str = "fade_black", action: Optional[Callable[[], Any]] = None, after: Optional[Callable[[], Any]] = None, **fade_kwargs):
         if self._busy:
             return  # or queue
