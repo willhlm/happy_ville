@@ -24,7 +24,7 @@ class GameState():
 
     def on_pop(self):
         'called when popping'
-        pass        
+        pass 
 
     def release_texture(self):#in the final version, this should not be needed sinec we wil not dynamically make layers
         pass

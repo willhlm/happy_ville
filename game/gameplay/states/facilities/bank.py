@@ -34,17 +34,16 @@ class Bank(BaseUI):#caled from mr banks
         self.game.game_objects.game.display.render(self.pointer.image, self.game.screen_manager.screen, position =(300,130+10*self.pointer_index[1]))#shader render              
 
     def handle_events(self,input):
-        event = input.output()
         input.processed()             
-        if event[0]:#press
-            if event[-1] == 'y':
+        if input.pressed:#press
+            if input.name == 'y':
                 self.game.state_manager.exit_state()
-            elif event[-1]=='a' or event[-1]=='return':
+            elif input.name in ('a', 'return'):
                 self.select()
-        if event[2]['l_stick'][1] > 0 or (event[-1] == 'dpad_down' and event[0]):#down
+        if input.pressed and input.name == 'down':#down
             self.pointer_index[1] += 1
             self.pointer_index[1] = min(self.pointer_index[1],len(self.surf)-1)
-        elif event[2]['l_stick'][1] < 0 or (event[-1] == 'dpad_up' and event[0]):#up
+        elif input.pressed and input.name == 'up':#up
             self.pointer_index[1] -= 1
             self.pointer_index[1] = max(self.pointer_index[1],0)                
 
@@ -56,4 +55,3 @@ class Bank(BaseUI):#caled from mr banks
                 self.game.game_objects.UI.set_ui('Bank_withdraw', self.npc)
             else:#deposite
                 self.game.game_objects.UI.set_ui('Bank_deposite', self.npc)            
-

@@ -36,16 +36,18 @@ class Game():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            else:
-                self.game_objects.controller.map_inputs(event)#makes a list of inputs (input buffer)
 
-        self.game_objects.controller.continuous_input_checks()#check every frame independent of event: right, left, up, down
-        #self.state_stack[-1].continuous_input_checks()#tdiscrete_inputs_UI is inprinciple not needed for gameplay state
-        inputs = self.game_objects.controller.input_buffer.copy()
+        self.game_objects.controller.update(events, dt)
+        inputs = self.game_objects.controller.get_inputs()
         self.game_objects.input_interpreter.update(dt)#checks for flicks and other input related things
+
+        active_state = self.state_manager.state_stack[-1]
         for input in inputs:
-            input.update(dt)
+            if input.is_done:
+                continue
             self.state_manager.handle_events(input)
+            if self.state_manager.state_stack[-1] is not active_state:#interupt it if we change state
+                break
 
     def run(self):
         self.game_loop.run()
@@ -105,4 +107,4 @@ class GameLoop():
             # Update display and limit FPS
             pygame.display.flip()
             self.clock.tick(self.game.fps)
-            #print(self.clock.get_fps())
+            #print(self.clock.get_fps()

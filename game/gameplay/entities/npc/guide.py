@@ -8,7 +8,7 @@ class Guide(NPC):
         super().update(dt)
         self.shader_state.update_render(dt)#goes between idle and teleport
 
-    def buisness(self):#enters after conversation
+    def on_conversation_complete(self):
         self.shader_state.enter_state('Teleport')
         self.give_light()
         self.game_objects.particles.emit('converging_soul', pos = self.hitbox.center, n = 10, player = self.game_objects.player)

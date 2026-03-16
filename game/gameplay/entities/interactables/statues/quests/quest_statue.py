@@ -14,7 +14,12 @@ class QuestStatue(Statues):#the status spawning a portal, balls etc - challange 
 
         self.ID = ID
         self.interacted = self.game_objects.world_state.quests.get(ID, False)
-        self.dialogue = dialogue.Dialogue_interactable(self, ID)#handles dialoage and what to say
+        self.dialogue = dialogue.Dialogue(
+            self,
+            data_path = "gameplay/narrative/text/interactables/" + ID + ".json",
+            speaker_id = "interactable:" + ID,
+            allow_comments = False,
+        )#handles dialoage and what to say
 
         if self.interacted:
             self.shader_state = states_shader.Tint(self, colour = [0,0,0,100])
@@ -22,6 +27,5 @@ class QuestStatue(Statues):#the status spawning a portal, balls etc - challange 
             game_objects.lights.add_light(self)
             self.shader_state = states_shader.Idle(self)
 
-    def buisness(self):#enters after conversation
+    def on_conversation_complete(self):
         self.game_objects.quests_events.initiate_quest(self.ID.capitalize(), monument = self)
-

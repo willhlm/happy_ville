@@ -35,8 +35,8 @@ class PhaseBase():
     def handle_release_input(self, input):#all states should inehrent this function, if it should be able to jump
         input.processed()
 
-    def handle_movement(self, event):#all states should inehrent this function: called in update function of gameplay state
-        value = event['l_stick']#the avlue of the press
+    def handle_movement(self, axes):#all states should inehrent this function: called in update function of gameplay state
+        value = axes.move#the avlue of the press
 
         #self.entity.acceleration[0] = C.acceleration[0] * math.ceil(abs(value[0]*0.8))#always positive, add acceleration to entity
         multiplier = 0
@@ -57,8 +57,8 @@ class PhaseAirBase(PhaseBase):
     def __init__(self, entity):
         super().__init__(entity)
 
-    def handle_movement(self, event):#all states should inehrent this function: called in update function of gameplay state
-        value = event['l_stick']#the avlue of the press
+    def handle_movement(self, axes):#all states should inehrent this function: called in update function of gameplay state
+        value = axes.move#the avlue of the press
 
         #self.entity.acceleration[0] = C.acceleration[0] * math.ceil(abs(value[0]*0.8))#always positive, add acceleration to entity
         multiplier = 0

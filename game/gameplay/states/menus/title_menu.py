@@ -66,28 +66,26 @@ class TitleMenu(BaseUI):
         self.previous_button = self.current_button
 
     def handle_events(self, input):
-        event = input.output()
         input.processed()
+        if input.pressed:
+            if input.name == 'up':#up
+                self.current_button -= 1
+                if self.current_button < 0:
+                    self.current_button = len(self.menu_ui.buttons) - 1
+                self._update_arrow()
+                self._update_button()  # Handle button state change
 
-        if event[2]['l_stick'][1] < 0 or (event[-1] == 'dpad_up' and event[0]):#up
-            self.current_button -= 1
-            if self.current_button < 0:
-                self.current_button = len(self.menu_ui.buttons) - 1
-            self._update_arrow()
-            self._update_button()  # Handle button state change
+            elif input.name == 'down':#down
+                self.current_button += 1
+                if self.current_button >= len(self.menu_ui.buttons):
+                    self.current_button = 0
+                self._update_arrow()
+                self._update_button()  # Handle button state change
 
-        elif event[2]['l_stick'][1] > 0 or (event[-1] == 'dpad_down' and event[0]):#down
-            self.current_button += 1
-            if self.current_button >= len(self.menu_ui.buttons):
-                self.current_button = 0
-            self._update_arrow()
-            self._update_button()  # Handle button state change
-
-        elif event[0]:
-            if event[-1] in ('return', 'a'):
+            elif input.name in ('return', 'a'):
                 self.menu_ui.buttons[self.current_button].pressed()
                 self.change_state()
-            elif event[-1] == 'start':
+            elif input.name == 'start':
                 pygame.quit()
                 sys.exit()
 
@@ -110,7 +108,7 @@ class TitleMenu(BaseUI):
             #self.game.game_objects.map.load_map(self,'crystal_mines_1','1')
             #self.game.game_objects.map.load_map(self,'village_1','1')
             #self.game.game_objects.map.load_map(self,'nordveden_windtest','1')
-            self.game.game_objects.map.load_map(self,'nordveden_23','1')
+            self.game.game_objects.map.load_map(self,'nordveden_1','1')
             #self.game.game_objects.map.load_map(self,'tall_trees_1','1')
             #self.game.game_objects.map.load_map(self,'dark_forest_1','5')
             #self.game.game_objects.map.load_map(self,'hlifblom_1','1')

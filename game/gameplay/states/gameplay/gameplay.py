@@ -35,35 +35,33 @@ class Gameplay(GameState):
         self.game.render_display(self.game.screen_manager.composite_screen.texture, scale = False)
 
     def handle_movement(self):#every frame
-        #value = self.game.game_objects.controller.continuous_input_checks()
-        value = self.game.game_objects.controller.value
-        self.game.game_objects.player.currentstate.handle_movement(value)#move around
-        self.game.game_objects.camera_manager.handle_movement(value)
+        axes = self.game.game_objects.controller.frame.axes
+        self.game.game_objects.player.currentstate.handle_movement(axes)#move around
+        self.game.game_objects.camera_manager.handle_movement(axes)
 
     def handle_events(self, input):
-        event = input.output()
-        if event[0]:#press
-            if event[-1]=='start':#escape button
-                input.processed()
+        if input.pressed:#press
+            if input.name == 'start':#escape button
+                input.processed()                
                 self.game.state_manager.enter_state('pause_menu')
 
-            elif event[-1]=='rb':
+            elif input.name == 'rb':
                 input.processed()
                 self.game.state_manager.enter_state('ability_select')
 
-            elif event[-1] == 'y':
+            elif input.name == 'y':
                 input.processed()
                 self.game.game_objects.collisions.check_interaction_collision()
 
-            elif event[-1] == 'select':
+            elif input.name == 'select':
                 input.processed()
                 self.game.state_manager.enter_state('uis', page = 'inventory')
 
-            elif event[-1] == 'down':
+            elif input.name == 'down':
                 input.processed()#should it be processed here or when passed through?
                 self.game.game_objects.collisions.pass_through(self.game.game_objects.player)
 
-            elif sum(event[2]['d_pad']) != 0:#d_pad was pressed
+            elif input.name in ('up', 'left', 'right'):#directional UI-style actions are ignored in gameplay
                 input.processed()
                 pass
 
@@ -71,10 +69,5 @@ class Gameplay(GameState):
                 interpreted = self.game.game_objects.input_interpreter.interpret(input)
                 self.game.game_objects.player.currentstate.handle_press_input(interpreted)
                 #self.game.game_objects.player.omamoris.handle_press_input(input)
-        elif event[1]:#release
+        elif input.released:#release
             self.game.game_objects.player.currentstate.handle_release_input(input)
-
-        elif event[2]['l_stick'][1] > 0.85:#pressing down
-            input.processed()#should it be processed here or when passed through?
-            self.game.game_objects.collisions.pass_through(self.game.game_objects.player)
-

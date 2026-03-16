@@ -41,10 +41,9 @@ class NewGame(GameState):
         self.game.render_display(self.game.screen_manager.screen.texture)
 
     def handle_events(self,input):
-        event = input.output()
         input.processed()
-        if event[0]:
-          if event[-1] == 'a':
+        if input.pressed:
+            if input.name == 'a':
                 self.frame += 1
                 self.time = 0                
                 if self.frame == len(self.sprites) :#if no more pages                                          

@@ -2,11 +2,12 @@ from gameplay.states import Gameplay
 from engine import constants as C
 
 class Conversation(Gameplay):
-    def __init__(self, game, npc):
+    def __init__(self, game, speaker):
         super().__init__(game)
         self.game.game_objects.player.reset_movement()
         self.game.game_objects.player.velocity = [0,0]
-        self.npc = npc
+        self.speaker = speaker
+        self.completed = False
         self.print_frame_rate = C.animation_framerate
         self.text_window_size = (352, 96)
         self.blit_pos = [int((self.game.window_size[0]-self.text_window_size[0])*0.5),50]
@@ -14,9 +15,11 @@ class Conversation(Gameplay):
         self.conv_screen = self.game.display.make_layer(self.game.window_size)#TODO
 
         self.clean_slate()
-        self.conv = self.npc.dialogue.get_conversation()
+        self.conv = self.speaker.dialogue.start_conversation()
         self.alpha = 10#alpha of the conversation screen
         self.sign = 1#fade in and back
+        if not self.conv:
+            self.fade_back()
 
     def clean_slate(self):
         self.letter_frame = 0
@@ -35,32 +38,32 @@ class Conversation(Gameplay):
         super().render()
         self.conv_screen.clear(10,10,10,100)#needed to make the self.background semi trasnaprant
 
-        text = self.game.game_objects.font.render((272,80), self.conv, int(self.letter_frame))
-        self.game.game_objects.shaders['colour']['colour'] = (255,255,255,255)
         self.game.display.render(self.background.texture, self.conv_screen, position = self.blit_pos)
-        self.game.display.render(text, self.conv_screen, position = (180,self.blit_pos[1] + 20), shader = self.game.game_objects.shaders['colour'])#shader render
-        self.npc.render_potrait(self.conv_screen)#some conversation target may not have potraits
-        text.release()
-        self.game.game_objects.shaders['alpha']['alpha'] = self.alpha
+        if self.conv:
+            self.game.display.render_text(self.game.game_objects.font.font_atals, self.conv_screen, text = self.conv, letter_frame = int(self.letter_frame), color = (255,255,255,255), position = (180,self.blit_pos[1] + 20), width = 272)
+        self.speaker.render_potrait(self.conv_screen)#some conversation target may not have potraits
 
+        self.game.game_objects.shaders['alpha']['alpha'] = self.alpha
         self.game.display.render(self.conv_screen.texture, self.game.screen_manager.screen, shader = self.game.game_objects.shaders['alpha'])#shader render
         self.game.render_display(self.game.screen_manager.screen.texture)
 
     def handle_events(self, input):
-        event = input.output()
         input.processed()
-        if event[0]:
-            if event[-1] == 'start':
+        if input.pressed:#press
+            if input.name == 'start':
                 self.fade_back()
 
-            elif event[-1] == 'y':
+            elif input.name == 'y':
+                if not self.conv:
+                    self.fade_back()
+                    return
                 if self.letter_frame < len(self.conv):
                     self.letter_frame = 10000
 
                 else:#check if we have a series of conversations or not
-                    self.npc.dialogue.increase_conv_index()
-                    conv = self.npc.dialogue.get_conversation()
+                    conv = self.speaker.dialogue.advance_conversation()
                     if not conv:
+                        self.completed = True
                         self.fade_back()
                     else:
                         self.clean_slate()
@@ -72,5 +75,7 @@ class Conversation(Gameplay):
     def on_exit(self):
         self.conv_screen.release()
         self.background.release()
-        self.npc.buisness()
-
+        if self.completed:
+            self.speaker.on_conversation_complete()
+        else:
+            self.speaker.on_conversation_cancelled()

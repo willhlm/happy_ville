@@ -95,29 +95,28 @@ class OptionSounds(BaseUI):
         read_files.write_json(self.game_settings, 'config/game_settings.json')#overwrite
 
     def handle_events(self, input):        
-        event = input.output()
         input.processed()
-        if event[2]['l_stick'][1] < 0:#up
-            self.current_button -= 1
-            if self.current_button < 0:
-                self.current_button = len(self.menu_ui.buttons) - 1
-            self._update_arrow()
-            self._update_button()  # Handle button state change
-        elif event[2]['l_stick'][1] > 0:#down
-            self.current_button += 1
-            if self.current_button >= len(self.menu_ui.buttons):
-                self.current_button = 0
-            self._update_arrow()
-            self._update_button()  # Handle button state change
+        if input.pressed:
+            if input.name == 'up':#up
+                self.current_button -= 1
+                if self.current_button < 0:
+                    self.current_button = len(self.menu_ui.buttons) - 1
+                self._update_arrow()
+                self._update_button()  # Handle button state change
+            elif input.name == 'down':#down
+                self.current_button += 1
+                if self.current_button >= len(self.menu_ui.buttons):
+                    self.current_button = 0
+                self._update_arrow()
+                self._update_button()  # Handle button state change
 
-        elif event[2]['l_stick'][0] > 0 or (event[-1] == 'dpad_right' and event[0]):  # Right                        
-            self.update_options(1)            
-            
-        elif event[2]['l_stick'][0] < 0 or (event[-1] == 'dpad_left' and event[0]):  # Left
-            self.update_options(-1)
+            elif input.name == 'right':  # Right                        
+                self.update_options(1)            
+                
+            elif input.name == 'left':  # Left
+                self.update_options(-1)
 
-        elif event[0]:
-            if event[-1] == 'start':
+            elif input.name == 'start':
                 self.game.state_manager.exit_state()
 
     def update_options(self, direction):

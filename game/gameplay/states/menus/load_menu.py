@@ -60,29 +60,26 @@ class LoadMenu(BaseUI):
         self.game.render_display(self.game.screen_manager.screen.texture)
 
     def handle_events(self, input):
-        event = input.output()
         input.processed()
-        
-        if event[2]['l_stick'][1] < 0 or (event[-1] == 'dpad_up' and event[0]):#up
-            self.current_button -= 1
-            if self.current_button < 0:
-                self.current_button = len(self.menu_ui.buttons) - 1
-            self._update_arrow()
-            self._update_button()  # Handle button state change
-            
-        elif event[2]['l_stick'][1] > 0 or (event[-1] == 'dpad_down' and event[0]):#down
-            self.current_button += 1
-            if self.current_button >= len(self.menu_ui.buttons):
-                self.current_button = 0
-            self._update_arrow()
-            self._update_button()  # Handle button state change
-            
-        elif event[0]:
-            if event[-1] == 'start':
+        if input.pressed:
+            if input.name == 'up':#up
+                self.current_button -= 1
+                if self.current_button < 0:
+                    self.current_button = len(self.menu_ui.buttons) - 1
+                self._update_arrow()
+                self._update_button()  # Handle button state change
+                
+            elif input.name == 'down':#down
+                self.current_button += 1
+                if self.current_button >= len(self.menu_ui.buttons):
+                    self.current_button = 0
+                self._update_arrow()
+                self._update_button()  # Handle button state change
+                
+            elif input.name == 'start':
                 self.game.state_manager.exit_state()
-            elif event[-1] in ('return', 'a'):
+            elif input.name in ('return', 'a'):
                 self.arrow.pressed()
                 map, point = self.game.game_objects.load_game()#load saved game data
                 self.game.state_manager.enter_state('Gameplay')
                 self.game.game_objects.load_map(self, map, point)
-

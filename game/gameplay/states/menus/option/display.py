@@ -91,34 +91,32 @@ class OptionDisplay(BaseUI):
         self.game.render_display(self.game.screen_manager.screen.texture)
 
     def handle_events(self, input):
-        event = input.output()
         input.processed()
-        
-        # Vertical navigation
-        if event[2]['l_stick'][1] < 0 or (event[-1] == 'dpad_up' and event[0]):  # Up
-            self.current_button -= 1
-            if self.current_button < 0:
-                self.current_button = len(self.menu_ui.buttons) - 1
-            self._update_arrow()
-            self._update_button()
+        if input.pressed:
+            # Vertical navigation
+            if input.name == 'up':  # Up
+                self.current_button -= 1
+                if self.current_button < 0:
+                    self.current_button = len(self.menu_ui.buttons) - 1
+                self._update_arrow()
+                self._update_button()
+                
+            elif input.name == 'down':  # Down
+                self.current_button += 1
+                if self.current_button >= len(self.menu_ui.buttons):
+                    self.current_button = 0
+                self._update_arrow()
+                self._update_button()
             
-        elif event[2]['l_stick'][1] > 0 or (event[-1] == 'dpad_down' and event[0]):  # Down
-            self.current_button += 1
-            if self.current_button >= len(self.menu_ui.buttons):
-                self.current_button = 0
-            self._update_arrow()
-            self._update_button()
-        
-        # Horizontal cycling (left/right to change values)
-        elif event[2]['l_stick'][0] > 0 or (event[-1] == 'dpad_right' and event[0]):  # Right
-            self.cycle_option(1)
-            
-        elif event[2]['l_stick'][0] < 0 or (event[-1] == 'dpad_left' and event[0]):  # Left
-            self.cycle_option(-1)
+            # Horizontal cycling (left/right to change values)
+            elif input.name == 'right':  # Right
+                self.cycle_option(1)
+                
+            elif input.name == 'left':  # Left
+                self.cycle_option(-1)
         
         # Actions
-        elif event[0]:
-            if event[-1] == 'start' or event[-1] == 'b':
+            elif input.name in ('start', 'b'):
                 self.game.state_manager.exit_state()
 
     def cycle_option(self, direction):

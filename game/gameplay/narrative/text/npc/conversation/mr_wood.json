@@ -1,17 +1,62 @@
 {
-
-    "lumberjack_omamori" : {
-        "0" : "What do you got there?",
-        "1" : "Here, let me fix that for you."
-    },    
-
-  "state_1" : {
-      "0" : "You want some Wood little girl?",
-      "1" : "Here, lick this!"
-  },
-  
-    "state_2" : {
-        "0" : "yolo.",
-        "1" : "Wood please"
+  "conversation_nodes": [
+    {
+      "id": "quest_lumberjack_radna",
+      "category": "quest",
+      "conditions": [
+        {"type": "quest", "name": "lumberjack_radna", "value": true}
+      ],
+      "once": true,
+      "lines": [
+        "What do you got there?",
+        "Here, let me fix that for you."
+      ]
+    },
+    {
+      "id": "fallback_state_1",
+      "category": "fallback",
+      "conditions": [
+        {"type": "progress_eq", "value": 1}
+      ],
+      "lines": [
+        "You want some Wood little girl?",
+        "Here, lick this!"
+      ]
+    },
+    {
+      "id": "fallback_state_2",
+      "category": "fallback",
+      "conditions": [
+        {"type": "progress_eq", "value": 2}
+      ],
+      "lines": [
+        "yolo.",
+        "Wood please"
+      ]
     }
+  ],
+  "comment_nodes": [
+    {
+      "id": "comment_state_1",
+      "category": "ambient",
+      "conditions": [
+        {"type": "progress_eq", "value": 1}
+      ],
+      "lines": [
+        "Hej",
+        "Zup"
+      ]
+    },
+    {
+      "id": "comment_state_2",
+      "category": "ambient",
+      "conditions": [
+        {"type": "progress_eq", "value": 2}
+      ],
+      "lines": [
+        "yolo",
+        "nice weather"
+      ]
+    }
+  ]
 }

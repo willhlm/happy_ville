@@ -1,0 +1,36 @@
+from .base_composite import CompositeState
+from .base_state import PhaseBase
+
+class ShieldState(CompositeState):
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.phases = {'pre': ShieldPre(entity), 'main': ShieldMain(entity)}
+
+class ShieldPre(PhaseBase):
+    def __init__(self, entity):
+        super().__init__(entity)
+
+    def handle_movement(self, event):
+        pass
+
+    def enter(self):
+        self.entity.acceleration[0] = 0
+        self.entity.animation.play('shield_pre')
+
+    def increase_phase(self):
+        self.enter_phase('main')
+
+class ShieldMain(PhaseBase):
+    def __init__(self, entity):
+        super().__init__(entity)
+
+    def handle_movement(self, event):
+        pass
+
+    def enter(self):
+        self.entity.animation.play('shield_main')
+        self.entity.consume_spirit()
+        self.entity.abilities.spirit_abilities['Shield'].initiate()
+
+    def increase_phase(self):
+        self.enter_state('idle')

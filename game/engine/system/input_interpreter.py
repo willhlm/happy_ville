@@ -8,15 +8,16 @@ class InputInterpreter():#mashing
         self.flick_direction = [0, 0]
 
     def update(self, dt):#check for flicking: called from game.py
+        value = self.game_objects.controller.frame.axes.move
         prev_x = self.last_l_stick[0]        
-        curr_x = self.game_objects.controller.value['l_stick'][0]     
+        curr_x = value[0]     
         prev_y = self.last_l_stick[1]        
-        curr_y = self.game_objects.controller.value['l_stick'][1]
+        curr_y = value[1]
 
         self.last_flick_time[0] += dt
         self.last_flick_time[1] += dt
 
-        self.last_l_stick = self.game_objects.controller.value['l_stick']          
+        self.last_l_stick = value
 
         if abs(curr_x) > self.flick_threshold and abs(curr_x - prev_x) > 0.4:            
             self.last_flick_time[0] = 0 
@@ -26,7 +27,7 @@ class InputInterpreter():#mashing
             self.flick_direction[1] = self.sign(curr_y)                   
 
     def interpret(self, input):
-        if input.key == 'x':
+        if input.name == 'x':
             if self.last_flick_time[0] < self.grace_period_frames:                      
                 if self.flick_direction[0] > 0:
                     input.meta = {'smash': True, 'direction': 'right'}

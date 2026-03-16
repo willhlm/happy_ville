@@ -5,12 +5,13 @@ class World_state():
         self.game_objects = game_objects
         save = read_files.read_json("saves/slots/slot1/save.json")
         self.state = save['world_state']
-        self.statistics = {'kill': {}, 'amber_droplet': 0, 'death': 0}
-        self.progress = 1
-        self.events = save.get('events', {})  # Load from save
+        self.statistics = save.get('statistics', {'kill': {}, 'amber_droplet': 0, 'death': 0})
+        self.progress = save.get('progress', 1)
+        self.events = save.get('events', {})
         self.quests = save.get('quests', {})
         self.cutscenes_complete = save.get('cutscenes_complete', {})
-        self.defeated_bosses = save.get('defeated_bosses', {}) 
+        self.defeated_bosses = save.get('defeated_bosses', {})
+        self.dialogue = save.get('dialogue', {})
 
     def cutscene_complete(self, event):
         self.cutscenes_complete[event] = True
@@ -80,3 +81,29 @@ class World_state():
         d = self._bucket(level_name, bucket)
         d[key] = not bool(d[key])
         return d[key]
+
+    def get_dialogue_bucket(self, speaker_id: str) -> dict:
+        bucket = self.dialogue.setdefault(speaker_id, {})
+        bucket.setdefault('progress', {})
+        bucket.setdefault('consumed', {})
+        return bucket
+
+    def get_dialogue_progress(self, speaker_id: str, node_id: str) -> int:
+        bucket = self.get_dialogue_bucket(speaker_id)
+        return int(bucket['progress'].get(node_id, 0))
+
+    def set_dialogue_progress(self, speaker_id: str, node_id: str, progress: int):
+        bucket = self.get_dialogue_bucket(speaker_id)
+        bucket['progress'][node_id] = int(progress)
+
+    def reset_dialogue_progress(self, speaker_id: str, node_id: str):
+        bucket = self.get_dialogue_bucket(speaker_id)
+        bucket['progress'].pop(node_id, None)
+
+    def is_dialogue_consumed(self, speaker_id: str, node_id: str) -> bool:
+        bucket = self.get_dialogue_bucket(speaker_id)
+        return bool(bucket['consumed'].get(node_id, False))
+
+    def consume_dialogue(self, speaker_id: str, node_id: str):
+        bucket = self.get_dialogue_bucket(speaker_id)
+        bucket['consumed'][node_id] = True

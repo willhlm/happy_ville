@@ -1,9 +1,49 @@
 {
-    "state_1" : {
-        "0" : "I am Sahkar!! Worororo"
+  "conversation_nodes": [
+    {
+      "id": "fallback_state_1",
+      "category": "fallback",
+      "conditions": [
+        {"type": "progress_eq", "value": 1}
+      ],
+      "lines": [
+        "I am Sahkar!! Worororo"
+      ]
     },
-    "state_2" : {
-        "0" : "hej",
-        "1" : "pa dig"
+    {
+      "id": "fallback_state_2",
+      "category": "fallback",
+      "conditions": [
+        {"type": "progress_eq", "value": 2}
+      ],
+      "lines": [
+        "hej",
+        "pa dig"
+      ]
     }
+  ],
+  "comment_nodes": [
+    {
+      "id": "comment_state_1",
+      "category": "ambient",
+      "conditions": [
+        {"type": "progress_eq", "value": 1}
+      ],
+      "lines": [
+        "Hej",
+        "Zup"
+      ]
+    },
+    {
+      "id": "comment_state_2",
+      "category": "ambient",
+      "conditions": [
+        {"type": "progress_eq", "value": 2}
+      ],
+      "lines": [
+        "yolo",
+        "nice weather"
+      ]
+    }
+  ]
 }

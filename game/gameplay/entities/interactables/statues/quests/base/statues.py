@@ -9,7 +9,7 @@ class Statues(Interactables):#monuments you interact to get quests or challenges
 
     def interact(self):#when plater press t
         if self.interacted: return
-        self.game_objects.game.state_manager.enter_state(state_name = 'Conversation', npc = self)
+        self.game_objects.game.state_manager.enter_state(state_name = 'conversation', speaker = self)
 
         self.shader_state.handle_input('tint', colour = [0,0,0,100])
         self.interacted = True

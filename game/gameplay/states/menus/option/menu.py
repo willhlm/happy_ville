@@ -60,24 +60,23 @@ class OptionMenu(BaseUI):
         self.previous_button = self.current_button 
 
     def handle_events(self, input):
-        event = input.output()
         input.processed()
-        if event[2]['l_stick'][1] < 0:#up
-            self.current_button -= 1
-            if self.current_button < 0:
-                self.current_button = len(self.menu_ui.buttons) - 1
-            self._update_arrow()
-            self._update_button()
-        elif event[2]['l_stick'][1] > 0:#down
-            self.current_button += 1
-            if self.current_button >= len(self.menu_ui.buttons):
-                self.current_button = 0
-            self._update_arrow()
-            self._update_button()
-        elif event[0]:
-            if event[-1] == 'start':
+        if input.pressed:
+            if input.name == 'up':#up
+                self.current_button -= 1
+                if self.current_button < 0:
+                    self.current_button = len(self.menu_ui.buttons) - 1
+                self._update_arrow()
+                self._update_button()
+            elif input.name == 'down':#down
+                self.current_button += 1
+                if self.current_button >= len(self.menu_ui.buttons):
+                    self.current_button = 0
+                self._update_arrow()
+                self._update_button()
+            elif input.name == 'start':
                 self.game.state_manager.exit_state()
-            elif event[-1] in ('return', 'a'):
+            elif input.name in ('return', 'a'):
                 self.game.game_objects.sound.play_ui_sound('select')
                 self.update_options()
 

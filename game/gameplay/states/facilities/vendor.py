@@ -88,13 +88,12 @@ class Vendor(BaseUI):#called from Astrid
         self.game.display.render(self.pointer.image, self.game.screen_manager.screen, position = position)#shader render
 
     def handle_events(self, input):
-        event = input.output()
         input.processed()            
-        if event[0]:#press
-            if event[-1] == 'y':
+        if input.pressed:#press
+            if input.name == 'y':
                 self.game.state_manager.exit_state()
 
-            elif event[-1] =='down':
+            elif input.name =='down':
                 self.item_index[1] += 1
                 self.item_index[1] = min(self.item_index[1],len(self.items)-1)
 
@@ -105,7 +104,7 @@ class Vendor(BaseUI):#called from Astrid
                 self.pointer_index[1] = min(self.pointer_index[1],self.display_number-1)                                    
                 self.letter_frame = 0                    
 
-            elif event[-1] =='up':
+            elif input.name =='up':
                 self.item_index[1]-=1
                 self.item_index[1] = max(self.item_index[1],0)
 
@@ -116,7 +115,7 @@ class Vendor(BaseUI):#called from Astrid
                 self.pointer_index[1] = max(self.pointer_index[1],0)
                 self.letter_frame = 0
 
-            elif event[-1]=='a' or event[-1]=='return':
+            elif input.name=='a' or input.name=='return':
                 self.select()
 
     def select(self):

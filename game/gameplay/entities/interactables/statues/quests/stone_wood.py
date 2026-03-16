@@ -16,15 +16,19 @@ class StoneWood(Statues):#the stone "statue" to initiate the lumberjacl quest
         self.quest = quest
 
         self.interacted = self.game_objects.world_state.quests.get(quest, False)
-        self.dialogue = dialogue.Dialogue_interactable(self, quest)#handles dialoage and what to say
+        self.dialogue = dialogue.Dialogue(
+            self,
+            data_path = "gameplay/narrative/text/interactables/" + quest + ".json",
+            speaker_id = "interactable:" + quest,
+            allow_comments = False,
+        )#handles dialoage and what to say
         self.shader_state = {False : states_shader.Idle, True: states_shader.Tint}[self.interacted](self)
 
     def on_interact(self, item, player):#called when the signal is emitted
         if type(item).__name__.lower() == self.item:
             self.game_objects.quests_events.initiate_quest(self.quest, item = self.item)
 
-    def buisness(self):#enters after conversation
+    def on_conversation_complete(self):
         self.game_objects.signals.subscribe('item_interacted', self.on_interact)
         item = getattr(sys.modules[__name__], self.item.capitalize())(self.rect.center, self.game_objects, state = 'wild')#make a class based on the name of the newstate: need to import sys
         self.game_objects.loot.add(item)
-

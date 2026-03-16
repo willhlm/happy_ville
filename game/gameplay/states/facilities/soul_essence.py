@@ -32,18 +32,17 @@ class SoulEssence(BaseUI):#called from inorinoki
             self.game.display.render(surf, self.game.screen_manager.screen, position = (self.bg_pos[0] + 30,self.bg_pos[1] + 10+index*10))#shader render        
 
     def handle_events(self,input):
-        event = input.output()
         input.processed()           
-        if event[0]:#press
-            if event[-1] == 'y':
+        if input.pressed:#press
+            if input.name == 'y':
                 self.game.state_manager.exit_state()
-            elif event[-1] =='down':
+            elif input.name == 'down':
                 self.pointer_index[1] += 1
                 self.pointer_index[1] = min(self.pointer_index[1],len(self.actions)-1)
-            elif event[-1] =='up':
+            elif input.name == 'up':
                 self.pointer_index[1] -= 1
                 self.pointer_index[1] = max(self.pointer_index[1],0)
-            elif event[-1]=='a' or event[-1]=='return':
+            elif input.name in ('a', 'return'):
                 self.select()
 
     def select(self):
@@ -61,4 +60,3 @@ class SoulEssence(BaseUI):#called from inorinoki
                 self.game.game_objects.player.backpack.inventory.remove('soul_essence', self.cost)
         else:#select cancel
             self.game.state_manager.exit_state()
-

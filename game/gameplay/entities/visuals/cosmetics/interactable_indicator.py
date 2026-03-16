@@ -18,13 +18,13 @@ class InteractableIndicator(StaticEntity):#the hoovering above things to indicat
         pass
 
     def update(self, dt):
-        self.time += dt * 0.1
-        self.update_vel()
+        self.update_vel(dt)
         self.update_pos(dt)
 
     def update_pos(self, dt):
         self.true_pos = [self.true_pos[0] + self.velocity[0] * dt, self.true_pos[1] + self.velocity[1] * dt]
         self.rect.topleft = self.true_pos
 
-    def update_vel(self):
+    def update_vel(self, dt):
+        self.time += dt * 0.1
         self.velocity[1] = 0.25*math.sin(self.time)

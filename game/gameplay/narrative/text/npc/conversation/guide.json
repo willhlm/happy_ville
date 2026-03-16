@@ -1,11 +1,51 @@
 {
-    "state_1" : {
-        "0" : "What is this? Well, this is what YOU wished for isn't it? It seems I've failed...",
-        "1" : "I will leave it to you, like so have our kind in the past.",
-        "2" : "Do not worry, I will abide you, like so have our kind in the past."
+  "conversation_nodes": [
+    {
+      "id": "fallback_state_1",
+      "category": "fallback",
+      "conditions": [
+        {"type": "progress_eq", "value": 1}
+      ],
+      "lines": [
+        "What is this? Well, this is what YOU wished for isn't it? It seems I've failed...",
+        "I will leave it to you, like so have our kind in the past.",
+        "Do not worry, I will abide you, like so have our kind in the past."
+      ]
     },
-    "state_2" : {
-        "0" : "Mr pink did what? Oh, my poor dear. What happened to him. You better seek out Aslat.",
-        "1" : "Could you seek out Aslat?"
+    {
+      "id": "fallback_state_2",
+      "category": "fallback",
+      "conditions": [
+        {"type": "progress_eq", "value": 2}
+      ],
+      "lines": [
+        "Mr pink did what? Oh, my poor dear. What happened to him. You better seek out Aslat.",
+        "Could you seek out Aslat?"
+      ]
     }
+  ],
+  "comment_nodes": [
+    {
+      "id": "comment_state_1",
+      "category": "ambient",
+      "conditions": [
+        {"type": "progress_eq", "value": 1}
+      ],
+      "lines": [
+        "Hej",
+        "Zup"
+      ]
+    },
+    {
+      "id": "comment_state_2",
+      "category": "ambient",
+      "conditions": [
+        {"type": "progress_eq", "value": 2}
+      ],
+      "lines": [
+        "yolo",
+        "nice weather"
+      ]
+    }
+  ]
 }

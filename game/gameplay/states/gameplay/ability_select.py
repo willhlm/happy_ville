@@ -28,18 +28,16 @@ class AbilitySelect(Gameplay):#when pressing tab
         self.game.render_display(self.surface.texture)
 
     def handle_events(self, input):
-        event = input.output()
         input.processed()
-        if event[2]['l_stick'][1] > 0:#dwpn
+        if input.pressed and input.name == 'down':#down
             self.index += 1
             if self.index > len(self.abilities)-1:
                 self.index = 0
-        elif event[2]['l_stick'][1] < 0:#up
+        elif input.pressed and input.name == 'up':#up
             self.index-=1
             if self.index<0:
                 self.index=len(self.abilities)-1
-        elif event [1]:#release
-            if event[-1]=='rb':
+        elif input.released:#release
+            if input.name == 'rb':
                 self.game.game_objects.player.abilities.equip=self.abilities[self.index]
                 self.game.state_manager.exit_state()
-

@@ -27,15 +27,14 @@ class TitleScreen(CutsceneEngine):#screen played after waking up from boss dream
         self.game.render_display(self.game.screen_manager.screen.texture)  
 
     def handle_events(self,input):
-        event = input.output()
         input.processed()
-        if event[0]:#press
-            if event[-1] == 'start':
+        if input.pressed:
+            if input.name == 'start':
                 self.game.state_manager.exit_state()
-            elif event[-1] == 'a':
+            elif input.name == 'a':
                 self.press = True
 
-        if event[-1]=='right' or event[-1]=='left' or event[-1] == None or event[-1]=='down' or event[-1]=='up':#left stick and arrow keys
+        if input.name=='right' or input.name=='left' or input.name == None or input.name=='down' or input.name=='up':#left stick and arrow keys
             if event[2]['l_stick'][0] > 0: return#can only go left
             event[2]['l_stick'][0] *= 0.5#half the speed
             self.game.game_objects.player.currentstate.handle_movement(event)

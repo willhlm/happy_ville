@@ -102,45 +102,44 @@ class InventoryUI(BaseUI):
             self.game_objects.game.display.render(self.texts[index], self.game_objects.ui.screen, position = self.iventory_UI.buttons[button].rect.center,shader = self.game_objects.shaders['colour'])#shader render
 
     def handle_events(self, input):
-        event = input.output()
         input.processed()
-        if event[0]:#press
-            if event[-1] == 'select':
+        if input.pressed:#press
+            if input.name == 'select':
                 self.game_objects.game.state_manager.exit_state()
-            elif event[-1] == 'rb':#nezt page
+            elif input.name == 'rb':#nezt page
                 self.iventory_UI.buttons['rb'].currentstate.handle_input('press')
                 self.game_objects.ui.next_page(screen_alpha = 230)
-            elif event[-1] == 'lb':#previouse
+            elif input.name == 'lb':#previouse
                 self.iventory_UI.buttons['lb'].currentstate.handle_input('press')
                 self.game_objects.ui.previouse_page(screen_alpha = 230)
-            elif event[-1]=='a' or event[-1]=='return':
+            elif input.name=='a' or input.name=='return':
                 self.iventory_UI.buttons['a'].currentstate.handle_input('press')
-                self.use_item()
-            self.letter_frame = 0
-        elif event[1]:#release
-            if event[-1]=='a' or event[-1]=='return':
-                self.iventory_UI.buttons['a'].currentstate.handle_input('release')
+                self.use_item()            
 
-        if event[2]['l_stick'][1] < 0:  # up
-            next_container = self.find_closest_position('up')
-            if next_container:
-                self.selected_container = next_container
-                self.letter_frame = 0
-        elif event[2]['l_stick'][1] > 0:  # down
-            next_container = self.find_closest_position('down')
-            if next_container:
-                self.selected_container = next_container
-                self.letter_frame = 0
-        elif event[2]['l_stick'][0] < 0:  # left
-            next_container = self.find_closest_position('left')
-            if next_container:
-                self.selected_container = next_container
-                self.letter_frame = 0
-        elif event[2]['l_stick'][0] > 0:  # right
-            next_container = self.find_closest_position('right')
-            if next_container:
-                self.selected_container = next_container
-                self.letter_frame = 0
+            elif input.name == 'up':  # up
+                next_container = self.find_closest_position('up')
+                if next_container:
+                    self.selected_container = next_container
+                    self.letter_frame = 0
+            elif input.name == 'down':  # down
+                next_container = self.find_closest_position('down')
+                if next_container:
+                    self.selected_container = next_container
+                    self.letter_frame = 0
+            elif input.name == 'left':  # left
+                next_container = self.find_closest_position('left')
+                if next_container:
+                    self.selected_container = next_container
+                    self.letter_frame = 0
+            elif input.name == 'right':  # right
+                next_container = self.find_closest_position('right')
+                if next_container:
+                    self.selected_container = next_container
+                    self.letter_frame = 0
+
+        if input.released:#press
+            if input.name=='a' or input.name=='return':
+                self.iventory_UI.buttons['a'].currentstate.handle_input('release')
 
     def find_closest_position(self, direction):
         current = self.selected_container.rect
@@ -259,46 +258,45 @@ class RadnaUI(BaseUI):
         self.game_objects.game.display.render(item.image, self.game_objects.ui.screen, position =self.radna_UI.equipped_containers[slot].rect.topleft,shader = self.game_objects.shaders['colour'])#shader render           
 
     def handle_events(self, input):
-        event = input.output()
         input.processed()
-        if event[0]:#press
-            if event[-1] == 'select':
+        if input.pressed:#press
+            if input.name == 'select':
                 self.game_objects.game.state_manager.exit_state()
-            elif event[-1] == 'rb':#nezt page
+            elif input.name == 'rb':#nezt page
                 #self.radna_UI.buttons['rb'].currentstate.handle_input('press')
                 self.game_objects.ui.next_page(screen_alpha = 230)            
-            elif event[-1] == 'lb':#previouse
+            elif input.name == 'lb':#previouse
                 #self.radna_UI.buttons['lb'].currentstate.handle_input('press')
                 self.game_objects.ui.previouse_page(screen_alpha = 230)
-            elif event[-1]=='a' or event[-1]=='return':
+            elif input.name=='a' or input.name=='return':
                 #self.radna_UI.buttons['a'].currentstate.handle_input('press')
                 self.use_item()
-            self.letter_frame = 0
-        elif event[1]:#release
-            if event[-1]=='a' or event[-1]=='return':
+
+            elif input.name == 'up':  # up
+                next_container = self.find_closest_position('up')
+                if next_container:
+                    self.selected_container = next_container
+                    self.letter_frame = 0
+            elif input.name == 'down':  # down
+                next_container = self.find_closest_position('down')
+                if next_container:
+                    self.selected_container = next_container
+                    self.letter_frame = 0
+            elif input.name == 'left':  # left
+                next_container = self.find_closest_position('left')
+                if next_container:
+                    self.selected_container = next_container
+                    self.letter_frame = 0
+            elif input.name == 'right':  # right
+                next_container = self.find_closest_position('right')
+                if next_container:
+                    self.selected_container = next_container
+                    self.letter_frame = 0
+
+        elif input.released:#release
+            if input.name=='a' or input.name=='return':
                 pass
                 #self.radna_UI.buttons['a'].currentstate.handle_input('release')
-
-        if event[2]['l_stick'][1] < 0:  # up
-            next_container = self.find_closest_position('up')
-            if next_container:
-                self.selected_container = next_container
-                self.letter_frame = 0
-        elif event[2]['l_stick'][1] > 0:  # down
-            next_container = self.find_closest_position('down')
-            if next_container:
-                self.selected_container = next_container
-                self.letter_frame = 0
-        elif event[2]['l_stick'][0] < 0:  # left
-            next_container = self.find_closest_position('left')
-            if next_container:
-                self.selected_container = next_container
-                self.letter_frame = 0
-        elif event[2]['l_stick'][0] > 0:  # right
-            next_container = self.find_closest_position('right')
-            if next_container:
-                self.selected_container = next_container
-                self.letter_frame = 0
 
     def find_closest_position(self, direction):
         current = self.selected_container.rect
@@ -409,16 +407,15 @@ class JournalUI(BaseUI):
         text.release()
 
     def handle_events(self,input):
-        event = input.output()
         input.processed()
-        if event[0]:#press
-            if event[-1] == 'select':
+        if input.pressed:#press
+            if input.name == 'select':
                 self.game_objects.game.state_manager.exit_state()
-            elif event[-1] == 'rb':#nezt page
+            elif input.name == 'rb':#nezt page
                 pass
-            elif event[-1] == 'lb':#previouse page
+            elif input.name == 'lb':#previouse page
                 self.game_objects.ui.previouse_page(screen_alpha = 230)
-            elif event[-1] =='down':
+            elif input.name =='down':
                 self.letter_frame = 0
                 self.journal_index[0] += 1
                 if self.journal_index[0] == self.number:
@@ -427,7 +424,7 @@ class JournalUI(BaseUI):
                     self.select_enemies()
                 self.journal_index[0] = min(self.journal_index[0],len(self.selected_enemies)-1)
 
-            elif event[-1] =='up':
+            elif input.name =='up':
                 self.letter_frame = 0
                 self.journal_index[0] -= 1
                 if self.journal_index[0] == -1:
@@ -457,41 +454,40 @@ class MapUI(BaseUI):#local maps
         self.blit_screen()
 
     def handle_events(self,input):
-        event = input.output()
         input.processed()        
 
-        if event[0]:#press
-            if event[-1] == 'select':
+        if input.pressed:#press
+            if input.name == 'select':
                 self.exit_state()
-            elif event[-1] == 'rb':#nezt page
+            elif input.name == 'rb':#nezt page
                 self.game_objects.ui.next_page(screen_alpha = 230)
-            elif event[-1] == 'a':#nezt page
+            elif input.name == 'a':#nezt page
                 map_name = self.selected_container.activate()#open the local map. I guess it should be a new state
                 self.game_objects.ui.set_ui('map', screen_alpha = 230, map = map_name)  
 
-            elif event[-1] == 'x':#when pressing a
+            elif input.name == 'x':#when pressing a
                 self.game_objects.ui.set_ui('worldmap', screen_alpha = 230)#world map
 
-        if event[2]['l_stick'][1] < 0:  # up
-            next_container = self.find_closest_position('up')
-            if next_container:
-                self.selected_container.reset()#reset the position of the container
-                self.selected_container = next_container
-        elif event[2]['l_stick'][1] > 0:  # down
-            next_container = self.find_closest_position('down')
-            if next_container:
-                self.selected_container.reset()#reset the position of the container
-                self.selected_container = next_container
-        elif event[2]['l_stick'][0] < 0:  # left
-            next_container = self.find_closest_position('left')
-            if next_container:
-                self.selected_container.reset()#reset the position of the container
-                self.selected_container = next_container
-        elif event[2]['l_stick'][0] > 0:  # right
-            next_container = self.find_closest_position('right')
-            if next_container:
-                self.selected_container.reset()#reset the position of the container
-                self.selected_container = next_container
+            elif input.name == 'up':  # up
+                next_container = self.find_closest_position('up')
+                if next_container:
+                    self.selected_container.reset()#reset the position of the container
+                    self.selected_container = next_container
+            elif input.name == 'down':  # down
+                next_container = self.find_closest_position('down')
+                if next_container:
+                    self.selected_container.reset()#reset the position of the container
+                    self.selected_container = next_container
+            elif input.name == 'left':  # left
+                next_container = self.find_closest_position('left')
+                if next_container:
+                    self.selected_container.reset()#reset the position of the container
+                    self.selected_container = next_container
+            elif input.name == 'right':  # right
+                next_container = self.find_closest_position('right')
+                if next_container:
+                    self.selected_container.reset()#reset the position of the container
+                    self.selected_container = next_container
 
     def find_closest_position(self, direction):
         current = self.selected_container.rect
@@ -546,8 +542,9 @@ class MapUI_2(BaseUI):#world map
         for object in self.map_UI.objects:
             object.update_scroll(self.scroll)
 
-    def continious_input(self):        
-        self.scroll = [-2*self.game_objects.controller.value['r_stick'][0], -2*self.game_objects.controller.value['r_stick'][1]]#right analog stick
+    def continious_input(self):    
+        value = self.game_objects.controller.frame.axes.look
+        self.scroll = [-2*value[0], -2*value[1]]#right analog stick
 
     def update_pos(self,scroll):
         self.pos = [self.pos[0]+scroll[0],self.pos[1]+scroll[1]]
@@ -581,39 +578,38 @@ class MapUI_2(BaseUI):#world map
         self.update_pos(scroll)
 
     def handle_events(self,input):
-        event = input.output()
         input.processed()        
 
-        if event[0]:#press
-            if event[-1] == 'select':
+        if input.pressed:#press
+            if input.name == 'select':
                 self.exit_state()
-            elif event[-1] == 'rb':#nezt page
+            elif input.name == 'rb':#nezt page
                 
                 self.game_objects.ui.set_ui('inventory', screen_alpha = 230)  
-            elif event[-1] == 'x':#when pressing a
+            elif input.name == 'x':#when pressing a
                 map_name = self.selected_container.activate()#open the local map. I guess it should be a new state
                 self.game_objects.ui.set_ui('map', screen_alpha = 230, map = map_name)  
 
-        if event[2]['l_stick'][1] < 0:  # up
-            next_container = self.find_closest_position('up')
-            if next_container:
-                self.selected_container = next_container
-                self.calculate_position()
-        elif event[2]['l_stick'][1] > 0:  # down
-            next_container = self.find_closest_position('down')
-            if next_container:
-                self.selected_container = next_container
-                self.calculate_position()
-        elif event[2]['l_stick'][0] < 0:  # left
-            next_container = self.find_closest_position('left')
-            if next_container:
-                self.selected_container = next_container
-                self.calculate_position()
-        elif event[2]['l_stick'][0] > 0:  # right
-            next_container = self.find_closest_position('right')
-            if next_container:
-                self.selected_container = next_container
-                self.calculate_position()
+            elif input.name == 'up':#down:  # up
+                next_container = self.find_closest_position('up')
+                if next_container:
+                    self.selected_container = next_container
+                    self.calculate_position()
+            elif input.name == 'down':  # down
+                next_container = self.find_closest_position('down')
+                if next_container:
+                    self.selected_container = next_container
+                    self.calculate_position()
+            elif input.name == 'left':  # left
+                next_container = self.find_closest_position('left')
+                if next_container:
+                    self.selected_container = next_container
+                    self.calculate_position()
+            elif input.name == 'right':  # right
+                next_container = self.find_closest_position('right')
+                if next_container:
+                    self.selected_container = next_container
+                    self.calculate_position()
 
     def exit_state(self):
         self.game_objects.game.state_manager.exit_state()

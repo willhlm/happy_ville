@@ -42,8 +42,8 @@ class Camera_manager():
     def set_camera_position(self):
         self.camera.set_camera_position()
 
-    def handle_movement(self, input):#right analogue stick: called from gameplay state
-        self.camera.handle_movement(input)
+    def handle_movement(self, axes):#right analogue stick: called from gameplay state
+        self.camera.handle_movement(axes)
 
 class Camera():#default camera
     def __init__(self, game_objects, scroll = [0,0]):
@@ -83,8 +83,8 @@ class Camera():#default camera
     def set_camera_position(self):
         self.true_scroll = [self.game_objects.player.true_pos[0] - self.center[0], self.game_objects.player.true_pos[1] - self.center[1]]#-self.game_objects.player.rect[2]*0.5,-self.game_objects.player.rect[3]*0.5 if there was a camera stopp
 
-    def handle_movement(self, event):#right analogue stick        
-        self.game_objects.camera_manager.centraliser.handle_movement(event['r_stick'])          
+    def handle_movement(self, axes):#right analogue stick        
+        self.game_objects.camera_manager.centraliser.handle_movement(axes.look)          
 
 class No_camera(Camera):
     def __init__(self, game_objects, scroll, **kwarg):
