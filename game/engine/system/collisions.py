@@ -12,7 +12,7 @@ class Collisions():
         return False
 
     def pass_through(self, entity):#called when pressing down
-        hitbox = self.game_objects.player.hitbox.copy()
+        hitbox = entity.hitbox.copy()
         offset = 1#looks better if it is 1, but if it is 1, the fall through doesn't work when going dow the ramp
         hitbox.bottom += offset
 
@@ -23,12 +23,12 @@ class Collisions():
                 break
 
         if ramp:
-            target = ramp.get_target(self.game_objects.player)#in case there are multiple enteties, need to calcuate the tyarget specifically for the playter
+            target = ramp.get_target(entity)#in case there are multiple enteties, need to calcuate the tyarget specifically for the playter
             if target > hitbox.bottom + offset:
                 return #if from above, do nothing
-            elif not self.game_objects.player.go_through['ramp']:#enter only once
-                self.game_objects.player.velocity[1] = offset#so that it looks more natural (cannot be 0, needs to be finite)
-                self.game_objects.player.go_through['ramp'] = ramp.go_through#a flag that determines if one can go through
+            elif not entity.go_through['ramp']:#enter only once
+                entity.velocity[1] = offset#so that it looks more natural (cannot be 0, needs to be finite)
+                entity.go_through['ramp'] = ramp.go_through#a flag that determines if one can go through
 
     #npc player conversation, when pressing t
     def check_interaction_collision(self):

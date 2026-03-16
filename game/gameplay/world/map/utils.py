@@ -670,13 +670,17 @@ class ObjectSpawner:
                 self.game_objects.interactables.add(new_block)
 
             elif id == 14:#camera stop
+                values = 'center'
                 camera_offset = 0
+                priority = 0
                 for property in properties:
-                    if property['name'] == 'direction':
+                    if property['name'] in ('direction', 'mode'):
                         values = property['value']
                     if property['name'] == 'offset':
                         camera_offset = property['value']
-                new_camera_stop = Stop(self.game_objects, object_size, object_position, values, camera_offset)
+                    if property['name'] == 'priority':
+                        priority = property['value']
+                new_camera_stop = Stop(self.game_objects, object_size, object_position, values, camera_offset, priority)
                 self.game_objects.camera_blocks.add(new_camera_stop)
 
             elif id == 15:#bg_particles -> circles, etc

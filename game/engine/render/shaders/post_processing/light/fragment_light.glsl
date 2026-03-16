@@ -13,6 +13,7 @@ uniform vec4 colour[20];
 uniform vec4 ambient;//texture(imageTexture, fragmentTexCoord); // Get background color
 
 uniform vec2 rectangleCorners[80]; // x/4 is the number of rectangles
+uniform int occluder_start_index[20];
 uniform int num_rectangle[20];//number of rectangles for each light source
 uniform int num_lights;
 
@@ -84,11 +85,12 @@ void main() {
         bool occluded = false;
 
         for (int r = 0; r < num_rectangle[l]; r++) { // number of rectangles
+            int rectIndex = occluder_start_index[l] + r;
             vec2[] points = vec2[](
-                vec2(rectangleCorners[r * 4].x, resolution.y - rectangleCorners[r * 4].y),
-                vec2(rectangleCorners[r * 4 + 1].x, resolution.y - rectangleCorners[r * 4 + 1].y),
-                vec2(rectangleCorners[r * 4 + 2].x, resolution.y - rectangleCorners[r * 4 + 2].y),
-                vec2(rectangleCorners[r * 4 + 3].x, resolution.y - rectangleCorners[r * 4 + 3].y)
+                vec2(rectangleCorners[rectIndex * 4].x, resolution.y - rectangleCorners[rectIndex * 4].y),
+                vec2(rectangleCorners[rectIndex * 4 + 1].x, resolution.y - rectangleCorners[rectIndex * 4 + 1].y),
+                vec2(rectangleCorners[rectIndex * 4 + 2].x, resolution.y - rectangleCorners[rectIndex * 4 + 2].y),
+                vec2(rectangleCorners[rectIndex * 4 + 3].x, resolution.y - rectangleCorners[rectIndex * 4 + 3].y)
             );
 
             int n = 4;//number of edges

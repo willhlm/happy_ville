@@ -46,7 +46,7 @@ class Player(Character):
         self.timer_jobs = {'wet': Wet(self, 60)}#these timers are activated when promt and a job is appeneded to self.timer.
 
         self.hit_component.set_invinsibility_time(C.invincibility_time_player)
-        self.reset_movement()           
+        self.reset_movement()     
         
     def ramp_down_collision(self, ramp):#when colliding with platform beneth
         super().ramp_down_collision(ramp)

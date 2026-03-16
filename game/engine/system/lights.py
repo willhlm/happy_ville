@@ -16,6 +16,7 @@ class Lights():
 
         self.normal_map = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.max_light_sources = 20#a valuehard coded in light shader
+        self.max_occluder_rectangles = 20#a value hard coded in light shader
         self.update_render(0)
 
     def set_ambiance(self, colour):        
@@ -31,15 +32,17 @@ class Lights():
     def update_render(self, dt):
         self.normal_interact = [0] * self.max_light_sources
         self.num_rectangle = [0] * self.max_light_sources
+        self.occluder_start_index = [0] * self.max_light_sources
         self.points = []
         self.positions = [(0, 0)] * self.max_light_sources
         self.radius = [0] * self.max_light_sources
-        self.colour = [[0, 0, 0, 0]] * self.max_light_sources
+        self.colour = [[0, 0, 0, 0] for _ in range(self.max_light_sources)]
         self.start_angle = [0] * self.max_light_sources
         self.end_angle = [0] * self.max_light_sources
         self.min_radius = [0] * self.max_light_sources
+        rectangle_cursor = 0
 
-        for i, light in enumerate(self.lights_sources):        # Process each light source and update the lists
+        for i, light in enumerate(self.lights_sources[:]):        # Process each light source and update the lists
             light.update_render(dt)  # Update the light source            
             
             self.positions[i] = (light.position[0], self.game_objects.game.window_size[1] - light.position[1])  # Get the positions of the lights
@@ -49,18 +52,23 @@ class Lights():
             self.end_angle[i] = light.end_angle
             self.min_radius[i] = light.min_radius
             self.normal_interact[i] = light.normal_interact
-            self.list_points(light, i)  # Sort the collision points into a list
+            rectangle_cursor = self.list_points(light, i, rectangle_cursor)  # Sort the collision points into a list
                 
-        self.points.extend([(0, 0)] * (self.max_light_sources * 4 - len(self.points)))# Add (0, 0) to the list until it reaches length self.max_light_sources*4
+        self.points.extend([(0, 0)] * (self.max_occluder_rectangles * 4 - len(self.points)))# Add (0, 0) to the list until it reaches the shader size
 
-    def list_points(self, light, index):
+    def list_points(self, light, index, rectangle_cursor):
         if not light.platform_interact: 
             self.num_rectangle[index] = 0  # Set num_rectangle[index] to 0 if no platform interaction
-            self.points.extend([(0, 0)] * 4)
+            self.occluder_start_index[index] = rectangle_cursor
+            return rectangle_cursor
         else:
             platforms = self.game_objects.collisions.sprite_collide(light, self.game_objects.platforms)  # Collision -> collision occurs at coordinates as per tiled position
-            self.num_rectangle[index] = len(platforms)  # Set num_rectangle[index] to the number of collided platforms            
-            self.points.extend(self.get_points(platforms))  # Get the collision points and set them at index                       
+            available = max(self.max_occluder_rectangles - rectangle_cursor, 0)
+            platforms = platforms[:available]
+            self.occluder_start_index[index] = rectangle_cursor
+            self.num_rectangle[index] = len(platforms)  # Set num_rectangle[index] to the number of collided platforms
+            self.points.extend(self.get_points(platforms))  # Get the collision points and set them at index
+            return rectangle_cursor + len(platforms)
 
     def get_points(self, platforms):
         l = []
@@ -89,6 +97,7 @@ class Lights():
 
     def draw(self, target):    
         self.shaders['light']['rectangleCorners'] = self.points
+        self.shaders['light']['occluder_start_index'] = self.occluder_start_index
         self.shaders['light']['lightPositions'] = self.positions
         self.shaders['light']['lightRadii'] = self.radius
         self.shaders['light']['colour'] = self.colour

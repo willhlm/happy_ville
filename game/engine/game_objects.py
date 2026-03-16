@@ -143,7 +143,6 @@ class GameObjects():
         self.collide_all(dt)
 
         #camera and calculate true pos
-        self.camera_blocks.update(dt)#need to be before camera: caemras stop needs tobe calculated before the scroll
         self.camera_manager.update(dt)#should be first
 
         #update cosmetics and BGs
