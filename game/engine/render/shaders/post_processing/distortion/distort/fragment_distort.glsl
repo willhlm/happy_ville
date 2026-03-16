@@ -1,8 +1,9 @@
 #version 330 core
 
 in vec2 fragmentTexCoord; // top-left is [0, 1] and bottom-right is [1, 0]
-uniform sampler2D imageTexture; // texture in location 0
 out vec4 COLOR;
+
+uniform sampler2D screen;
 
 uniform sampler2D noise;
 uniform float TIME;
@@ -14,6 +15,7 @@ uniform vec2 u_resolution; // screen size
 uniform vec2 center = vec2(0.5, 0.5); // Center of the distortion
 uniform float radius = 1; // Distance threshold from the center to apply distortion
 uniform vec3 tint = vec3(1,1,1);
+uniform vec3 colour = vec3(0.299, 0.587, 0.114);
 
 void main() {
     vec2 offset = fragmentTexCoord - vec2(center.x / u_resolution.x, 1 - center.y / u_resolution.y);
@@ -29,12 +31,12 @@ void main() {
     vec4 smoke_color = texture(noise, fract(smoke_uv));
     smoke_color = clamp(smoke_color * size * withinThreshold*distanceFromCenter*distanceFromCenter, 0.0, 1.0);
     
-    vec4 img_color = texture(imageTexture, fragmentTexCoord + vec2(smoke_color.g - size*distanceFromCenter*distanceFromCenter / 2.0, 0.0));
+    vec4 img_color = texture(screen, fragmentTexCoord + vec2(smoke_color.g - size*distanceFromCenter*distanceFromCenter / 2.0, 0.0));
     
     // Convert img_color to grayscale
-    float luminance = dot(img_color.rgb, vec3(0.299, 0.587, 0.114));
+    float luminance = dot(img_color.rgb, colour);
     img_color.rgb = vec3(luminance)*tint;
 
     // Mix between distorted and original color based on the step function result
-    COLOR = mix(texture(imageTexture, fragmentTexCoord), img_color, withinThreshold);
+    COLOR = mix(texture(screen, fragmentTexCoord), img_color, withinThreshold);
 }

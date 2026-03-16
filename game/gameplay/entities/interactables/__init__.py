@@ -22,6 +22,7 @@ from .fireplace.fireplace import Fireplace
 from .grass.cave_grass import InteractableCaveGrass
 
 from .inorinoki import Inorinoki
+from .verve_tree import VerveTree
 from .lever.lever import Lever
 from .light_crystal import LightCrystal
 from .place_holder_interacatble import PlaceHolderInteracatble
@@ -51,3 +52,5 @@ from .uber_runestone import UberRunestone
 
 from .two_d_liquid.two_d_liquid import TwoDLiquid
 from .up_stream import UpStream
+
+from .portal.portal import Portal

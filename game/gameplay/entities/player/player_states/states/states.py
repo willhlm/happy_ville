@@ -572,7 +572,7 @@ class JumpMain(PhaseAirBase):
 
     def enter(self, **kwarg):
         self.entity.animation.play('jump_main')#the name of the class
-        self.entity.game_objects.sound.play_sfx(self.entity.sounds['jump'][random.randint(0,2)], vol = 0.1)
+        self.entity.game_objects.sound.play_sfx(random.choice(self.entity.sounds['jump']), vol = 0.06)
         self.entity.animation.frame = kwarg.get('frame', 0)
         self.jump_dash_timer = C.jump_dash_timer
         #self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times

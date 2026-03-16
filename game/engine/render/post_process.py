@@ -1,4 +1,4 @@
-from engine.system import shaders
+from . import shaders
 
 class PostProcess():#for screen-wide effects
     def __init__(self, game_objects, default_shader = 'vignette', **kwargs):

@@ -2,7 +2,7 @@ import pygame
 from .base_collisions import BaseCollisions
 
 class PathInteract(BaseCollisions):
-    def __init__(self, pos, game_objects, size, destination, spawn, image):
+    def __init__(self, pos, game_objects, size, destination, spawn):
         super().__init__(pos, game_objects)
         self.rect = pygame.Rect(pos, size)
         self.rect.topleft = pos

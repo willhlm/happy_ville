@@ -26,3 +26,5 @@ class TjasolmaisEmbrace(Ability):#makes the shield, water god
 
         self.entity.projectiles.add(self.shield)
 
+    def update(self, dt):
+        pass

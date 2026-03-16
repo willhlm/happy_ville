@@ -91,7 +91,7 @@ class MapDataLoader:
             elif "objects" in source:
                 objects_firstgid = tileset["firstgid"]
             elif "platforms" in source:
-                platforms_firstgid = tileset["firstgid"]                
+                platforms_firstgid = tileset["firstgid"]
 
         # store back too (so existing logic that expects these keys still works)
         map_data["statics_firstgid"] = statics_firstgid
@@ -159,7 +159,7 @@ class BiomeManager:
         biome_name = level_name[: level_name.rfind("_")]
         self.area_change = (biome_name != self.biome_name)
 
-        if self.area_change:            
+        if self.area_change:
             self.biome_name = biome_name
             self.biome.clear_biome()
             self.biome = getattr(sys.modules[__name__], biome_name.capitalize(), Biome)(self.loader)
@@ -355,8 +355,8 @@ class SceneBuilder:
 
             if 'fade' in tile_layer:#add fade blocks
                 for fade in blit_fade_surfaces.keys():
-                    if 'fade' in fade:#is needed                                                
-                        bg = BgFade(pos, self.game_objects, blit_fade_surfaces[fade], parallax, blit_fade_pos[fade], data[fade]['id'])                        
+                    if 'fade' in fade:#is needed
+                        bg = BgFade(pos, self.game_objects, blit_fade_surfaces[fade], parallax, blit_fade_pos[fade], data[fade]['id'])
                         if layer_name.startswith('bg'): self.game_objects.all_bgs.add(layer_name,bg)#bg
                         else: self.game_objects.all_fgs.add(layer_name,bg)
                         self.game_objects.bg_fade.add(bg)
@@ -395,14 +395,14 @@ class ObjectSpawner:
             "damage_on_land": False,
 
             # behavior
-            "move": False,            
+            "move": False,
             "disappear_on_stand": False,
             "breakable": False,
-            
+
             # signals
             "signal_id": "",
 
-            'sprite_path': ''#sprite path/name rellative from assets/sprites/entities/platforms/
+            #'sprite_path': ''#sprite path/name rellative from assets/sprites/entities/platforms/
         }
 
     def _bool(self, v, default=False):
@@ -415,7 +415,7 @@ class ObjectSpawner:
         s = str(v).strip().lower()
         return s in ("1", "true", "yes", "y", "on")
 
-    def _components_from_flags(self, props: dict) -> str:      
+    def _components_from_flags(self, props: dict) -> str:
         comps = []
 
         # choose ONE collision behavior (priority order)
@@ -505,7 +505,7 @@ class ObjectSpawner:
         snap_to_path: bool (default True)
         start_index: int (default 0)
         speed: float (px/s)
-        
+
         '''
         ctx.references.setdefault("paths_by_id", {})
 
@@ -552,9 +552,9 @@ class ObjectSpawner:
                 continue
 
             source, firstgid, local_id = resolve_tileset(map_def, obj["gid"])
-            if "static" not in source: continue 
+            if "static" not in source: continue
             id = local_id
-            
+
             if id == 0:  # Player
                 if ctx.spawned: continue#skip if player has already spawned
                 for property in properties:
@@ -629,10 +629,8 @@ class ObjectSpawner:
                         destination = property['value']
                     elif property['name'] == 'spawn':
                         spawn = property['value']
-                    elif property['name'] == 'image':
-                        image = property['value']
 
-                new_path = PathInteract(object_position,self.game_objects, object_size, destination, spawn, image)
+                new_path = PathInteract(object_position,self.game_objects, object_size, destination, spawn)
                 self.game_objects.interactables.add(new_path)
 
             elif id == 10:
@@ -641,7 +639,7 @@ class ObjectSpawner:
                         destination = property['value']
                     if property['name'] == 'spawn':
                         spawn = property['value']
-                new_path = PathCollision(object_position,self.game_objects,object_size,destination,spawn)                        
+                new_path = PathCollision(object_position,self.game_objects,object_size,destination,spawn)
                 self.game_objects.interactables.add(new_path)
 
             elif id == 11:#one way collision block (currently only top implemented)
@@ -652,7 +650,7 @@ class ObjectSpawner:
                 self.game_objects.platforms.add(new_block)
 
             elif id == 12:#hole, if aila collides, aila will move to safe_spawn position
-                new_block = Hole(object_position, self.game_objects, object_size)                
+                new_block = Hole(object_position, self.game_objects, object_size)
                 self.game_objects.interactables.add(new_block)
 
             elif id == 13:#spawn position
@@ -662,7 +660,7 @@ class ObjectSpawner:
                         pos = property['value']
                         string_list = pos.split(",")
                         spawn_pos = [int(item) for item in string_list]
-                
+
                 new_block = SafeSpawn(object_position, self.game_objects, object_size, spawn_pos)
                 self.game_objects.interactables.add(new_block)
 
@@ -681,21 +679,23 @@ class ObjectSpawner:
                     if property['name'] == 'particle':
                         particle_type = property['value']
 
-                new_shader_screen = getattr(screen_particles, particle_type)                
+                new_shader_screen = getattr(screen_particles, particle_type)
                 if layer_name.startswith('fg'):
                     self.game_objects.all_fgs.add(layer_name, new_shader_screen(self.game_objects, parallax, 20))
                 else:
                     self.game_objects.all_bgs.add(layer_name, new_shader_screen(self.game_objects, parallax, 20))
 
-            elif id == 16:
-                print(object_position)
-
-            #elif id == 17:#leaves
-            #    information = [object_position,object_size]
-            #    if layer_name.startswith('fg')
-            #        entities_parallax.create_leaves(information,parallax,self.game_objects.all_fgs)
-            #    else:
-            #        entities_parallax.create_leaves(information,parallax,self.game_objects.all_bgs)
+            elif id == 16:#evil gate
+                kwarg = {}
+                for property in properties:
+                    if property['name'] == 'ID':
+                        kwarg['ID'] = property['value']
+                    elif property['name'] == 'erect':
+                        kwarg['erect'] = property['value']
+                    elif property['name'] == 'vertical':
+                        kwarg['vertical'] = property['value']
+                gate = EvilGate(object_position,self.game_objects, object_size, **kwarg)
+                self.game_objects.platforms.add(gate)
 
             elif id  == 18:#god rays
                 prop = {}
@@ -722,8 +722,8 @@ class ObjectSpawner:
                 kwarg = props_list_to_dict(properties)
 
                 if self.game_objects.world_state.is_cutscene_complete(kwarg['event']): continue#if the cutscene has been shown before, return.
-                if self.game_objects.world_state.is_event_complete(kwarg['event']): continue#if event has already been done 
-                
+                if self.game_objects.world_state.is_event_complete(kwarg['event']): continue#if event has already been done
+
                 obj = self.game_objects.registry.fetch('event_triggers',  kwarg['event'])
                 if obj:#if event is registered
                     new_trigger = obj(object_position, self.game_objects, object_size, **kwarg)
@@ -740,9 +740,9 @@ class ObjectSpawner:
                     elif property['name'] == 'speed':
                         prop['speed'] = property['value']
                     elif property['name'] == 'texture_parallax':
-                        prop['texture_parallax'] = property['value']              
+                        prop['texture_parallax'] = property['value']
                     elif property['name'] == 'water_texture_on':
-                        prop['water_texture_on'] = property['value']                                      
+                        prop['water_texture_on'] = property['value']
 
                 reflection = River(object_position, self.game_objects, parallax, object_size, layer_name, **prop)
 
@@ -761,12 +761,12 @@ class ObjectSpawner:
                         kwarg['rate'] = float(property['value'])
                     elif property['name'] == 'scale':
                         kwarg['scale'] = float(property['value'])
-                
+
                 new_zoom = ZoomCollision(object_position, self.game_objects, object_size, **kwarg)
                 self.game_objects.interactables.add(new_zoom)
 
-            elif id == 22:#projectile spawner     
-                kwarg = {}          
+            elif id == 22:#projectile spawner
+                kwarg = {}
                 new_spawner = AreaSpawner(object_position, self.game_objects, object_size, **kwarg)
                 self.game_objects.cosmetics.add(new_spawner)
 
@@ -776,13 +776,13 @@ class ObjectSpawner:
                     if property['name'] == 'colour':
                          colour = list(pygame.Color(property['value']))
                          kwargs['colour'] = [colour[1]/255,colour[2]/255,colour[3]/255,colour[0]/255]
-                    elif property['name'] == 'layers':                        
+                    elif property['name'] == 'layers':
                         layers = property['value'] .split(",")
                         kwargs['layers'] = [l.strip() for l in layers]
                     elif property['name'] == 'scale':
-                        kwargs['scale'] = property['value']       
+                        kwargs['scale'] = property['value']
                     elif property['name'] == 'shader':
-                        kwargs['shader'] = property['value']        
+                        kwargs['shader'] = property['value']
 
                 new_interacable = LayerTrigger(object_position, self.game_objects, object_size, **kwargs)
                 self.game_objects.interactables.add(new_interacable)
@@ -907,13 +907,13 @@ class ObjectSpawner:
         for obj in data['objects']:
             object_position, object_size = calculate_object_position(obj, parallax, offset, viewport_center)
             properties = obj.get('properties',[])
-            
+
             source, firstgid, local_id = resolve_tileset(map_def, obj["gid"])
-            if "interactables" not in source: continue 
+            if "interactables" not in source: continue
             id = local_id
 
             if id == 2:#save point
-                new_int = SavePoint(object_position,self.game_objects,self.game_objects.map.level_name)                  
+                new_int = SavePoint(object_position,self.game_objects,self.game_objects.map.level_name)
                 self.game_objects.interactables.add(new_int)
 
             elif id == 3:#runestones, colectable
@@ -968,12 +968,12 @@ class ObjectSpawner:
 
             elif id == 10:#lever
                 kwarg = {}
-                for property in properties:                    
+                for property in properties:
                     if property['name'] == 'ID':
                         kwarg['ID'] = property['value']
                     elif property['name'] == 'on':
                         kwarg['on'] = property['value']
-                
+
                 lever = Lever(object_position,self.game_objects, **kwarg)
                 self.game_objects.interactables.add(lever)
 
@@ -1005,7 +1005,7 @@ class ObjectSpawner:
                     if property['name'] == 'interactable_item':
                         name = property['value']
                 if not self.game_objects.world_state.state[self.game_objects.map.level_name]['interactable_items'].get(name, False):#if it has not been interacted with: (assume only one interactable)
-                    obj = self.game_objects.registry.fetch('items', name)(object_position, self.game_objects, state = 'wild')      
+                    obj = self.game_objects.registry.fetch('items', name)(object_position, self.game_objects, state = 'wild')
                     self.game_objects.loot.add(obj)
 
             elif id == 15:#gate
@@ -1022,10 +1022,6 @@ class ObjectSpawner:
                 statue = AirDashStatue(object_position, self.game_objects)
                 self.game_objects.interactables.add(statue)
 
-            elif id == 17:#thunder dive statue
-                statue = ThunderDiveStatue(object_position, self.game_objects)
-                self.game_objects.interactables.add(statue)
-
             elif id == 18:
                 state = self.game_objects.world_state.state[self.game_objects.map.level_name]['loot_container'].get(str(loot_container), False)
                 amber_rock = AmberRock(object_position, self.game_objects, state, str(loot_container))
@@ -1035,6 +1031,7 @@ class ObjectSpawner:
             elif id == 19:#collision block that can only brak with charge flag on projectile
                 platform = BreakableBlockCharge_1(object_position, self.game_objects)
                 self.game_objects.platforms.add(platform)
+
 
 
 # ----------------------------
@@ -1066,12 +1063,12 @@ class Biome:
             "snow": {
                 "manager": self.level.game_objects.weather.snow,
                 "fx_class": "SnowFX",
-            },            
+            },
         }
 
     def play_music(self):
         pass
-    
+
     def clear_biome(self):
         pass
 
@@ -1081,17 +1078,17 @@ class Biome:
     def set_camera(self, ctx):
         pass
 
-    def configure_weather(self, group, parallax):        
+    def configure_weather(self, group, parallax):
         for weather_type in self.weather_config.keys():#wind, rain, for etc.
-            if self.weather_config[weather_type]['layers'].get(group, False):   
-                kwarg = self.weather_config[weather_type]['layers'][group]                 
+            if self.weather_config[weather_type]['layers'].get(group, False):
+                kwarg = self.weather_config[weather_type]['layers'][group]
                 new_weather = getattr(weather, self._weather_registry[weather_type]['fx_class'])(self.level.game_objects, parallax = parallax, **kwarg)
-                
+
                 self._weather_registry[weather_type]['manager'].add_fx(new_weather)
                 if group.startswith('fg'):
                     self.level.game_objects.all_fgs.add(group, new_weather)
                 else:
-                    self.level.game_objects.all_bgs.add(group, new_weather)   
+                    self.level.game_objects.all_bgs.add(group, new_weather)
 
     def post_process(self, group, parallax):
         pass
@@ -1104,23 +1101,23 @@ class Village(Biome):
         super().__init__(level)
 
     def post_process(self, layer_name, parallax):#called at the end of group loading
-        if self.live_blur:       
-            downsample = 1         
-            if parallax[0] == 1: 
+        if self.live_blur:
+            downsample = 1
+            if parallax[0] == 1:
                  radius = 0.01
-            else:                
+            else:
                 radius = functions.blur_radius(parallax, max_blur = 5)
 
-            self.level.game_objects.game.screen_manager.append_shader('Blur_fast', [layer_name], radius = radius)   
-            if layer_name == 'bg1':     
-                self.level.game_objects.game.screen_manager.append_shader('Blur_fast', ['player'], radius = radius)   
-                self.level.game_objects.game.screen_manager.append_shader('Blur_fast', ['player_fg'], radius = radius)   
+            self.level.game_objects.game.screen_manager.append_shader('Blur_fast', [layer_name], radius = radius)
+            if layer_name == 'bg1':
+                self.level.game_objects.game.screen_manager.append_shader('Blur_fast', ['player'], radius = radius)
+                self.level.game_objects.game.screen_manager.append_shader('Blur_fast', ['player_fg'], radius = radius)
 
     def room(self, room):#called wgen a new room is loaded
         if room in ['5']:
-            self.live_blur = True   
+            self.live_blur = True
         else:
-            self.live_blur = False            
+            self.live_blur = False
 
     def load_objects(self, data, parallax, offset, ctx: LoadContext, map_def: MapDefinition, layer_name: str, viewport_center):
         for obj in data['objects']:
@@ -1128,7 +1125,7 @@ class Village(Biome):
             properties = obj.get('properties',[])
 
             source, firstgid, local_id = resolve_tileset(map_def, obj["gid"])
-            if "objects" not in source: continue 
+            if "objects" not in source: continue
             id = local_id
 
             if id == 0:
@@ -1154,14 +1151,14 @@ class Village(Biome):
 
             elif id == 3:#boulder
                 new_tree = Boulder(object_position, self.level.game_objects)
-                self.level.game_objects.platforms.add(new_tree)                
+                self.level.game_objects.platforms.add(new_tree)
 
 class Nordveden(Biome):
     def __init__(self, level):
         super().__init__(level)
         #self.live_blur = True
         self.weather_config = {
-            "wind": {                                
+            "wind": {
                 "layers": {
                     "bg1": {"velocity": [-2, 0.1], "duration_range": [3000, 7000] },
                     "bg2": {"velocity": [-2, 0.1], "duration_range": [3000, 7000] },
@@ -1182,35 +1179,36 @@ class Nordveden(Biome):
                     "bg5": { "intensity": 1.0, 'colour': (1,1,1,1) }
                 }
             }
-        }            
+        }
 
     def post_process(self, layer_name, parallax):#called at the end of group loading
-        if self.live_blur:       
-            if parallax[0] == 1: return          
+        if self.live_blur:
+            if parallax[0] == 1: return
             radius = functions.blur_radius(parallax)
-            self.level.game_objects.game.screen_manager.append_shader('Blur_fast', [layer_name], radius = radius)   
+            self.level.game_objects.game.screen_manager.append_shader('Blur_fast', [layer_name], radius = radius)
 
     def play_music(self):
-        sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/visuals/environments/ambient/nordveden/')
-        self.level.game_objects.sound.play_background_sound(sounds['idle'][0], index = 1, loop = -1, fade = 1000, volume = 0.2)
+        sounds = read_files.load_sounds_dict('assets/audio/music/maps/nordveden/')
+        self.level.game_objects.sound.play_background_sound(sounds['music'][0], index = 1, loop = -1, fade = 1000, volume = 0.1)
+        self.level.game_objects.sound.play_background_sound(sounds['ambient'][0], index = 2, loop = -1, fade = 1000, volume = 0.2)
 
     def room(self, room):#called wgen a new room is loaded
         if room in ['11', '8', '7', '6', '5']:
-            self.level.game_objects.lights.set_ambiance([100/255,100/255,100/255,255/255])      
+            self.level.game_objects.lights.set_ambiance([100/255,100/255,100/255,255/255])
             self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,200/255], interact = False)
 
     def load_objects(self, data, parallax, offset, ctx: LoadContext, map_def: MapDefinition, layer_name: str, viewport_center):
         for obj in data['objects']:
             object_position, object_size = calculate_object_position(obj, parallax, offset, viewport_center)
             properties = obj.get('properties',[])
-            
+
             source, firstgid, local_id = resolve_tileset(map_def, obj["gid"])
-            if "objects" not in source: continue 
+            if "objects" not in source: continue
             id = local_id
 
            # id = obj['gid'] - map_def.objects_firstgid
-            if id == 2:#light forest tree tree      
-                name = 'nordveden/tree_1/'                        
+            if id == 2:#light forest tree tree
+                name = 'nordveden/tree_1/'
                 new_tree = GeneralTree(object_position, self.level.game_objects, parallax, layer_name, name)
                 if layer_name.startswith('fg'):
                     self.level.game_objects.all_fgs.add(layer_name, new_tree)
@@ -1218,7 +1216,7 @@ class Nordveden(Biome):
                     self.level.game_objects.all_bgs.add(layer_name, new_tree)
 
             elif id == 3:#light forest tree tree
-                name = 'nordveden/tree_2/'        
+                name = 'nordveden/tree_2/'
                 new_tree = GeneralTree(object_position, self.level.game_objects, parallax, layer_name, name)
                 if layer_name.startswith('fg'):
                     self.level.game_objects.all_fgs.add(layer_name,new_tree)
@@ -1264,13 +1262,13 @@ class Nordveden(Biome):
 
             elif id == 8:#cocoon
                 new_boss = self.level.game_objects.registry.fetch('enemies', 'cocoon_boss')(object_position, self.level.game_objects)
-                self.level.game_objects.interactables.add(new_boss)                                                       
+                self.level.game_objects.interactables.add(new_boss)
 
 class Rhoutta_encounter(Biome):
     def __init__(self, level):
-        super().__init__(level)  
+        super().__init__(level)
         self.weather_config = {
-            "wind": {                                
+            "wind": {
                 "layers": {
                     "bg1": {"velocity": [-2, 0.1], "duration_range": [3000, 7000] },
                     "bg2": {"velocity": [-2, 0.1], "duration_range": [3000, 7000] },
@@ -1291,7 +1289,7 @@ class Rhoutta_encounter(Biome):
                     "bg5": { "intensity": 1.0, 'colour': (0,0,0,1) }
                 }
             }
-        }      
+        }
 
     def room(self, room):
         if room == '2':
@@ -1308,9 +1306,8 @@ class Rhoutta_encounter(Biome):
             object_position, object_size = calculate_object_position(obj, parallax, offset, viewport_center)
             properties = obj.get('properties',[])
             source, firstgid, local_id = resolve_tileset(map_def, obj["gid"])
-            if "objects" not in source: continue 
+            if "objects" not in source: continue
             id = local_id
-
 
 class Hlifblom(Biome):
     def __init__(self, level):
@@ -1318,8 +1315,8 @@ class Hlifblom(Biome):
 
     def play_music(self):
         super().play_music()
-        sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/visuals/environments/ambient/light_forest_cave/')
-        #self.level.game_objects.sound.play_background_sound(sounds['idle'][0], index = 1, loop = -1, fade = 1000, volume = 0.1)
+        sounds = read_files.load_sounds_dict('assets/audio/music/maps/hlifblom/')
+        self.level.game_objects.sound.play_background_sound(sounds['music'][0], index = 1, loop = -1, fade = 1000, volume = 0.1)
 
     def room(self, room = 1):
         self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [255/255,255/255,255/255,255/255], normal_interact = False)
@@ -1330,7 +1327,7 @@ class Hlifblom(Biome):
             object_position, object_size = calculate_object_position(obj, parallax, offset, viewport_center)
             properties = obj.get('properties',[])
             source, firstgid, local_id = resolve_tileset(map_def, obj["gid"])
-            if "objects" not in source: continue 
+            if "objects" not in source: continue
             id = local_id
 
             if id == 0:#cave grass
@@ -1417,7 +1414,7 @@ class Golden_fields(Biome):
             object_position, object_size = calculate_object_position(obj, parallax, offset, viewport_center)
             properties = obj.get('properties',[])
             source, firstgid, local_id = resolve_tileset(map_def, obj["gid"])
-            if "objects" not in source: continue 
+            if "objects" not in source: continue
             id = local_id
 
             if id == 2:#bridge that is built when the reindeer dies
@@ -1439,8 +1436,8 @@ class Crystal_mines(Biome):
 
     def play_music(self):
         super().play_music()
-        sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/visuals/environments/ambient/crystal_mines')
-        self.level.game_objects.sound.play_background_sound(sounds['idle'][0], index = 1, loop = -1, fade = 1000, volume = 0.2)
+        sounds = read_files.load_sounds_dict('assets/audio/music/maps/crystal_mines')
+        self.level.game_objects.sound.play_background_sound(sounds['ambient'][0], index = 1, loop = -1, fade = 1000, volume = 0.2)
 
     def room(self, room = 1):
         self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [255/255,255/255,255/255,255/255], normal_interact = False)
@@ -1451,7 +1448,7 @@ class Crystal_mines(Biome):
             object_position, object_size = calculate_object_position(obj, parallax, offset, viewport_center)
             properties = obj.get('properties',[])
             source, firstgid, local_id = resolve_tileset(map_def, obj["gid"])
-            if "objects" not in source: continue 
+            if "objects" not in source: continue
             id = local_id
 
             if id == 7:#Conveyor_belt
@@ -1551,14 +1548,14 @@ class Dark_forest(Biome):
                     "bg7": { "intensity": 1.0, 'colour': (0,0,0,1) }
                 }
             }
-        }      
+        }
 
-    def configure_weather(self, group, parallax):        
+    def configure_weather(self, group, parallax):
         for weather_type in self.weather_config.keys():#wind, rain, for etc.
-            if self.weather_config[weather_type]['layers'].get(group, False):   
-                kwarg = self.weather_config[weather_type]['layers'][group]                  
+            if self.weather_config[weather_type]['layers'].get(group, False):
+                kwarg = self.weather_config[weather_type]['layers'][group]
                 new_weather = getattr(weather, self._weather_registry[weather_type]['fx_class'])(self.level.game_objects, parallax = parallax, **kwarg)
-                
+
                 self._weather_registry[weather_type]['manager'].add_fx(new_weather)
                 if group.startswith('fg'):
                     self.level.game_objects.all_fgs.add(group, new_weather)
@@ -1575,7 +1572,7 @@ class Dark_forest(Biome):
             object_position, object_size = calculate_object_position(obj, parallax, offset, viewport_center)
             properties = obj.get('properties',[])
             source, firstgid, local_id = resolve_tileset(map_def, obj["gid"])
-            if "objects" not in source: continue 
+            if "objects" not in source: continue
             id = local_id
 
             if id == 9:#vines
@@ -1614,13 +1611,13 @@ class Tall_trees(Biome):
 
     def room(self, room = 1):
         pass
- 
+
     def load_objects(self, data, parallax, offset, ctx: LoadContext, map_def: MapDefinition, layer_name: str, viewport_center):
         for obj in data['objects']:
             object_position, object_size = calculate_object_position(obj, parallax, offset, viewport_center)
             properties = obj.get('properties',[])
             source, firstgid, local_id = resolve_tileset(map_def, obj["gid"])
-            if "objects" not in source: continue 
+            if "objects" not in source: continue
             id = local_id
 
             if id == 10:#packun
@@ -1630,7 +1627,7 @@ class Tall_trees(Biome):
                         kwarg['direction'] = property['value']
 
                 new_enemy = self.level.game_objects.registry.fetch('enemies', 'packun')(object_position, self.level.game_objects, **kwarg)
-                self.level.game_objects.enemies.add(new_enemy)                              
+                self.level.game_objects.enemies.add(new_enemy)
 
 class Wakeup_forest(Biome):
     def __init__(self, level):
@@ -1646,7 +1643,7 @@ class Wakeup_forest(Biome):
                             "they laid her beneath the roots.",
                             "The roots still breathe.",
                             "And something beneath them stirs."]
-        }     
+        }
 
         self.level.game_objects.ui.overlay.overlay_library.add_text_blocks(intro_blocks)
 
@@ -1657,7 +1654,7 @@ class Wakeup_forest(Biome):
         #game_objects.ui.overlay.overlay_library.add_title_cards(titles)
 
     def room(self, room = 1):
-        self.level.game_objects.lights.set_ambiance([200/255,200/255,200/255,255/255])      
+        self.level.game_objects.lights.set_ambiance([200/255,200/255,200/255,255/255])
         self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,255/255], normal_interact = False)
         if room in ['99']:
             self.level.game_objects.lights.ambient = (30/255,20030/255,30/255,230/255)#230
@@ -1666,17 +1663,21 @@ class Wakeup_forest(Biome):
 
     def play_music(self):
         super().play_music()
-        sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/visuals/environments/ambient/light_forest_cave/')
-        #self.level.game_objects.sound.play_background_sound(sounds['idle'][0], index = 1, loop = -1, fade = 1000, volume = 0.1)
+        sounds = read_files.load_sounds_dict('assets/audio/music/maps/wake_up_forest/')
+        self.level.game_objects.sound.play_background_sound(sounds['ambient'][0], index = 1, loop = -1, fade = 1000, volume = 0.1)
 
     def load_objects(self, data, parallax, offset, ctx: LoadContext, map_def: MapDefinition, layer_name: str, viewport_center):
         for obj in data['objects']:
             object_position, object_size = calculate_object_position(obj, parallax, offset, viewport_center)
             properties = obj.get('properties',[])
             source, firstgid, local_id = resolve_tileset(map_def, obj["gid"])
-            if "objects" not in source: continue 
+            if "objects" not in source: continue
             id = local_id
 
             if id == 0:#tsatue
                 new_int = RhouttaStatue(object_position, self.level.game_objects)
+                self.level.game_objects.interactables.add(new_int)
+
+            if id == 1:#tsatue
+                new_int = VerveTree(object_position, self.level.game_objects)
                 self.level.game_objects.interactables.add(new_int)

@@ -22,9 +22,3 @@ class BaseCollisions(Interactables):#with sprites
 
     def draw(self, target):
         pass
-
-    def take_hit(self, effect):
-        """Delegate to hit component"""      
-        effect.attacker_callbacks = {}
-        effect.attacker_callbacks = {}
-        return self.hit_component.take_hit(effect)        

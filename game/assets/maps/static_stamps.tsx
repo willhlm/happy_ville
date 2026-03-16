@@ -80,7 +80,9 @@
  </tile>
  <tile id="16">
   <properties>
-   <property name="colour" type="color" value="#ffffffff"/>
+   <property name="ID" value=""/>
+   <property name="erect" type="bool" value="false"/>
+   <property name="vertical" type="bool" value="false"/>
   </properties>
  </tile>
  <tile id="18">

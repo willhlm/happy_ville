@@ -41,33 +41,34 @@ void main()
 
     // Get the texture size using the built-in function
     vec2 texture_size = vec2(textureSize(imageTexture, 0));
+    vec2 pixel_uv = (floor(uv * texture_size) + 0.5) / texture_size;
 
     // Convert pixel heights to texture coordinates using the texture size
     float lineHeight = lineHeightPixels / texture_size.y;
     float darkerRegionHeight = darkerRegionHeightPixels / texture_size.y;
 
     // Calculate wave effect with noise using the refraction map
-    float waveEffect = wave(uv, texture_size);
+    float waveEffect = wave(pixel_uv, texture_size);
 
     // Position for the wavy line
     float waveLinePosition = 1.0 - lineHeight + waveEffect;
 
-    if (uv.y > waveLinePosition) {
+    if (pixel_uv.y > waveLinePosition) {
         // Top portion remains transparent
         COLOR = vec4(0.0, 0.0, 0.0, 0.0); // Fully transparent
         return;
     }
-    else if (uv.y > (waveLinePosition - darkerRegionHeight * 0.95)) { // Line region
-        new_liquid_tint = mix(darker_color, liquid_tint, (uv.y - (waveLinePosition - darkerRegionHeight * 0.95)) / darkerRegionHeight);
+    else if (pixel_uv.y > (waveLinePosition - darkerRegionHeight * 0.95)) { // Line region
+        new_liquid_tint = mix(darker_color, liquid_tint, (pixel_uv.y - (waveLinePosition - darkerRegionHeight * 0.95)) / darkerRegionHeight);
     }
-    else if (uv.y > (waveLinePosition - darkerRegionHeight)) { // Darker region
-        new_liquid_tint = mix(line_color, liquid_tint, (uv.y - (waveLinePosition - darkerRegionHeight)) / darkerRegionHeight);
+    else if (pixel_uv.y > (waveLinePosition - darkerRegionHeight)) { // Darker region
+        new_liquid_tint = mix(line_color, liquid_tint, (pixel_uv.y - (waveLinePosition - darkerRegionHeight)) / darkerRegionHeight);
     }
     else {
         new_liquid_tint = liquid_tint;
     }
 
-    vec2 refraction_offset = texture(refraction_map, vec2(mod(uv.x * refraction_stretch.x + TIME * speed, 1.0), mod(uv.y * refraction_stretch.y + TIME * speed, 1.0))).xy;
+    vec2 refraction_offset = texture(refraction_map, vec2(mod(pixel_uv.x * refraction_stretch.x + TIME * speed, 1.0), mod(pixel_uv.y * refraction_stretch.y + TIME * speed, 1.0))).xy;
 
     refraction_offset -= 0.5; // Set values between -0.5 and 0.5 (instead of 0 and 1).
 

@@ -16,6 +16,7 @@ class Gameplay(GameState):
     def update_render(self, dt):
         dt *= self.game.game_objects.time_manager.time_scale#apply time scale
         self.game.game_objects.update_render(dt)
+        self.game.game_objects.world_transform_controller.update_render(dt)
         self.game.game_objects.ui.hud.update(dt)
         self.game.game_objects.post_process.update_render(dt)#apply post process shaders to the composite screen, which is large
 

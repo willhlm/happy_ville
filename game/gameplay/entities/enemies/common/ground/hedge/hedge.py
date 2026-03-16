@@ -1,4 +1,4 @@
-import pygame
+import pygame, random
 from gameplay.entities.enemies.base.enemy import Enemy
 from engine.utils import read_files
 from gameplay.entities.enemies.common.shared.states.state_manager import StateManager
@@ -25,3 +25,18 @@ class Hedge(Enemy):
         self.aggro_distance = self.config['distances']['aggro']
 
         self.currentstate = StateManager(self, custom_states = HEDGE_STATES, custom_deciders = None)
+
+        self.shader_state.add_shader('aura', colour = [0,0,0], size = 0.3, fall_off = 4, noise_intensity = 3)
+        self.time = 0
+
+    def update_render(self, dt):
+        super().update_render(dt)
+        self.release_particles(dt)
+
+    def release_particles(self, dt):
+        self.time += dt 
+        if self.time > 40:
+            rect = self.hitbox
+            position = [rect.centerx + random.uniform(-rect[2] * 0.5, rect[2] * 0.5), rect.centery + random.uniform(rect[3]*0.1,rect[3]*0.5)]
+            self.game_objects.particles.emit("spirit_wisp", pos=position, n=1, colour=(0,0,0,255))            
+            self.time = 0

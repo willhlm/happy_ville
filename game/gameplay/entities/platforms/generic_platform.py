@@ -15,7 +15,7 @@ class GenericPlatform(DynamicPlatform):
         super().__init__(pos, game_objects, size=props.get('size', (16, 16)), components=[])
         self.props = props
 
-        name = props.get("sprite_path", "generic/default/")
+        name = props.get("sprite_path", "generic/default")
         self.sprites = read_files.load_sprites_dict(f"assets/sprites/entities/platforms/{name}" + '/', game_objects)
         self.image = self.sprites["idle"][0]
 
@@ -37,7 +37,7 @@ class GenericPlatform(DynamicPlatform):
 
     def kill(self):
         self.components = []
-        super().kill()            
+        super().kill()
 
     def draw(self, target):
         self.game_objects.game.display.render(self.image,target,
@@ -45,4 +45,4 @@ class GenericPlatform(DynamicPlatform):
                 int(self.rect[0] - self.game_objects.camera_manager.camera.scroll[0]),
                 int(self.rect[1] - self.game_objects.camera_manager.camera.scroll[1]),
             ),
-        )        
+        )

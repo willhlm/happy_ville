@@ -12,10 +12,13 @@ class Fireplace(Interactables):
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
         self.hitbox.midbottom = self.rect.midbottom
+        
         self.currentstate = states_fireplace.Idle(self)
         self.light_sources = []#save light references to turn be able to removr them
         if on:
             self.interact()        
+
+        self.hit_component.set_invinsibility(True)
 
     def interact(self):  # when player press t/y
         self.currentstate.handle_input('Interact')  # goes to interacted after transform
