@@ -15,16 +15,16 @@ class GameState():
         input.processed()
 
     def on_exit(self):
-        'called when exit'
+        'called when another state calls enter_state. This state is preserved.'
         pass
 
     def on_resume(self):
-        'called when popping the previous state'
+        'called when latest state calls exit_state, so that the previous state is resuming'
         pass
 
     def on_pop(self):
-        'called when popping'
+        'called when calling exit_state. This state is destroyed.'
         pass 
 
-    def release_texture(self):#in the final version, this should not be needed sinec we wil not dynamically make layers
+    def release_texture(self):
         pass

@@ -19,9 +19,6 @@ class BubbleSource(Interactables):#the thng that spits out bubbles in cave HAWK 
         #self.time = random.randint(0, 10)
         self.time = -1 * prop.get('init_delay', random.randint(0, 50))
 
-    def group_distance(self):
-        pass
-
     def draw(self, target):
         pass
 

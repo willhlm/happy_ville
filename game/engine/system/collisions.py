@@ -46,8 +46,8 @@ class Collisions():
     def entity_collision(self, entities, target_group):
         """
         Track collisions using object references.
+        - on_collision(entity): called ONCE when entity enters, before first collision(entity)
         - collision(entity): called EVERY frame while colliding
-        - on_collision(entity): called ONCE when entity enters
         - on_noncollision(entity): called ONCE when entity exits
         """
         for target in target_group:
@@ -57,18 +57,15 @@ class Collisions():
             # Find current collisions
             for entity in entities:
                 if self.collided(entity, target):
+                    if entity not in previous:
+                        target.on_collision(entity)
                     target.collision(entity)
                     current.add(entity)
 
             # Calculate state changes
-            entered = current - previous
             exited = previous - current
 
             # Emit events
-            for entity in entered:#once
-                #if target.alive():
-                target.on_collision(entity)
-
             for entity in exited:#once
                 #if target.alive():
                 target.on_noncollision(entity)

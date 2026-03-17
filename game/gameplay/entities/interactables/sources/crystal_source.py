@@ -13,9 +13,6 @@ class CrystalSource(Interactables):#the thng that spits out crystals in crystal 
         self.frequency = kwarg.get('frequency', 15)
         self.kwarg = kwarg
 
-    def group_distance(self):
-        pass
-
     def update(self, dt):
         super().update(dt)
         self.time += dt

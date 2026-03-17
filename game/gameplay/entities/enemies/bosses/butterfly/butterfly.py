@@ -16,9 +16,6 @@ class Butterfly(FlyingEnemy):
     def knock_back(self,dir):
         pass
 
-    def group_distance(self):
-        pass
-
     def dead(self):#called when death animation is finished
         super().dead()
         self.game_objects.signals.emit('butterfly_killed')

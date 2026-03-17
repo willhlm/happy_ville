@@ -14,7 +14,6 @@ class LayeredObjects(AnimatedEntity):#objects in tiled that goes to different la
 
     def update(self, dt):
         super().update(dt)
-        self.group_distance()
 
     def init_sprites(self, path):#save in memory. key (0,0) is reserved for none blurred images
         if self.live_blur:
@@ -48,9 +47,3 @@ class LayeredObjects(AnimatedEntity):#objects in tiled that goes to different la
 
     def release_texture(self):  # Called when .kill() and when emptying the group        
         pass  
-
-    def group_distance(self):
-        blit_pos = [self.true_pos[0]-self.parallax[0]*self.game_objects.camera_manager.camera.true_scroll[0], self.true_pos[1]-self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
-        if blit_pos[0] < self.bounds[0] or blit_pos[0] > self.bounds[1] or blit_pos[1] < self.bounds[2] or blit_pos[1] > self.bounds[3]:
-            self.remove(self.group)#self.group.remove_from_layer(self.layer_name, self)#remove from group
-            self.add(self.pause_group)#add to pause        

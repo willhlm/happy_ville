@@ -1,5 +1,12 @@
 import pygame
 
+def apply_activation(sprite):
+    if not hasattr(sprite, 'pause_group'):
+        return
+    if sprite.game_objects.activation_manager.is_active(sprite):
+        return
+    sprite.game_objects.activation_manager.sleep(sprite)
+
 class LayeredGroup():#costum layered rendering group: all_bgs and all_fgs
     def __init__(self):
         self.group_dict = {}#a dict of groups for each layer
@@ -44,6 +51,7 @@ class Group(pygame.sprite.Group):#normal
     def update(self, dt):
         for s in self.sprites():
             s.update(dt)
+            apply_activation(s)
 
     def draw(self, target):
         for spr in self.sprites():
@@ -65,6 +73,7 @@ class LayeredUpdates(pygame.sprite.LayeredUpdates):#layered rendering
     def update(self, dt):
         for s in self.sprites():
             s.update(dt)
+            apply_activation(s)
 
     def draw(self, target):
         for spr in self.sprites():
@@ -90,8 +99,7 @@ class PauseLayer(pygame.sprite.Group):#the pause group when parallax objects are
 
     @staticmethod
     def group_distance(s):
-        pos = [s.true_pos[0] - s.parallax[0]*s.game_objects.camera_manager.camera.scroll[0], s.true_pos[1] - s.parallax[1]*s.game_objects.camera_manager.camera.scroll[1]]
-        if pos[0] < s.bounds[0] or pos[0] > s.bounds[1] or pos[1] < s.bounds[2] or pos[1] > s.bounds[3]: #or abs(entity.rect[1])>300:#this means it is outside of screen
+        if not s.game_objects.activation_manager.is_active(s):
             pass
         else:#manually add to a specific layer
             #s.remove(s.pause_group)#remove from pause  
@@ -119,9 +127,7 @@ class PauseGroup(pygame.sprite.Group):#the pause group when enteties are outside
 
     @staticmethod
     def group_distance(s):
-        s.blit_pos = [s.true_pos[0] - s.game_objects.camera_manager.camera.scroll[0], s.true_pos[1] - s.game_objects.camera_manager.camera.scroll[1]]
-        if s.blit_pos[0] < s.bounds[0] or s.blit_pos[0] > s.bounds[1] or s.blit_pos[1] < s.bounds[2] or s.blit_pos[1] > s.bounds[3]: #or abs(entity.rect[1])>300:#this means it is outside of screen
+        if not s.game_objects.activation_manager.is_active(s):
             pass#s.update_pos(pos)
         else:
-            s.add(s.group)#add to group
-            s.remove(s.pause_group)#remove from pause
+            s.game_objects.activation_manager.wake(s)

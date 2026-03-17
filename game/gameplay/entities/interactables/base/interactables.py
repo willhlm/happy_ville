@@ -14,7 +14,6 @@ class Interactables(AnimatedEntity):#interactables
 
     def update(self, dt):
         super().update(dt)
-        self.group_distance()        
 
     def update_render(self, dt):        
         self.shader_state.update_render(dt)

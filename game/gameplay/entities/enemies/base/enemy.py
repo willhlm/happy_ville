@@ -40,8 +40,6 @@ class Enemy(Character):
         self.currentstate.update(scaled_dt)#need to be aftre update_vel since some state transitions look at velocity
         self.animation.update(scaled_dt)#need to be after currentstate since animation will animate the current state
 
-        self.group_distance()
-
     def player_collision(self, player):#when player collides with enemy
         if not self.flags['aggro']: return
         pm_one = sign(player.hitbox.center[0]-self.hitbox.center[0])

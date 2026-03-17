@@ -1,6 +1,6 @@
 import pygame
 from engine.utils import read_files
-from engine.system import time_field_manager, collisions, save_load, groups, object_pool, controller, lights, timer, signals, time_manager, alphabet, input_interpreter, transition_controller
+from engine.system import activation_manager, time_field_manager, collisions, save_load, groups, object_pool, controller, lights, timer, signals, time_manager, alphabet, input_interpreter, transition_controller
 from engine.sound import game_audio
 from gameplay.entities.player import player
 from engine.render import post_process
@@ -30,6 +30,7 @@ class GameObjects():
         self.lights = lights.Lights(self)
         self.timer_manager = timer.Timer_manager(self)
         self._create_groups()
+        self.activation_manager = activation_manager.ActivationManager(self)
         self.weather = weather.Weather(self)
         self.collisions = collisions.Collisions(self)
         self.transition = transition_controller.TransitionController(self)
@@ -132,6 +133,7 @@ class GameObjects():
 
         #things that shuodl collide
         self.players.update(dt)
+        self.activation_manager.update()
         self.entity_pause.update(dt)#should be before enemies, npcs and interactable groups
         self.enemies.update(dt)
         self.npcs.update(dt)

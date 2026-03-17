@@ -6,7 +6,7 @@ class BaseCollisions(Interactables):#with sprites
         self.hit_component.set_invinsibility(True)
 
     def update(self, dt):      
-        self.group_distance()
+        pass
 
     def update_render(self, dt):      
         pass

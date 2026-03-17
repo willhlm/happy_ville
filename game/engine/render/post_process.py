@@ -49,13 +49,20 @@ class PostProcessLayer(PostProcess):#for per layer screen effects: the shaders n
     def __init__(self, game_objects, screen):
         super().__init__(game_objects, None)    
         self.screen = screen
-        self.temp_layer = game_objects.game.display.make_layer(game_objects.game.window_size)    # Create temp buffer at window size resolution: TODO
+        self.temp_layer_a = game_objects.game.display.make_layer(game_objects.game.window_size)    # Window-sized ping-pong buffer
+        self.temp_layer_b = game_objects.game.display.make_layer(game_objects.game.window_size)    # Window-sized ping-pong buffer
 
     def apply(self, source_layer, final_target):  
         shader_items = list(self.shaders.items())
-        input_layer = source_layer   
-        for i, (key, shader_obj) in enumerate(shader_items):   
-            self.temp_layer.clear(0, 0, 0, 0)            
-            input_layer = shader_obj.draw(self.temp_layer, input_layer)
-        
-        self.screen.apply_pp(input_layer, final_target)        
+        src = source_layer
+        dst = self.temp_layer_a
+
+        self.temp_layer_a.clear(0, 0, 0, 0)
+        self.temp_layer_b.clear(0, 0, 0, 0)
+
+        for key, shader_obj in shader_items:
+            src = shader_obj.draw(dst, src)
+            dst = self.temp_layer_b if dst is self.temp_layer_a else self.temp_layer_a
+            dst.clear(0, 0, 0, 0)
+
+        self.screen.apply_pp(src, final_target)        

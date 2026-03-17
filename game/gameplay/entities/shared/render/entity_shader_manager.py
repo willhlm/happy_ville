@@ -89,7 +89,7 @@ class EntityProcess(PostProcess):#for entity overlay effects
                 shader_obj.draw_to_composite(src, target, position, flip)# Last shader draws to final target
             else:                
                 src = shader_obj.draw(src, dst)# Intermediate shader: draw src -> dst
-                dst = self.temp_layer_b if dst is self.temp_layer_a else self.temp_layer_a
+                dst = self.temp_layer_b if dst is self.temp_layer_a else self.temp_layer_a#needed for 3+ shaders in pipeline
                 dst.clear(0, 0, 0, 0)
 
     def append_shader(self, shader_name, **kwargs):        

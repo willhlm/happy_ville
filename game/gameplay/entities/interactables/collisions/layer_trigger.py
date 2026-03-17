@@ -16,7 +16,7 @@ class LayerTrigger(BaseCollisions):
     def release_texture(self):
         pass
 
-    def collision(self, entity):#append some shader to specified screen layers
+    def collision(self, entity):#append some shader to specified screen layers        
         self.kwargs['scale'] = [0.5 * max((entity.hitbox.centerx - self.rect.left)/self.rect[2],0)]                
         self.game_objects.signals.emit("layer_trigger_update", **self.kwargs)# 2. emit continuous update
 
@@ -25,4 +25,3 @@ class LayerTrigger(BaseCollisions):
 
     def on_noncollision(self, entity):#when player doesn't collide        
         self.game_objects.signals.emit("layer_trigger_out", **self.kwargs)  
-

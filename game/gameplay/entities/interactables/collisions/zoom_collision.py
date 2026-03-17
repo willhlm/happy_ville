@@ -31,7 +31,6 @@ class ZoomCollision(BaseCollisions):
 
     def update(self, dt):
         """Called every frame - handle continuous blur updates here"""
-        self.group_distance()        
         self.update_blur()#Always updating blur
     
     def collision(self, entity):
