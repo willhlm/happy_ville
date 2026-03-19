@@ -9,8 +9,8 @@ from gameplay.entities.projectiles import SlamAttack
 from .config import WOLFIES_CONFIG
 
 class Wolfies(Boss):
-    def __init__(self, pos, game_objects):
-        super().__init__(pos, game_objects)
+    def __init__(self, pos, game_objects, ID):
+        super().__init__(pos, game_objects, ID)        
         self.sprites = read_files.load_sprites_dict('assets/sprites/entities/enemies/bosses/wolfies/',game_objects, flip_x = True)
         self.image = self.sprites['idle_nice'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
@@ -35,8 +35,3 @@ class Wolfies(Boss):
 
     def slam_attack(self):#called from states, attack main
         self.game_objects.cosmetics.add(ChainSpawner(self.rect.center, self.game_objects, SlamAttack, direction = self.dir, distance = 50, number = 5, frequency = 20))
-
-    def move(self, speed_multiplier=1.0):
-        """Standard movement in current direction"""
-        base_speed = 3
-        self.velocity[0] = self.dir[0] * base_speed * speed_multiplier    

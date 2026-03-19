@@ -2,7 +2,7 @@ import pygame, random
 from gameplay.entities.enemies.base.enemy import Enemy
 from engine.utils import read_files
 from .larv_jr import LarvJr
-from config.enemy import ENEMY_CONFIG 
+from gameplay.data.enemy import ENEMY_CONFIG
 
 class Larv(Enemy):
     def __init__(self, pos, game_objects):

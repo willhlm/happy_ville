@@ -1,7 +1,7 @@
 import pygame 
 from engine.utils import read_files
 from gameplay.entities.enemies.base.enemy import Enemy
-from config.enemy import ENEMY_CONFIG 
+from gameplay.data.enemy import ENEMY_CONFIG
 
 class LarvJr(Enemy):
     def __init__(self, pos, game_objects):

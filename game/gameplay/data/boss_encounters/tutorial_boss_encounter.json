@@ -1,0 +1,90 @@
+{
+  "camera": "Deer_encounter",
+  "respawn_aggro_delay": 40,
+  "setup_actions": [
+    {
+      "type": "player_shader_input",
+      "input": "idle"
+    },
+    {
+      "type": "player_acceleration_x",
+      "value": 1
+    }
+  ],
+  "steps": [
+    {
+      "time": 120,
+      "actions": [
+        {
+          "type": "player_state",
+          "state": "idle"
+        },
+        {
+          "type": "player_acceleration_x",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "time": 200,
+      "actions": [
+        {
+          "type": "boss_tasks",
+          "tasks": [
+            {
+              "task": "transform"
+            },
+            {
+              "task": "idle",
+              "animation": "idle"
+            }
+          ]
+        },
+        {
+          "type": "player_velocity_x",
+          "value": -20
+        }
+      ]
+    },
+    {
+      "time": 350,
+      "actions": [
+        {
+          "type": "boss_tasks",
+          "tasks": [
+            {
+              "task": "roar_pre"
+            },
+            {
+              "task": "roar_main"
+            },
+            {
+              "task": "roar_post"
+            },
+            {
+              "task": "idle",
+              "animation": "idle"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "time": 600,
+      "actions": [
+        {
+          "type": "camera_exit"
+        },
+        {
+          "type": "boss_start_aggro"
+        },
+        {
+          "type": "mark_cutscene_complete"
+        },
+        {
+          "type": "exit_state"
+        }
+      ]
+    }
+  ]
+}

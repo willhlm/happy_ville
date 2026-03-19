@@ -7,4 +7,5 @@ REGISTER_EVENT_TRIGGERS = {
     'start_larv_party': StartLarvParty,
     'butterfly_encounter': ButterflyEncounter,    
     'narration': Narration,    
+    'boss_encounter': BossEncounter,
 }

@@ -602,8 +602,18 @@ class ObjectSpawner:
                 new_enemy = self.game_objects.registry.fetch('enemies', enemy_name)(object_position, self.game_objects)
                 self.game_objects.enemies.add(new_enemy)
 
-            elif id == 4:#pass
-                pass
+            elif id == 3:#pass
+                path_props = props_list_to_dict(obj.get("properties", []))
+                if not self.game_objects.world_state.narrative.is_boss_defeated(path_props['ID']):
+                    from gameplay.data.boss_encounter_configs import get_boss_encounter_config
+
+                    aggro = self.game_objects.world_state.narrative.is_cutscene_complete(path_props['ID'])
+                    new_boss = self.game_objects.registry.fetch('enemies', path_props['class'])(object_position, self.game_objects, path_props['ID'])
+                    self.game_objects.enemies.add(new_boss)
+                    ctx.references[path_props['ID']] = new_boss
+                    if aggro:
+                        delay = get_boss_encounter_config(path_props['ID']).get('respawn_aggro_delay', 0)
+                        new_boss.start_aggro(delay = delay)
 
             elif id == 5:#items
                 kwarg = {}
@@ -729,8 +739,9 @@ class ObjectSpawner:
 
             elif id == 19:#trigger
                 kwarg = props_list_to_dict(properties)
+                completion_key = kwarg.get('ID', kwarg['event'])
 
-                if self.game_objects.world_state.narrative.is_cutscene_complete(kwarg['event']): continue#if the cutscene has been shown before, return.
+                if self.game_objects.world_state.narrative.is_cutscene_complete(completion_key): continue#if the cutscene has been shown before, return.
                 if self.game_objects.world_state.narrative.is_event_complete(kwarg['event']): continue#if event has already been done 
                 
                 obj = self.game_objects.registry.fetch('event_triggers',  kwarg['event'])
@@ -1599,10 +1610,6 @@ class Dark_forest(Biome):
                         kwarg['on'] = property['value']
                 new_lantern = ShadowLightLantern(object_position, self.level.game_objects, **kwarg)
                 self.level.game_objects.interactables.add(new_lantern)
-
-            elif id == 14:
-                new_boss = self.game_objects.registry.fetch('enemies', 'reindeer')(object_position, self.game_objects)
-                self.level.game_objects.enemies.add(new_boss)
 
 class Tall_trees(Biome):
     def __init__(self, level):

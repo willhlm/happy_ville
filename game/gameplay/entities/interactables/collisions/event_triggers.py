@@ -8,6 +8,8 @@ class EventTrigger(BaseCollisions):
         self.hitbox = self.rect.copy()
         self.event = kwarg.get('event', False)
         self.new_state = kwarg.get('new_state', False)#if it is an event that requires new sttae, e.g. cutscene
+        self.ID = kwarg.get('ID', False)
+        self.kwarg = kwarg
 
     def release_texture(self):
         pass
@@ -17,8 +19,9 @@ class EventTrigger(BaseCollisions):
 
     def on_collision(self, entity):
         if type(entity).__name__ != 'Player': return#only player trigger
-        if self.new_state:#if it is an event that requires new sttae, e.g. cutscene            
-            self.game_objects.game.state_manager.enter_state(self.event)              
+        if self.new_state:#if it is an event that requires new sttae, e.g. cutscene       
+            if not self.game_objects.world_state.narrative.is_cutscene_complete(self.ID):     
+                self.game_objects.game.state_manager.enter_state(self.event, **self.kwarg)              
         else:            
             self.game_objects.quests_events.initiate_event(self.event)#event
         
@@ -89,4 +92,32 @@ class Narration(EventTrigger):
             channel="narration",
         )
 
+        self.kill()
+
+class BossEncounter(BaseCollisions):
+    def __init__(self, pos, game_objects, size, **kwarg):
+        super().__init__(pos, game_objects)
+        self.rect = pygame.Rect(pos, size)
+        self.hitbox = self.rect.copy()
+        self.ID = kwarg.get('ID', False)
+        self.kwarg = kwarg
+        self.event = kwarg.get('event', 'boss_encounter')
+
+    def release_texture(self):
+        pass
+
+    def draw(self, target):
+        pass
+
+    def on_collision(self, entity):
+        if type(entity).__name__ != 'Player': return#only player trigger
+        if self.ID and self.game_objects.world_state.narrative.is_boss_defeated(self.ID):
+            self.kill()
+            return
+
+        if not self.game_objects.world_state.narrative.is_cutscene_complete(self.ID):
+            kwarg = dict(self.kwarg)
+            if self.ID:
+                kwarg['entity'] = self.game_objects.map.ctx.references[self.ID]
+            self.game_objects.game.state_manager.enter_state(self.event, **kwarg)
         self.kill()

@@ -58,13 +58,15 @@ class HitComponent():
 
     def _activate_invincibility(self, effect):
         self.set_invinsibility(True)
-        effect.game_objects.timer_manager.start_timer(self.invincibility_time, self._on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
+        self.timer = effect.game_objects.timer_manager.start_timer(self.invincibility_time, self._on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
 
     def _on_invincibility_timeout(self):
         self.set_invinsibility(False)
 
     def set_invinsibility(self, state):
         self.invincibility = state
+        #if state and self.timer:#if we set it to true, we need to cancel the timer
+            #self.entity.game_objects.timer_manager.remove_timer(self.timer)
 
     def set_invinsibility_time(self, time):
         self.invincibility_time = time

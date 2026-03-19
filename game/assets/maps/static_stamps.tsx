@@ -22,6 +22,7 @@
  </tile>
  <tile id="3">
   <properties>
+   <property name="ID" value=""/>
    <property name="class" value=""/>
   </properties>
  </tile>

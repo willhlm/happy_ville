@@ -25,8 +25,8 @@ from .facilities.soul_essence import SoulEssence
 from .facilities.vendor_2 import Vendor_2
 from .facilities.vendor import Vendor
 
+from .cutscenes.boss_encounter import BossEncounter
 from .cutscenes.boss_deer_encounter import BossDeerEncounter
-from .cutscenes.tutorial_boss_encounter import TutorialBossEncounter
 from .cutscenes.butterfly_encounter import ButterflyEncounter
 from .cutscenes.cultist_encounter import CultistEncounter
 from .cutscenes.death import Death

@@ -255,6 +255,22 @@ def falling_debris_warning(pos, game_objects, *, colour=(120, 110, 100, 255)):
         .build()
     )
 
+def enemy_death_burst(pos, game_objects, *, colour=(255, 255, 255, 255), scale=6):
+    return (
+        ParticleBuilder(pos, game_objects)
+        .circle(scale=scale, gradient = 1, colour=list(colour))
+        .velocity_directional(
+            min_speed=2.5,
+            max_speed=9,
+            direction="isotropic",
+            angle_spread=[10, 10],
+        )
+        .ejac(end_y_vel=-0.3, damping=0.07)
+        .fade(speed=8)
+        .lifetime(frames=50)
+        .build()
+    )
+
 PRESETS = {
     "spirit_aura": spirit_aura,
     "converging_soul": converging_soul,
@@ -269,6 +285,7 @@ PRESETS = {
     'drop': drop,
     'floaty_ambient':floaty_ambient,
     'falling_debris_warning': falling_debris_warning,
+    'enemy_death_burst': enemy_death_burst,
 }
 
 

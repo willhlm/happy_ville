@@ -19,6 +19,12 @@ class BaseState():
 
     def set_uniforms(self):#called before draw
         pass
+
+    def finish(self):
+        on_complete = getattr(self, 'on_complete', None)
+        if on_complete:
+            self.on_complete = None
+            on_complete()
     
     def enter_state(self, newstate, **kwarg):
         self.entity.shader_state.enter_state(newstate, **kwarg)        
@@ -124,15 +130,18 @@ class Colour(BaseState):#TODO #move to shadders for the entities
             self.enter_state('Idle')
 
 class Alpha(BaseState):#fade screen uses it
-    def __init__(self,entity):
+    def __init__(self,entity, **kwarg):
         super().__init__(entity)
         self.shader = self.entity.game_objects.shaders['alpha']
-        self.alpha = 255
+        self.alpha = kwarg.get('alpha', 255)
+        self.fade_rate = kwarg.get('fade_rate', 0.9)
+        self.kill_threshold = kwarg.get('kill_threshold', 5)
+        self.on_complete = kwarg.get('on_complete', self.entity.kill)
 
     def update_render(self, dt):
-        self.alpha *= 0.9
-        if self.alpha < 5:
-            self.entity.kill()
+        self.alpha *= self.fade_rate
+        if self.alpha < self.kill_threshold:
+            self.finish()
 
     def set_uniforms(self):
         self.shader['alpha'] = self.alpha
@@ -185,14 +194,20 @@ class Dissolve(BaseState):#disolve and bloom
         super().__init__(entity)
         self.noise_layer = self.entity.game_objects.game.display.make_layer(self.entity.image.size)#move wlesewhere, memory leaks
         self.empty = self.entity.game_objects.game.display.make_layer(self.entity.image.size)#move wlesewhere, memory leaks
-        self.entity.shader = self.entity.game_objects.shaders['bloom']
+        self.shader = self.entity.game_objects.shaders['dissolve']
 
         self.time = 0
         self.colour = kwarg.get('colour', [1,0,0,1])
         self.size = kwarg.get('size', 0.1)
+        self.duration = kwarg.get('duration', 100)
+        self.on_complete = kwarg.get('on_complete', self.entity.kill)
 
     def update_render(self, dt):
-        self.time += dt * 0.01
+        self.time += dt * 0.1
+        if self.time >= 1 or self.duration <= 0:
+            self.finish()
+            return
+        self.duration -= dt
 
     def set_uniforms(self):
         self.empty.clear(0,0,0,0)
@@ -206,10 +221,6 @@ class Dissolve(BaseState):#disolve and bloom
         self.entity.game_objects.shaders['dissolve']['dissolve_value'] = max(1 - self.time,0)
         self.entity.game_objects.shaders['dissolve']['burn_color'] = self.colour
         self.entity.game_objects.shaders['dissolve']['burn_size'] = self.size
-        self.entity.game_objects.game.display.render(self.entity.image, self.empty, shader = self.entity.game_objects.shaders['dissolve'])#shader render
-        self.entity.image = self.empty.texture
-
-        self.entity.game_objects.shaders['bloom']['targetColor'] = self.colour[0:3]
 
 class Tint(BaseState):#TODO #move to shadders for the entities
     def __init__(self, entity, **kwarg):
@@ -323,4 +334,3 @@ class Swirl(BaseState):
 
     def set_uniforms(self):        
         self.shader['ratio'] = self.ratio        
-

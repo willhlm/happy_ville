@@ -4,6 +4,7 @@ from engine import constants as C
 from gameplay.entities.interactables.base.interactables import Interactables
 from .states import Grow
 from gameplay.entities.shared.components.hit_effects import screen_shake_callback
+from gameplay.entities.shared.components.hitstop_component import HitstopComponent
 
 class AbilityBall(Interactables):
     def __init__(self, pos, game_objects, ability):
@@ -14,11 +15,10 @@ class AbilityBall(Interactables):
         self.hitbox.center = self.rect.center
         self.true_pos = self.rect.topleft
 
+        self.hitstop = HitstopComponent()
         self.currentstate = Grow(self)#start with grow
         self.health = 3
         self.ability = ability
-
-        self.flags = {'invincibility': False}
 
         #shader uniforms
         self.explosion = 0        
@@ -35,15 +35,10 @@ class AbilityBall(Interactables):
         AbilityBall.size = (300,120)
         AbilityBall.image = game_objects.game.display.make_layer(AbilityBall.size).texture
 
-    def on_invincibility_timeout(self):
-        self.flags['invincibility'] = False
-
     def take_dmg(self, effect):
         self.health -= effect.damage#take damage
-        self.flags['invincibility'] = True
 
         if self.health > 0:#check if dead
-            self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)            
             self.shader_state.handle_input('hurt')#turn white and shake
             self.currentstate.handle_input('hurt')#handle if we shoudl go to hurt state
 
@@ -53,7 +48,7 @@ class AbilityBall(Interactables):
             #effect.append_callback('attacker', 'hitstop', lambda eff: eff.attacker.hitstop.start(duration=10))##make sure default_attacker_hitstop is there                        
         else:#if dead
             self.game_objects.time_manager.modify_time(time_scale = 0, duration = 50)            
-            self.ability_ball_pickup(effect.attacker)  
+            self.ability_ball_pickup(effect.attacker)               
         return effect
 
     def update_render(self, dt):    
