@@ -557,7 +557,8 @@ class DisappearOnStand(PlatformComponent):
 
     def _start_disappear(self):
         self.p.currentstate.handle_input("dissapear")
-        self.timers.start_timer(self.respawn_time, self._start_respawn)
+        if self.respawn_time > 0:
+            self.timers.start_timer(self.respawn_time, self._start_respawn)
 
     def _start_respawn(self):
         self.p.currentstate.handle_input("re_appear")

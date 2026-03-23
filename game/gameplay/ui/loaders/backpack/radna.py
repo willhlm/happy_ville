@@ -6,6 +6,9 @@ from ..base_loader import BaseLoader
 
 
 class RadnaLoader(BaseLoader):
+    PAGE_OBJECT_LAYER = "objects"
+    PAGE_TILESET = "radna_UI"
+
     def __init__(self, game_objects):
         super().__init__(game_objects)
         self.BG = game_objects.game.display.surface_to_texture(
@@ -16,39 +19,36 @@ class RadnaLoader(BaseLoader):
         self.load_data()
 
     def load_data(self):
-        self.buttons = {}
         self.containers = []
         self.equipped_containers = {}
         self.items = {}
         self.rings = {}
-        for obj in self.map_data["elements"]:
-            topleft_object_position = [int(obj["x"]), int(obj["y"]) - int(obj["height"])]
-            properties = obj.get("properties", [])
-            id = obj["gid"] - self.map_data["UI_firstgid"]
+        for obj in self.map_data.get(self.PAGE_OBJECT_LAYER, []):
+            local_id = self.get_object_local_id(obj, self.PAGE_TILESET)
+            if local_id is None:
+                continue
 
-            if id == 0:
+            topleft_object_position = self.get_object_topleft(obj)
+            item = self.get_object_properties(obj).get("item", str(obj["id"]))
+
+            if local_id == 0:
                 self.items["hand"] = Hand(topleft_object_position, self.game_objects)
-            elif id == 1:
-                item = str(obj["id"])
-                for property in properties:
-                    if property["name"] == "item":
-                        item = property["value"]
-
+            elif local_id == 1:
                 if item in ["index", "long", "ring", "small"]:
                     self.equipped_containers[item] = InventoryContainer(topleft_object_position, self.game_objects, item)
                 else:
                     self.containers.append(InventoryContainer(topleft_object_position, self.game_objects, item))
-            elif id == 2:
+            elif local_id == 2:
                 self.items["half_dmg"] = topleft_object_position
-            elif id == 3:
+            elif local_id == 3:
                 self.rings["index"] = topleft_object_position
-            elif id == 7:
-                self.rings["long"] = topleft_object_position
-            elif id == 8:
-                self.rings["ring"] = topleft_object_position
-            elif id == 9:
-                self.rings["small"] = topleft_object_position
-            elif id == 5:
+            elif local_id == 5:
                 self.items["boss_hp"] = topleft_object_position
-            elif id == 6:
+            elif local_id == 6:
                 self.items["loot_magnet"] = topleft_object_position
+            elif local_id == 7:
+                self.rings["long"] = topleft_object_position
+            elif local_id == 8:
+                self.rings["ring"] = topleft_object_position
+            elif local_id == 9:
+                self.rings["small"] = topleft_object_position

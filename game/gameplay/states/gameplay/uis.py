@@ -16,3 +16,5 @@ class UIs(Gameplay):#pressing i: map, inventory, omamori, journal
     def handle_events(self,input):
         self.game.game_objects.ui.handle_events(input)
 
+    def handle_movement(self):#so aila doesn't move
+        pass

@@ -1,4 +1,3 @@
-from .darkforest_map import DarkforestMapLoader
-from .hlifblom_map import HlifblomMapLoader
-from .nordveden_map import NordvedenMapLoader
-from .world_map import WorldMapLoader
+from .base_scrollable_map import BaseScrollableMapLoader
+from .domain_map import DomainMapLoader
+from .world_scrollable_map import ScrollableWorldMapLoader

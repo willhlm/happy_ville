@@ -67,9 +67,6 @@ class BaseState():
         if input_type == "Hurt" and self.entity.flags.get("hurt_state_able", True):
             self.enter_state("hurt")
 
-    def modify_hit(self, effect):
-        return effect
-
     def increase_phase(self):
         """Called when animation phase completes"""
         pass

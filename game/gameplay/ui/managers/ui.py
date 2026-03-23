@@ -10,7 +10,6 @@ class UiManager():#initialised in game_objects, keep common UIs always in memory
             'hud':        ui_hud.HUD(game_objects),
             'inventory':  ui_backpack.InventoryUI(game_objects),
             'map':        ui_backpack.MapUI(game_objects),
-            'worldmap':        ui_backpack.MapUI_2(game_objects),
             'radna':     ui_backpack.RadnaUI(game_objects),
             'journal':     ui_backpack.JournalUI(game_objects),    
             'menu': BackgroundMenu(game_objects), 

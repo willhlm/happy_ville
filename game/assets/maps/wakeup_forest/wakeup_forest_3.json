@@ -916,6 +916,17 @@
                          "height":96,
                          "id":395,
                          "name":"",
+                         "properties":[
+                                {
+                                 "name":"path_to",
+                                 "type":"string",
+                                 "value":"wakeup_forest_4"
+                                }, 
+                                {
+                                 "name":"spawn",
+                                 "type":"string",
+                                 "value":"1"
+                                }],
                          "rotation":0,
                          "type":"",
                          "visible":true,

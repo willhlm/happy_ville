@@ -57,8 +57,8 @@ class Character(PlatformEntity):#enemy, NPC,player
         self.velocity[1] = -dir[1] * amp[1]
 
     def draw(self, target):
-        self.blit_pos = [int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1])]
-        self.shader_state.draw(self.image, target, self.blit_pos, flip = self.dir[0] > 0)
+        blit_pos = [int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1])]
+        self.shader_state.draw(self.image, target, blit_pos, flip = self.dir[0] > 0)
 
     def on_attack_timeout(self):#when attack cooldown timer runs out
         self.flags['attack_able'] = True

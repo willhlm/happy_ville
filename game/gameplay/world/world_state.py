@@ -96,6 +96,42 @@ class DialogueState:
         bucket = self.get_bucket(speaker_id)
         bucket['consumed'][node_id] = True
 
+
+class MapState:
+    DEFAULT_MAP_STATE = {
+        'revealed_areas': {},
+        'visited_areas': {},
+    }
+
+    def __init__(self, state):
+        self.state = state
+
+    def get_bucket(self, map_name: str) -> dict:
+        bucket = self.state.setdefault(map_name, {})
+        for key, value in self.DEFAULT_MAP_STATE.items():
+            bucket.setdefault(key, value.copy())
+        return bucket
+
+    def reveal_area(self, map_name: str, area_id) -> bool:
+        bucket = self.get_bucket(map_name)
+        bucket['revealed_areas'][str(area_id)] = True
+        return True
+
+    def visit_area(self, map_name: str, area_id) -> bool:
+        bucket = self.get_bucket(map_name)
+        key = str(area_id)
+        bucket['visited_areas'][key] = True
+        bucket['revealed_areas'][key] = True
+        return True
+
+    def is_area_revealed(self, map_name: str, area_id) -> bool:
+        bucket = self.get_bucket(map_name)
+        return bool(bucket['revealed_areas'].get(str(area_id), False))
+
+    def get_revealed_areas(self, map_name: str) -> set[str]:
+        bucket = self.get_bucket(map_name)
+        return {key for key, revealed in bucket['revealed_areas'].items() if revealed}
+
 class NarrativeState:
     QUEST_INACTIVE = 'inactive'
     QUEST_ACTIVE = 'active'
@@ -165,6 +201,7 @@ class World_state():
             save.get('statistics', {'kill': {}, 'amber_droplet': 0, 'death': 0}),
             save.get('progress', 1),
         )
+        self.map_state = MapState(save.get('map_state', {}))
         self.narrative = NarrativeState(
             events=save.get('events', {}),
             quests=save.get('quests', {}),

@@ -28,10 +28,10 @@ def burst(pos, game_objects, colour):#player getting hurt
         .build()
     )
 
-def spirit_wisp(pos, game_objects, colour):#dead boss
+def spirit_wisp(pos, game_objects, colour, scale = 3):#dead boss
     return (
         ParticleBuilder(pos, game_objects)
-        .circle(scale=3, gradient=1, colour=colour)
+        .circle(scale=scale, gradient=1, colour=colour)
         # Old: vel={'wave':[0, -1]}
         # We keep a tiny base drift upward, and let wave motion do the wobble.
         .velocity_xy(vx=0, vy=-1)

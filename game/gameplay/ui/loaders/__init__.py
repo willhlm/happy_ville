@@ -1,5 +1,5 @@
 from .backpack import InventoryLoader, JournalLoader, RadnaLoader
-from .backpack.maps import DarkforestMapLoader, HlifblomMapLoader, NordvedenMapLoader, WorldMapLoader
+from .backpack.maps import DomainMapLoader, ScrollableWorldMapLoader
 from .facilities import FastTravelLoader, VendorLoader
 from .menus import (
     LoadMenuLoader,

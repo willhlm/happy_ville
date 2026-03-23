@@ -9,6 +9,8 @@ knockback_x: str
 knockback_y: str
 
 dissaper_on_stand: bool
+respawn_time: int
+disappear_time: int
 
 move: bool
 move_type: str -> direction_distance, path

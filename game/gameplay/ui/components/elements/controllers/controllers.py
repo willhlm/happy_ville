@@ -6,6 +6,7 @@ from engine.utils import read_files
 class Controllers():
     def __init__(self, pos, game_objects, button, type):
         self.game_objects = game_objects#animation need it
+        self.button = button
         self.sprites = read_files.load_sprites_dict('assets/sprites/ui/elements/controller/' + type + '/',game_objects)
         name = button + '_idle'
         self.image = self.sprites[name][0]
@@ -23,4 +24,3 @@ class Controllers():
 
     def render(self, target):  
         self.game_objects.game.display.render(self.image, target, position=self.rect.topleft)
-

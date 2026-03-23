@@ -181,7 +181,7 @@ class GameObjects():
         self.interactables.update_render(dt)
         self.interactables_fg.update_render(dt)#twoD water use it
 
-    def draw(self):#called from render states
+    def draw(self):#called from render states         
         self.lights.clear_normal_map()
         self.all_bgs.draw(self.game.screen_manager.screens)
 
@@ -200,16 +200,20 @@ class GameObjects():
         self.players.draw(self.game.screen_manager.screens['player'].layer)
 
         #after the player but bg1:
-        plater_fg_screen = self.game.screen_manager.screens['player_fg'].layer
-        self.fprojectiles.draw(plater_fg_screen)
-        self.eprojectiles.draw(plater_fg_screen)
-        self.interactables_fg.draw(plater_fg_screen)#shoud be after the player -> upstream, 2D water
-        self.cosmetics.draw(plater_fg_screen)
+        player_fg_screen = self.game.screen_manager.screens['player_fg'].layer
+        self.fprojectiles.draw(player_fg_screen)
+        self.eprojectiles.draw(player_fg_screen)
+        self.interactables_fg.draw(player_fg_screen)#shoud be after the player -> upstream, 2D water
+        self.cosmetics.draw(player_fg_screen)
+
+        self._draw_hitboxes(player_fg_screen)           
 
         #fgs
         self.all_fgs.draw(self.game.screen_manager.screens)
         #self.camera_blocks.draw()
 
+
+    def _draw_hitboxes(self, target):
         #temporaries draws. Shuold be removed
         if self.game.RENDER_HITBOX_FLAG:
             image = pygame.Surface(self.game.window_size,pygame.SRCALPHA,32).convert_alpha()
@@ -234,10 +238,10 @@ class GameObjects():
                 pygame.draw.rect(image, (0,0,255), (int(cos.hitbox[0]-self.camera_manager.camera.scroll[0]),int(cos.hitbox[1]-self.camera_manager.camera.scroll[1]),cos.hitbox[2],cos.hitbox[3]),1)#draw hitbox
                 pygame.draw.rect(image, (255,0,255), (int(cos.rect[0]-self.camera_manager.camera.scroll[0]),int(cos.rect[1]-self.camera_manager.camera.scroll[1]),cos.rect[2],cos.rect[3]),1)#draw hitbox
             for platform in self.platforms:#go through the group
-                if type(platform).__name__ == 'Collision_oneway_up':
-                    pygame.draw.rect(image, (255,0,255), (int(platform.hitbox[0]-self.camera_manager.camera.scroll[0]),int(platform.hitbox[1]-self.camera_manager.camera.scroll[1]),platform.hitbox[2],platform.hitbox[3]),1)#draw hitbox
+                if type(platform).__name__ == 'CollisionOnewayUp':
+                    pygame.draw.rect(image, (255,0,255, 150), (int(platform.hitbox[0]-self.camera_manager.camera.scroll[0]),int(platform.hitbox[1]-self.camera_manager.camera.scroll[1]),platform.hitbox[2],platform.hitbox[3]), 0)#draw hitbox
                 else:
-                    pygame.draw.rect(image, (255,0,0), (int(platform.hitbox[0]-self.camera_manager.camera.scroll[0]),int(platform.hitbox[1]-self.camera_manager.camera.scroll[1]),platform.hitbox[2],platform.hitbox[3]),1)#draw hitbox
+                    pygame.draw.rect(image, (0,0,0, 150), (int(platform.hitbox[0]-self.camera_manager.camera.scroll[0]),int(platform.hitbox[1]-self.camera_manager.camera.scroll[1]),platform.hitbox[2],platform.hitbox[3]), 0)#draw hitbox
             for ramp in self.platforms_ramps:
                 pygame.draw.rect(image, (0,0,0), (int(ramp.hitbox[0]-self.camera_manager.camera.scroll[0]),int(ramp.hitbox[1]-self.camera_manager.camera.scroll[1]),ramp.hitbox[2],ramp.hitbox[3]),1)#draw hitbox
             for fade in self.bg_fade:
@@ -263,5 +267,5 @@ class GameObjects():
                     pygame.draw.rect(image, (255,0,0), (int(reflect.rect[0]-reflect.parallax[0]*self.camera_manager.camera.scroll[0]),int(reflect.rect[1]-reflect.parallax[1]*self.camera_manager.camera.scroll[1]),reflect.rect[2],reflect.rect[3]),1)#draw hitbox
 
             tex = self.game.display.surface_to_texture(image)
-            self.game.display.render(tex, plater_fg_screen)#shader render
+            self.game.display.render(tex, target)#shader render
             tex.release()

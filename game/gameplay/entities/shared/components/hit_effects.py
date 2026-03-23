@@ -1,3 +1,4 @@
+import random 
 from gameplay.entities.shared.components.hit_results import HitResult
 
 """
@@ -99,7 +100,7 @@ def play_sound_callback(sound_manager, sound, volume=1.0):
 def default_defender_sound(effect):
     """Play hurt sound"""
     try:
-        effect.game_objects.sound.play_sfx(effect.defender.sounds['hurt'][0], vol=0.2)
+        effect.game_objects.sound.play_sfx(random.choice(effect.defender.sounds['hurt']), vol=0.2)
     except:
         pass
 

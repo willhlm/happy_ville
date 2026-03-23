@@ -46,6 +46,7 @@ class MapCoordinator:
         self.biome_mgr.update_for_level(map_name)
 
         self.map_def = self.data_loader.load(map_name)
+        self.game_objects.world_state.map_state.visit_area(self.map_def.biome_name, self.map_def.level_name)
 
         self.scene_builder.build(self.map_def, self.ctx, self.biome_mgr)
 
