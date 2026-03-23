@@ -17,8 +17,7 @@ class Player(Character):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
         self.sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/player/')
-        self.sprites = read_files.load_sprites_dict('assets/sprites/entities/player/texture/', game_objects)
-        self.normal_maps = read_files.load_sprites_dict('assets/sprites/entities/player/normal/', game_objects)
+        self.sprites = read_files.load_sprites_dict('assets/sprites/entities/player/texture/', game_objects, normal_map = True)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 35)
@@ -152,11 +151,6 @@ class Player(Character):
         self.blit_pos = [interp_x - self.game_objects.camera_manager.camera.interp_scroll[0], interp_y - self.game_objects.camera_manager.camera.interp_scroll[1]]#save float position for screen manager
         blit_pos = [int(self.blit_pos[0]), int(self.blit_pos[1])]#bit at interget position, and let screen manager hanfle the sub pixel rendering
         self.shader_state.draw(self.image, target, blit_pos, flip = self.dir[0] > 0)
-        #self.game_objects.game.display.render(self.image, target, position = blit_pos , flip = self.dir[0] > 0, shader = self.shader)#shader render
-
-        #normal map draw
-        self.game_objects.shaders['normal_map']['direction'] = -self.dir[0]#the normal map shader can invert the normal map depending on direction
-        self.game_objects.game.display.render(self.normal_maps[self.animation.animation_name][self.animation.image_frame], self.game_objects.lights.normal_map, position = self.blit_pos, flip = self.dir[0] > 0, shader = self.game_objects.shaders['normal_map'])#should be rendered on the same position, image_state and frame as the texture
 
     def update_timers(self, dt):
         for timer in self.timers:

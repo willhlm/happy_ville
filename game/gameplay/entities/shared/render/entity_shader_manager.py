@@ -31,12 +31,40 @@ class EntityShaderManager():
     def draw(self, base_texture, target, position, flip = False):        
         if not self.effects.shaders:
             self.state.draw(base_texture, target, position, flip)# If no overlay effects, render base shader directly
+            self.draw_normal(position, flip)
             return
 
         self.effects.draw(base_texture, target, position, flip) # Pass through overlay pipeline
+        self.draw_normal(position, flip)
 
     def clear_textures(self):#called when release_texture is called.
         self.effects.clear_textures()
+
+    def draw_normal(self, position, flip = False):
+        normal_texture = self._current_normal_texture()
+        if normal_texture is None:
+            return
+
+        self.entity.game_objects.shaders['normal_map']['direction'] = -self.entity.dir[0]
+        self.entity.game_objects.game.display.render(
+            normal_texture,
+            self.entity.game_objects.lights.normal_map,
+            position = position,
+            flip = flip,
+            shader = self.entity.game_objects.shaders['normal_map'],
+        )
+
+    def _current_normal_texture(self):
+        sprites = getattr(self.entity, 'sprites', None)
+        normal_maps = getattr(sprites, 'normal_maps', None)
+        if not normal_maps:
+            return None
+
+        animation_name = self.entity.animation.animation_name
+        image_frame = self.entity.animation.image_frame
+        textures = normal_maps.get(animation_name)
+ 
+        return textures[image_frame]
 
 class EntityProcess(PostProcess):#for entity overlay effects
     def __init__(self, entity):   

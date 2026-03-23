@@ -1,6 +1,40 @@
+from dataclasses import dataclass, field
+
 import pygame, json
-from os import listdir, walk
-from os.path import isfile, join, basename, isdir
+from os import listdir, walk, makedirs
+from os.path import isfile, join, basename, isdir, dirname
+
+@dataclass
+class SpriteSet:
+    textures: object
+    normal_maps: object = field(default_factory=dict)
+
+    def __getitem__(self, key):
+        return self.textures[key]
+
+    def __setitem__(self, key, value):
+        self.textures[key] = value
+
+    def __len__(self):
+        return len(self.textures)
+
+    def __iter__(self):
+        return iter(self.textures)
+
+    def __contains__(self, item):
+        return item in self.textures
+
+    def get(self, key, default = None):
+        return self.textures.get(key, default)
+
+    def keys(self):
+        return self.textures.keys()
+
+    def values(self):
+        return self.textures.values()
+
+    def items(self):
+        return self.textures.items()
 
 def default(dict):
     if hasattr(dict, 'to_json'):
@@ -112,23 +146,78 @@ def load_single_sfx(path):
     return pygame.mixer.Sound(path)
 
 'sprite loader'
-def load_sprites_dict(base_path, game_objects, flip_x = False):#returns a dict with "state" as key and list of sprites as value
+def load_sprites_dict(base_path, game_objects, flip_x = False, normal_map = False):#returns a dict with "state" as key and list of sprites as value
     sprite_dict = {}
+    normal_dict = {}
+
+    if normal_map:
+        for subdir in [d[0] for d in walk(base_path)]:
+            if subdir == base_path:
+                pass
+            state = subdir.split("/")[-1]
+            sprite_set = load_sprites_list(subdir, game_objects, flip_x, normal_map)
+            sprite_dict[state] = sprite_set.textures
+            normal_dict[state] = sprite_set.normal_maps
+        return SpriteSet(sprite_dict, normal_dict)
+
     for subdir in [d[0] for d in walk(base_path)]:
         if subdir == base_path:
             pass
-        sprite_dict[subdir.split("/")[-1]] = load_sprites_list(subdir, game_objects, flip_x)
-    return sprite_dict
+        sprite_dict[subdir.split("/")[-1]] = load_sprites_list(subdir, game_objects, flip_x, normal_map).textures
+    return SpriteSet(sprite_dict)
 
-def load_sprites_list(path_to_folder, game_objects, flip_x = False):#returns a list of sprites
+def load_sprites_list(path_to_folder, game_objects, flip_x = False, normal_map = False):#returns a list of sprites
+    list_of_sprites = _list_sprite_files(path_to_folder)
+    if normal_map:
+        sprites = []
+        normal_maps = []
+        for file in list_of_sprites:
+            sprite_surface = load_sprite(file, flip_x)
+            sprites.append(game_objects.game.display.surface_to_texture(sprite_surface))
+            normal_maps.append(_load_or_generate_normal_texture(file, game_objects, sprite_surface))
+        return SpriteSet(sprites, normal_maps)
+    return SpriteSet([game_objects.game.display.surface_to_texture(load_sprite(file, flip_x)) for file in list_of_sprites])
+
+'normal map'
+def load_generated_normal_sprites_dict(texture_base_path, game_objects, flip_x = False):
+    return load_sprites_dict(texture_base_path, game_objects, flip_x, normal_map = True).normal_maps
+
+def load_generated_normal_sprites_list(texture_folder, game_objects, flip_x = False):
+    return load_sprites_list(texture_folder, game_objects, flip_x, normal_map = True).normal_maps
+
+def _list_sprite_files(path_to_folder):
+    if not isdir(path_to_folder):
+        return []
+
     list_of_sprites = [join(path_to_folder, f) for f in listdir(path_to_folder) if isfile(join(path_to_folder, f))]
-    if join(path_to_folder,'.DS_Store') in list_of_sprites:
-        list_of_sprites.remove(join(path_to_folder,'.DS_Store'))
-    if join(path_to_folder,'.gitkeep') in list_of_sprites:#sp that we can push empty folders
-        list_of_sprites.remove(join(path_to_folder,'.gitkeep'))
+    ignored_files = {join(path_to_folder, '.DS_Store'), join(path_to_folder, '.gitkeep')}
+    list_of_sprites = [path for path in list_of_sprites if path not in ignored_files]
     list_of_sprites.sort()
-    return [game_objects.game.display.surface_to_texture(load_sprite(file, flip_x)) for file in list_of_sprites]
+    return list_of_sprites
 
+def _load_or_generate_normal_texture(texture_path, game_objects, sprite_surface = None):
+    normal_path = _normal_map_path(texture_path)
+
+    if isfile(normal_path):
+        return game_objects.game.display.surface_to_texture(load_sprite(normal_path))
+
+    if sprite_surface is None:
+        sprite_surface = load_sprite(texture_path)
+
+    generated_surface = game_objects.normal_map_generator.generate_surface(sprite_surface)
+    _save_generated_normal_map(generated_surface, normal_path)
+    return game_objects.game.display.surface_to_texture(generated_surface)
+
+def _normal_map_path(texture_path):
+    if texture_path.startswith('assets/sprites/'):
+        return texture_path.replace('assets/sprites/', 'assets/normal_maps/', 1)
+    return join('assets/normal_maps', texture_path)
+
+def _save_generated_normal_map(surface, output_path):
+    makedirs(dirname(output_path), exist_ok = True)
+    pygame.image.save(surface, output_path)
+
+'simple load'
 def load_sprite(path_to_sprite, flip_x = False):#use to load single sprite, full path must be provided
     temp = pygame.image.load(path_to_sprite).convert_alpha()
     if flip_x:

@@ -111,7 +111,7 @@ class Lights():
 
         self.game_objects.game.display.render(target.texture, self.screen_copy)#copy the screen, the display sized one
         self.shaders['blend']['background'] = self.screen_copy.texture
-        self.shaders['blur']['blurRadius'] = 5
+        self.shaders['blur']['blurRadius'] = 2
 
         self.game_objects.game.display.use_alpha_blending(False)#need to turn of blending to remove black outline in places with no ambient dark. It looks beter if it is always True for dark areas
         self.game_objects.game.display.render(self.layer1.texture, self.layer2, shader = self.shaders['light'])

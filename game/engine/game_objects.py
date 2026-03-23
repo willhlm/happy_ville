@@ -4,6 +4,7 @@ from engine.system import activation_manager, time_field_manager, collisions, sa
 from engine.sound import game_audio
 from gameplay.entities.player import player
 from engine.render import post_process
+from engine.render.normal_map_generator import NormalMapGenerator
 from engine.camera import camera
 
 from gameplay.world import world_state
@@ -24,6 +25,7 @@ class GameObjects():
         self.font = alphabet.Alphabet(self)#intitilise the alphabet class, scale of alphabet          
         self.signals = signals.Signals()        
         self.shaders = read_files.load_shaders_dict(self)#load all shaders aavilable into a dict
+        self.normal_map_generator = NormalMapGenerator(self)
         self.controller = controller.Controller()
         self.object_pool = object_pool.Object_pool(self)
         self.sound = game_audio.GameAudio()
