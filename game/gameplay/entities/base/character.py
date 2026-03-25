@@ -49,7 +49,7 @@ class Character(PlatformEntity):#enemy, NPC,player
         else:  # dead
             self.game_objects.camera_manager.camera_shake(amplitude=4, duration=20, scale=0.95)
             self.flags['aggro'] = False
-            self.currentstate.enter_state('Death')
+            self.currentstate.die()
         return effect
 
     def knock_back(self, amp, dir):

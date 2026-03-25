@@ -24,6 +24,7 @@ from .facilities.smith import Smith
 from .facilities.soul_essence import SoulEssence
 from .facilities.vendor_2 import Vendor_2
 from .facilities.vendor import Vendor
+from .facilities.weaver import Weaver
 
 from .cutscenes.boss_encounter import BossEncounter
 from .cutscenes.boss_deer_encounter import BossDeerEncounter

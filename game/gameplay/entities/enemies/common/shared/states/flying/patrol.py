@@ -26,7 +26,7 @@ class FlyingPatrol(BaseState):
         """Calculate new random patrol point around spawn"""
         angle = random.randint(0, 180)
         amp = random.randint(40, 80)
-        offset = [-20 - 10*self.entity.dir[0], 20 - 10*self.entity.dir[0]]
+        offset = [-20 - 10*self.entity.dir[0], 20 - 10*self.entity.dir[1]]
         angle = random.randint(angle + offset[0], angle + offset[1])
         
         self.target_position = [

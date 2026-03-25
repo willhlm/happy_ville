@@ -1,6 +1,6 @@
 from engine.utils import read_files
 from os.path import basename, splitext
-from gameplay.ui.components import Controllers, MapArrow
+from gameplay.ui.components import Controllers, InventoryContainer, Text
 
 class BaseLoader():
     # Tiled convention for UI loaders:
@@ -18,6 +18,8 @@ class BaseLoader():
         self.base_resolution = game_objects.game.window_size.copy()
         self.buttons = {}
         self.shared_objects = []
+        self.containers = []
+        self.texts = []
 
     def load_UI_data(self, path, name):
         map_data = read_files.read_json(path)
@@ -64,10 +66,12 @@ class BaseLoader():
 
         for obj in objects:
             local_id = self.get_object_local_id(obj, self.SHARED_TILESET)
-            if local_id is None:
-                continue
+            if local_id is None: continue
+                
 
             topleft = self.get_object_topleft(obj)
+            properties = self.get_object_properties(obj)
+            object_size = [int(obj["width"]), int(obj["height"])]
 
             if local_id == 0:#a button
                 button = Controllers(topleft, self.game_objects, 'a', self.game_objects.controller.controller_type[-1])
@@ -99,21 +103,12 @@ class BaseLoader():
                 #self.shared_objects.append(button)
                 self.buttons['rb'] = button                    
 
-            elif local_id == 7:#map arrow
-                properties = self.get_object_properties(obj)
-                direction = properties.get("direction")
-                if not direction:
-                    continue
-                self.shared_objects.append(
-                    MapArrow(
-                        topleft,
-                        self.game_objects,
-                        properties.get("map"),
-                        direction,
-                    )
-                )
+            elif local_id == 7:#             
+                self.texts.append(Text(self.game_objects, text=properties['text'], position=topleft, size=object_size))
 
-        return self.shared_objects
+            elif local_id == 8:                
+                item = properties.get("item", str(obj["id"]))
+                self.containers.append(InventoryContainer(topleft, self.game_objects, item))                
 
     def _scale_position(self, pos):
         """Scale a position from base resolution to current resolution"""

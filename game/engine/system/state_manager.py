@@ -69,6 +69,7 @@ REGISTERY = {
     "soul_essence": SoulEssence,
     "vendor_2": Vendor_2,
     "vendor": Vendor,
+    'weaver': Weaver,
 
     # Cutscenes
     "boss_encounter": BossEncounter,

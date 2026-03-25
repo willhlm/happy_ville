@@ -253,15 +253,22 @@ class Blur(BaseState):#TODO #move to shadders for the entities
             self.enter_state('Idle')
 
 class Palette_swap(BaseState):#TODO #move to shadders for the entities
+    MAX_PALETTE_SWAP_COLOURS = 32
+
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.shader = self.entity.game_objects.shaders['palette_swap']
 
     def set_uniforms(self):
-        self.entity.shader['number_colour'] = len(self.entity.original_colour)
-        for index, color in enumerate(self.entity.original_colour):
-            self.entity.shader['original_' + str(index)] = color
-            self.entity.shader['replace_' + str(index)] = self.entity.replace_colour[index]
+        colour_count = min(len(self.entity.original_colour), len(self.entity.replace_colour), self.MAX_PALETTE_SWAP_COLOURS)
+        self.entity.shader['number_colour'] = colour_count
+        self.entity.shader['original_colors'] = self._format_palette_uniform(self.entity.original_colour, colour_count)
+        self.entity.shader['replace_colors'] = self._format_palette_uniform(self.entity.replace_colour, colour_count)
+
+    def _format_palette_uniform(self, colours, colour_count):
+        padded = list(colours[:colour_count])
+        padded.extend([(0, 0, 0, 0)] * (self.MAX_PALETTE_SWAP_COLOURS - colour_count))
+        return tuple(tuple(colour) for colour in padded)
 
     def handle_input(self, input, **kwarg):
         if input == 'idle':

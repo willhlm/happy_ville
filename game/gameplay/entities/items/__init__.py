@@ -14,6 +14,8 @@ from .radna.loot_magnet import LootMagnet
 from .radna.half_damage import HalfDamage
 from .rings import Rings
 
+from .dyes.dyes import Dyes
+
 from .soul_essence import SoulEssence
 
 from .memory_shard import MemoryShard

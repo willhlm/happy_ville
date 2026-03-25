@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.8" tiledversion="1.8.2" name="shared" tilewidth="64" tileheight="64" tilecount="7" columns="0">
+<tileset version="1.8" tiledversion="1.8.2" name="shared" tilewidth="32" tileheight="32" tilecount="8" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0">
   <image width="16" height="16" source="../sprites/ui/elements/controller/xbox/a_idle/A1.png"/>
@@ -21,8 +21,14 @@
  </tile>
  <tile id="7">
   <properties>
-   <property name="direction" value=""/>
+   <property name="text" value=""/>
   </properties>
-  <image width="64" height="64" source="../sprites/ui/menus/map/arrow/idle/arrow.png"/>
+  <image width="32" height="16" source="../sprites/ui/utils/text.png"/>
+ </tile>
+ <tile id="8">
+  <properties>
+   <property name="item" value=""/>
+  </properties>
+  <image width="32" height="32" source="../sprites/ui/elements/container/idle/square_empty.png"/>
  </tile>
 </tileset>

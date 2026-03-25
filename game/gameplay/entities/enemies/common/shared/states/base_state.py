@@ -7,6 +7,10 @@ class BaseState():
         self.deciders = []
         self._load_deciders(deciders)
 
+    @property
+    def allows_transitions(self):
+        return True
+
     def _load_deciders(self, deciders):
         state_config = self.entity.config['states'].get(self.config_key, {})
         decider_configs = state_config.get('deciders', {})        
@@ -60,7 +64,7 @@ class BaseState():
 
         self.enter_state(best.next_state, **best.kwargs)
 
-    def enter_state(self, state_name, **kwargs):
+    def enter_state(self, state_name, **kwargs):        
         self.entity.currentstate.enter_state(state_name, **kwargs)
 
     def handle_input(self, input_type):

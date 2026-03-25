@@ -21,14 +21,19 @@ class Backpack():#Ailas back pack. Can append new things such as journal, if pic
 class Inventory():
     def __init__(self):
         self.items = {}#{"healthpotion": {"item": <Item instance>, "quantity": 3}}
+        self.dyes = {}
 
     def get_item(self, item_name):
         if item_name in self.items:
             return self.items[item_name]['item']
         return False
 
-    def add(self, item, quantity=1):
-        name = type(item).__name__.lower()
+    def add_dye(self, dye, name):
+        self.dyes[name] = dye
+
+    def add(self, item, quantity=1, name = None):
+        if name is None: name = type(item).__name__.lower()
+            
         if self.items.get(name, False):
             self.items[name]["quantity"] += quantity
         else:#new item

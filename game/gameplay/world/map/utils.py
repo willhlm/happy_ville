@@ -1022,11 +1022,9 @@ class ObjectSpawner:
                 soul_essence_int += 1
 
             elif id == 14:#interactable_item
-                for property in properties:
-                    if property['name'] == 'interactable_item':
-                        name = property['value']
-                if not self.game_objects.world_state.objects.get_bucket(self.game_objects.map.level_name, 'interactable_items').get(name, False):#if it has not been interacted with: (assume only one interactable)
-                    obj = self.game_objects.registry.fetch('items', name)(object_position, self.game_objects, state = 'wild')      
+                obj_props = props_list_to_dict(obj.get("properties", []))
+                if not self.game_objects.world_state.objects.get_bucket(self.game_objects.map.level_name, 'interactable_items').get(obj_props['interactable_item'], False):#if it has not been interacted with: (assume only one interactable)
+                    obj = self.game_objects.registry.fetch('items', obj_props['interactable_item'])(object_position, self.game_objects, **obj_props)      
                     self.game_objects.loot.add(obj)
 
             elif id == 15:#gate
@@ -1217,7 +1215,7 @@ class Nordveden(Biome):
     def room(self, room):#called wgen a new room is loaded
         if room in ['11', '8', '7', '6', '5']:
             self.level.game_objects.lights.set_ambiance([100/255,100/255,100/255,255/255])      
-            self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,200/255], interact = False)
+            self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,200/255], normal_interact = False)
 
     def load_objects(self, data, parallax, offset, ctx: LoadContext, map_def: MapDefinition, layer_name: str, viewport_center):
         for obj in data['objects']:

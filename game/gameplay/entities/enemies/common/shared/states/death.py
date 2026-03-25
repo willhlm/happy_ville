@@ -5,11 +5,12 @@ class Death(BaseState):
         super().__init__(entity, deciders, config_key)
         self.entity.animation.play('death', 0.2)
 
+    @property
+    def allows_transitions(self):
+        return False
+
     def update_logic(self, dt):
         self.entity.velocity[0] = 0
-
-    def enter_state(self, newstate, **kwarg):
-        pass
 
     def increase_phase(self):
         self.entity.dead()

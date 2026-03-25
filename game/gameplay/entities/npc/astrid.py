@@ -6,7 +6,8 @@ class Astrid(NPC):#vendor
         self.inventory={'Bone':10,'Amber_droplet':1}#itam+price
 
     def on_conversation_complete(self):
-        self.game_objects.game.state_manager.enter_state(state_name = 'Vendor', category = 'game_states_facilities', npc = self)
+        #self.game_objects.game.state_manager.enter_state(state_name = 'Vendor', category = 'game_states_facilities', npc = self)
+        self.game_objects.game.state_manager.enter_state(state_name = 'weaver')
 
     def load_sprites(self):
         super().load_sprites('astrid')

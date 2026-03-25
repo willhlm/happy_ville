@@ -21,8 +21,9 @@ class StateManager:
         self.enter_state(initial_state)
     
     def enter_state(self, state_name, **kwargs):
-        if self.states.get(state_name.lower(), False):
-            self.state  = self.states[state_name.lower()](self.entity, self.deciders, config_key = state_name.lower(), **kwargs)
+        normalized_state = state_name.lower()
+        if self.states.get(normalized_state, False):
+            self.state = self.states[normalized_state](self.entity, self.deciders, config_key = normalized_state, **kwargs)
 
     def update(self, dt):
         """Update cooldowns and current state"""
@@ -38,10 +39,11 @@ class StateManager:
         """Progress to next phase of current state"""
         self.state.increase_phase()
 
-    def modify_hit(self, effect):
-        effect = self.state.modify_hit(effect)
-        return effect
-
     def check_player_distance(self):
         player = self.entity.game_objects.player
         self.player_distance = [player.hitbox.centerx - self.entity.hitbox.centerx, player.hitbox.centery - self.entity.hitbox.centery]
+
+    def die(self):
+        if isinstance(self.state, self.states['death']):#if in death state
+            return
+        self.enter_state("death")

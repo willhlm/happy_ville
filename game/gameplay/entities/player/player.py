@@ -17,7 +17,7 @@ class Player(Character):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
         self.sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/player/')
-        self.sprites = read_files.load_sprites_dict('assets/sprites/entities/player/texture/', game_objects, normal_map = True)
+        self.sprites = read_files.load_sprites_dict('assets/sprites/entities/player/default/', game_objects, normal_map = True)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 35)
