@@ -14,10 +14,10 @@ from .common.flying.mygga_variants.mygga_colliding import MyggaColliding
 from .common.flying.mygga_variants.crystal.mygga_crystal import MyggaCrystal
 from .common.flying.mygga_variants.exploding.mygga_exploding import MyggaExploding
 from .common.flying.mygga_variants.mygga_suicide import MyggaSuicide
-from .common.flying.mygga_variants.torpedo.torpedo import MyggaTorpedo
 from .common.flying.mygga_variants.vertical_torpedo.vertical_torpedo import VerticalMyggaTorpedo
 from .common.flying.mygga_variants.casual.mygga import Mygga
-from .common.flying.bee import Bee
+from .common.flying.bees.big_bee import BigBee
+from .common.flying.bees.small_bee.small_bee import SmallBee
 
 from .common.ground.crab_crystal.crab_crystal import CrabCrystal
 from .common.ground.egg import Egg
@@ -29,7 +29,7 @@ from .common.ground.sandrew.sandrew import Sandrew
 from .common.ground.shroompoline import Shroompoline
 from .common.ground.svampis import Svampis
 from .common.ground.vatt.vatt import Vatt
-from .common.ground.wild_swine import WildSwine
+from .common.ground.wild_swine.wild_swine import WildSwine
 from .common.ground.maggot.maggot import Maggot
 from .common.ground.hedge.hedge import Hedge
 from .common.ground.tagg_mus.tagg_mus import TaggMus

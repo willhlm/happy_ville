@@ -1,7 +1,7 @@
 import pygame
 from engine.utils import read_files
 from gameplay.entities.items.base.interactable_item import InteractableItem
-from .config import DYES, ORIGINAL_COLOUR
+from .config import DYES, PALETTE_CHANNELS
 
 class Dyes(InteractableItem):#ring in which to attach radnas
     def __init__(self, pos, game_objects, **kwarg):
@@ -12,11 +12,10 @@ class Dyes(InteractableItem):#ring in which to attach radnas
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
 
-        self.currentstate.enter_state('Idle')
-
-        self.type = DYES[self.name]['type']
-        self.repalce_colour = DYES[self.name][self.type]['colours']
-        self.target_colour = ORIGINAL_COLOUR[self.type]
+        dye_config = DYES[self.name]
+        self.channel = dye_config['channel']
+        self.target_colour = PALETTE_CHANNELS[self.channel]['source']
+        self.replace_colour = dye_config['target']
 
     def pickup(self, player):
         super().pickup(player)

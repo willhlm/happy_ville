@@ -56,7 +56,7 @@ class Weaver(GameState):
             if dye is None:
                 continue
             original_colours.extend(dye.target_colour)
-            replace_colours.extend(dye.repalce_colour)
+            replace_colours.extend(dye.replace_colour)
 
         self._set_palette_swap_uniforms(shader, original_colours, replace_colours)
 

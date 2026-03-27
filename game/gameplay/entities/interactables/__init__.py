@@ -20,6 +20,7 @@ from .fast_travel import FastTravel
 from .fireplace.fireplace import Fireplace
 
 from .grass.cave_grass import InteractableCaveGrass
+from .vines.interactable_vines import InteractableVines
 
 from .inorinoki import Inorinoki
 from .verve_tree import VerveTree

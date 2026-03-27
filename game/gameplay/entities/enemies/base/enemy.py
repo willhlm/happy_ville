@@ -62,7 +62,10 @@ class Enemy(Character):
     def loots(self):#called when dead
         for key in self.inventory.keys():#go through all loot
             for i in range(0, self.inventory[key]):#make that many object for that specific loot and add to gorup
-                obj = self.game_objects.registry.fetch('items', key)(self.hitbox.midtop, self.game_objects) 
-                obj.spawn_position()                                         
+                obj = self.game_objects.registry.fetch('items', key)(self.hitbox.midtop, self.game_objects)
+                obj.hitbox.midbottom = (self.hitbox.centerx, self.hitbox.top - 1)
+                obj.update_rect_x()
+                obj.update_rect_y()
+                obj.spawn_position()
                 self.game_objects.loot.add(obj)
             self.inventory[key] = 0

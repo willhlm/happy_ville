@@ -23,8 +23,5 @@ class FlyingEnemy(Enemy):
         self.rect.center = self.hitbox.center
         self.true_pos[0] = self.rect.left
 
-    def killed(self):#called when death animation starts playing
-        pass
-
     def limit_y(self):
         pass

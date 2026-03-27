@@ -30,7 +30,7 @@ class WeaverLoader(BaseLoader):
                 category = properties['category']
                 self.categories[category] = {
                     'container': InventoryContainer(topleft_object_position, self.game_objects, category),
-                    'dye_key': properties.get('dye_key', category),
+                    'channel_key': properties.get('channel_key', category),
                     'dyes': [None],
                     'index': 0,
                 }
@@ -42,6 +42,6 @@ class WeaverLoader(BaseLoader):
 
         for dye in dyes:
             for entry in self.categories.values():
-                if dye.type == entry['dye_key']:
+                if dye.channel == entry['channel_key']:
                     entry['dyes'].append(dye)
                     break

@@ -1282,7 +1282,11 @@ class Nordveden(Biome):
 
             elif id == 8:#cocoon
                 new_boss = self.level.game_objects.registry.fetch('enemies', 'cocoon_boss')(object_position, self.level.game_objects)
-                self.level.game_objects.interactables.add(new_boss)                                                       
+                self.level.game_objects.interactables.add(new_boss)   
+
+            elif id == 9:#vines
+                new_vine = InteractableVines(object_position, self.level.game_objects)
+                self.level.game_objects.interactables.add(new_vine)                                                                    
 
 class Rhoutta_encounter(Biome):
     def __init__(self, level):
