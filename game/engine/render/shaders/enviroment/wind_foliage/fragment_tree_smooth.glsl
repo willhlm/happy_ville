@@ -1,10 +1,12 @@
 #version 330 core
 
 in vec2 fragmentTexCoord;
-in vec2 worldPosition;
+
 
 uniform sampler2D imageTexture;
 uniform float time;
+
+uniform vec2 worldPosition;
 
 // Wind parameters
 uniform float wind_strength = 1.0;
@@ -138,6 +140,7 @@ void main()
     // ============================================
     // VORONOI CELL (for variation within same depth)
     // ============================================
+    vec2 worldPosition = fragmentTexCoord;
     vec2 cell_id = voronoiID(worldPosition * leaf_cell_size);
     float cell_seed1 = hash12(cell_id);
     float cell_seed2 = hash12(cell_id + vec2(17.3, 53.7));

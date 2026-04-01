@@ -31,7 +31,7 @@ class Wolfies(Boss):
 
     def attack(self, lifetime = 10):#called from states, attack main
         attack = HurtBox(self, lifetime = 10, dir = self.dir, size = [64, 64])#make the object
-        self.game_objects.eprojectiles.add(attack)#add to group but in main phase
+        self.game_objects.projectiles.add_enemy(attack)#add to group but in main phase
 
     def slam_attack(self):#called from states, attack main
         self.game_objects.cosmetics.add(ChainSpawner(self.rect.center, self.game_objects, SlamAttack, direction = self.dir, distance = 50, number = 5, frequency = 20))

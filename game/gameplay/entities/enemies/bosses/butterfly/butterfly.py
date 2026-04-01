@@ -20,14 +20,8 @@ class Butterfly(FlyingEnemy):
         super().dead()
         self.game_objects.signals.emit('butterfly_killed')
 
-    def right_collision(self,block, type = 'Wall'):
+    def on_platform_side_collision(self, side, block, collision_type = 'Wall'):
         pass
 
-    def left_collision(self,block, type = 'Wall'):
-        pass
-
-    def down_collision(self,block):
-        pass
-
-    def top_collision(self,block):
+    def on_platform_vertical_collision(self, side, block):
         pass

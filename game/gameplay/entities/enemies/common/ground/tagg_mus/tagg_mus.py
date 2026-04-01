@@ -1,5 +1,4 @@
-import pygame
-import math
+import pygame, random, math
 from gameplay.entities.enemies.base.enemy import Enemy
 from engine.utils import read_files
 from .config import ENEMY_CONFIG 
@@ -35,28 +34,30 @@ class TaggMus(Enemy):
 
         self.health = self.config['health']   
         self.currentstate = StateManager(self, custom_states = TAGGMUS_STATES, custom_deciders = TAGGMUS_DECIDERS)
-        self.tagg_burst_index = 0
 
-    def emit_tagg_burst(self, angle_offset = 0, count = None, speed = None):
+    def emit_tagg_burst(self):#perhaps make it so that easer to defeat with dash abilty as we can get close and go under the volley
         attack_cfg = self.config['attacks']['tagg_burst']
-        count = count or attack_cfg['counts'][0]
-        speed = speed or attack_cfg['speed'][0]
+        count = random.choice(attack_cfg['counts'])
+        speed = [attack_cfg['speed'][0], attack_cfg['speed'][1]]
         lifetime = attack_cfg['lifetime']
         spawn_radius = attack_cfg['spawn_radius']
+        start_angle = attack_cfg['angle_start_degrees']
+        end_angle = attack_cfg['angle_end_degrees']
 
-        for index in range(count):
-            angle = angle_offset + (math.tau * index / count)
-            velocity = [math.cos(angle) * speed, math.sin(angle) * speed]
+        angle_step = (end_angle - start_angle) / (count - 1)
+        angles = [start_angle + angle_step * index for index in range(count)]
+   
+        for angle_degrees in angles:
+            angle = math.radians(angle_degrees)
+            velocity = [math.cos(angle) * speed[0], -math.sin(angle) * speed[1]]
             spawn_pos = (
                 self.hitbox.centerx + math.cos(angle) * spawn_radius,
-                self.hitbox.centery + math.sin(angle) * spawn_radius,
+                self.hitbox.centery - math.sin(angle) * spawn_radius,
             )
 
             projectile = Tagg(spawn_pos, self.game_objects, lifetime=lifetime, velocity=velocity)
-            projectile.set_pos(spawn_pos)
-            self.projectiles.add(projectile)
-
-        self.tagg_burst_index += 1
+            projectile.body.set_pos(spawn_pos)
+            self.game_objects.projectiles.add_enemy(projectile)
 
     def start_attack_repeat_cooldown(self, duration):
         self.currentstate.cooldowns.set('tagg_burst_repeat', duration)

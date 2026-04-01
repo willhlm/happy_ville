@@ -3,10 +3,11 @@ from gameplay.entities.enemies.base.flying_enemy import FlyingEnemy
 from engine.utils import read_files
 from gameplay.entities.enemies.common.shared.states.state_manager import StateManager
 from .config import ENEMY_CONFIG 
-from .states import AttackMain
+from .states import AttackMain, Death
 
 TORPEDO_STATES = {
     'attack_main': AttackMain,
+    'death': Death,
 }
 
 class SmallBee(FlyingEnemy):#torpedo

@@ -12,13 +12,9 @@ class ThunderDiveStatue(Interactables):#interact with it to upgrade horagalles r
 
         ability = self.game_objects.player.abilities.spirit_abilities.get('Thunder', False)
         self.interacted = ability and ability.level == 2#if level 2, inteeracted = True
-
-        self.shader_state = {False : states_shader.Idle, True: states_shader.Tint}[self.interacted](self, colour = [0, 0, 0, 100])
+        if self.interacted:
+            self.shader_state.enter_state('tint', colour = [0, 0, 0, 100])
         self.text = 'thunder dive in directions'
-
-    def draw(self, target):
-        self.shader_state.draw()
-        super().draw(target)
 
     def interact(self):#when player press t/y
         if self.interacted: return

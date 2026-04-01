@@ -67,7 +67,7 @@ class AreaSpawner(StaticEntity):
                 pending_strike.reset_warning_timer(self.warning_interval)
 
             if pending_strike.should_spawn():
-                self.game_objects.eprojectiles.add(FallingRock(pending_strike.spawn_position, self.game_objects))
+                self.game_objects.projectiles.add_enemy(FallingRock(pending_strike.spawn_position, self.game_objects))
                 spawned_projectiles.append(pending_strike)
 
         for pending_strike in spawned_projectiles:

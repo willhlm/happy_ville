@@ -11,13 +11,9 @@ class AirDashStatue(Interactables):#interact with it to get air dash
         self.hitbox = self.rect.copy()
 
         self.interacted = self.game_objects.player.states.get('Air_dash', False)
-
-        self.shader_state = {False : states_shader.Idle, True: states_shader.Tint}[self.interacted](self, colour = [0,0,0,100])
+        if self.interacted:
+            self.shader_state.enter_state('tint', colour = [0,0,0,100])
         self.text = 'dash in air'
-
-    def draw(self, target):
-        self.shader_state.draw()
-        super().draw(target)
 
     def interact(self):#when player press t/y
         if self.interacted: return

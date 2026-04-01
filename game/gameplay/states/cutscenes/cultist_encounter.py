@@ -3,7 +3,7 @@ from .base.cutscene_engine import CutsceneEngine
 class CultistEncounter(CutsceneEngine):#intialised from cutscene trigger
     def __init__(self,game):
         super().__init__(game)
-        self.game.game_objects.player.death_state.handle_input('cultist_encounter')
+        self.game.game_objects.player.death_manager.set_override(self.handle_player_death)
         self.game.game_objects.quests_events.initiate_event('cultist_encounter', kill = 2)
 
         pos = [1420, 500]
@@ -48,3 +48,9 @@ class CultistEncounter(CutsceneEngine):#intialised from cutscene trigger
     def on_exit(self):
         self.game.game_objects.camera_manager.camera.exit_state()
         super().on_exit()
+
+    def handle_player_death(self):
+        player = self.game.game_objects.player
+        player.reset_movement()
+        self.game.game_objects.map.load_map(self.game.game_objects.game.state_stack[-1], 'dark_forest_1', '1')
+        player.death_manager.clear_override()

@@ -39,16 +39,19 @@ class Death(CutsceneEngine):#when aila dies
             map_name = self.game.game_objects.player.backpack.map.spawn_point['map']
             point = self.game.game_objects.player.backpack.map.spawn_point['point']
 
-        # Instead of self.game.game_objects.map.load_map(...)
         self.game.game_objects.transition.run(
             previous_state=self,                   
             style="fade_black",
             action=lambda: self.game.game_objects.map.load_now(map_name, point),
-            after=lambda: self.game.game_objects.player.currentstate.enter_state("invisible"),
+            on_covered=self._on_respawn_map_ready,
+            after=self._on_respawn_map_loaded,
         )
 
-        self.stage = 1
+    def _on_respawn_map_ready(self):
+        self.game.game_objects.player.currentstate.enter_state("invisible")
 
+    def _on_respawn_map_loaded(self):
+        self.stage = 1
 
     def handle_events(self,input):
         input.processed()

@@ -51,7 +51,8 @@ class Gameplay(GameState):
 
             elif input.name == 'y':
                 input.processed()
-                self.game.game_objects.collisions.check_interaction_collision()
+                if self.game.game_objects.player.currentstate.can_interact():
+                    self.game.game_objects.collisions.check_interaction_collision()
 
             elif input.name == 'select':
                 input.processed()

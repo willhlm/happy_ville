@@ -17,18 +17,18 @@ class Basic_states():
 
     def collide_entity_y(self,entity):                      
         if self.entity.velocity[1] < 0:#going up              
-            entity.down_collision(self.entity)
+            entity.platform_physics.resolve_vertical_collision(self.entity, 'bottom')
         else:#going down
-            entity.top_collision(self.entity)
-        entity.update_rect_y()    
+            entity.platform_physics.resolve_vertical_collision(self.entity, 'top')
+        entity.body.update_rect_y()    
 
     def collide_y(self,entity):                    
         if entity.velocity[1] > self.entity.velocity[1]:#going down               
-            entity.down_collision(self.entity)
-            entity.limit_y()
+            entity.platform_physics.resolve_vertical_collision(self.entity, 'bottom')
+            entity.platform_physics.limit_y()
         else:#going up
-            entity.top_collision(self.entity)
-        entity.update_rect_y()        
+            entity.platform_physics.resolve_vertical_collision(self.entity, 'top')
+        entity.body.update_rect_y()        
 
     def update(self, dt):
         pass
@@ -57,11 +57,10 @@ class Go_down(Basic_states):
 
     def collide_entity_y(self,entity):     
         if self.entity.velocity[1] < 0:#going up              
-            entity.down_collision(self.entity)
+            entity.platform_physics.resolve_vertical_collision(self.entity, 'bottom')
         else:#going down            
-            entity.take_dmg(1)#returns true if damae was taken         
-            self.entity.hole.player_transport(entity)                
-        entity.update_rect_y()    
+            self.entity.hole.on_collision(entity)
+        entity.body.update_rect_y()    
 
 class Down(Basic_states):
     def __init__(self,entity,**kwarg):

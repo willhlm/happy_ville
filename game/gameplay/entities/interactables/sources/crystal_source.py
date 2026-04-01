@@ -18,5 +18,5 @@ class CrystalSource(Interactables):#the thng that spits out crystals in crystal 
         self.time += dt
         if self.time > self.frequency:
             crystal = Projectile_1(self.rect.center, self.game_objects, **self.kwarg)
-            self.game_objects.eprojectiles.add(crystal)
+            self.game_objects.projectiles.add_enemy(crystal)
             self.time = 0

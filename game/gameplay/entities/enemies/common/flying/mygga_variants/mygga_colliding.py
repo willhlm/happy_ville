@@ -24,33 +24,15 @@ class MyggaColliding(FlyingEnemy):#bounce around
     def update_vel(self):
         pass
 
-    #ramp collisions
-    def ramp_top_collision(self, ramp):#called from collusion in clollision_ramp
-        self.hitbox.top = ramp.target
-        self.collision_types['top'] = True
+    def on_ramp_collision(self, side, ramp):
         self.velocity[1] *= -1
 
-    def ramp_down_collision(self, ramp):#called from collusion in clollision_ramp
-        self.hitbox.bottom = ramp.target
-        self.collision_types['bottom'] = True
-        self.velocity[1] *= -1
-
-    #platform collision
-    def right_collision(self, block, type = 'Wall'):
-        super().right_collision(block)
+    def on_platform_side_collision(self, side, block, collision_type = 'Wall'):
+        super().on_platform_side_collision(side, block, collision_type)
         self.velocity[0] *= -1
-        self.dir[0] = -1
+        self.dir[0] = -1 if side == 'right' else 1
 
-    def left_collision(self, block, type = 'Wall'):
-        super().left_collision(block)
-        self.velocity[0] *= -1
-        self.dir[0] = 1
-
-    def down_collision(self, block):
-        super().down_collision(block)
-        self.velocity[1] *= -1
-
-    def top_collision(self, block):
-        self.hitbox.top = block.hitbox.bottom
-        self.collision_types['top'] = True
+    def on_platform_vertical_collision(self, side, block):
+        if side == 'bottom':
+            super().on_platform_vertical_collision(side, block)
         self.velocity[1] *= -1

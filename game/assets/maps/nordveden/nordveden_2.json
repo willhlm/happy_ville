@@ -1638,24 +1638,6 @@
                          "y":544
                         }, 
                         {
-                         "gid":3,
-                         "height":16,
-                         "id":875,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"class",
-                                 "type":"string",
-                                 "value":"vertical_mygga_torpedo"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":1456,
-                         "y":544
-                        }, 
-                        {
                          "gid":8,
                          "height":192,
                          "id":879,
@@ -1918,6 +1900,24 @@
                          "width":240,
                          "x":576,
                          "y":1248
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":916,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"vertical_mygga_torpedo"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1568,
+                         "y":560
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -1957,7 +1957,7 @@
          "y":0
         }],
  "nextlayerid":106,
- "nextobjectid":916,
+ "nextobjectid":917,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

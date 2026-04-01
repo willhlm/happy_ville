@@ -33,8 +33,10 @@ class Portal(Basic_states):
         
         self.game_objects.enemies.draw(self.portal.bg_grey_layer)
         self.game_objects.npcs.draw(self.portal.bg_grey_layer)
-        self.game_objects.fprojectiles.draw(self.portal.bg_grey_layer)
-        self.game_objects.eprojectiles.draw(self.portal.bg_grey_layer)
+        self.game_objects.projectiles.friendly.draw(self.portal.bg_grey_layer)
+        self.game_objects.projectiles.friendly_platform.draw(self.portal.bg_grey_layer)
+        self.game_objects.projectiles.enemy.draw(self.portal.bg_grey_layer)
+        self.game_objects.projectiles.enemy_platform.draw(self.portal.bg_grey_layer)
         self.game_objects.loot.draw(self.portal.bg_grey_layer)
         self.game_objects.platforms.draw(self.portal.bg_grey_layer)
         self.game_objects.players.draw(self.portal.bg_grey_layer)

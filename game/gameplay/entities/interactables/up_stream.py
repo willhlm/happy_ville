@@ -21,15 +21,15 @@ class UpStream(StaticEntity):#a draft that can lift enteties along a direction
         self.channel = game_objects.sound.play_sfx(sounds['idle'][0], loop = -1, vol = 0.5)
         self.type = 'up_stream_vertical' if self.dir[1] != 0 else 'up_stream_horizontal'
 
-    def collision(self, entity):
-        pass
-
     def on_collision(self, entity):#entity collision
         entity.velocity[1] += self.dir[1] * int(entity.collision_types['bottom'])#a small inital boost if on ground
         entity.movement_manager.add_modifier(self.type, speed = [self.dir[0] * self.accel_x, self.dir[1] * self.accel_y], max_speed = self.max_speed)
 
     def on_noncollision(self, entity):
         entity.movement_manager.remove_modifier(self.type)
+
+    def collision(self, entity):
+        pass
 
     def release_texture(self):
         self.image.release()

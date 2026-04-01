@@ -20,6 +20,6 @@ class CollisionOnewayUp(Platform):
         )
 
         if horizontal_contact and (crossed_top or inside_snap_window):
-            entity.down_collision(self)
-            entity.limit_y()
-            entity.update_rect_y()
+            entity.platform_physics.resolve_vertical_collision(self, 'bottom')
+            entity.platform_physics.limit_y()
+            entity.body.update_rect_y()

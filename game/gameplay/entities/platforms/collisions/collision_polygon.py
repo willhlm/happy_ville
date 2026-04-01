@@ -42,8 +42,8 @@ class CollisionPolygon(Platform):
 
         entity.hitbox.x += move_x
         entity.hitbox.y += move_y
-        entity.update_rect_x()
-        entity.update_rect_y()
+        entity.body.update_rect_x()
+        entity.body.update_rect_y()
 
     def dot(self, a, b):
         return a[0]*b[0] + a[1]*b[1]

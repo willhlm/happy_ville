@@ -6,7 +6,7 @@ from typing import Any, Dict, Optional, Tuple
 import pygame
 
 from engine import constants as C
-from engine.system import groups
+from engine import groups
 from engine.utils import read_files
 
 from gameplay.entities.items import SoulEssence
@@ -568,9 +568,9 @@ class ObjectSpawner:
                             if property['value'] != ctx.spawn:
                                 continue
 
-                            self.game_objects.player.set_pos(object_position)
+                            self.game_objects.player.body.set_pos(object_position)
                         else:#coordinate-based spawn
-                            self.game_objects.player.set_pos(ctx.spawn)
+                            self.game_objects.player.body.set_pos(ctx.spawn)
 
                         self.game_objects.player.reset_movement()
                         ctx.spawned = True#mark as spawned to avoid re-entry
@@ -1121,7 +1121,7 @@ class Village(Biome):
         super().__init__(level)
 
     def post_process(self, layer_name, parallax):#called at the end of group loading
-        if self.live_blur:       
+        if self.live_blur:
             downsample = 1         
             if parallax[0] == 1: 
                  radius = 0.01

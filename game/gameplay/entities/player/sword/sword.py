@@ -1,10 +1,11 @@
 import pygame, random
 
 from gameplay.entities.projectiles.base.melee import Melee
+from gameplay.entities.shared.components.body.melee_body import SwordBody
 from engine.utils import read_files
 from . import states_sword
 from engine import constants as C
-from gameplay.entities.shared.components import hit_effects
+from gameplay.entities.shared.components.hit import hit_effects
 
 class Sword(Melee):
     def __init__(self, entity):
@@ -15,6 +16,7 @@ class Sword(Melee):
         self.animation.play('slash_1')
         self.rect = pygame.Rect(0, 0, self.image.width, self.image.height)
         self.hitbox = self.rect.copy()
+        self.body = SwordBody(self)
         self.currentstate = states_sword.Slash_1(self)
 
         self.tungsten_cost = 1#the cost to level up to next level
@@ -25,12 +27,6 @@ class Sword(Melee):
     def use_sword(self, swing = 'light'):#called from player stetas whenswing sword
         self.stone_states['slash'].slash_speed()
         self.entity.game_objects.sound.play_sfx(self.entity.sword.sounds['swing'][0])
-
-    def update_hitbox(self):
-        hitbox_attr, entity_attr = self.direction_mapping[tuple(self.dir)]#self.dir is set in states_sword
-        setattr(self.hitbox, hitbox_attr, getattr(self.entity.hitbox, entity_attr))
-        self.rect.center = self.hitbox.center#match the positions of hitboxes
-        self.currentstate.update_rect()
 
     def collision_projectile(self, eprojectile):#fprojecticle proectile collision with projectile
         effect = self.create_effect()

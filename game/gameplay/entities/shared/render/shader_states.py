@@ -104,13 +104,13 @@ class Invincibile(BaseState):#blink white -> enteyties use it
 class Mix_colour(BaseState):#TODO #move to shadders for the entities
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.shader = self.entity.game_objects.shaders['mix_colour']
-        self.entity.shader['position'] = 0
+        self.shader = self.entity.game_objects.shaders['mix_colour']
+        self.shader['position'] = 0
 
     def set_uniforms(self):
-        self.entity.shader['colour'] = self.entity.colour#higher alpha for lower parallax
-        self.entity.shader['new_colour'] = self.entity.new_colour#higher alpha for lower parallax
-        self.entity.shader['position'] = max((self.entity.game_objects.player.hitbox.centerx - self.entity.bounds.left)/self.entity.bounds[2],0)
+        self.shader['colour'] = self.entity.colour#higher alpha for lower parallax
+        self.shader['new_colour'] = self.entity.new_colour#higher alpha for lower parallax
+        self.shader['position'] = max((self.entity.game_objects.player.hitbox.centerx - self.entity.bounds.left)/self.entity.bounds[2],0)
 
     def handle_input(self,input):
         if input == 'idle':
@@ -119,11 +119,11 @@ class Mix_colour(BaseState):#TODO #move to shadders for the entities
 class Colour(BaseState):#TODO #move to shadders for the entities
     def __init__(self,entity, **kwarg):#colour is a list of 4 floats):
         super().__init__(entity)
-        self.entity.shader = self.entity.game_objects.shaders['colour']
+        self.shader = self.entity.game_objects.shaders['colour']
         self.colour = kwarg.get('colour', [1,1,1,1])#colour is a list of 4 floats
         
-    def set_uniforms(self, dt):
-        self.entity.shader['colour'] = self.colour
+    def set_uniforms(self):
+        self.shader['colour'] = self.colour
 
     def handle_input(self,input):
         if input == 'idle':
@@ -150,7 +150,7 @@ class Teleport(BaseState):
     def __init__(self,entity):
         super().__init__(entity)
         self.time = 0
-        self.entity.shader = entity.game_objects.shaders['teleport']#apply teleport first and then bloom
+        self.shader = entity.game_objects.shaders['teleport']#apply teleport first and then bloom
 
     def update_render(self, dt):
         self.time += 0.01
@@ -158,13 +158,13 @@ class Teleport(BaseState):
             self.entity.kill()
 
     def set_uniforms(self):
-        self.entity.shader['progress'] = self.time
+        self.shader['progress'] = self.time
 
 class Glow(BaseState):#TODO #move to shadders for the entities
     def __init__(self,entity, colour = [100,200,255,100]):
         super().__init__(entity)
         self.colour = colour
-        self.entity.shader = self.entity.game_objects.shaders['bloom']
+        self.shader = self.entity.game_objects.shaders['bloom']
         self.layer1 = self.entity.game_objects.game.display.make_layer(self.entity.image.size)#!! need to move it somewehre in memory
 
     def set_uniforms(self):
@@ -176,7 +176,7 @@ class Shining(BaseState):#TODO #move to shadders for the entities
     def __init__(self,entity, colour = [0.39, 0.78, 1,1]):
         super().__init__(entity)
         self.colour = colour
-        self.entity.shader = self.entity.game_objects.shaders['shining']
+        self.shader = self.entity.game_objects.shaders['shining']
         self.layer1 = self.entity.game_objects.game.display.make_layer(self.entity.image.size)#make a layer ("surface")
         self.time = 0
         self.speed = 0.6
@@ -185,9 +185,9 @@ class Shining(BaseState):#TODO #move to shadders for the entities
         self.time += dt * 0.01
 
     def set_uniforms(self):
-        self.entity.shader['TIME'] = self.time
-        self.entity.shader['tint'] = self.colour
-        self.entity.shader['speed'] = self.speed
+        self.shader['TIME'] = self.time
+        self.shader['tint'] = self.colour
+        self.shader['speed'] = self.speed
 
 class Dissolve(BaseState):#disolve and bloom
     def __init__(self, entity, **kwarg):
@@ -225,11 +225,11 @@ class Dissolve(BaseState):#disolve and bloom
 class Tint(BaseState):#TODO #move to shadders for the entities
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
-        self.entity.shader = self.entity.game_objects.shaders['tint']
+        self.shader = self.entity.game_objects.shaders['tint']
         self.colour = kwarg.get('colour', [0,0,0,0])
 
     def set_uniforms(self):
-        self.entity.shader['colour'] = self.colour
+        self.shader['colour'] = self.colour
 
     def handle_input(self, input, **kwarg):
         if input == 'idle':
@@ -257,13 +257,13 @@ class Palette_swap(BaseState):#TODO #move to shadders for the entities
 
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.shader = self.entity.game_objects.shaders['palette_swap']
+        self.shader = self.entity.game_objects.shaders['palette_swap']
 
     def set_uniforms(self):
         colour_count = min(len(self.entity.original_colour), len(self.entity.replace_colour), self.MAX_PALETTE_SWAP_COLOURS)
-        self.entity.shader['number_colour'] = colour_count
-        self.entity.shader['original_colors'] = self._format_palette_uniform(self.entity.original_colour, colour_count)
-        self.entity.shader['replace_colors'] = self._format_palette_uniform(self.entity.replace_colour, colour_count)
+        self.shader['number_colour'] = colour_count
+        self.shader['original_colors'] = self._format_palette_uniform(self.entity.original_colour, colour_count)
+        self.shader['replace_colors'] = self._format_palette_uniform(self.entity.replace_colour, colour_count)
 
     def _format_palette_uniform(self, colours, colour_count):
         padded = list(colours[:colour_count])
@@ -297,7 +297,7 @@ class Noise_border(BaseState):#TODO #move to shadders for the entities
         self.empty = self.entity.game_objects.game.display.make_layer(self.entity.image.size)#move wlesewhere, memory leaks
         self.color_Lookup = self.entity.game_objects.game.display.make_layer(self.entity.image.size)#move wlesewhere, memory leaks
 
-        self.entity.shader = self.entity.game_objects.shaders['noise_border']
+        self.shader = self.entity.game_objects.shaders['noise_border']
         self.time = 0
 
     def update_render(self, dt):

@@ -62,22 +62,22 @@ class Bubble(BaseDynamic):#dynamic one: #shoudl be added to platforms and dynami
 
     def collide_x(self, entity):  # Handles horizontal collision
         if entity.hitbox.right >= self.hitbox.left and entity.old_hitbox.right <= self.old_hitbox.left:
-            entity.right_collision(self)
+            entity.platform_physics.resolve_side_collision(self, 'right')
             self.collided_right = True
         if entity.hitbox.left <= self.hitbox.right and entity.old_hitbox.left >= self.old_hitbox.right:
-            entity.left_collision(self)
+            entity.platform_physics.resolve_side_collision(self, 'left')
             self.collided_left = True
-        entity.update_rect_x()
+        entity.body.update_rect_x()
 
     def collide_y(self, entity):  # Handles vertical collision
         if entity.hitbox.bottom >= self.hitbox.top and entity.old_hitbox.bottom <= self.old_hitbox.top:
-            entity.down_collision(self)
-            entity.limit_y()
+            entity.platform_physics.resolve_vertical_collision(self, 'bottom')
+            entity.platform_physics.limit_y()
             self.collided_y = True
         if entity.hitbox.top <= self.hitbox.bottom and entity.old_hitbox.top >= self.old_hitbox.bottom:
-            entity.top_collision(self)
+            entity.platform_physics.resolve_vertical_collision(self, 'top')
             self.deactivate()
-        entity.update_rect_y()  # Update player’s vertical position
+        entity.body.update_rect_y()  # Update player’s vertical position
 
     def release_texture(self):
         pass

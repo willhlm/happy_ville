@@ -1,8 +1,8 @@
 import pygame
-from gameplay.entities.projectiles.base.projectiles import Projectiles
+from gameplay.entities.projectiles.base.platform_projectile import PlatformProjectile
 from engine.utils import read_files
 
-class PoisonBlob(Projectiles):
+class PoisonBlob(PlatformProjectile):
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects)
         self.sprites = PoisonBlob.sprites

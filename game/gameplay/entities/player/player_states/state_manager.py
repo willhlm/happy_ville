@@ -73,6 +73,9 @@ class StateManager():
     def handle_movement(self, event):#called from gameplay loop state
         self.composite_state.handle_movement(event)
 
+    def can_interact(self):
+        return self.composite_state.can_interact()
+
     def increase_phase(self):#called when an animation is finished for that state
         self.composite_state.increase_phase()
 

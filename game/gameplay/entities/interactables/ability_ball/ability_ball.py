@@ -3,8 +3,8 @@ from engine.utils import read_files
 from engine import constants as C
 from gameplay.entities.interactables.base.interactables import Interactables
 from .states import Grow
-from gameplay.entities.shared.components.hit_effects import screen_shake_callback
-from gameplay.entities.shared.components.hitstop_component import HitstopComponent
+from gameplay.entities.shared.components.hit.hit_effects import screen_shake_callback
+from gameplay.entities.shared.components.hit.hitstop_component import HitstopComponent
 
 class AbilityBall(Interactables):
     def __init__(self, pos, game_objects, ability):

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pygame
+import random
 from typing import Callable, Dict
 
 from .sound_library import SFXLibrary, MusicLibrary
@@ -29,6 +30,16 @@ class GameAudio:
 
     def play_ui_sound(self, ui_event, volume=0.4):
         sound = self.sfx_library.get_ui_sound(ui_event)
+        return self.sound_player.play_sfx(sound, volume)
+
+    def play_enemy_sound(self, enemy, event, volume=0.4):
+        sounds = getattr(enemy, 'sounds', {})
+        sound_list = sounds.get(event)
+
+        if sound_list:
+            return self.sound_player.play_sfx(random.choice(sound_list), volume)
+
+        sound = self.sfx_library.get_enemy_death_sound(event)
         return self.sound_player.play_sfx(sound, volume)
 
     def play_background_sound(self, track, volume=0.7, index=0, loop=-1, fade=300):

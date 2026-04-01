@@ -1,6 +1,6 @@
 import math, pygame
 from .states_time_collision import Idle
-from gameplay.entities.shared.components import hit_effects
+from gameplay.entities.shared.components.hit import hit_effects
 
 # ----------------------------
 # Component base
@@ -56,11 +56,11 @@ class SolidCollision(PlatformComponent):
         )
 
         if hit_from_left:
-            entity.right_collision(self.p)
+            entity.platform_physics.resolve_side_collision(self.p, 'right')
         elif hit_from_right:
-            entity.left_collision(self.p)
+            entity.platform_physics.resolve_side_collision(self.p, 'left')
 
-        entity.update_rect_x()
+        entity.body.update_rect_x()
 
     def collide_y(self, entity):
         eps = 1
@@ -75,12 +75,12 @@ class SolidCollision(PlatformComponent):
         )
 
         if landed_from_above:
-            entity.down_collision(self.p)
-            entity.limit_y()
+            entity.platform_physics.resolve_vertical_collision(self.p, 'bottom')
+            entity.platform_physics.limit_y()
         elif hit_from_below:
-            entity.top_collision(self.p)
+            entity.platform_physics.resolve_vertical_collision(self.p, 'top')
 
-        entity.update_rect_y()
+        entity.body.update_rect_y()
 
 class CarryOnTop(PlatformComponent):
     def pre_entity_y_collision(self, entity):
@@ -105,7 +105,7 @@ class CarryOnTop(PlatformComponent):
         entity.true_pos[1] += self.p.delta[1]
         entity.rect.left = round(entity.true_pos[0])
         entity.rect.top = round(entity.true_pos[1])
-        entity.update_hitbox()
+        entity.body.update_hitbox()
         return True
 
 class OneWayUpCollision(PlatformComponent):
@@ -118,9 +118,9 @@ class OneWayUpCollision(PlatformComponent):
             return  # going up: ignore
         offset = entity.velocity[1] + abs(entity.velocity[0]) + 1
         if entity.hitbox.bottom <= self.p.hitbox.top + offset:
-            entity.down_collision(self.p)
-            entity.limit_y()
-            entity.update_rect_y()
+            entity.platform_physics.resolve_vertical_collision(self.p, 'bottom')
+            entity.platform_physics.limit_y()
+            entity.body.update_rect_y()
 
 #notr used
 class DamageCollision(PlatformComponent):
@@ -144,21 +144,21 @@ class DamageCollision(PlatformComponent):
 
     def collide_x(self, entity):
         if entity.velocity[0] > 0:
-            entity.right_collision(self.p)
+            entity.platform_physics.resolve_side_collision(self.p, 'right')
             self._apply_damage(entity, -self.kx, entity.velocity[1])
         else:
-            entity.left_collision(self.p)
+            entity.platform_physics.resolve_side_collision(self.p, 'left')
             self._apply_damage(entity, +self.kx, entity.velocity[1])
-        entity.update_rect_x()
+        entity.body.update_rect_x()
 
     def collide_y(self, entity):
         if entity.velocity[1] > 0:
-            entity.down_collision(self.p)
+            entity.platform_physics.resolve_vertical_collision(self.p, 'bottom')
             self._apply_damage(entity, entity.velocity[0], -self.ky)
         else:
-            entity.top_collision(self.p)
+            entity.platform_physics.resolve_vertical_collision(self.p, 'top')
             self._apply_damage(entity, entity.velocity[0], +self.ky)
-        entity.update_rect_y()
+        entity.body.update_rect_y()
 
 class DamageOnLand(PlatformComponent):
     """Only hurts when the entity lands from above (common 'spikes-on-top' variant)."""
@@ -171,15 +171,15 @@ class DamageOnLand(PlatformComponent):
         if entity.velocity[1] <= 0:
             return
         # treat as a normal solid landing + damage
-        entity.down_collision(self.p)
-        entity.limit_y()
+        entity.platform_physics.resolve_vertical_collision(self.p, 'bottom')
+        entity.platform_physics.limit_y()
 
         effect = self.effect.copy()
         effect.attacker = self.p
         entity.take_hit(effect)
         entity.velocity[1] = -self.ky
 
-        entity.update_rect_y()
+        entity.body.update_rect_y()
 
 
 # ----------------------------
@@ -551,9 +551,9 @@ class DisappearOnStand(PlatformComponent):
             # after delay, start transition_1 (turns collision off)
             self.timers.start_timer(self.disappear_time, self._start_disappear)
 
-            entity.down_collision(self.p)
-            entity.limit_y()
-            entity.update_rect_y()
+            entity.platform_physics.resolve_vertical_collision(self.p, 'bottom')
+            entity.platform_physics.limit_y()
+            entity.body.update_rect_y()
 
     def _start_disappear(self):
         self.p.currentstate.handle_input("dissapear")

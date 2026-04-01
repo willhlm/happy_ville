@@ -20,7 +20,7 @@ class CultistWarrior(Enemy):
         pass
 
     def attack(self):#called from states, attack main
-        self.projectiles.add(HurtBox(self))#add to group
+        self.game_objects.projectiles.add_enemy(HurtBox(self))#add to group
 
     def dead(self):#called when death animation is finished
         super().dead()

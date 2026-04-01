@@ -50,7 +50,7 @@ class Bjorn(Enemy):
 
     def attack(self):#called from states, attack main
         attack = HurtBox(self, lifetime = 10, dir = self.dir, size = [64, 32])#make the object
-        self.projectiles.add(attack)#add to group but in main phase         
+        self.game_objects.projectiles.add_enemy(attack)#add to group but in main phase         
 
     def slam(self):#called from states, attack main
         self.game_objects.signals.emit('fall_projectiles', attack_id='bjorn_slam', source=self)

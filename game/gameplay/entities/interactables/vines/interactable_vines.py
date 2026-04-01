@@ -33,16 +33,11 @@ class InteractableVines(Interactables):#issue when player lands on a bent vine, 
         self.gravity = 0.2
         self.wind_strength = 0.1
         self.collision_padding = max(1.5, self.body_width * 0.08)
+        self.surface_snap_padding = max(1.0, self.body_width * 0.12)
         self.collider = None
         self.player_hitbox = None
         self.prev_collider = None
         self.collider_velocity = [0.0, 0.0]
-        self.contact_release_distance = max(4.0, self.body_width * 0.75)
-        self.edge_transition_distance = max(6.0, self.body_width * 1.5)
-        self.top_hold_margin = max(8.0, self.body_width * 2.5)
-        self.mode_switch_margin = max(6.0, self.body_width * 1.75)
-        self.contact_blend = 0.35
-        self.contact_modes = [0] * self.point_count
         self.is_colliding = False
 
         self.points = []
@@ -118,33 +113,28 @@ class InteractableVines(Interactables):#issue when player lands on a bent vine, 
             point_b[0] -= correction_x * 0.5
             point_b[1] -= correction_y * 0.5
 
-    def _resolve_contact_mode(self, point, collider, player_hitbox, previous_mode):
-        dist_left = abs(point[0] - collider.left)
-        dist_right = abs(collider.right - point[0])
+    def _resolve_collision_axis(self, point, previous, collider):
+        crossed_top = previous[1] <= collider.top < point[1]
+        crossed_bottom = previous[1] >= collider.bottom > point[1]
+        crossed_left = previous[0] <= collider.left < point[0]
+        crossed_right = previous[0] >= collider.right > point[0]
 
-        # Sticky side guards — keep stable contacts from flipping.
-        if previous_mode == -1 and point[0] <= collider.left + self.mode_switch_margin:
-            return -1
-        if previous_mode == 1 and point[0] >= collider.right - self.mode_switch_margin:
-            return 1
+        if crossed_top:
+            return 'top'
+        if crossed_bottom:
+            return 'bottom'
+        if crossed_left:
+            return 'left'
+        if crossed_right:
+            return 'right'
 
-        # Top-contact (mode 0) requires the point to be genuinely at or just inside
-        # the real player top edge — NOT decided by a distance race against collider.top.
-        # The old dist_top min() could classify mid-body and foot-level points as top
-        # contacts because it used the inflated collider top, which sits above the real
-        # player hitbox top.  That misclassification is what causes bent vines to hook.
-        near_player_top = point[1] <= player_hitbox.top + self.segment_length
-        within_top_span = (
-            player_hitbox.left - self.top_hold_margin
-            <= point[0]
-            <= player_hitbox.right + self.top_hold_margin
-        )
-        if near_player_top and within_top_span:
-            return 0
-
-        if abs(dist_left - dist_right) < 2.0 and previous_mode in (-1, 1):
-            return previous_mode
-        return -1 if dist_left < dist_right else 1
+        overlaps = {
+            'left': abs(point[0] - collider.left),
+            'right': abs(collider.right - point[0]),
+            'top': abs(point[1] - collider.top),
+            'bottom': abs(collider.bottom - point[1]),
+        }
+        return min(overlaps, key=overlaps.get)
 
     def _solve_body_collision(self):
         if self.collider is None or self.player_hitbox is None:
@@ -155,68 +145,34 @@ class InteractableVines(Interactables):#issue when player lands on a bent vine, 
         side_offset = self.body_width * 0.5 + self.collision_padding
         for index in range(1, self.point_count):
             point = self.points[index]
-            was_in_contact = self.contact_modes[index] != 0
-            inside = collider.collidepoint(point[0], point[1])
-
-            if not inside and not was_in_contact:
+            previous = self.prev_points[index]
+            if not collider.collidepoint(point[0], point[1]):
                 continue
 
-            # Hard gate: a point below the player's feet has no valid contact state.
-            # Chain constraints can pull lower vine points upward into the collider from
-            # beneath — releasing them here immediately prevents them from being
-            # misclassified and dragged up toward the player top (the hook artefact).
-            if point[1] > player_hitbox.bottom + self.collision_padding:
-                self.contact_modes[index] = 0
-                continue
+            collision_axis = self._resolve_collision_axis(point, previous, collider)
 
-            mode = self.contact_modes[index]
-            if inside or mode == 0:
-                mode = self._resolve_contact_mode(point, collider, player_hitbox, self.contact_modes[index])
-                self.contact_modes[index] = mode
-
-            if mode == 0:
-                if point[0] < player_hitbox.left - self.top_hold_margin:
-                    self.contact_modes[index] = -1
-                    mode = -1
-                elif point[0] > player_hitbox.right + self.top_hold_margin:
-                    self.contact_modes[index] = 1
-                    mode = 1
-
-            if mode == 0:
-                target_x = point[0]
-                target_y = player_hitbox.top - self.collision_padding
-            elif mode < 0:
-                if point[0] < player_hitbox.left - self.contact_release_distance:
-                    self.contact_modes[index] = 0
-                    continue
-                target_x = player_hitbox.left - side_offset
-                target_y = point[1]
-            elif mode > 0:
-                if point[0] > player_hitbox.right + self.contact_release_distance:
-                    self.contact_modes[index] = 0
-                    continue
-                target_x = player_hitbox.right + side_offset
-                target_y = point[1]
+            if collision_axis == 'top':
+                point[1] = player_hitbox.top - self.surface_snap_padding
+                previous[1] = point[1]
+                point[0] += self.collider_velocity[0]
+                previous[0] = point[0] - self.collider_velocity[0] * 0.25
+            elif collision_axis == 'bottom':
+                point[1] = player_hitbox.bottom + self.surface_snap_padding
+                previous[1] = point[1]
+            elif collision_axis == 'left':
+                point[0] = player_hitbox.left - side_offset
+                previous[0] = point[0]
             else:
-                self.contact_modes[index] = 0
-                continue
-
-            target_x += self.collider_velocity[0]
-            point[0] += (target_x - point[0]) * self.contact_blend
-            point[1] += (target_y - point[1]) * self.contact_blend
-
-            # Damp local oscillation while keeping the contact state stable.
-            self.prev_points[index][0] = point[0] - self.collider_velocity[0] * 0.25
-            self.prev_points[index][1] = point[1]
+                point[0] = player_hitbox.right + side_offset
+                previous[0] = point[0]
 
     def _track_collider(self, entity):
         if not hasattr(entity, 'hitbox'):
             return
 
         pad_x = self.body_width + self.collision_padding * 2
-        pad_y = self.collision_padding * 2
         self.player_hitbox = entity.hitbox.copy()
-        self.collider = entity.hitbox.inflate(pad_x, pad_y)
+        self.collider = entity.hitbox.inflate(pad_x, 0)
         if self.prev_collider is None:
             self.collider_velocity[0] = 0.0
             self.collider_velocity[1] = 0.0
@@ -242,8 +198,6 @@ class InteractableVines(Interactables):#issue when player lands on a bent vine, 
         self.prev_collider = None
         self.collider_velocity[0] = 0.0
         self.collider_velocity[1] = 0.0
-        for index in range(1, self.point_count):
-            self.contact_modes[index] = 0
 
     def update(self, dt):
         self.time += dt

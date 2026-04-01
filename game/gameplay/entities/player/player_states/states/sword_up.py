@@ -18,7 +18,7 @@ class SwordUpMain(Sword):
         self.entity.abilities.spirit_abilities['Shield'].sword()
         self.entity.sword.use_sword()
         self.entity.sword.currentstate.enter_state('Slash_up')
-        self.entity.projectiles.add(self.entity.sword)
+        self.entity.game_objects.projectiles.add_friendly(self.entity.sword)
 
     def increase_phase(self):
         if self.entity.collision_types['bottom']:

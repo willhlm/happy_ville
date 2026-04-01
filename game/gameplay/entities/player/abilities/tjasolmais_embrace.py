@@ -24,7 +24,7 @@ class TjasolmaisEmbrace(Ability):#makes the shield, water god
         #self.entity.movement_manager.add_modifier('tjasolmais_embrace', entity = self.entity)
         self.entity.hit_component.damage_manager.add_modifier('tjasolmais_embrace', entity = self.entity)
 
-        self.entity.projectiles.add(self.shield)
+        self.entity.game_objects.projectiles.add_friendly(self.shield)
 
     def update(self, dt):
         pass

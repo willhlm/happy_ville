@@ -35,4 +35,4 @@ class Rav(Enemy):
 
     def attack(self):#called from states, attack main
         attack = HurtBox(self, lifetime = 10, dir = self.dir, size = [32, 32])#make the object
-        self.projectiles.add(attack)#add to group but in main phase
+        self.game_objects.projectiles.add_enemy(attack)#add to group but in main phase

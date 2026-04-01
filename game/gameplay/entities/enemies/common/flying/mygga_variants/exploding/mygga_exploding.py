@@ -18,5 +18,5 @@ class MyggaExploding(FlyingEnemy):
 
     def killed(self):
         self.game_objects.sound.play_sfx(self.sounds['explosion'][0], vol = 0.2)
-        self.projectiles.add(Hurt_box(self, size = [64,64], lifetime = 30, dir = [0,0]))
+        self.game_objects.projectiles.add_enemy(Hurt_box(self, size = [64,64], lifetime = 30, dir = [0,0]))
         self.game_objects.camera_manager.camera_shake(amp = 2, duration = 30)#amplitude and duration

@@ -21,7 +21,7 @@ class SwordAirMain(SwordAir):
         self.entity.sword.use_sword()
         self.entity.sword.dir = self.entity.dir.copy()
         self.entity.sword.currentstate.enter_state('Slash_1')
-        self.entity.projectiles.add(self.entity.sword)
+        self.entity.game_objects.projectiles.add_friendly(self.entity.sword)
 
     def increase_phase(self):
         self.enter_state('fall')

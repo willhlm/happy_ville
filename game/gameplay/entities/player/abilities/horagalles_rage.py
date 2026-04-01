@@ -11,5 +11,4 @@ class HoragallesRage(Ability):#desolate dive:thunder god:
         thunder = Thunder(enemy_rect, self.entity.game_objects, lifetime =  1000)
         thunder.rect.midbottom = enemy_rect.midbottom
         thunder.hitbox = thunder.rect.copy()
-        self.entity.projectiles.add(thunder)#add attack to group
-
+        self.entity.game_objects.projectiles.add_friendly(thunder)#add attack to group

@@ -1,7 +1,7 @@
 import pygame
-from gameplay.entities.projectiles.base.projectiles import Projectiles
+from gameplay.entities.projectiles.base.projectile_base import ProjectileBase
 
-class Shield(Projectiles):#a protection shield
+class Shield(ProjectileBase):#a protection shield
     def __init__(self, entity, **kwarg):
         super().__init__(entity.hitbox.topleft, entity.game_objects)
         self.entity = entity

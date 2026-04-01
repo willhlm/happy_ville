@@ -1,7 +1,7 @@
 import random
 from gameplay.entities.base.character import Character
 from engine.utils.functions import sign
-from gameplay.entities.shared.components import hit_effects
+from gameplay.entities.shared.components.hit import hit_effects
 from gameplay.entities.enemies.base.death_effects import EnemyDeathEffects
 from gameplay.entities.enemies.common.shared.states.state_manager import StateManager
 from gameplay.data.enemy import ENEMY_CONFIG 
@@ -9,7 +9,6 @@ from gameplay.data.enemy import ENEMY_CONFIG
 class Enemy(Character):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)      
-        self.projectiles = game_objects.eprojectiles
         self.group = game_objects.enemies
         self.pause_group = game_objects.entity_pause
         self.description = 'enemy'##used in journal
@@ -50,22 +49,25 @@ class Enemy(Character):
         effect.meta['attacker_dir'] = [pm_one, 0]  # Push player away                   
         damage_applied, modified = player.take_hit(effect)# Player takes hit
 
-    def dead(self):#called when death animation is finished
-        if not self.death_effects.begin_cleanup():
-            return
+    def killed(self):#called at killing blow
+        if not self.death_effects.begin_cleanup(): return        
 
+        self.death_effects.play_kill_sound()
         self.death_effects.emit_particles()
-        self.loots()
         self.game_objects.world_state.statistics_state.update_kill_statistics(type(self).__name__.lower())
+        self._emit_loot()
+
+    def dead(self):#called when death animation is finished                        
+        self.death_effects.play_dead_sound()
         self.death_effects.start_visual()
 
-    def loots(self):#called when dead
+    def _emit_loot(self):
         for key in self.inventory.keys():#go through all loot
             for i in range(0, self.inventory[key]):#make that many object for that specific loot and add to gorup
                 obj = self.game_objects.registry.fetch('items', key)(self.hitbox.midtop, self.game_objects)
                 obj.hitbox.midbottom = (self.hitbox.centerx, self.hitbox.top - 1)
-                obj.update_rect_x()
-                obj.update_rect_y()
+                obj.body.update_rect_x()
+                obj.body.update_rect_y()
                 obj.spawn_position()
                 self.game_objects.loot.add(obj)
             self.inventory[key] = 0

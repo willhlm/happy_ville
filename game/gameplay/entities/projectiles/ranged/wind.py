@@ -1,7 +1,7 @@
 import pygame
-from gameplay.entities.projectiles.base.projectiles import Projectiles
+from gameplay.entities.projectiles.base.projectile_base import ProjectileBase
 
-class Wind(Projectiles):
+class Wind(ProjectileBase):
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects)
         self.image = Wind.image
@@ -29,6 +29,8 @@ class Wind(Projectiles):
 
     def update(self, dt):
         self.time += dt
+        self.body.update_true_pos_x(dt)
+        self.body.update_true_pos_y(dt)
         self.lifetime -= dt
         self.destroy()
 

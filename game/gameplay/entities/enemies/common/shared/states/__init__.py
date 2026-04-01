@@ -2,6 +2,7 @@ from .idle import Idle
 from .wait import Wait
 from .hurt import Hurt
 from .death import Death
+from .dead import Dead
 from .attack import AttackPre, AttackMain
 
 from .ground.patrol import GroundPatrol
@@ -17,6 +18,7 @@ SHARED_STATES = {
         'wait': Wait,
         'hurt': Hurt,
         'death': Death,
+        'dead': Dead,
         'attack_pre': AttackPre,
         'attack_main': AttackMain,
     },
@@ -26,6 +28,7 @@ SHARED_STATES = {
         'wait': Wait,
         'hurt': Hurt,
         'death': Death,
+        'dead': Dead,
         'attack_pre': AttackPre,
         'attack_main': AttackMain,        
     }

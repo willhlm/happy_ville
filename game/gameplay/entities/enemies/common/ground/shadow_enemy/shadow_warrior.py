@@ -17,4 +17,4 @@ class ShadowWarrior(ShadowEnemy):
         self.check_light()
 
     def attack(self):#called from states, attack main
-        self.projectiles.add(Sword(self))#add to group
+        self.game_objects.projectiles.add_enemy(Sword(self))#add to group

@@ -105,8 +105,8 @@ class CollisionRightAngle(Platform):#ramp
 
     def shift_down(self,entity):
         if entity.hitbox.top < self.target:
-            entity.ramp_top_collision(self)
-            entity.update_rect_y()
+            entity.platform_physics.resolve_ramp_collision(self, 'top')
+            entity.body.update_rect_y()
 
     def shift_up(self, other_side, entity, benethe):
         if self.target > entity.hitbox.bottom:
@@ -114,5 +114,5 @@ class CollisionRightAngle(Platform):#ramp
         elif other_side > 0 or benethe > 0:
             entity.go_through['ramp'] = True
         elif not entity.go_through['ramp']: #need to be elif
-            entity.ramp_down_collision(self)
-            entity.update_rect_y()
+            entity.platform_physics.resolve_ramp_collision(self, 'bottom')
+            entity.body.update_rect_y()

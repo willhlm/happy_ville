@@ -3,7 +3,7 @@ from gameplay.entities.enemies.common.shared.states import SHARED_STATES
 from gameplay.entities.enemies.common.shared.deciders import SHARED_DECIDERS
 
 class StateManager:
-    def __init__(self, entity, type = 'ground', custom_states = {}, custom_deciders = None, universal_states = ['death', 'hurt', 'attack_pre', 'attack_main', 'wait']):
+    def __init__(self, entity, type = 'ground', custom_states = {}, custom_deciders = None, universal_states = ['death', 'dead', 'hurt', 'attack_pre', 'attack_main', 'wait']):
         self.entity = entity
         self.cooldowns = CooldownManager()
         self.player_distance = [0, 0]
@@ -44,6 +44,10 @@ class StateManager:
         self.player_distance = [player.hitbox.centerx - self.entity.hitbox.centerx, player.hitbox.centery - self.entity.hitbox.centery]
 
     def die(self):
-        if isinstance(self.state, self.states['death']):#if in death state
+        death_state = self.states.get('death')
+        dead_state = self.states.get('dead')
+        if death_state and isinstance(self.state, death_state):#if already in death flow
+            return
+        if dead_state and isinstance(self.state, dead_state):
             return
         self.enter_state("death")

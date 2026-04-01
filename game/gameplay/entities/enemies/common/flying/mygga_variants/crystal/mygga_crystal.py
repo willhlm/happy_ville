@@ -23,7 +23,7 @@ class MyggaCrystal(FlyingEnemy):
         dirs = [[1,1], [-1,1], [1,-1], [-1,-1]]
         for direction in dirs:
             obj = Poisonblobb(self.hitbox.topleft, self.game_objects, dir = direction, amp = [3,3])
-            self.game_objects.eprojectiles.add(obj)
+            self.game_objects.projectiles.add_enemy(obj)
 
     def chase(self, direction):#called from state: when chaising
         self.velocity[0] += direction[0]*0.5

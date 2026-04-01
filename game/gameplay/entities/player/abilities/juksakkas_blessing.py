@@ -10,4 +10,4 @@ class JuksakkasBlessing(Ability):#arrow -> fetillity god
         self.description = ['shoot arrow','charge arrows','charge for insta kill','imba']
 
     def initiate(self, dir, time):#called when relasing the button
-        self.entity.projectiles.add(Arrow(pos = self.entity.hitbox.topleft, game_objects = self.entity.game_objects, dir = dir, lifetime = 50, time = time))#add attack to group
+        self.entity.game_objects.projectiles.add_friendly(Arrow(pos = self.entity.hitbox.topleft, game_objects = self.entity.game_objects, dir = dir, lifetime = 50, time = time))#add attack to group

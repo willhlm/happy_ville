@@ -14,18 +14,18 @@ class BaseTexture(Platform):#blocks that has tectures
 
     def collide_x(self,entity):
         if entity.velocity[0] > 0:#going to the right
-            entity.right_collision(self)
+            entity.platform_physics.resolve_side_collision(self, 'right')
         else:#going to the leftx
-            entity.left_collision(self)
-        entity.update_rect_x()
+            entity.platform_physics.resolve_side_collision(self, 'left')
+        entity.body.update_rect_x()
 
     def collide_y(self,entity):
         if entity.velocity[1] > 0:#going down
-            entity.down_collision(self)
-            entity.limit_y()
+            entity.platform_physics.resolve_vertical_collision(self, 'bottom')
+            entity.platform_physics.limit_y()
         else:#going up
-            entity.top_collision(self)
-        entity.update_rect_y()
+            entity.platform_physics.resolve_vertical_collision(self, 'top')
+        entity.body.update_rect_y()
 
     def reset_timer(self):#aniamtion need it
         self.currentstate.increase_phase()

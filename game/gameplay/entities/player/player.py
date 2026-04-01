@@ -2,17 +2,16 @@ import pygame
 
 from gameplay.entities.base.character import Character
 from engine.utils import read_files
+from gameplay.entities.player.death_manager import DeathManager
+from gameplay.entities.player.hazard_resolver import PlayerHazardResolver
 from gameplay.entities.player.player_states.state_manager import StateManager
-from gameplay.entities.player import states_death
 from gameplay.entities.player.backpack import backpack
-from gameplay.entities.shared.modifiers import modifier_movement
 from gameplay.entities.visuals.cosmetics.slash import Slash
 from gameplay.entities.player.sword.sword import Sword
 from gameplay.entities.player.abilities.ability_manager import AbilityManager
 from gameplay.entities.shared.status.wet import Wet
 from engine import constants as C
 from gameplay.entities.visuals.cosmetics import Blood
-
 class Player(Character):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
@@ -29,15 +28,13 @@ class Player(Character):
         self.health = 20
         self.spirit = 2
 
-        self.movement_manager = modifier_movement.MovementManager()
-
-        self.projectiles = game_objects.fprojectiles
         self.sword = Sword(self)
         self.abilities = AbilityManager(self)#spirit (thunder,migawari etc) and movement /dash, double jump and wall glide)
 
-        self.flags = {'ground': False, 'shroompoline': False, 'attack_able': True, 'grounddash': True}# flags to check if on ground (used for jumpåing), #a flag to make sure you can only swing sword when this is False
+        self.flags = {'ground': False, 'shroompoline': False, 'attack_able': True, 'grounddash': True, 'sprint_chain_active': False}# flags to check if on ground (used for jumpåing), #a flag to make sure you can only swing sword when this is False
         self.currentstate = StateManager(self)#states_player.Idle_main(self)
-        self.death_state = states_death.Idle(self)#this one can call "normal die" or specifal death (for example cultist encounter)
+        self.death_manager = DeathManager(self)
+        self.hazard_resolver = PlayerHazardResolver(self)
 
         self.backpack = backpack.Backpack(self)
 
@@ -47,22 +44,20 @@ class Player(Character):
         self.hit_component.set_invinsibility_time(C.invincibility_time_player)
         self.reset_movement()     
         
-    def ramp_down_collision(self, ramp):#when colliding with platform beneth
-        super().ramp_down_collision(ramp)
-        self.movement_manager.handle_input('ground')        
-        self.flags['ground'] = True
+    def on_ramp_collision(self, side, ramp):
+        super().on_ramp_collision(side, ramp)
+        if side == 'bottom':
+            self.movement_manager.handle_input('ground')
+            self.flags['ground'] = True
 
-    def down_collision(self, block):#when colliding with platform beneth
-        super().down_collision(block)
-        self.movement_manager.handle_input('ground')        
-        self.flags['ground'] = True
+    def on_platform_vertical_collision(self, side, block):
+        super().on_platform_vertical_collision(side, block)
+        if side == 'bottom':
+            self.movement_manager.handle_input('ground')
+            self.flags['ground'] = True
 
-    def right_collision(self, block, type = 'Wall'):
-        super().right_collision(block, type)
-        self.movement_manager.handle_input('wall')
-
-    def left_collision(self, block, type = 'Wall'):
-        super().left_collision(block, type)
+    def on_platform_side_collision(self, side, block, collision_type = 'Wall'):
+        super().on_platform_side_collision(side, block, collision_type)
         self.movement_manager.handle_input('wall')
 
     def update_vel(self, dt):#called from hitsop_states
@@ -77,7 +72,10 @@ class Player(Character):
 
     def take_dmg(self, effect):
         """Called by hit_component after modifiers run. Apply damage and effects."""
-        self.health -= effect.damage
+        if self.health <= 0:
+            return effect
+
+        self.health = max(0, self.health - effect.damage)
         self.game_objects.ui.hud.meters.remove_hearts(effect.damage)# * self.dmg_scale)#update UI
 
         if self.health > 0:  # Still alive
@@ -95,10 +93,10 @@ class Player(Character):
             self.game_objects.post_process.append_shader('chromatic_aberration', duration = 20)
         else:  # dead
             self.game_objects.signals.emit('player_died')#emit a signal that player died
-            self.death_state.die()#depending on gameplay state, different death stuff should happen
+            self.death_manager.die()
         return effect
 
-    def die(self):#called from idle death_state, also called from vertical acid
+    def start_death_effects(self):
         #self.animation.update()#make sure you get the new animation
         self.game_objects.cosmetics.add(Blood(self.hitbox.center, self.game_objects, dir = self.dir))#pause first, then slow motion
         self.game_objects.time_manager.modify_time(time_scale = 0.4, duration = 100)#sow motion
@@ -123,6 +121,7 @@ class Player(Character):
     def reset_movement(self):#called when loading new map or entering conversations
         self.acceleration =  [0, C.acceleration[1]]
         self.friction = C.friction_player.copy()
+        self.flags['sprint_chain_active'] = False
         #self.movement_manager.clear_modifiers()#TODO probably not all should be cleared
 
     def update_render(self, dt):#called in group
@@ -165,3 +164,6 @@ class Player(Character):
 
     def on_grounddash_timout(self):
         self.flags['grounddash'] = True
+
+    def on_crush(self, block):
+        self.hazard_resolver.handle_crush(block)

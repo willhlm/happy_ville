@@ -10,7 +10,6 @@ ENEMY_CONFIG = {
         'distances': {'aggro': [200, 20], 'attack': [50, 150]},#x, y
         'cooldowns': {
             'melee_attack': [50, 80],#min max
-            'tagg_burst_chain': [24, 36],
             'tagg_burst_repeat': [200, 250],
         },
         'timers': {
@@ -21,10 +20,11 @@ ENEMY_CONFIG = {
         'attacks': {
             'tagg_burst': {
                 'counts': [8, 10],
-                'speed': [3.0, 3.6],
+                'speed': [3, 4],
                 'lifetime': 120,
                 'spawn_radius': 12,
-                'volleys': [2, 3],
+                'angle_start_degrees': 135,
+                'angle_end_degrees': 45,
             },
         },
         'states': {

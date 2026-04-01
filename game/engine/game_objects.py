@@ -1,6 +1,7 @@
 import pygame
 from engine.utils import read_files
-from engine.system import activation_manager, time_field_manager, collisions, save_load, groups, object_pool, controller, lights, timer, signals, time_manager, alphabet, input_interpreter, transition_controller
+from engine.system import activation_manager, time_field_manager, collisions, save_load, object_pool, controller, lights, timer, signals, time_manager, alphabet, input_interpreter, transition_controller
+from engine import groups
 from engine.sound import game_audio
 from gameplay.entities.player import player
 from engine.render import post_process
@@ -59,8 +60,7 @@ class GameObjects():
         self.all_fgs = groups.LayeredGroup()#[]
         self.bg_interact = groups.Group()#small grass stuff so that interactables blends with BG
         self.bg_fade = groups.Group()#fg stuff that should dissapear when player comes: this should not blit or update. it will just run collision checks
-        self.eprojectiles = groups.Group()#enemy projectiles
-        self.fprojectiles = groups.Group()#player prohectiles
+        self.projectiles = groups.ProjectileGroups()
         self.loot = groups.Group()#enemy drops and things player cn pickup upon collision
         self.entity_pause = groups.PauseGroup() #all Entities that are far away
         self.cosmetics = groups.Group()#things we just want to blit after the player layer
@@ -92,15 +92,17 @@ class GameObjects():
         self.cosmetics_bg.empty()
         self.layer_pause.empty()
         self.bg_fade.empty()
-        self.eprojectiles.empty()
+        self.projectiles.empty()
         self.interactables_fg.empty()
-        self.fprojectiles.empty()
         self.timer_manager.clear_timers()
         self.weather.empty()
         self.collisions.clear_state()
 
     def collide_all(self, dt):
         self.platform_collision(dt)
+        enemy_projectiles = self.projectiles.all_enemy()
+        friendly_projectiles = self.projectiles.all_friendly()
+        players_enemies_loot = self.players.sprites() + self.enemies.sprites() + self.loot.sprites()
         
         self.collisions.simple_collision(self.players, self.enemies, callback_name = 'player_collision')
         self.collisions.simple_collision(self.players, self.bg_fade, callback_name = 'player_collision')
@@ -108,25 +110,25 @@ class GameObjects():
         #checks colliions and non collisions
         self.collisions.entity_collision(self.players, self.loot)
         self.collisions.entity_collision(self.players, self.interactables)
-        self.collisions.entity_collision(self.players, self.interactables_fg)
+        self.collisions.entity_collision(players_enemies_loot, self.interactables_fg)
         self.collisions.entity_collision(self.players, self.npcs)
 
-        self.collisions.simple_collision(self.eprojectiles, self.fprojectiles, callback_name = 'collision_projectile')
-        self.collisions.simple_collision(self.enemies, self.fprojectiles, callback_name = 'collision_enemy')
-        self.collisions.simple_collision(self.players, self.eprojectiles, callback_name = 'collision_enemy')
-        self.collisions.simple_collision(self.platforms, self.fprojectiles, callback_name = 'collision_platform')
-        self.collisions.simple_collision(self.platforms, self.eprojectiles, callback_name = 'collision_platform')
+        self.collisions.simple_collision(enemy_projectiles, friendly_projectiles, callback_name = 'collision_projectile')
+        self.collisions.simple_collision(self.enemies, friendly_projectiles, callback_name = 'collision_enemy')
+        self.collisions.simple_collision(self.players, enemy_projectiles, callback_name = 'collision_enemy')
+        self.collisions.simple_collision(self.platforms, self.projectiles.friendly, callback_name = 'collision_platform')
+        self.collisions.simple_collision(self.platforms, self.projectiles.enemy, callback_name = 'collision_platform')
 
-        self.collisions.simple_collision(self.interactables, self.fprojectiles, callback_name = 'collision_interactables')
-        self.collisions.simple_collision(self.interactables_fg,self.fprojectiles, callback_name = 'collision_interactables_fg')
-        self.collisions.simple_collision(self.interactables, self.eprojectiles, callback_name = 'collision_interactables')
-        self.collisions.simple_collision(self.interactables_fg,self.eprojectiles, callback_name = 'collision_interactables_fg')
+        self.collisions.simple_collision(self.interactables, friendly_projectiles, callback_name = 'collision_interactables')
+        self.collisions.simple_collision(self.interactables_fg, friendly_projectiles, callback_name = 'collision_interactables_fg')
+        self.collisions.simple_collision(self.interactables, enemy_projectiles, callback_name = 'collision_interactables')
+        self.collisions.simple_collision(self.interactables_fg, enemy_projectiles, callback_name = 'collision_interactables_fg')
 
     def platform_collision(self, dt):
         self.collisions.platform_collision(self.players, dt)
         self.collisions.platform_collision(self.enemies, dt)
-        self.collisions.platform_collision(self.eprojectiles, dt)
-        self.collisions.platform_collision(self.fprojectiles, dt)
+        self.collisions.platform_collision(self.projectiles.enemy_platform, dt)
+        self.collisions.platform_collision(self.projectiles.friendly_platform, dt)
         self.collisions.platform_collision(self.npcs, dt)
         self.collisions.platform_collision(self.loot, dt)
 
@@ -140,8 +142,7 @@ class GameObjects():
         self.entity_pause.update(dt)#should be before enemies, npcs and interactable groups
         self.enemies.update(dt)
         self.npcs.update(dt)
-        self.fprojectiles.update(dt)
-        self.eprojectiles.update(dt)
+        self.projectiles.update(dt)
         self.loot.update(dt)
 
         #collide and move the entities
@@ -176,8 +177,7 @@ class GameObjects():
         self.players.update_render(dt)
         self.enemies.update_render(dt)
         self.npcs.update_render(dt)
-        self.fprojectiles.update_render(dt)
-        self.eprojectiles.update_render(dt)
+        self.projectiles.update_render(dt)
         self.loot.update_render(dt)
         self.cosmetics.update_render(dt)
         self.cosmetics_bg.update_render(dt)
@@ -197,15 +197,14 @@ class GameObjects():
         self.cosmetics_bg.draw(last_bg_screen)#Should be before enteties
 
         self.enemies.draw(last_bg_screen)
-        self.npcs.draw(last_bg_screen)
-        self.loot.draw(last_bg_screen)
+        self.npcs.draw(last_bg_screen)        
 
         self.players.draw(self.game.screen_manager.screens['player'].layer)
 
         #after the player but bg1:
         player_fg_screen = self.game.screen_manager.screens['player_fg'].layer
-        self.fprojectiles.draw(player_fg_screen)
-        self.eprojectiles.draw(player_fg_screen)
+        self.loot.draw(player_fg_screen)
+        self.projectiles.draw(player_fg_screen)
         self.interactables_fg.draw(player_fg_screen)#shoud be after the player -> upstream, 2D water
         self.cosmetics.draw(player_fg_screen)
 
@@ -224,9 +223,13 @@ class GameObjects():
             pygame.draw.rect(image, (255,0,255), (round(self.player.hitbox[0]-self.camera_manager.camera.true_scroll[0]),round(self.player.hitbox[1]-self.camera_manager.camera.true_scroll[1]),self.player.hitbox[2],self.player.hitbox[3]),2)#draw hitbox
             pygame.draw.rect(image, (0,0,255), (round(self.player.rect[0]-self.camera_manager.camera.true_scroll[0]),round(self.player.rect[1]-self.camera_manager.camera.true_scroll[1]),self.player.rect[2],self.player.rect[3]),2)#draw hitbox
 
-            for projectile in self.fprojectiles.sprites():#go through the group
+            for projectile in self.projectiles.friendly.sprites():#go through the group
                 pygame.draw.rect(image, (0,0,255), (int(projectile.hitbox[0]-self.camera_manager.camera.scroll[0]),int(projectile.hitbox[1]-self.camera_manager.camera.scroll[1]),projectile.hitbox[2],projectile.hitbox[3]),1)#draw hitbox
-            for projectile in self.eprojectiles.sprites():#go through the group
+            for projectile in self.projectiles.friendly_platform.sprites():#go through the group
+                pygame.draw.rect(image, (0,0,255), (int(projectile.hitbox[0]-self.camera_manager.camera.scroll[0]),int(projectile.hitbox[1]-self.camera_manager.camera.scroll[1]),projectile.hitbox[2],projectile.hitbox[3]),1)#draw hitbox
+            for projectile in self.projectiles.enemy.sprites():#go through the group
+                pygame.draw.rect(image, (0,0,255), (int(projectile.hitbox[0]-self.camera_manager.camera.scroll[0]),int(projectile.hitbox[1]-self.camera_manager.camera.scroll[1]),projectile.hitbox[2],projectile.hitbox[3]),1)#draw hitbox
+            for projectile in self.projectiles.enemy_platform.sprites():#go through the group
                 pygame.draw.rect(image, (0,0,255), (int(projectile.hitbox[0]-self.camera_manager.camera.scroll[0]),int(projectile.hitbox[1]-self.camera_manager.camera.scroll[1]),projectile.hitbox[2],projectile.hitbox[3]),1)#draw hitbox
             for enemy in self.enemies.sprites():#go through the group
                 pygame.draw.rect(image, (0,0,255), [enemy.hitbox[0]-self.camera_manager.camera.scroll[0],enemy.hitbox[1]-self.camera_manager.camera.scroll[1],enemy.hitbox[2],enemy.hitbox[3]],2)#draw hitbox

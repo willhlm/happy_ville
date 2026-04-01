@@ -1,5 +1,5 @@
 import pygame
-from gameplay.entities.shared.components.hit_component import HitComponent
+from gameplay.entities.shared.components.hit.hit_component import HitComponent
 
 class Platform(pygame.sprite.Sprite):
     def __init__(self, pos, size=(16, 16), run_particle = 'dust'):

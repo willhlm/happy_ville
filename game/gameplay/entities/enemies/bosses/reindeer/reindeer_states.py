@@ -238,7 +238,7 @@ class Attack_main(Base_states):
         super().__init__(entity)
         self.entity.animation.play('attack_main')
         attack = self.entity.attack(self.entity, lifetime = 10)#make the object
-        self.entity.projectiles.add(attack)#add to group but in main phase
+        self.entity.game_objects.projectiles.add_enemy(attack)#add to group but in main phase
 
     def increase_phase(self):
         self.entity.currentstate.start_next_task()     
@@ -301,7 +301,7 @@ class Charge_attack(Base_states):
         super().__init__(entity)
         self.entity.animation.play('charge_attack') 
         attack = self.entity.attack(self.entity, lifetime = 10)#make the object
-        self.entity.projectiles.add(attack)#add to group but in main phase
+        self.entity.game_objects.projectiles.add_enemy(attack)#add to group but in main phase
 
     def increase_phase(self):
         self.entity.currentstate.start_next_task()        

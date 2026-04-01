@@ -1,7 +1,7 @@
 import pygame
 from engine import constants as C
 from gameplay.entities.base.static_entity import StaticEntity
-from . import states_two_d_liquid
+from . import liquid_behaviors
 
 class TwoDLiquid(StaticEntity):#inside interactables_fg group. fg because in front of player
     def __init__(self, pos, game_objects, size, layer_name, **properties):
@@ -22,12 +22,11 @@ class TwoDLiquid(StaticEntity):#inside interactables_fg group. fg because in fro
         self.shader['u_resolution'] = self.game_objects.game.window_size
         if game_objects.world_state.narrative.events.get('tjasolmai', False):#if water boss (golden fields) is dead
             if not properties.get('vertical', False):
-                self.hole = Hole(pos, game_objects, size)#for poison
-                self.currentstate = states_two_d_liquid.Poison(self, **properties)
+                self.behavior = liquid_behaviors.PoisonBehavior(self, **properties)
             else:#vertical scroller -> golden fields
-                self.currentstate = states_two_d_liquid.Poison_vertical(self, **properties)
+                self.behavior = liquid_behaviors.VerticalPoisonBehavior(self, **properties)
         else:
-            self.currentstate = states_two_d_liquid.Water(self, **properties)
+            self.behavior = liquid_behaviors.WaterBehavior(self, **properties)
 
     def release_texture(self):
         self.empty.release()
@@ -35,7 +34,7 @@ class TwoDLiquid(StaticEntity):#inside interactables_fg group. fg because in fro
 
     def update(self, dt):
         self.time += dt
-        self.currentstate.update()
+        self.behavior.update()
 
     def draw(self, target):
         #noise
@@ -62,24 +61,26 @@ class TwoDLiquid(StaticEntity):#inside interactables_fg group. fg because in fro
 
     def on_collision(self, entity):#player collision
         entity.movement_manager.add_modifier('two_d_liquid')
-        vel_scale = entity.velocity[1] / C.max_vel[1]
+        vel_scale = max(entity.velocity[1] / C.max_vel[1], 0.5)
         self.splash(entity.hitbox.midbottom, vel_scale)
-        #self.splash(entity.hitbox.midbottom, lifetime = 100, dir = [0,1], colour = [self.currentstate.liquid_tint[0]*255, self.currentstate.liquid_tint[1]*255, self.currentstate.liquid_tint[2]*255, 255], vel = {'gravity': [7 * vel_scale, 14 * vel_scale]}, fade_scale = 0.3, gradient=0)
-        entity.timer_jobs['wet'].deactivate()#stop dropping if inside the water again
-        self.currentstate.player_collision(entity)
+        #self.splash(entity.hitbox.midbottom, lifetime = 100, dir = [0,1], colour = [self.behavior.liquid_tint[0]*255, self.behavior.liquid_tint[1]*255, self.behavior.liquid_tint[2]*255, 255], vel = {'gravity': [7 * vel_scale, 14 * vel_scale]}, fade_scale = 0.3, gradient=0)
+        if hasattr(entity, 'timer_jobs') and 'wet' in entity.timer_jobs:
+            entity.timer_jobs['wet'].deactivate()#stop dropping if inside the water again
+        self.behavior.on_enter(entity)
 
     def on_noncollision(self, entity):
         entity.movement_manager.remove_modifier('two_d_liquid')
-        entity.timer_jobs['wet'].activate(self.currentstate.liquid_tint)#water when player leaves
-        vel_scale = abs(entity.velocity[1] / C.max_vel[1])
+        if hasattr(entity, 'timer_jobs') and 'wet' in entity.timer_jobs:
+            entity.timer_jobs['wet'].activate(self.behavior.liquid_tint)#water when player leaves
+        vel_scale = max(entity.velocity[1] / C.max_vel[1], 0.5)
         self.splash(entity.hitbox.midbottom, vel_scale)
-        #self.splash(entity.hitbox.midbottom, lifetime = 100, dir = [0,1], colour = [self.currentstate.liquid_tint[0]*255, self.currentstate.liquid_tint[1]*255, self.currentstate.liquid_tint[2]*255, 255], vel = {'gravity': [10 * vel_scale, 14 * vel_scale]}, fade_scale = 0.3, gradient=0)
-        self.currentstate.player_noncollision()
+        #self.splash(entity.hitbox.midbottom, lifetime = 100, dir = [0,1], colour = [self.behavior.liquid_tint[0]*255, self.behavior.liquid_tint[1]*255, self.behavior.liquid_tint[2]*255, 255], vel = {'gravity': [10 * vel_scale, 14 * vel_scale]}, fade_scale = 0.3, gradient=0)
+        self.behavior.on_exit(entity)
 
     def splash(self,  pos, vel_scale, number_particles=20):#called from states, upoin collusions
-        self.game_objects.particles.emit('liquid_splash', pos, number_particles, colour = [self.currentstate.liquid_tint[0]*255, self.currentstate.liquid_tint[1]*255, self.currentstate.liquid_tint[2]*255, 255],vel_scale = vel_scale)
+        self.game_objects.particles.emit('liquid_splash', pos, number_particles, colour = [self.behavior.liquid_tint[0]*255, self.behavior.liquid_tint[1]*255, self.behavior.liquid_tint[2]*255, 255],vel_scale = vel_scale)
 
     def seed_collision(self, seed):
         vel_scale = [abs(seed.velocity[0])/20,abs(seed.velocity[1])/ 20]
-        self.splash(seed.hitbox.midbottom, lifetime = 100, dir = [0,1], colour = [self.currentstate.liquid_tint[0]*255, self.currentstate.liquid_tint[1]*255, self.currentstate.liquid_tint[2]*255, 255], vel = {'gravity': [14 * vel_scale[0], 7 * vel_scale[0]]}, fade_scale = 0.3, gradient=0, scale = 2)
+        self.splash(seed.hitbox.midbottom, lifetime = 100, dir = [0,1], colour = [self.behavior.liquid_tint[0]*255, self.behavior.liquid_tint[1]*255, self.behavior.liquid_tint[2]*255, 255], vel = {'gravity': [14 * vel_scale[0], 7 * vel_scale[0]]}, fade_scale = 0.3, gradient=0, scale = 2)
         seed.seed_spawner.spawn_bubble()        

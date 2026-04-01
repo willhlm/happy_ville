@@ -23,7 +23,7 @@ class EnemyDrop(Item):
             self.kill()
 
     def on_collision(self, entity):#when the player collides with this object
-        self.game_objects.sound.play_sfx(self.sounds['death'][0])#should be in states        
+        self.game_objects.sound.play_sfx(self.sounds['death'][0])
         self.currentstate.handle_input('Death')
         entity.backpack.inventory.add(self)  
          

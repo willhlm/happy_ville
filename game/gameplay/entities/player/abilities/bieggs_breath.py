@@ -16,10 +16,9 @@ class BieggsBreath(Ability):#force push
             dir = [0,-self.entity.dir[1]]
 
         spawn = Wind(self.entity.hitbox.midtop, self.entity.game_objects, dir = dir, dmg = 0)
-        self.entity.game_objects.fprojectiles.add(spawn)
+        self.entity.game_objects.projectiles.add_friendly(spawn)
 
     def upgrade_ability(self):#called from upgrade menu
         self.level += 1
         if self.level == 2:
             self.health = 2
-

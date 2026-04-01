@@ -74,12 +74,12 @@ class ConveyorBelt(BaseTexture):
 
     def collide_x(self,entity):
         if entity.velocity[0] > 0:#going to the right
-            entity.right_collision(self, 'belt')
+            entity.platform_physics.resolve_side_collision(self, 'right', 'belt')
             entity.velocity[1] += self.direction[1]
         else:#going to the leftx
-            entity.left_collision(self, 'belt')
+            entity.platform_physics.resolve_side_collision(self, 'left', 'belt')
             entity.velocity[1] += -self.direction[1]
-        entity.update_rect_x()
+        entity.body.update_rect_x()
 
     def collide_y(self,entity):
         super().collide_y(entity)

@@ -1,4 +1,4 @@
-from gameplay.entities.shared.components.hit_results import HitResult
+from gameplay.entities.shared.components.hit.hit_results import HitResult
 
 class DamageManager():
     """Manages damage modifiers (for player, complex entities)"""

@@ -17,7 +17,7 @@ class CultistEncounter(Tasks):#called from cutscene when meeting the cultist acr
         self.cleanup()
 
     def complete(self):
-        self.game_objects.player.death_state.handle_input('idle')
+        self.game_objects.player.death_manager.clear_override()
         self.game_objects.world_state.narrative.mark_cutscene_complete(type(self).__name__.lower())
         self.game_objects.world_state.narrative.update_event(type(self).__name__.lower())
         self.cleanup()

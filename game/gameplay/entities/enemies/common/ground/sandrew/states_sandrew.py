@@ -91,7 +91,7 @@ class Attack_main(Enemy_states):
         super().__init__(entity)
         hitbox = [self.entity.hitbox[2] + 30,self.entity.hitbox[3] + 30]
         self.attack_box = self.entity.attack(self.entity, size = hitbox, lifetime = 300, charge_blocks = True)
-        self.entity.game_objects.eprojectiles.add(self.attack_box)
+        self.entity.game_objects.projectiles.add_enemy(self.attack_box)
 
     def update(self, dt):
         self.entity.velocity[0] += dt * self.entity.dir[0] * 2

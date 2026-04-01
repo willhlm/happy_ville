@@ -3,7 +3,7 @@ from gameplay.entities.visuals.environments.base.layered_objects import LayeredO
 from . import states_droplet_source
 from gameplay.entities.projectiles import ProjectileDroplet
 from gameplay.entities.visuals.environments import BackgroundDroplet
-from gameplay.entities.shared.states import states_shader
+from gameplay.entities.shared.render.entity_shader_manager import EntityShaderManager
 
 class DropletSource(LayeredObjects):
     animations = {}    
@@ -14,18 +14,17 @@ class DropletSource(LayeredObjects):
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.topleft = pos
         self.currentstate = states_droplet_source.Idle(self)
+        self.shader_state = EntityShaderManager(self)
     
         if game_objects.world_state.narrative.events.get('tjasolmai', False):#if water boss (golden fields) is dead            
-            self.shader_state = states_shader.Palette_swap(self)
             self.original_colour = [[46, 74,132, 255]]#can append more to replace more
             self.replace_colour = [[70, 210, 33, 255]]#new oclour. can append more to replace more       
-        else:
-            self.shader_state = states_shader.Idle(self)
+            self.shader_state.enter_state('palette_swap')
 
     def drop(self):#called from states                
         if self.parallax == [1,1]:#TODO need to check for bg and fg etc if fg should not go into eprojectiles?
             obj = ProjectileDroplet(self.rect.topleft, self.game_objects)       
-            self.game_objects.eprojectiles.add(obj)
+            self.game_objects.projectiles.add_enemy(obj)
         else:#TODO need to put in all_bgs or all_gfs
             sprites = self.group.sprites()
             bg = self.group.reference[tuple(self.parallax)]
@@ -36,6 +35,9 @@ class DropletSource(LayeredObjects):
             self.group._spritelist.insert(index,obj)#it goes behind the static layer of reference
             obj.add_internal(self.group)
 
+    def update_render(self, dt):
+        self.shader_state.update_render(dt)
+
     def draw(self,target):
-        self.shader_state.draw()
-        super().draw(target)
+        pos = (int(self.true_pos[0] - self.parallax[0] * self.game_objects.camera_manager.camera.interp_scroll[0]),int(self.true_pos[1] - self.parallax[0] * self.game_objects.camera_manager.camera.interp_scroll[1]))
+        self.shader_state.draw(self.image, target, pos, flip = self.dir[0] > 0)

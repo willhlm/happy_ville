@@ -30,12 +30,20 @@ class Transform_down(Basic_states):
     def __init__(self,entity, **kwarg):
         super().__init__(entity, **kwarg)
 
+    def handle_input(self, input):
+        if input == 'transform' or input == 'On':
+            self.enter_state('Transform_up')
+
     def increase_phase(self):
         self.enter_state('Down')
 
 class Transform_up(Basic_states):
     def __init__(self,entity, **kwarg):
         super().__init__(entity, **kwarg)
+
+    def handle_input(self, input):
+        if input == 'transform' or input == 'Off':
+            self.enter_state('Transform_down')
 
     def increase_phase(self):
         self.enter_state('Erect')

@@ -16,7 +16,8 @@ class MovementManager:
 
     This matches your current “add/remove only while active” workflow well.
     """
-    def __init__(self):
+    def __init__(self, entity = None):
+        self.entity = entity
         self.modifiers = {}             # name -> modifier instance (stackable)
         self.authoritative_mods = {}    # name -> modifier instance (authoritative)
 
@@ -64,7 +65,7 @@ class MovementManager:
         Authoritative-first resolve.
         This assumes authoritative mods are only present while active.
         """
-        context = MovementContext()
+        context = MovementContext(self.entity)
         stackables = self._sorted_modifiers.copy()
         auths = self._sorted_authoritative.copy()
 
@@ -112,11 +113,11 @@ class MovementManager:
         )
 
 class MovementContext:
-    def __init__(self):
-        self.gravity = C.acceleration[1]
+    def __init__(self, entity = None):
+        self.gravity = entity.acceleration[1] if entity and hasattr(entity, 'acceleration') else C.acceleration[1]
         self.velocity = [0, 0]
-        self.friction = C.friction_player.copy()  # friction is sampled every frame
-        self.max_vel = C.max_vel.copy()
+        self.friction = entity.friction.copy() if entity and hasattr(entity, 'friction') else C.friction.copy()
+        self.max_vel = entity.max_vel.copy() if entity and hasattr(entity, 'max_vel') else C.max_vel.copy()
 
         self.air_timer = C.air_timer
         self.upstream = 1  # scale for upstream movement: sampled during upstream collision

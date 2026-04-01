@@ -3,7 +3,7 @@ from engine.utils import read_files
 from engine import constants as C
 from gameplay.entities.interactables.base.interactables import Interactables
 from . import states_grind
-from gameplay.entities.shared.components import hit_effects
+from gameplay.entities.shared.components.hit import hit_effects
 
 class Grind(Interactables):#trap
     def __init__(self, pos, game_objects, **kwarg):

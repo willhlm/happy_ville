@@ -1,9 +1,9 @@
 import math
 import pygame
-from gameplay.entities.projectiles.base.projectiles import Projectiles
+from gameplay.entities.projectiles.base.platform_projectile import PlatformProjectile
 from engine.utils import read_files
 
-class Tagg(Projectiles):
+class Tagg(PlatformProjectile):
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects)
         self.sprites = Tagg.sprites
@@ -38,9 +38,15 @@ class Tagg(Projectiles):
         self.velocity = [0,0]
         self.currentstate.handle_input('Death')
 
-    def collision_platform(self,platform):
+    def _collision_platform(self,platform):        
         self.velocity = [0,0]
         self.currentstate.handle_input('Death')
 
     def pool(game_objects):
         Tagg.sprites = read_files.load_sprites_dict('assets/sprites/entities/projectiles/tagg/', game_objects)
+
+    def on_platform_side_collision(self, side, block, collision_type = 'Wall'):
+        self._collision_platform(block)
+
+    def on_platform_vertical_collision(self, side, block):
+        self._collision_platform(block)

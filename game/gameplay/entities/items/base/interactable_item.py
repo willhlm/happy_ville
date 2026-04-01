@@ -6,7 +6,7 @@ from . import interactale_item_states
 class InteractableItem(Item):#need to press Y to pick up - #key items: need to pick up instead of just colliding
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects)        
-        if kwarg.get('state', 'wild'):#if it is spawn in the wild
+        if kwarg.get('state', 'wild') == 'wild':#if it is spawn in the wild
             self.currentstate = interactale_item_states.Wild(self, **kwarg)
         else:
             self.currentstate = interactale_item_states.Idle(self, **kwarg)

@@ -28,30 +28,17 @@ class MyggaSuicide(FlyingEnemy):#torpedo and explode
         self.suicide()
 
     def suicide(self):#called from states
-        self.projectiles.add(Explosion(self))
+        self.game_objects.projectiles.add_enemy(Explosion(self))
         self.game_objects.camera_manager.camera_shake(amp = 2, duration = 30)#amplitude and duration
 
-    #pltform collisions.
-    def right_collision(self, block, type = 'Wall'):
-        super().right_collision(block)
+    def on_platform_side_collision(self, side, block, collision_type = 'Wall'):
+        super().on_platform_side_collision(side, block, collision_type)
         self.currentstate.handle_input('collision')#for suicide
 
-    def left_collision(self, block, type = 'Wall'):
-        super().left_collision(block)
+    def on_platform_vertical_collision(self, side, block):
+        super().on_platform_vertical_collision(side, block)
         self.currentstate.handle_input('collision')#for suicide
 
-    def down_collision(self, block):
-        super().down_collision(block)
-        self.currentstate.handle_input('collision')#for suicide
-
-    def top_collision(self, block):
-        super().top_collision(block)
-        self.currentstate.handle_input('collision')#for suicide
-
-    def ramp_down_collision(self, ramp):#called from collusion in clollision_ramp
-        super().ramp_down_collision(ramp)
-        self.currentstate.handle_input('collision')#for suicide
-
-    def ramp_top_collision(self, ramp):#called from collusion in clollision_ramp
-        super().ramp_top_collision(ramp)
+    def on_ramp_collision(self, side, ramp):
+        super().on_ramp_collision(side, ramp)
         self.currentstate.handle_input('collision')#for suicide

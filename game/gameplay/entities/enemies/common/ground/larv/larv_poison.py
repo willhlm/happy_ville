@@ -14,4 +14,4 @@ class LarvPoison(Enemy):
 
     def attack(self):#called from states, attack main
         attack = Poisonblobb(self.rect.topleft, self.game_objects, dir = self.dir)#make the object
-        self.projectiles.add(attack)#add to group but in main phase
+        self.game_objects.projectiles.add_enemy(attack)#add to group but in main phase

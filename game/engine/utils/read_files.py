@@ -114,14 +114,24 @@ def load_shaders_dict(game_objects):#returns a dicy with "state" as key and shad
     return shader_dict
 
 def load_shader_list(path_to_folder, game_objects):#use this to load multiple sprites in a path_to_folder           
-    list_of_shader = []
+    vertex_path = None
+    fragment_path = None
+
     for f in listdir(path_to_folder):
         if not isfile(join(path_to_folder, f)): continue#skip the folders
         if '.DS_Store' in f or '.gitkeep' in f: continue#skip this file
-        list_of_shader.append(join(path_to_folder, f))
-    
-    list_of_shader.sort(reverse=True)
-    return game_objects.game.display.load_shader_from_path(list_of_shader[0], list_of_shader[1])#vertex first
+
+        shader_path = join(path_to_folder, f)
+        file_name = f.lower()
+        if 'vertex' in file_name:
+            vertex_path = shader_path
+        elif 'fragment' in file_name:
+            fragment_path = shader_path
+
+    if fragment_path is None:
+        raise FileNotFoundError(f"No fragment shader found in '{path_to_folder}'")
+
+    return game_objects.game.display.load_shader_from_path(vertex_path, fragment_path)
 
 'sound loader'
 def load_sounds_dict(base_path):#returns a dict with "stae" as key, the sound file as value
