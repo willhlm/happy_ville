@@ -1041,6 +1041,11 @@ class ObjectSpawner:
                 statue = AirDashStatue(object_position, self.game_objects)
                 self.game_objects.interactables.add(statue)
 
+            elif id == 17:
+                kwarg = props_list_to_dict(properties)
+                web = LarvWeb(object_position, self.game_objects, **kwarg)
+                self.game_objects.interactables.add(web)
+
             elif id == 18:
                 state = self.game_objects.world_state.objects.get_bucket(self.game_objects.map.level_name, 'loot_container').get(str(loot_container), False)
                 amber_rock = AmberRock(object_position, self.game_objects, state, str(loot_container))

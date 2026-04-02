@@ -4,7 +4,7 @@ from engine.utils import read_files
 from .config import ENEMY_CONFIG 
 from gameplay.entities.projectiles import Tagg
 
-from gameplay.entities.enemies.common.shared.states.state_manager import StateManager
+from gameplay.entities.enemies.common.shared.state_machine import StateManager
 
 from .states import AttackPre, AttackMain, AttackPost, Retreat, Hurt
 from .deciders import CheckSafeDecider, CheckPlayerAttackReadyDecider

@@ -31,6 +31,6 @@
   <image width="112" height="176" source="../../../sprites/entities/enemies/bosses/cocoon_boss/idle/idle.png"/>
  </tile>
  <tile id="9">
-  <image width="16" height="96" source="../../../sprites/entities/interactables/vines/nordveden/vines_1/idle/idle.png"/>
+  <image width="144" height="96" source="../../../sprites/entities/interactables/vines/nordveden/vines_1/idle/idle.png"/>
  </tile>
 </tileset>

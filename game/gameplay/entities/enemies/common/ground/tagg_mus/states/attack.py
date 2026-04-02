@@ -1,4 +1,4 @@
-from gameplay.entities.enemies.common.shared.states.base_state import BaseState
+from gameplay.entities.enemies.common.shared.state_machine.states.base_state import BaseState
 from .helpers import (
     get_tagg_burst_repeat_cooldown,
 )

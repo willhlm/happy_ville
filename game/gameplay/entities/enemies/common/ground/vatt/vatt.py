@@ -2,7 +2,7 @@ import pygame, random
 from gameplay.entities.enemies.base.enemy import Enemy
 from engine.utils import read_files
 from engine import constants as C
-from gameplay.entities.enemies.common.shared.states.state_manager import StateManager
+from gameplay.entities.enemies.common.shared.state_machine import StateManager
 
 from .states import Skip
 from .deciders import CheckEdgeSkipDecider

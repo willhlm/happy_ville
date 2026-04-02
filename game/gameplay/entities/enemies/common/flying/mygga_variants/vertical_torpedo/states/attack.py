@@ -1,6 +1,6 @@
 # orthogonal_torpedo/states/attack.py
 import random
-from gameplay.entities.enemies.common.shared.states.base_state import BaseState
+from gameplay.entities.enemies.common.shared.state_machine.states.base_state import BaseState
 from engine.utils.functions import sign
 
 class AttackMain(BaseState):

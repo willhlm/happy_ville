@@ -20,10 +20,7 @@ class TitleMenu(BaseUI):
         self.game.game_objects.ui.uis['menu'].update_time(dt)
         for arrow in self.menu_ui.arrows:
             arrow.update(dt)#make them move back and forth
-
-    def fade_update(self, dt):#called from fade out: update that should be played when fading: it is needed becayse depending on state, only part of the update loop should be called
-        self.update_render(dt)
-
+            
     def render(self):
         self.game.screen_manager.screen.clear(0,0,0,0)
         self.game.game_objects.ui.uis['menu'].render_background(self.game.screen_manager.screen)
@@ -106,7 +103,7 @@ class TitleMenu(BaseUI):
             #self.game.game_objects.map.load_map(self,'wakeup_forest_3','1')
             #self.game.game_objects.map.load_map(self,'spirit_world_1','1')
             #self.game.game_objects.map.load_map(self,'crystal_mines_1','1')
-            #self.game.game_objects.map.load_map(self,'village_1','1')
+            #self.game.game_objects.map.load_map(self,'village_5','1')
             #self.game.game_objects.map.load_map(self,'nordveden_windtest','1')
             self.game.game_objects.map.load_map(self,'nordveden_1','1')
             #self.game.game_objects.map.load_map(self,'tall_trees_1','1')

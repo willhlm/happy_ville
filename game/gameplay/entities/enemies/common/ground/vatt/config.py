@@ -12,6 +12,10 @@ ENEMY_CONFIG = {
         'timers': {'hurt_recovery': [200, 250]},  # min max         
         
         'states': {
+            'wait': {},
+            'hurt': {},
+            'death': {},
+            'dead': {},
             'patrol': {
                 'deciders':{
                     'patrol_end': {'next_state':'wait', 'score':50, 'priority':0, 'patrol_time': [150, 200], 'kwargs': {'next_state': 'skip', 'time':50}}, 

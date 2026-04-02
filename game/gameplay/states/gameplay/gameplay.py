@@ -20,11 +20,6 @@ class Gameplay(GameState):
         self.game.game_objects.ui.hud.update(dt)
         self.game.game_objects.post_process.update_render(dt)#apply post process shaders to the composite screen, which is large
 
-    def fade_update(self, dt):#called from fade out: update that should be played when fading: it is needed becayse depending on state, only part of the update loop should be called
-        self.game.game_objects.update_render(dt)
-        #self.game.game_objects.platform_collision(dt)
-        self.game.game_objects.ui.hud.update(dt)
-
     def render(self):
         self.game.game_objects.draw()#rendered on multiple layers on each parallax screen
         self.game.screen_manager.render()#renders each parllax to a composite screen with pp shader, which makes it display size

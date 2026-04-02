@@ -5,6 +5,9 @@ ENEMY_CONFIG = {
         'timers': {'hurt_recovery': [150, 200]},
         
         'states': {
+            'wait': {},
+            'death': {},
+            'dead': {},
             'patrol': {
                 'deciders': {
                     'patrol_position_end': {

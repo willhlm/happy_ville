@@ -28,6 +28,10 @@ ENEMY_CONFIG = {
             },
         },
         'states': {
+            'wait': {},
+            'death': {},
+            'dead': {},
+            'hurt': {},
             'patrol': {
                 'deciders':{
                     'check_player_attack_ready': {'next_state':'wait', 'score': 80, 'priority': 1, 'kwargs': {'time':10, 'next_state':'attack_pre'}}, 
@@ -35,11 +39,14 @@ ENEMY_CONFIG = {
                     'check_edge': {'next_state':'wait', 'score':90, 'priority':2, 'kwargs': {'time':60, 'next_state':'patrol', 'dir':-1}}
                     },
             },
+            'attack_pre': {},
             'attack_main': {
                 'deciders':{
                     'check_safe': {'next_state':'attack_post', 'score': 80, 'priority': 1, 'kwargs': {}}, 
                     },
             },
+            'attack_post': {},
+            'retreat': {},
         }
     }
 }

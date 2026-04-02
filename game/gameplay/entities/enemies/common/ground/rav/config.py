@@ -15,6 +15,10 @@ ENEMY_CONFIG = {
         'timers': {'hurt_recovery': [200, 250]},#min max         
 
         'states': {
+            'wait': {},
+            'hurt': {},
+            'death': {},
+            'dead': {},
             'patrol': {
                 'deciders':{
                     'check_player': {'next_state':'wait', 'score': 80, 'priority': 1, 'kwargs': {'time':10, 'next_state':'chase'}}, 
@@ -29,7 +33,15 @@ ENEMY_CONFIG = {
                     'chase_give_up': {'next_state':'wait','score':50,'priority':1,'give_up_time':400, 'kwargs': {'next_state':'patrol', 'time': 30}}, 
                     'check_edge': {'next_state':'wait', 'score':90, 'priority':2, 'kwargs': {'time':60, 'next_state':'patrol', 'dir':-1}}
                     },
-            },                                            
+            },
+            'attack_pre': {},
+            'attack_main': {},
+            'attack_post': {},
+            'jump_attack_pre': {},
+            'jump_attack_main': {},
+            'jump_attack_post': {},
+            'jump_back_pre': {},
+            'jump_back_main': {},
         }
     }
 }

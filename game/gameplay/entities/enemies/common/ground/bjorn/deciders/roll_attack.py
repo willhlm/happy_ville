@@ -1,4 +1,4 @@
-from gameplay.entities.enemies.common.shared.deciders.decision import Decision
+from gameplay.entities.enemies.common.shared.state_machine.deciders.decision import Decision
 
 class RollAttackDecider:
     def __init__(self, entity, **kwargs):

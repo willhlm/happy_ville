@@ -2,7 +2,7 @@ import pygame
 from gameplay.entities.enemies.base.enemy import Enemy
 from engine.utils import read_files
 from gameplay.entities.projectiles import HurtBox
-from gameplay.entities.enemies.common.shared.states.state_manager import StateManager
+from gameplay.entities.enemies.common.shared.state_machine import StateManager
 from .config import ENEMY_CONFIG as RAV_CONFIG
 
 from .states import JumpAttackPre, JumpAttackMain, JumpAttackPost, JumpBackPre, JumpBackMain, Hurt

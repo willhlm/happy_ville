@@ -58,7 +58,3 @@ class NewGame(GameState):
         width = 300
         position = [self.game.window_size[0] * 0.5 - width * 0.5, self.game.window_size[1] * 0.75]
         self.game.display.render_text(self.game.game_objects.font.font_atals, self.game.screen_manager.screen, text = self.texts[self.frame], letter_frame = int(self.time), color = (255,255,255,255), width = width, position = position)
-
-
-    def fade_update(self, dt):
-        pass

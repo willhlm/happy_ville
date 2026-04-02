@@ -25,6 +25,7 @@ from .vines.interactable_vines import InteractableVines
 from .inorinoki import Inorinoki
 from .verve_tree import VerveTree
 from .lever.lever import Lever
+from .larv_web.larv_web import LarvWeb
 from .light_crystal import LightCrystal
 from .place_holder_interacatble import PlaceHolderInteracatble
 from .rhoutta_altar import RhouttaAltar

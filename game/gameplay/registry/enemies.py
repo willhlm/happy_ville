@@ -40,5 +40,6 @@ REGISTER_ENEMIES = {
     'small_bee': SmallBee,
     'bjorn': Bjorn,
     'vertical_mygga_torpedo': VerticalMyggaTorpedo,
+    'krakan': Krakan,
 
 }

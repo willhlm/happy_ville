@@ -1,5 +1,5 @@
 import random
-from gameplay.entities.enemies.common.shared.states.base_state import BaseState
+from gameplay.entities.enemies.common.shared.state_machine.states.base_state import BaseState
 
 class JumpAttackPre(BaseState):
     def __init__(self, entity, deciders, config_key, **kwargs):

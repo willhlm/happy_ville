@@ -18,6 +18,7 @@ from .common.flying.mygga_variants.vertical_torpedo.vertical_torpedo import Vert
 from .common.flying.mygga_variants.casual.mygga import Mygga
 from .common.flying.bees.big_bee import BigBee
 from .common.flying.bees.small_bee.small_bee import SmallBee
+from .common.flying.krakan.krakan import Krakan
 
 from .common.ground.crab_crystal.crab_crystal import CrabCrystal
 from .common.ground.egg import Egg

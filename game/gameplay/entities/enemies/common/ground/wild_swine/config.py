@@ -14,6 +14,9 @@ ENEMY_CONFIG = {
             'hurt_recovery': [160, 210],
         },
         'states': {
+            'wait': {},
+            'death': {},
+            'dead': {},
             'patrol': {
                 'deciders': {
                     'check_player': {'next_state': 'wait', 'score': 80, 'priority': 1, 'kwargs': {'time': 10, 'next_state': 'chase'}},
@@ -31,6 +34,10 @@ ENEMY_CONFIG = {
             'hurt': {
                 'next_state': 'chase',
             },
+            'attack_pre': {},
+            'charging': {},
+            'attack_main': {},
+            'attack_post': {},
         },
     }
 }
