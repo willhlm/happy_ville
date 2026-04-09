@@ -1,3 +1,4 @@
+import math
 import pygame
 from gameplay.entities.platforms.base.platform import Platform
 
@@ -34,16 +35,7 @@ class CollisionPolygon(Platform):
             return  # No collision
 
         overlap, axis = result
-        # Move entity out of the polygon
-        direction = (entity.hitbox.centerx - self.rect.centerx, entity.hitbox.centery - self.rect.centery)
-        sign = 1 if self.dot(direction, axis) > 0 else -1
-        move_x = axis[0] * overlap * sign
-        move_y = axis[1] * overlap * sign
-
-        entity.hitbox.x += move_x
-        entity.hitbox.y += move_y
-        entity.body.update_rect_x()
-        entity.body.update_rect_y()
+        entity.platform_collider.resolve_polygon(self, overlap, axis)
 
     def dot(self, a, b):
         return a[0]*b[0] + a[1]*b[1]

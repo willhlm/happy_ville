@@ -10,7 +10,7 @@ class ThunderDiveStatue(Interactables):#interact with it to upgrade horagalles r
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = self.rect.copy()
 
-        ability = self.game_objects.player.abilities.spirit_abilities.get('Thunder', False)
+        ability = self.game_objects.player.abilities.spirit_abilities['Thunder']
         self.interacted = ability and ability.level == 2#if level 2, inteeracted = True
         if self.interacted:
             self.shader_state.enter_state('tint', colour = [0, 0, 0, 100])
@@ -19,7 +19,7 @@ class ThunderDiveStatue(Interactables):#interact with it to upgrade horagalles r
     def interact(self):#when player press t/y
         if self.interacted: return
         self.game_objects.player.currentstate.enter_state('Pray_pre')
-        ability = self.game_objects.player.abilities.spirit_abilities['Thunder'].level_up()
+        self.game_objects.player.abilities.spirit_abilities['Thunder'].level_up()
         self.shader_state.handle_input('tint', colour = [0,0,0,100])
         self.interacted = True
 

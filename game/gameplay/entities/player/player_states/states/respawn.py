@@ -18,10 +18,8 @@ class ReSpawnMain(PhaseBase):
         pass
 
     def increase_phase(self):
-        self.entity.health = max(self.entity.health, 0)
-        self.entity.heal(self.entity.max_health)
+        self.entity.vitals.set_health(max(self.entity.vitals.health, 0))
+        self.entity.heal_vitals(self.entity.vitals.max_health)
         if self.entity.backpack.map.spawn_point.get('bone', False):
             self.entity.backpack.map.spawn_point.pop()
         self.enter_state('idle')
-
-

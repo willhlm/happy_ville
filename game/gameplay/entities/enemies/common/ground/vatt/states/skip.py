@@ -19,8 +19,7 @@ class Skip(BaseState):
             self.entity.velocity[1] = -2
             self.skip = False
         
-        
-    def handle_input(self, input):
-        if input =='Ground':
+    def consume_contact_state(self):
+        if self.entity.is_on_floor():
             self.skip = True
             

@@ -813,7 +813,7 @@
                  "objects":[
                         {
                          "height":0,
-                         "id":1142,
+                         "id":1181,
                          "name":"",
                          "polyline":[
                                 {
@@ -821,23 +821,31 @@
                                  "y":0
                                 }, 
                                 {
-                                 "x":-80,
-                                 "y":-32
+                                 "x":204.137931034483,
+                                 "y":0
                                 }, 
                                 {
-                                 "x":-160,
-                                 "y":32
+                                 "x":367.448275862069,
+                                 "y":0
                                 }, 
                                 {
-                                 "x":-160,
-                                 "y":96
+                                 "x":469.51724137931,
+                                 "y":0
+                                }, 
+                                {
+                                 "x":571.586206896552,
+                                 "y":0
+                                }, 
+                                {
+                                 "x":592,
+                                 "y":0
                                 }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":0,
-                         "x":3760,
-                         "y":784
+                         "x":3136,
+                         "y":639
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -888,19 +896,57 @@
                                 {
                                  "name":"path",
                                  "type":"object",
-                                 "value":1142
+                                 "value":1181
                                 }, 
                                 {
                                  "name":"sprite_path",
                                  "type":"string",
-                                 "value":"generic\/rock1"
+                                 "value":"generic\/rock2"
                                 }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":112,
-                         "x":3488,
-                         "y":736
+                         "x":3408,
+                         "y":624
+                        }, 
+                        {
+                         "gid":32045,
+                         "height":64,
+                         "id":1177,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"breakable",
+                                 "type":"bool",
+                                 "value":false
+                                }, 
+                                {
+                                 "name":"damage",
+                                 "type":"bool",
+                                 "value":false
+                                }, 
+                                {
+                                 "name":"damage_on_land",
+                                 "type":"bool",
+                                 "value":false
+                                }, 
+                                {
+                                 "name":"disappear_on_stand",
+                                 "type":"bool",
+                                 "value":true
+                                }, 
+                                {
+                                 "name":"solid",
+                                 "type":"bool",
+                                 "value":false
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":112,
+                         "x":7104,
+                         "y":768
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -952,7 +998,7 @@
                          "type":"",
                          "visible":true,
                          "width":64,
-                         "x":3792,
+                         "x":3856,
                          "y":928
                         }, 
                         {
@@ -993,8 +1039,8 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":3376,
-                         "y":880
+                         "x":3456,
+                         "y":544
                         }, 
                         {
                          "gid":11,
@@ -1870,8 +1916,8 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":3888,
-                         "y":864
+                         "x":3760,
+                         "y":896
                         }, 
                         {
                          "gid":3,
@@ -1972,12 +2018,12 @@
                          "type":"",
                          "visible":true,
                          "width":160,
-                         "x":3232,
+                         "x":3200,
                          "y":928
                         }, 
                         {
                          "gid":8,
-                         "height":48,
+                         "height":160,
                          "id":1167,
                          "name":"",
                          "rotation":0,
@@ -1985,7 +2031,7 @@
                          "visible":true,
                          "width":128,
                          "x":3776,
-                         "y":704
+                         "y":816
                         }, 
                         {
                          "gid":8,
@@ -2012,24 +2058,6 @@
                          "y":608
                         }, 
                         {
-                         "gid":1073741827,
-                         "height":16,
-                         "id":1170,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"class",
-                                 "type":"string",
-                                 "value":"larv_wall"
-                                }],
-                         "rotation":90,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":3504,
-                         "y":832
-                        }, 
-                        {
                          "gid":3,
                          "height":16,
                          "id":1171,
@@ -2044,8 +2072,8 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":3840,
-                         "y":544
+                         "x":3824,
+                         "y":640
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -2096,7 +2124,7 @@
          "y":0
         }],
  "nextlayerid":112,
- "nextobjectid":1172,
+ "nextobjectid":1184,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

@@ -36,7 +36,10 @@ class JumpSprintMain(PhaseAirBase):
         self.entity.velocity[0] += self.entity.dir[0]
 
     def handle_input(self, input):
-        if input == 'Ground':
+        pass
+
+    def consume_contact_state(self):
+        if self.entity.is_on_floor():
             self.enter_phase('post')
 
 class JumpSprintPost(PhaseAirBase):

@@ -1,10 +1,11 @@
 import pygame
-from .base_texture import BaseTexture
+from .textured_platform import TexturedPlatform
 from engine.system import animation
 from engine.utils import read_files
 from gameplay.entities.shared.states import states_basic
+from gameplay.entities.platforms.components.geometry import CollisionSample
 
-class ConveyorBelt(BaseTexture):
+class ConveyorBelt(TexturedPlatform):
     def __init__(self, pos, game_objects, size, **kwarg):
         super().__init__(pos, game_objects)
         self.tile_size = [16,16]
@@ -72,19 +73,19 @@ class ConveyorBelt(BaseTexture):
         for layer in self.layers:
             layer.release()
 
-    def collide_x(self,entity):
-        if entity.velocity[0] > 0:#going to the right
-            entity.platform_physics.resolve_side_collision(self, 'right', 'belt')
-            entity.velocity[1] += self.direction[1]
-        else:#going to the leftx
-            entity.platform_physics.resolve_side_collision(self, 'left', 'belt')
-            entity.velocity[1] += -self.direction[1]
-        entity.body.update_rect_x()
+    def get_contact_metadata(self, entity, side, axis, collision_kind):
+        return {}
 
-    def collide_y(self,entity):
-        super().collide_y(entity)
-        entity.velocity[0] += self.direction[0] * 0.1
-        entity.friction[0] = C.friction_player[0] - 0.1 * self.direction[0] * entity.dir[0]
-        entity.timer_jobs['friction'].activate()
+    def get_wall_samples(self, entity):
+        if not (
+            entity.hitbox.bottom > self.hitbox.top and
+            entity.hitbox.top < self.hitbox.bottom
+        ):
+            return ()
+
+        return (
+            CollisionSample('right', self.hitbox.left, self, self, collision_kind='belt'),
+            CollisionSample('left', self.hitbox.right, self, self, collision_kind='belt'),
+        )
 
 #shadow light platforms: platforms that appear under shadow light

@@ -15,6 +15,6 @@ class SpiritContainer(Item):
         self.velocity[1]=3*dt
 
     def player_collision(self,player):
-        player.max_spirit += 1
+        player.vitals.set_max_spirit(player.vitals.max_spirit + 1)
         #a cutscene?
         self.kill()

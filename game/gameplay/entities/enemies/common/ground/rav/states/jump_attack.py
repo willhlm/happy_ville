@@ -20,7 +20,7 @@ class JumpAttackMain(BaseState):
 
     def update_logic(self, dt):
         self.entity.velocity[0] += self.entity.dir[0]
-        if self.entity.collision_types["bottom"]:
+        if self.entity.is_on_floor():
             self.enter_state("jump_attack_post")
 
     def modify_hit(self, effect):

@@ -13,8 +13,6 @@ class InteractableItem(Item):#need to press Y to pick up - #key items: need to p
 
     def update(self, dt):
         super().update(dt)
-        self.perform_bounce()     
-        self.bounce_directions.clear()     
 
     def pickup(self, player):
         self.game_objects.world_state.objects.set_bool(self.game_objects.map.level_name, 'interactable_items', type(self).__name__, True)#save in state file that the items on this map has picked up (assume that only one interactable item on each room)

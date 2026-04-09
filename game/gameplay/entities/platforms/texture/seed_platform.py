@@ -1,10 +1,10 @@
 import pygame
 from engine.utils import read_files
 from engine.system import animation
-from .base_texture import BaseTexture
+from .textured_platform import TexturedPlatform
 from gameplay.entities.shared.states import states_basic
 
-class SeedPlatform(BaseTexture):
+class SeedPlatform(TexturedPlatform):
     def __init__(self, arrow, game_objects, dir):
         super().__init__(arrow.hitbox.center, game_objects)
         self.lifetime = 200

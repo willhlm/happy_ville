@@ -15,6 +15,6 @@ class HeartContainer(Item):
         self.velocity[1] = 3*dt
 
     def player_collision(self, player):
-        player.max_health += 1
+        player.vitals.set_max_health(player.vitals.max_health + 1)
         #a cutscene?
         self.kill()

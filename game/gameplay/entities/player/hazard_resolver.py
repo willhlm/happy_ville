@@ -19,18 +19,18 @@ class PlayerHazardResolver:
         self._begin_safe_respawn()
         self._apply_void_effect(attacker, damage)
         if not self.player.game_objects.transition.is_busy:
-            self.player.platform_physics.enabled = True
+            self.player.platform_collider.enabled = True
 
     def _begin_safe_respawn(self, after_transport=None):
-        if self.player.health <= 1:
+        if self.player.vitals.health <= 1:
             return
 
-        self.player.platform_physics.enabled = False
+        self.player.platform_collider.enabled = False
         self.player.currentstate.enter_state('invisible')
 
         def after():
             self.player.currentstate.handle_input('pray_post')
-            self.player.platform_physics.enabled = True
+            self.player.platform_collider.enabled = True
             if after_transport:
                 after_transport()
 
@@ -57,10 +57,10 @@ class PlayerHazardResolver:
                 hitstop=40,
                 knockback=[0, 0],
                 attacker=attacker,
+                attacker_dir=[0, 0],
             )
             effect.attacker_callbacks = {}
             attacker._hazard_effect = effect
 
         effect = effect.copy()
-        effect.meta['attacker_dir'] = [0, 0]
         self.player.take_hit(effect)

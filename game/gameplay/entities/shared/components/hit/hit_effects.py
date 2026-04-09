@@ -23,6 +23,7 @@ class HitEffect():
         self.particles = kwargs.get('particles', {})        
         self.attacker_particles = kwargs.get('attacker_particles', {})        
         self.projectile = kwargs.get('projectile', None)
+        self.attacker_dir = kwargs.get('attacker_dir', [0, 0])
         self.meta = kwargs.get('meta', {})
         
         self.result = HitResult.CONNECTED  # Default result
@@ -45,6 +46,7 @@ class HitEffect():
         new_effect.hit_type = self.hit_type
         new_effect.particles = self.particles.copy()
         new_effect.attacker_particles = self.attacker_particles.copy()
+        new_effect.attacker_dir = self.attacker_dir[:]
         new_effect.meta = self.meta.copy()
         new_effect.defender_callbacks = self.defender_callbacks.copy()
         new_effect.attacker_callbacks = self.attacker_callbacks.copy()
@@ -116,6 +118,11 @@ def default_attacker_particles(effect):
     """Clash particles (projectile-specific)"""
     effect.game_objects.particles.emit(effect.attacker_particles['preset'], effect.projectile.hitbox.center, effect.attacker_particles['n'],  **effect.attacker_particles['args'])
 
+def default_clash_particles(effect):
+    """Spawn clash particles at a resolved clash position"""
+    pos = effect.meta.get('clash_pos', effect.projectile.hitbox.center)
+    effect.game_objects.particles.emit(effect.attacker_particles['preset'], pos, effect.attacker_particles['n'], **effect.attacker_particles['args'])
+
 def default_sound_dynamic(effect):
     """Dynamically resolve and play hit sound"""        
     material = getattr(effect.defender, 'material', 'flesh')
@@ -134,7 +141,7 @@ def create_melee_effect(game_objects, **kwargs):
         'hitstop': lambda eff: eff.defender.hitstop.start(
             duration=eff.hitstop,
             callback=[
-                knockback_callback(eff.defender, eff.knockback, eff.meta['attacker_dir'])
+                knockback_callback(eff.defender, eff.knockback, eff.attacker_dir)
             ]
         ),
         'particles': default_defender_particles,        
@@ -162,7 +169,7 @@ def create_projectile_effect(game_objects, **kwargs):
         'hitstop': lambda eff: eff.defender.hitstop.start(
             duration=eff.hitstop,
             callback=[
-                knockback_callback(eff.defender, eff.knockback, eff.meta['attacker_dir'])
+                knockback_callback(eff.defender, eff.knockback, eff.attacker_dir)
             ]
         ),
         'particles': default_defender_particles,
@@ -187,7 +194,7 @@ def create_contact_effect(game_objects, **kwargs):
         'hitstop': lambda eff: eff.defender.hitstop.start(
             duration=eff.hitstop,
             callback=[
-                knockback_callback(eff.defender, eff.knockback, eff.meta['attacker_dir'])
+                knockback_callback(eff.defender, eff.knockback, eff.attacker_dir)
             ]
         ),
         'sound': default_defender_sound,        
@@ -201,4 +208,15 @@ def create_contact_effect(game_objects, **kwargs):
         ),
     }
     
+    return effect
+
+def create_projectile_clash_effect(game_objects, **kwargs):
+    """Factory for projectile-vs-projectile clash feedback"""
+    effect = HitEffect(game_objects, **kwargs)
+
+    effect.attacker_callbacks = {
+        'particles': default_clash_particles,
+        'sound': default_sound_dynamic,
+    }
+
     return effect

@@ -11,7 +11,7 @@ class BouncyBalls(PlatformProjectile):#for ball challange room
         self.hitbox = self.rect.copy()
 
         self.light = game_objects.lights.add_light(self)
-        self.velocity = [random.uniform(-10,10),random.uniform(-10,-4)]
+        self.velocity = [random.uniform(-2,2),random.uniform(-2,-1)]
 
     def pool(game_objects):
         BouncyBalls.sprites = read_files.load_sprites_dict('assets/sprites/entities/projectiles/projectile_1/',game_objects)
@@ -23,15 +23,16 @@ class BouncyBalls(PlatformProjectile):#for ball challange room
         super().kill()
         self.game_objects.lights.remove_light(self.light)
 
-    def take_dmg(self, dmg):#when hit by aila sword without purple stone
+    def on_projectile_clash_lost(self, other):#when hit by aila sword without purple stone
         self.velocity = [0,0]
         self.dmg = 0
         self.currentstate.handle_input('Death')
         self.game_objects.signals.emit('ball_killed')
 
-    def on_platform_side_collision(self, side, block, collision_type = 'Wall'):
-        self.currentstate.handle_input(collision_type)
-        self.velocity[0] = -self.velocity[0]
+    def handle_platform_collision(self, collision):
+        if collision.axis == 'x':
+            self.currentstate.handle_input(collision.collision_kind)
+            self.velocity[0] = -self.velocity[0]
+            return
 
-    def on_platform_vertical_collision(self, side, block):
         self.velocity[1] = -self.velocity[1]

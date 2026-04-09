@@ -18,14 +18,13 @@ class Enemy(Character):
         self.currentstate = StateManager(self)
 
         self.inventory = {'amber_droplet':random.randint(1,3)}#thigs to drop wgen killed
-        self.health = self.config['health']    
+        self.vitals.set_max_health(self.config['health'])
+        self.vitals.set_health(self.vitals.max_health)
 
         self.flags = {'aggro': True, 'attack_able': True, 'hurt_able': True}#'attack able': a flag used as a cooldown of attack
         self.dmg = 1
         self.death_effects = EnemyDeathEffects(self)
         
-        self.contact_effect = hit_effects.create_contact_effect(game_objects, damage = 1, knockback = [20, 0], hitstop = 5, attacker = self)#collision with player
-
     def update_render(self, dt):
         dt = self.game_objects.time_field_manager.get_dt_at(dt, self.hitbox.center)
         scaled_dt = self.hitstop.get_sim_dt(dt)
@@ -38,20 +37,32 @@ class Enemy(Character):
         scaled_dt = self.hitstop.get_sim_dt(dt)
 
         self.update_vel(scaled_dt)
-        self.currentstate.update(scaled_dt)#need to be aftre update_vel since some state transitions look at velocity
-        self.animation.update(scaled_dt)#need to be after currentstate since animation will animate the current state
+
+    def post_physics_update(self, dt):
+        dt = self.game_objects.time_field_manager.get_dt_at(dt, self.hitbox.center)
+        scaled_dt = self.hitstop.get_sim_dt(dt)
+        self.consume_contact_state()
+        self.currentstate.update(scaled_dt)
+        self.animation.update(scaled_dt)
 
     def player_collision(self, player):#when player collides with enemy
         if not self.flags['aggro']: return
         pm_one = sign(player.hitbox.center[0]-self.hitbox.center[0])
-        
-        effect = self.contact_effect.copy()
-        effect.meta['attacker_dir'] = [pm_one, 0]  # Push player away                   
+
+        effect = hit_effects.create_contact_effect(
+            self.game_objects,
+            damage=1,
+            knockback=[20, 0],
+            hitstop=5,
+            attacker=self,
+            attacker_dir=[pm_one, 0],
+        )
         damage_applied, modified = player.take_hit(effect)# Player takes hit
 
     def killed(self):#called at killing blow
         if not self.death_effects.begin_cleanup(): return        
-
+        self.flags['aggro'] = False
+                
         self.death_effects.play_kill_sound()
         self.death_effects.emit_particles()
         self.game_objects.world_state.statistics_state.update_kill_statistics(type(self).__name__.lower())

@@ -32,7 +32,8 @@ class TaggMus(Enemy):
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 20, 30)
 
-        self.health = self.config['health']   
+        self.vitals.set_max_health(self.config['health'])
+        self.vitals.set_health(self.vitals.max_health)
         self.currentstate = StateManager(self, custom_states = TAGGMUS_STATES, custom_deciders = TAGGMUS_DECIDERS)
 
     def emit_tagg_burst(self):#perhaps make it so that easer to defeat with dash abilty as we can get close and go under the volley

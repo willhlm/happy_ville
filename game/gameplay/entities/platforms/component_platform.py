@@ -1,0 +1,90 @@
+from engine.utils import read_files
+from gameplay.entities.platforms.base.dynamic_platform import DynamicPlatform
+from gameplay.entities.platforms.components.platform_components import COMPONENTS
+
+'''costume properties accepted from tiled:
+damage_on_land: bool
+damage: str
+knockback_x: str
+knockback_y: str
+
+dissaper_on_stand: bool
+respawn_time: int
+disappear_time: int
+
+move: bool
+move_type: str -> direction_distance, path
+disatnce: str
+direction: str
+phase: str
+speed: str
+pingpong: bool
+loop: bool
+
+one_way_up: bool
+solid: bool
+crushes_entities: bool
+
+sprite_path: str
+ID: str -> emits this signal ID
+
+breakale: bool
+vulnerable_sides: str -> "top", "bottom", "left", "right"
+health: str
+invincibility_time: str
+'''
+
+def parse_components(components):
+    if isinstance(components, (list, tuple)):
+        return [str(x).strip() for x in components if str(x).strip()]
+    s = str(components).strip()
+    if not s:
+        return []
+    return [c.strip() for c in s.split(",") if c.strip()]
+
+def parse_bool(value, default=False):
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return value
+    return str(value).strip().lower() in {'1', 'true', 'yes', 'on'}
+
+class ComponentPlatform(DynamicPlatform):
+    def __init__(self, pos, game_objects, components, **props):
+        super().__init__(pos, game_objects, size=props.get('size', (16, 16)), components=[])
+        self.props = props
+        self.crushes_entities = parse_bool(props.get('crushes_entities', True), default=True)
+
+        name = props.get("sprite_path", "generic/default")    
+        self.sprites = read_files.load_sprites_dict(f"assets/sprites/entities/platforms/{name}" + '/', game_objects)
+        self.image = self.sprites["idle"][0]
+
+        # sync rect/hitbox to image size
+        self.rect.width = self.image.width
+        self.rect.height = self.image.height
+        self.hitbox = self.rect.copy()
+        self.old_hitbox = self.hitbox.copy()
+
+        # ---- components ----
+        names = parse_components(components)
+        self.components = []
+        for comp_name in names:
+            cls = COMPONENTS.get(comp_name)
+            if cls is None:
+                raise KeyError(f"Unknown platform component: {comp_name}")
+            self.components.append(cls(self, **self.props))
+
+        for c in self.components:
+            c.on_added()
+
+    def kill(self):
+        self.components = []
+        super().kill()            
+
+    def draw(self, target):
+        self.game_objects.game.display.render(self.image,target,
+            position=(
+                int(self.rect[0] - self.game_objects.camera_manager.camera.scroll[0]),
+                int(self.rect[1] - self.game_objects.camera_manager.camera.scroll[1]),
+            ),
+        )        

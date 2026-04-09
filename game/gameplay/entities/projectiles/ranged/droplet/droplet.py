@@ -33,6 +33,9 @@ class ProjectileDroplet(PlatformProjectile):#droplet that can be placed, the sou
         if self.dmg == 0: return#do not do the stuff if dmg = 0
         super().collision_platform(collision_plat)
 
+    def handle_platform_collision(self, collision):
+        self.collision_platform(collision.collider)
+
     def pool(game_objects):
         ProjectileDroplet.sprites = read_files.load_sprites_dict('assets/sprites/entities/visuals/environments/droplet/', game_objects)
 

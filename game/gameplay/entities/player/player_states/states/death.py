@@ -28,7 +28,11 @@ class DeathPre(PhaseBase):
         pass
 
     def handle_input(self, input):
-        if input == 'Ground' or input == 'hole':
+        if input == 'hole':
+            self.enter_phase('main')
+
+    def consume_contact_state(self):
+        if self.entity.is_on_floor():
             self.enter_phase('main')
 
 class DeathMain(PhaseBase):
@@ -52,7 +56,7 @@ class DeathPost(PhaseBase):
         super().__init__(entity)
 
     def enter(self, **kwarg):
-        self.entity.dead()
+        self.entity.death_manager.finish_death()
         self.entity.animation.play('death_post')
 
     def update(self, dt):

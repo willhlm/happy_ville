@@ -3,7 +3,6 @@ from gameplay.entities.enemies.common.shared.state_machine.states.base_state imp
 class Death(BaseState):
     def __init__(self, entity, deciders, config_key, **kwarg):
         super().__init__(entity, deciders, config_key)
-        self.entity.killed()
         self.entity.dead()
         self.entity.animation.play('death', 0.2)
 

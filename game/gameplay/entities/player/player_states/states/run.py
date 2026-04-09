@@ -1,6 +1,5 @@
 from .base_composite import CompositeState
 from .base_state import PhaseBase
-from engine import constants as C
 
 class RunState(CompositeState):
     def __init__(self, entity):
@@ -14,16 +13,16 @@ class RunPre(PhaseBase):
     def enter(self, **kwarg):
         self.entity.animation.play('run_pre')
         self.particle_timer = 0
-        self.entity.game_objects.timer_manager.remove_ID_timer('cayote')
+        self.entity.end_coyote_time()
 
     def update(self, dt):
         self.particle_timer -= dt
         if self.particle_timer < 0:
             self.running_particles()
 
-        if not self.entity.collision_types['bottom']:
+        if not self.entity.is_on_floor():
             self.enter_state('fall')
-            self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
+            self.entity.begin_coyote_time()
 
     def increase_phase(self):
         self.enter_phase('main')
@@ -67,9 +66,8 @@ class RunPre(PhaseBase):
         if not self.entity.flags['attack_able']:
             return
         if abs(self.entity.dir[1]) < 0.8:
-            state = 'sword_stand' + str(int(self.entity.sword.swing) + 1)
+            state = 'sword_stand' + str(self.entity.combat_tracker.next_swing_index())
             self.enter_state(state)
-            self.entity.sword.swing = not self.entity.sword.swing
         elif self.entity.dir[1] > 0.8:
             self.enter_state('sword_up')
 
@@ -93,9 +91,9 @@ class RunMain(PhaseBase):
             self.entity.game_objects.sound.play_sfx(self.entity.sounds['run'][self.sfx_timer % 2], vol = 0.8)
             self.sfx_timer = self.sfx_loop_time
 
-        if not self.entity.collision_types['bottom']:
+        if not self.entity.is_on_floor():
             self.enter_state('fall')
-            self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
+            self.entity.begin_coyote_time()
 
     def enter_state(self, new_state, **kwarg):
         super().enter_state(new_state, **kwarg)
@@ -132,9 +130,8 @@ class RunMain(PhaseBase):
         if not self.entity.flags['attack_able']:
             return
         if abs(self.entity.dir[1]) < 0.8:
-            state = 'sword_stand' + str(int(self.entity.sword.swing) + 1)
+            state = 'sword_stand' + str(self.entity.combat_tracker.next_swing_index())
             self.enter_state(state)
-            self.entity.sword.swing = not self.entity.sword.swing
         elif self.entity.dir[1] > 0.8:
             self.enter_state('sword_up')
 
@@ -146,9 +143,9 @@ class RunPost(PhaseBase):
         self.entity.animation.play('run_post')
 
     def update(self, dt):
-        if not self.entity.collision_types['bottom']:
+        if not self.entity.is_on_floor():
             self.enter_state('fall')
-            self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
+            self.entity.begin_coyote_time()
 
     def handle_press_input(self, input):
         if input.name == 'a':
@@ -186,9 +183,8 @@ class RunPost(PhaseBase):
         if not self.entity.flags['attack_able']:
             return
         if self.entity.dir[1] == 0:
-            state = 'sword_stand' + str(int(self.entity.sword.swing) + 1)
+            state = 'sword_stand' + str(self.entity.combat_tracker.next_swing_index())
             self.enter_state(state)
-            self.entity.sword.swing = not self.entity.sword.swing
         elif self.entity.dir[1] > 0:
             self.enter_state('sword_up')
 

@@ -47,7 +47,7 @@ class Patrol(EnemyStates):#goes back and forth
             x = self.entity.hitbox.left - 5
         else:
             x = self.entity.hitbox.right + 5
-        if not self.entity.game_objects.collisions.check_ground([x, self.entity.hitbox.bottom + 5]):
+        if not self.entity.game_objects.physics.collision_queries.check_ground([x, self.entity.hitbox.bottom + 5]):
             self.entity.game_objects.timer_manager.remove_timer(self.timer)            
             self.enter_state('wait', time = 60, next_state = 'patrol')
 

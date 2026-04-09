@@ -30,4 +30,13 @@ class SlamAttack(ProjectileBase):
             },
         }
 
-        return hit_effects.create_projectile_effect(self.game_objects, damage = self.dmg, hit_type = 'stone', knockback = [25, 0], hitstop = 10, projectile = self, meta = {'attacker_dir': self.dir}, attacker_particles = attacker_particles)#save direction)
+        return hit_effects.create_projectile_effect(
+            self.game_objects,
+            damage=self.dmg,
+            hit_type='stone',
+            knockback=[25, 0],
+            hitstop=10,
+            projectile=self,
+            attacker_dir=self.dir,
+            attacker_particles=attacker_particles,
+        )

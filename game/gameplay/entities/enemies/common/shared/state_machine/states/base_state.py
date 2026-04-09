@@ -23,6 +23,9 @@ class BaseState():
         self.update_logic(dt)
         self.check_transitions(dt)
 
+    def consume_contact_state(self):
+        pass
+
     def update_logic(self, dt):
         """Override in subclasses: movement, attack, etc."""
         pass

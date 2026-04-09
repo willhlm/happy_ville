@@ -18,4 +18,4 @@ class GreenInfinityStone(InfinityStones):#faster slash (changing framerate)
         super().pool(game_objects)
 
     def attach(self, player):
-        player.sword.stone_states['slash'].enter_state('Slash', 'slash')
+        player.sword.modifier_manager.add_modifier('green_stone')

@@ -17,5 +17,5 @@ class RedInfinityStone(InfinityStones):#more dmg
         cls.sprites = read_files.load_sprites_dict('assets/sprites/entities/items/infinity_stones/red/',game_objects)#for inventory
         super().pool(game_objects)
 
-    def attach(self):
-        self.sword.dmg *= 1.1
+    def attach(self, player):
+        player.sword.modifier_manager.add_modifier('red_stone')

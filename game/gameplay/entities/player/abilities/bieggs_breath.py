@@ -3,6 +3,12 @@ from engine.utils import read_files
 from gameplay.entities.projectiles import Wind
 
 class BieggsBreath(Ability):#force push
+    id = 'wind'
+    name = 'Wind'
+    state_name = 'wind'
+    spirit_cost = 1
+    selectable = True
+
     def __init__(self, entity):
         super().__init__(entity)
         self.sprites = read_files.load_sprites_dict('assets/sprites/ui/elements/abilities//bieggs_breath/',entity.game_objects)
@@ -18,7 +24,8 @@ class BieggsBreath(Ability):#force push
         spawn = Wind(self.entity.hitbox.midtop, self.entity.game_objects, dir = dir, dmg = 0)
         self.entity.game_objects.projectiles.add_friendly(spawn)
 
-    def upgrade_ability(self):#called from upgrade menu
-        self.level += 1
+    def level_up(self):
+        super().level_up()
         if self.level == 2:
             self.health = 2
+        return self

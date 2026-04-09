@@ -10,7 +10,8 @@ class FlowerButterfly(FlyingEnemy):#peaceful ones
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
-        self.health = 1
+        self.vitals.set_max_health(1)
+        self.vitals.set_health(self.vitals.max_health)
         self.aggro_distance = [0,0]
         self.game_objects.lights.add_light(self, colour = [77/255,168/255,177/255,200/255], interact = False)
         self.flags['aggro'] = False

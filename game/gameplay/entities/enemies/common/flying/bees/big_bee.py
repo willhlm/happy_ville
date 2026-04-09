@@ -10,5 +10,6 @@ class BigBee(FlyingEnemy):#a non aggro mygga that roams around
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
-        self.health = 3
+        self.vitals.set_max_health(3)
+        self.vitals.set_health(self.vitals.max_health)
         self.aggro_distance = [0, 0]

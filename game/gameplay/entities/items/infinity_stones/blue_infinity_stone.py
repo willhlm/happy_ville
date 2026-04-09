@@ -18,4 +18,4 @@ class BlueInfinityStone(InfinityStones):#get spirit at collision
         super().pool(game_objects)
 
     def attach(self, player):
-        player.sword.stone_states['enemy_collision'].enter_state('Enemy_collision', 'enemy_collision')
+        player.sword.modifier_manager.add_modifier('blue_stone')

@@ -10,7 +10,8 @@ class MyggaColliding(FlyingEnemy):#bounce around
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
-        self.health = 3
+        self.vitals.set_max_health(3)
+        self.vitals.set_health(self.vitals.max_health)
         self.velocity = [random.randint(-2,2),random.randint(-2,2)]
         self.dir[0] = sign(self.velocity[0])
         self.aggro_distance = [0, 0]
@@ -24,15 +25,10 @@ class MyggaColliding(FlyingEnemy):#bounce around
     def update_vel(self):
         pass
 
-    def on_ramp_collision(self, side, ramp):
-        self.velocity[1] *= -1
+    def handle_platform_collision(self, collision):
+        if collision.axis == 'x':
+            self.velocity[0] *= -1
+            self.dir[0] = -1 if collision.side == 'right' else 1
+            return
 
-    def on_platform_side_collision(self, side, block, collision_type = 'Wall'):
-        super().on_platform_side_collision(side, block, collision_type)
-        self.velocity[0] *= -1
-        self.dir[0] = -1 if side == 'right' else 1
-
-    def on_platform_vertical_collision(self, side, block):
-        if side == 'bottom':
-            super().on_platform_vertical_collision(side, block)
         self.velocity[1] *= -1

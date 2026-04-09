@@ -21,7 +21,8 @@ class Wolfies(Boss):
         self.ability = WOLFIES_CONFIG['ability']#the stae of image that will be blitted to show which ability that was gained
         self.attack_distance = WOLFIES_CONFIG['attack_distance']
         self.jump_distance = WOLFIES_CONFIG['jump_distance']
-        self.health = WOLFIES_CONFIG['health']
+        self.vitals.set_max_health(WOLFIES_CONFIG['health'])
+        self.vitals.set_health(self.vitals.max_health)
 
         self.light = self.game_objects.lights.add_light(self, radius = 150)
 

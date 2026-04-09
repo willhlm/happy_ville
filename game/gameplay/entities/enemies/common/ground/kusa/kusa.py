@@ -13,7 +13,8 @@ class Kusa(Enemy):
 
         self.currentstate = states_kusa.Idle(self)
         self.attack_distance = [30, 30]
-        self.health = 1
+        self.vitals.set_max_health(1)
+        self.vitals.set_health(self.vitals.max_health)
         self.dmg = 2
 
     def suicide(self):

@@ -36,6 +36,20 @@ class ActivationManager:
             and rect.top <= bottom + margin_y
         )
 
+    def get_camera_rect(self):
+        return pygame.Rect(
+            int(self.camera_left),
+            int(self.camera_top),
+            int(self.camera_right - self.camera_left),
+            int(self.camera_bottom - self.camera_top),
+        )
+
+    def get_active_region_rect(self):
+        rect = self.get_camera_rect()
+        margin_x, margin_y = self._coerce_margin(self.activation_margin)
+        rect.inflate_ip(margin_x * 2, margin_y * 2)
+        return rect
+
     def sleep(self, sprite):
         if not self._is_managed(sprite):
             return
@@ -88,6 +102,10 @@ class ActivationManager:
         if margin is None:
             margin = self.activation_margin
 
+        return self._coerce_margin(margin)
+
+    @staticmethod
+    def _coerce_margin(margin):
         if isinstance(margin, (int, float)):
             value = int(margin)
             return value, value

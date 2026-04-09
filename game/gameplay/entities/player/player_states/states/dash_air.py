@@ -23,7 +23,7 @@ class DashAirPre(PhaseBase):
         self.dash_length = C.dash_length
         self.entity.shader_state.handle_input('motion_blur')
         self.entity.game_objects.cosmetics.add(Dusts(self.entity.hitbox.center, self.entity.game_objects, dir = self.entity.dir, state = 'one'))
-        self.entity.game_objects.timer_manager.remove_ID_timer('cayote')
+        self.entity.end_coyote_time()
         self.jump_dash_timer = C.jump_dash_timer
         self.entity.movement_manager.add_modifier('dash', entity = self.entity, authoritative = True)
         self.entity.velocity[1] *= 0
@@ -47,16 +47,7 @@ class DashAirPre(PhaseBase):
             self.increase_phase()
 
     def handle_input(self, input, **kwarg):
-        if input == 'Wall' or input == 'belt':
-            self.entity.shader_state.handle_input('idle')
-            if self.entity.acceleration[0] != 0:
-                state = input.lower() + '_glide'
-                self.enter_state(state, **kwarg)
-            else:
-                self.enter_state('idle')
-        elif input == 'Ground':
-            self.land_from_dash()
-        elif input == 'interrupt':
+        if input == 'interrupt':
             self.entity.shader_state.handle_input('idle')
             self.enter_state('idle')
 
@@ -83,6 +74,21 @@ class DashAirPre(PhaseBase):
         else:
             self.enter_state('land', phase = 'soft')
 
+    def consume_contact_state(self):
+        if self.entity.is_on_floor():
+            self.land_from_dash()
+            return
+
+        if self.entity.has_collision_kind('belt') or self.entity.has_collision_kind('Wall'):
+            self.entity.shader_state.handle_input('idle')
+            if self.entity.acceleration[0] != 0:
+                if self.entity.has_collision_kind('belt'):
+                    self.enter_state('belt_glide')
+                else:
+                    self.enter_state('wall_glide')
+            else:
+                self.enter_state('idle')
+
 
 class DashAirMain(DashGroundPre):
     def __init__(self, entity, **kwarg):
@@ -101,12 +107,6 @@ class DashAirMain(DashGroundPre):
         if input.name == 'lb':
             self.entity.flags['sprint_chain_active'] = False
         input.processed()
-
-    def handle_input(self, input, **kwarg):
-        if input == 'Ground':
-            self.land_from_dash()
-        else:
-            super().handle_input(input, **kwarg)
 
     def exit_state(self):
         if self.dash_length < 0:
@@ -154,12 +154,6 @@ class DashAirPost(DashGroundPre):
         if input.name == 'lb':
             self.entity.flags['sprint_chain_active'] = False
         input.processed()
-
-    def handle_input(self, input, **kwarg):
-        if input == 'Ground':
-            self.land_from_dash()
-        else:
-            super().handle_input(input, **kwarg)
 
     def enter_state(self, state, **kwarg):
         self.entity.shader_state.handle_input('idle')

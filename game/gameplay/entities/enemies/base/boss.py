@@ -5,7 +5,8 @@ from gameplay.entities.interactables import AbilityBall
 class Boss(Enemy):
     def __init__(self,pos,game_objects, ID = None):
         super().__init__(pos,game_objects)
-        self.health = 10
+        self.vitals.set_max_health(10)
+        self.vitals.set_health(self.vitals.max_health)
         self.always_active = True
         self.ID = ID
 

@@ -19,10 +19,10 @@ class SprintMain(PhaseBase):
 
     def update(self, dt):
         self.sprint_time += dt
-        if not self.entity.collision_types['bottom']:
+        if not self.entity.is_on_floor():
             self.entity.flags['sprint_chain_active'] = True
             self.enter_state('fall')
-            self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
+            self.entity.begin_coyote_time()
 
     def handle_press_input(self, input):
         if input.name == 'a' and self.sprint_time > self.sprint_time_threshold:
@@ -51,10 +51,10 @@ class SprintPost(PhaseBase):
         self.entity.animation.play('sprint_post')
 
     def update(self, dt):
-        if not self.entity.collision_types['bottom']:
+        if not self.entity.is_on_floor():
             self.entity.flags['sprint_chain_active'] = True
             self.enter_state('fall')
-            self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
+            self.entity.begin_coyote_time()
 
     def handle_press_input(self, input):
         if input.name == 'a':

@@ -43,7 +43,8 @@ class Bjorn(Enemy):
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 20, 30)
 
-        self.health = self.config['health']    
+        self.vitals.set_max_health(self.config['health'])
+        self.vitals.set_health(self.vitals.max_health)
         self.currentstate = StateManager(self, type = 'ground', custom_states = BJORN_STATES, custom_deciders = BJORN_DECIDERS)
 
         self.flags["hurt_state_able"] = False        

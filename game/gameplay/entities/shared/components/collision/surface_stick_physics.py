@@ -1,186 +1,293 @@
 class SurfaceStickPhysics:
-    SURFACE_NORMALS = {
-        'bottom': [0, -1],
-        'left': [1, 0],
-        'top': [0, 1],
-        'right': [-1, 0],
+    CLOCKWISE_SURFACE_ORDER = ("bottom", "left", "top", "right")
+    COUNTERCLOCKWISE_SURFACE_ORDER = ("bottom", "right", "top", "left")
+
+    INWARD_VECTORS = {
+        "bottom": (0, 1),
+        "top": (0, -1),
+        "left": (-1, 0),
+        "right": (1, 0),
     }
 
-    SURFACE_ANGLES = {
-        'bottom': 0,
-        'left': 90,
-        'top': 180,
-        'right': -90,
-    }
-
-    def __init__(self, entity, speed, stick_speed=1.5, probe_distance=2, corner_inset=3, initial_side='bottom'):
+    def __init__(self, entity, speed, stick_speed, probe_distance=2, corner_inset=3, clockwise=True, initial_side="bottom"):
         self.entity = entity
         self.speed = speed
         self.stick_speed = stick_speed
         self.probe_distance = probe_distance
         self.corner_inset = corner_inset
+        self.clockwise = clockwise
+        self.surface_side = initial_side if initial_side in self.INWARD_VECTORS else "bottom"
+        self.surface_body = None
 
-        self.surface_side = initial_side
-        self.surface_normal = self.SURFACE_NORMALS[initial_side][:]
-        self.pending_contacts = []
-        self.preferred_surface_side = initial_side
+    def update_velocity(self, dt=None):
+        self._refresh_surface()
 
-        self._sync_visuals()
-
-    def update_velocity(self):
-        self._sync_surface_from_contacts()
-        self._turn_corner_if_needed()
-
-        tangent = self.get_tangent()
-        inward = [-self.surface_normal[0], -self.surface_normal[1]]
+        tangent = self._get_tangent_vector(self.surface_side)
+        inward = self.INWARD_VECTORS[self.surface_side]
 
         self.entity.velocity[0] = tangent[0] * self.speed + inward[0] * self.stick_speed
         self.entity.velocity[1] = tangent[1] * self.speed + inward[1] * self.stick_speed
-        self._sync_visuals()
 
-    def register_contact(self, side, block=None):
-        self.pending_contacts.append((side, block))
-
-    def get_tangent(self):
-        direction = getattr(self.entity, 'clockwise', 1)
-        return [self.surface_normal[1] * direction, self.surface_normal[0] * direction]
-
-    def _sync_surface_from_contacts(self):
-        if not self.pending_contacts:
-            if self.surface_side != 'bottom':
-                self.entity.standing_platform = None
-            return
-
-        sides = [side for side, _ in self.pending_contacts]
-
-        if self.surface_side in sides:
-            chosen_side = self.surface_side
-        elif self.preferred_surface_side in sides:
-            chosen_side = self.preferred_surface_side
-        elif len(set(sides)) == 1:
-            chosen_side = sides[0]
-        else:
-            chosen_side = self.surface_side
-
-        chosen_block = None
-        for side, block in self.pending_contacts:
-            if side == chosen_side:
-                chosen_block = block
-                break
-
-        self.pending_contacts.clear()
-        self._set_surface(chosen_side, chosen_block)
-        self.preferred_surface_side = chosen_side
-
-    def _turn_corner_if_needed(self):
-        if self._has_surface_ahead():
-            return
-
-        next_normal = self._get_corner_normal()
-        next_side = self._get_side_from_normal(next_normal)
-        if self._has_corner_surface():
-            self._set_surface(next_side)
-            self.preferred_surface_side = next_side
-            return
-
-        self.entity.clockwise *= -1
-        self.preferred_surface_side = self.surface_side
-        self._sync_visuals()
-
-    def _has_surface_ahead(self):
-        tangent = self.get_tangent()
-        inward = [-self.surface_normal[0], -self.surface_normal[1]]
-        probe = self._get_current_surface_probe(tangent, inward)
-        return self._is_solid_point(probe)
-
-    def _has_corner_surface(self):
-        tangent = self.get_tangent()
-        inward = [-self.surface_normal[0], -self.surface_normal[1]]
-        return any(self._is_solid_point(probe) for probe in self._get_corner_probes(tangent, inward))
-
-    def _get_probe_point(self, tangent_scale, inward_scale, tangent, inward):
-        centerx, centery = self.entity.hitbox.center
-        tangent_scale = max(0, tangent_scale)
-        inward_scale = max(0, inward_scale)
-
-        return (
-            round(centerx + tangent[0] * tangent_scale + inward[0] * inward_scale),
-            round(centery + tangent[1] * tangent_scale + inward[1] * inward_scale),
-        )
-
-    def _get_current_surface_probe(self, tangent, inward):
-        leading_corner = self._get_leading_corner(tangent, inward)
-        return (
-            round(leading_corner[0] - tangent[0] * self.corner_inset + inward[0] * self.probe_distance),
-            round(leading_corner[1] - tangent[1] * self.corner_inset + inward[1] * self.probe_distance),
-        )
-
-    def _get_corner_probes(self, tangent, inward):
-        leading_corner = self._get_leading_corner(tangent, inward)
-        next_normal = self._get_corner_normal()
-        next_inward = [-next_normal[0], -next_normal[1]]
-
-        probes = [
-            (
-                round(leading_corner[0] + next_inward[0] * self.probe_distance),
-                round(leading_corner[1] + next_inward[1] * self.probe_distance),
-            ),
-            (
-                round(leading_corner[0] + next_inward[0] * self.probe_distance + inward[0] * self.probe_distance),
-                round(leading_corner[1] + next_inward[1] * self.probe_distance + inward[1] * self.probe_distance),
-            ),
-            (
-                round(leading_corner[0] + next_inward[0] * (self.probe_distance + self.corner_inset)),
-                round(leading_corner[1] + next_inward[1] * (self.probe_distance + self.corner_inset)),
-            ),
-        ]
-        return probes
-
-    def _get_leading_corner(self, tangent, inward):
-        centerx, centery = self.entity.hitbox.center
-        return (
-            centerx + tangent[0] * self._axis_extent(tangent) + inward[0] * self._axis_extent(inward),
-            centery + tangent[1] * self._axis_extent(tangent) + inward[1] * self._axis_extent(inward),
-        )
-
-    def _is_solid_point(self, point):
-        for group_name in ('platforms', 'platforms_ramps'):
-            group = getattr(self.entity.game_objects, group_name, [])
-            for platform in group:
-                hitbox = getattr(platform, 'hitbox', None)
-                if hitbox and hitbox.collidepoint(point):
-                    return True
-        return False
-
-    def _get_corner_normal(self):
-        nx, ny = self.surface_normal
-        if self.entity.clockwise > 0:
-            return [-ny, nx]
-        return [ny, -nx]
-
-    def _set_surface(self, side, block=None):
-        self.surface_side = side
-        self.surface_normal = self.SURFACE_NORMALS[side][:]
-        self.entity.angle = self.SURFACE_ANGLES[side]
-
-        if side == 'bottom':
-            self.entity.standing_platform = block
-        else:
-            self.entity.standing_platform = None
-
-    def _sync_visuals(self):
-        tangent = self.get_tangent()
         if tangent[0] != 0:
             self.entity.dir[0] = 1 if tangent[0] > 0 else -1
-        self.entity.angle = self.SURFACE_ANGLES[self.surface_side]
 
-    def _axis_extent(self, direction):
-        if direction[0] != 0:
-            return self.entity.hitbox.width * 0.5
-        return self.entity.hitbox.height * 0.5
+    def post_physics_update(self, dt=None):
+        if dt is not None and dt <= 0:
+            return
 
-    def _get_side_from_normal(self, normal):
-        for side, side_normal in self.SURFACE_NORMALS.items():
-            if side_normal[0] == normal[0] and side_normal[1] == normal[1]:
-                return side
-        return self.surface_side
+        contact_state = self.entity.contact_state
+
+        if contact_state.surface_collision:
+            collision = contact_state.surface_collision
+            self.surface_side = collision.side
+            self.surface_body = collision.collider
+            if self._snap_to_surface(self.surface_body, self.surface_side):
+                return
+
+            self._refresh_surface()
+            return
+
+        if self.surface_body is None:
+            self._refresh_surface()
+            return
+
+        if self._try_wrap_current_surface():
+            return
+
+        self._reverse_direction()
+        self._restore_to_surface(self.surface_body, self.surface_side)
+
+    def handle_platform_collision(self, collision):
+        if collision.side not in self.INWARD_VECTORS:
+            return
+
+        self.surface_side = collision.side
+        self.surface_body = collision.collider
+        if self._snap_to_surface(collision.collider, collision.side):
+            return
+
+    def get_angle(self):
+        return {
+            "bottom": 0,
+            "left": -90,
+            "top": 180,
+            "right": 90,
+        }[self.surface_side]
+
+    def _refresh_surface(self):
+        platform = self._find_platform_from_points(self._get_surface_probe_points(self.surface_side))
+        if platform:
+            self.surface_body = platform
+            self._snap_to_surface(platform, self.surface_side)
+            return
+
+        for side in self.INWARD_VECTORS:
+            platform = self._find_platform_from_points(self._get_surface_probe_points(side))
+            if platform:
+                self.surface_side = side
+                self.surface_body = platform
+                self._snap_to_surface(platform, side)
+                return
+
+    def _try_wrap_current_surface(self):
+        next_side = self._get_next_side(self.surface_side)
+        if not self._has_reached_corner(self.surface_body, self.surface_side):
+            return False
+
+        self._wrap_around_corner(self.surface_body, self.surface_side, next_side)
+        self.surface_side = next_side
+        self.surface_body = self.surface_body
+        return True
+
+    def _get_surface_probe_points(self, side):
+        hitbox = self.entity.hitbox
+        probe = self.probe_distance
+        inset = min(self.corner_inset, max(1, min(hitbox.width, hitbox.height) // 2))
+
+        if side == "bottom":
+            return [
+                (hitbox.left + inset, hitbox.bottom + probe),
+                (hitbox.centerx, hitbox.bottom + probe),
+                (hitbox.right - inset, hitbox.bottom + probe),
+            ]
+        if side == "top":
+            return [
+                (hitbox.left + inset, hitbox.top - probe),
+                (hitbox.centerx, hitbox.top - probe),
+                (hitbox.right - inset, hitbox.top - probe),
+            ]
+        if side == "left":
+            return [
+                (hitbox.left - probe, hitbox.top + inset),
+                (hitbox.left - probe, hitbox.centery),
+                (hitbox.left - probe, hitbox.bottom - inset),
+            ]
+        return [
+            (hitbox.right + probe, hitbox.top + inset),
+            (hitbox.right + probe, hitbox.centery),
+            (hitbox.right + probe, hitbox.bottom - inset),
+        ]
+
+    def _get_tangent_vector(self, side):
+        if self.clockwise:
+            return {
+                "bottom": (1, 0),
+                "left": (0, 1),
+                "top": (-1, 0),
+                "right": (0, -1),
+            }[side]
+
+        return {
+            "bottom": (-1, 0),
+            "right": (0, 1),
+            "top": (1, 0),
+            "left": (0, -1),
+        }[side]
+
+    def _get_next_side(self, side):
+        order = self.CLOCKWISE_SURFACE_ORDER if self.clockwise else self.COUNTERCLOCKWISE_SURFACE_ORDER
+        index = order.index(side)
+        return order[(index + 1) % len(order)]
+
+    def _has_reached_corner(self, platform, side):
+        if self._is_ramp(platform):
+            return False
+
+        hitbox = self.entity.hitbox
+        inset = min(self.corner_inset, max(1, min(hitbox.width, hitbox.height) // 2))
+
+        if side == "bottom":
+            if self.clockwise:
+                return hitbox.centerx >= platform.hitbox.right - inset
+            return hitbox.centerx <= platform.hitbox.left + inset
+
+        if side == "top":
+            if self.clockwise:
+                return hitbox.centerx <= platform.hitbox.left + inset
+            return hitbox.centerx >= platform.hitbox.right - inset
+
+        if side == "left":
+            if self.clockwise:
+                return hitbox.centery >= platform.hitbox.bottom - inset
+            return hitbox.centery <= platform.hitbox.top + inset
+
+        if self.clockwise:
+            return hitbox.centery <= platform.hitbox.top + inset
+        return hitbox.centery >= platform.hitbox.bottom - inset
+
+    def _find_platform_from_points(self, points):
+        for point in points:
+            platform = self._find_platform_at_point(point)
+            if platform:
+                return platform
+        return None
+
+    def _find_platform_at_point(self, point):
+        return self.entity.game_objects.physics.platform_spatial_index.query_point(point)
+
+    def _wrap_around_corner(self, platform, from_side, to_side):
+        hitbox = self.entity.hitbox
+
+        if from_side == "bottom" and to_side == "left":
+            hitbox.topleft = (platform.hitbox.right, platform.hitbox.top)
+        elif from_side == "left" and to_side == "top":
+            hitbox.topleft = (platform.hitbox.right - hitbox.width, platform.hitbox.bottom)
+        elif from_side == "top" and to_side == "right":
+            hitbox.topleft = (platform.hitbox.left - hitbox.width, platform.hitbox.bottom - hitbox.height)
+        elif from_side == "right" and to_side == "bottom":
+            hitbox.topleft = (platform.hitbox.left, platform.hitbox.top - hitbox.height)
+        elif from_side == "bottom" and to_side == "right":
+            hitbox.topleft = (platform.hitbox.left - hitbox.width, platform.hitbox.top)
+        elif from_side == "right" and to_side == "top":
+            hitbox.topleft = (platform.hitbox.left, platform.hitbox.bottom)
+        elif from_side == "top" and to_side == "left":
+            hitbox.topleft = (platform.hitbox.right, platform.hitbox.bottom - hitbox.height)
+        elif from_side == "left" and to_side == "bottom":
+            hitbox.topleft = (platform.hitbox.right - hitbox.width, platform.hitbox.top - hitbox.height)
+        else:
+            self._snap_to_surface(platform, to_side)
+            return
+
+        self.entity.body.update_rect_x()
+        self.entity.body.update_rect_y()
+
+    def _restore_to_surface(self, platform, side):
+        hitbox = self.entity.hitbox
+
+        if self._align_to_surface_target(platform, side):
+            return
+
+        if side == "bottom":
+            hitbox.bottom = platform.hitbox.top
+            hitbox.left = max(platform.hitbox.left, min(hitbox.left, platform.hitbox.right - hitbox.width))
+        elif side == "top":
+            hitbox.top = platform.hitbox.bottom
+            hitbox.left = max(platform.hitbox.left, min(hitbox.left, platform.hitbox.right - hitbox.width))
+        elif side == "left":
+            hitbox.left = platform.hitbox.right
+            hitbox.top = max(platform.hitbox.top, min(hitbox.top, platform.hitbox.bottom - hitbox.height))
+        else:
+            hitbox.right = platform.hitbox.left
+            hitbox.top = max(platform.hitbox.top, min(hitbox.top, platform.hitbox.bottom - hitbox.height))
+
+        self.entity.body.update_rect_x()
+        self.entity.body.update_rect_y()
+
+    def _reverse_direction(self):
+        self.clockwise = not self.clockwise
+
+    def _snap_to_surface(self, platform, side):
+        if self._align_to_surface_target(platform, side):
+            return True
+
+        if self._is_ramp(platform):
+            return False
+
+        if side == "bottom":
+            self.entity.hitbox.bottom = platform.hitbox.top
+            self.entity.body.update_rect_y()
+            return True
+
+        if side == "top":
+            self.entity.hitbox.top = platform.hitbox.bottom
+            self.entity.body.update_rect_y()
+            return True
+
+        if side == "left":
+            self.entity.hitbox.left = platform.hitbox.right
+            self.entity.body.update_rect_x()
+            return True
+
+        self.entity.hitbox.right = platform.hitbox.left
+        self.entity.body.update_rect_x()
+        return True
+
+    def _align_to_surface_target(self, platform, side):
+        if not self._is_ramp(platform):
+            return False
+
+        surface_collision = getattr(platform, "surface_collision", None)
+        if surface_collision is None:
+            return False
+
+        if side == "bottom":
+            target = surface_collision._get_floor_target(self.entity.hitbox)
+            if target is None:
+                return False
+            self.entity.hitbox.bottom = target
+            self.entity.body.update_rect_y()
+            return True
+
+        if side == "top":
+            target = surface_collision._get_ceiling_target(self.entity.hitbox)
+            if target is None:
+                return False
+            self.entity.hitbox.top = target
+            self.entity.body.update_rect_y()
+            return True
+
+        return False
+
+    @staticmethod
+    def _is_ramp(platform):
+        return getattr(platform, "surface_collision", None).__class__.__name__ == "RightAngleSurfaceCollisionComponent"

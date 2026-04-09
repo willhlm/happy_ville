@@ -20,11 +20,17 @@ class EntityBody:
         setattr(self.entity.hitbox, self.anchor, getattr(self.entity.rect, self.anchor))
 
     def update_true_pos_x(self, dt):
-        self.entity.true_pos[0] += dt * self.entity.velocity[0]
+        self.move_x(dt * self.entity.velocity[0])
+
+    def update_true_pos_y(self, dt):
+        self.move_y(dt * self.entity.velocity[1])
+
+    def move_x(self, amount):
+        self.entity.true_pos[0] += amount
         self.entity.rect.left = round(self.entity.true_pos[0])
         self.update_hitbox()
 
-    def update_true_pos_y(self, dt):
-        self.entity.true_pos[1] += dt * self.entity.velocity[1]
+    def move_y(self, amount):
+        self.entity.true_pos[1] += amount
         self.entity.rect.top = round(self.entity.true_pos[1])
         self.update_hitbox()

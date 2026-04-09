@@ -16,7 +16,9 @@ ENEMY_CONFIG = {
         },
         'states': {
             'crawl': {},
-            'hurt': {},
+            'hurt': {
+                'next_state': 'crawl',
+            },
             'death': {},
             'dead': {},
             'wait': {},

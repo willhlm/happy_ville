@@ -23,16 +23,15 @@ class ProjectileGroups:
         self.friendly_router = ProjectileRouter(self.add_friendly)
 
     def add_friendly(self, projectile):
-        if getattr(projectile, 'uses_platform_physics', False):
-            self.friendly_platform.add(projectile)
-        else:
-            self.friendly.add(projectile)
+        self.route(projectile, 'player')
 
     def add_enemy(self, projectile):
-        if getattr(projectile, 'uses_platform_physics', False):
-            self.enemy_platform.add(projectile)
-        else:
-            self.enemy.add(projectile)
+        self.route(projectile, 'enemy')
+
+    def route(self, projectile, team):
+        self._remove_from_all_groups(projectile)
+        projectile.team = team
+        self._group_for(projectile, team).add(projectile)
 
     def all_friendly(self):
         return self._all_friendly
@@ -66,3 +65,15 @@ class ProjectileGroups:
         self.friendly.empty()
         self.enemy_platform.empty()
         self.friendly_platform.empty()
+
+    def _group_for(self, projectile, team):
+        uses_platform = getattr(projectile, 'uses_platform_collider', False)
+        if team == 'player':
+            return self.friendly_platform if uses_platform else self.friendly
+        return self.enemy_platform if uses_platform else self.enemy
+
+    def _remove_from_all_groups(self, projectile):
+        self.enemy.remove(projectile)
+        self.friendly.remove(projectile)
+        self.enemy_platform.remove(projectile)
+        self.friendly_platform.remove(projectile)

@@ -34,10 +34,7 @@ class InteractableVines(Interactables):#issue when player lands on a bent vine, 
         self.wind_strength = 0.1
         self.collision_padding = max(1.5, self.body_width * 0.08)
         self.surface_snap_padding = max(1.0, self.body_width * 0.12)
-        self.collider = None
-        self.player_hitbox = None
-        self.prev_collider = None
-        self.collider_velocity = [0.0, 0.0]
+        self.colliders = {}
         self.is_colliding = False
 
         self.points = []
@@ -45,6 +42,8 @@ class InteractableVines(Interactables):#issue when player lands on a bent vine, 
         self.section_vertices = []
         self._init_chain()
         self._init_sections()
+
+        self.hit_component.set_invinsibility(True)    
 
     def _init_chain(self):
         self.points.clear()
@@ -136,12 +135,10 @@ class InteractableVines(Interactables):#issue when player lands on a bent vine, 
         }
         return min(overlaps, key=overlaps.get)
 
-    def _solve_body_collision(self):
-        if self.collider is None or self.player_hitbox is None:
-            return
-
-        collider = self.collider
-        player_hitbox = self.player_hitbox
+    def _solve_body_collision(self, collision_data):
+        collider = collision_data['collider']
+        player_hitbox = collision_data['player_hitbox']
+        collider_velocity = collision_data['velocity']
         side_offset = self.body_width * 0.5 + self.collision_padding
         for index in range(1, self.point_count):
             point = self.points[index]
@@ -154,8 +151,8 @@ class InteractableVines(Interactables):#issue when player lands on a bent vine, 
             if collision_axis == 'top':
                 point[1] = player_hitbox.top - self.surface_snap_padding
                 previous[1] = point[1]
-                point[0] += self.collider_velocity[0]
-                previous[0] = point[0] - self.collider_velocity[0] * 0.25
+                point[0] += collider_velocity[0]
+                previous[0] = point[0] - collider_velocity[0] * 0.25
             elif collision_axis == 'bottom':
                 point[1] = player_hitbox.bottom + self.surface_snap_padding
                 previous[1] = point[1]
@@ -171,19 +168,27 @@ class InteractableVines(Interactables):#issue when player lands on a bent vine, 
             return
 
         pad_x = self.body_width + self.collision_padding * 2
-        self.player_hitbox = entity.hitbox.copy()
-        self.collider = entity.hitbox.inflate(pad_x, 0)
-        if self.prev_collider is None:
-            self.collider_velocity[0] = 0.0
-            self.collider_velocity[1] = 0.0
+        player_hitbox = entity.hitbox.copy()
+        collider = entity.hitbox.inflate(pad_x, 0)
+        previous_data = self.colliders.get(entity)
+        if previous_data is None:
+            velocity = [0.0, 0.0]
         else:
-            self.collider_velocity[0] = self.collider.centerx - self.prev_collider.centerx
-            self.collider_velocity[1] = self.collider.centery - self.prev_collider.centery
-        self.prev_collider = self.collider.copy()
+            prev_collider = previous_data['collider']
+            velocity = [
+                collider.centerx - prev_collider.centerx,
+                collider.centery - prev_collider.centery,
+            ]
+
+        self.colliders[entity] = {
+            'player_hitbox': player_hitbox,
+            'collider': collider,
+            'velocity': velocity,
+        }
 
     def collision(self, entity):
-        self.is_colliding = True
         self._track_collider(entity)
+        self.is_colliding = bool(self.colliders)
 
     def on_collision(self, entity):
         pass
@@ -192,12 +197,8 @@ class InteractableVines(Interactables):#issue when player lands on a bent vine, 
         pass
 
     def on_noncollision(self, entity):
-        self.is_colliding = False
-        self.collider = None
-        self.player_hitbox = None
-        self.prev_collider = None
-        self.collider_velocity[0] = 0.0
-        self.collider_velocity[1] = 0.0
+        self.colliders.pop(entity, None)
+        self.is_colliding = bool(self.colliders)
 
     def update(self, dt):
         self.time += dt
@@ -206,7 +207,8 @@ class InteractableVines(Interactables):#issue when player lands on a bent vine, 
         for _ in range(iterations):
             self._solve_constraints()
             if self.is_colliding:
-                self._solve_body_collision()
+                for collision_data in self.colliders.values():
+                    self._solve_body_collision(collision_data)
 
     def _segment_vertices(self, top_point, bottom_point, scroll):
         delta_x = bottom_point[0] - top_point[0]

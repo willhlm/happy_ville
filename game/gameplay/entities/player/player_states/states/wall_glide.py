@@ -13,9 +13,9 @@ class WallGlide(PhaseBase):
 
     def enter(self, **kwarg):
         self.entity.animation.play(self.animation_name)
-        self.entity.game_objects.timer_manager.remove_ID_timer('cayote')
+        self.entity.end_coyote_time()
         self.entity.movement_manager.add_modifier('wall_glide', authoritative = True)
-        if self.entity.collision_types['right']:
+        if self.entity.is_on_wall_side('right'):
             self.dir = [1, 0]
         else:
             self.dir = [-1, 0]
@@ -28,7 +28,7 @@ class WallGlide(PhaseBase):
             self.timer -= dt
             if self.timer <= 0:
                 self.fall()
-        if not self.entity.collision_types['right'] and not self.entity.collision_types['left']:
+        if not self.entity.is_on_wall():
             self.entity.velocity[0] = 0
             self.enter_state('fall', wall_dir = self.dir)
         else:
@@ -59,8 +59,8 @@ class WallGlide(PhaseBase):
         self.entity.velocity[0] = -self.entity.dir[0] * 2
         self.enter_state('fall', wall_dir = self.dir)
 
-    def handle_input(self, input, **kwarg):
-        if input == 'Ground':
+    def consume_contact_state(self):
+        if self.entity.is_on_floor():
             self.enter_state('run')
 
     def exit(self):

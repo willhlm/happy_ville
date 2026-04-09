@@ -23,3 +23,6 @@ class FallingRock(PlatformProjectile):#things that can be placed in cave, the so
     def collision_platform(self, collision_plat):#collision platform, called from collusoin_block
         super().collision_platform(collision_plat)
         self.currentstate.handle_input('death')
+
+    def handle_platform_collision(self, collision):
+        self.collision_platform(collision.collider)

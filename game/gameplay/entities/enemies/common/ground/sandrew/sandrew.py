@@ -12,7 +12,8 @@ class Sandrew(Enemy):
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 32, 32)
         self.currentstate = states_sandrew.Idle(self)
-        self.health = 3
+        self.vitals.set_max_health(3)
+        self.vitals.set_health(self.vitals.max_health)
         self.attack_distance = [200, 25]
         self.aggro_distance = [250, 25]#at which distance to the player when you should be aggro. Negative value make it no going aggro
         self.attack = HurtBox

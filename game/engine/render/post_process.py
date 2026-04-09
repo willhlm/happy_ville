@@ -45,6 +45,9 @@ class PostProcess():#for screen-wide effects
     def clear_shaders(self):
         self.shaders = {}        
 
+    def has_shaders(self):
+        return bool(self.shaders)
+
 class PostProcessLayer(PostProcess):#for per layer screen effects: the shaders need to respect the alpha (see e.g. chromatic abbrevation)
     def __init__(self, game_objects, screen):
         super().__init__(game_objects, None)    
@@ -54,6 +57,10 @@ class PostProcessLayer(PostProcess):#for per layer screen effects: the shaders n
 
     def apply(self, source_layer, final_target):  
         shader_items = list(self.shaders.items())
+        if not shader_items:
+            self.screen.apply_pp(source_layer, final_target)
+            return
+
         src = source_layer
         dst = self.temp_layer_a
 

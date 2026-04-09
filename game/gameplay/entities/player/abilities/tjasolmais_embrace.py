@@ -3,12 +3,17 @@ from engine.utils import read_files
 from gameplay.entities.projectiles import Shield
 
 class TjasolmaisEmbrace(Ability):#makes the shield, water god
+    id = 'shield'
+    name = 'Shield'
+    state_name = 'shield'
+    spirit_cost = 1
+    selectable = True
+
     def __init__(self, entity):
         super().__init__(entity)
         self.sprites = read_files.load_sprites_dict('assets/sprites/ui/elements/abilities/tjasolmais_embrace/',entity.game_objects)
         self.description = ['shield','hits one additional target','one additional damage','imba']
         self.shield = None#-> higher level can reflect projectiles? or maybe hurt enemy?
-        self.entity.movement_manager.add_modifier('tjasolmais_embrace', entity = self.entity)#this shoudl be appdended when abilty is added
 
     def shield_expire(self):#called when the shield is destroyed
         #self.entity.movement_manager.remove_modifier('tjasolmais_embrace')

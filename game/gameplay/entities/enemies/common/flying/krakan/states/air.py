@@ -43,7 +43,7 @@ class Patrol(BaseState):
             self.enter_state('chase')
             return
 
-        if self.entity.collision_types['bottom']:
+        if self.entity.is_on_floor():
             self.grounded_timer = self.behavior['grounded_grace_time']
         else:
             self.grounded_timer = max(0, self.grounded_timer - dt)

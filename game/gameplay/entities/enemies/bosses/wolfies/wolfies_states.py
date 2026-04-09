@@ -12,6 +12,9 @@ class Base_states():
     def handle_input(self, input):
         pass
 
+    def consume_contact_state(self):
+        pass
+
     def increase_phase(self):
         pass
 
@@ -100,7 +103,10 @@ class Run_main(Base_states):
             return        
 
     def handle_input(self, input):
-        if input == 'Wall':
+        pass
+
+    def consume_contact_state(self):
+        if self.entity.has_collision_kind('Wall'):
             self.entity.currentstate.start_next_task()
 
 @register_state(STATE_REGISTRY)
@@ -339,10 +345,13 @@ class Fall_main(Base_states):
         self.entity.animation.play('fall_main') 
 
     def handle_input(self, input):
-        if input == 'Ground':
-            self.entity.game_objects.camera_manager.camera_shake(amplitude = 15, duration = 15, scale = 0.9)     
+        pass
+
+    def consume_contact_state(self):
+        if self.entity.is_on_floor():
+            self.entity.game_objects.camera_manager.camera_shake(amplitude = 15, duration = 15, scale = 0.9)
             self.entity.acceleration[0] = 0
-            self.entity.currentstate.start_next_task()   
+            self.entity.currentstate.start_next_task()
 
 @register_state(STATE_REGISTRY)
 class Land(Base_states):

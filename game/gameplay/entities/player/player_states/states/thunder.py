@@ -13,11 +13,12 @@ class ThunderPre(PhaseBase):
         super().__init__(entity)
 
     def enter(self, **kwarg):
+        self.ability = self.entity.abilities.spirit_abilities['Thunder']
         self.ball = ThunderBall(self.entity.rect.topleft, self.entity.game_objects)
         self.entity.game_objects.cosmetics.add(self.ball)
         self.duration = 100
         self.entity.shader_state.enter_state('Swirl')
-        if self.entity.abilities.spirit_abilities['Thunder'].level == 2:
+        if self.ability.level == 2:
             self.arrow = self.entity.game_objects.ui.hud.widgets.show_point_arrow(
                 'thunder',
                 self.entity.rect.topleft,
@@ -27,7 +28,7 @@ class ThunderPre(PhaseBase):
     def update(self, dt):
         self.duration -= dt
         self.entity.velocity = [0, 0]
-        if self.entity.abilities.spirit_abilities['Thunder'].level == 2:
+        if self.ability.level == 2:
             self.arrow.set_pos(self.entity.rect.topleft)
         if self.duration < 0:
             self.exit_state()
@@ -35,7 +36,7 @@ class ThunderPre(PhaseBase):
     def exit_state(self):
         self.entity.shader_state.enter_state('Idle')
         self.ball.kill()
-        if self.entity.abilities.spirit_abilities['Thunder'].level == 1:
+        if self.ability.level == 1:
             self.enter_phase('main', dir = [0, 1])
         else:
             self.entity.game_objects.ui.hud.widgets.hide('thunder')
@@ -47,7 +48,7 @@ class ThunderPre(PhaseBase):
             self.exit_state()
 
     def handle_movement(self, axes):
-        if self.entity.abilities.spirit_abilities['Thunder'].level == 2:
+        if self.ability.level == 2:
             value = axes.move
             if value[0] != 0 or value[1] != 0:
                 self.arrow.dir = [value[0], -value[1]]
@@ -78,8 +79,8 @@ class ThunderMain(PhaseBase):
     def handle_movement(self, event):
         pass
 
-    def handle_input(self, input, **kwarg):
-        if input in ['Ground', 'Wall', 'belt']:
+    def consume_contact_state(self):
+        if self.entity.is_on_floor() or self.entity.has_collision_kind('Wall') or self.entity.has_collision_kind('belt'):
             self.exit_state()
 
 

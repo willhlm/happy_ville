@@ -17,6 +17,5 @@ class OrangeInfinityStone(InfinityStones):#bigger hitbox
         cls.sprites = read_files.load_sprites_dict('assets/sprites/entities/items/infinity_stones/orange/',game_objects)#for inventory
         super().pool(game_objects)
 
-    def attach(self):
-        self.sword.rect = pygame.Rect(self.sword.entity.rect.x,self.sword.entity.rect.y, 80, 40)
-        self.sword.hitbox = self.sword.rect.copy()
+    def attach(self, player):
+        player.sword.modifier_manager.add_modifier('orange_stone')

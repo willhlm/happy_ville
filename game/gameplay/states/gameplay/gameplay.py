@@ -22,11 +22,14 @@ class Gameplay(GameState):
 
     def render(self):
         self.game.game_objects.draw()#rendered on multiple layers on each parallax screen
-        self.game.screen_manager.render()#renders each parllax to a composite screen with pp shader, which makes it display size
-        self.game.game_objects.lights.draw(self.game.screen_manager.composite_screen)#before post procssing shader?
-        self.game.game_objects.post_process.apply(self.game.screen_manager.composite_screen)#apply post process shaders to the composite screen, which is large
-        self.game.game_objects.ui.hud.draw(self.game.screen_manager.composite_screen)#renders hud elements to the composite
 
+        self.game.screen_manager.render()#renders each parllax to a composite screen with pp shader, which makes it display size
+
+        self.game.game_objects.lights.draw(self.game.screen_manager.composite_screen)#before post procssing shader?
+
+        self.game.game_objects.post_process.apply(self.game.screen_manager.composite_screen)#apply post process shaders to the composite screen, which is large
+
+        self.game.game_objects.ui.hud.draw(self.game.screen_manager.composite_screen)#renders hud elements to the composite
         self.game.render_display(self.game.screen_manager.composite_screen.texture, scale = False)
 
     def handle_movement(self):#every frame
@@ -47,7 +50,7 @@ class Gameplay(GameState):
             elif input.name == 'y':
                 input.processed()
                 if self.game.game_objects.player.currentstate.can_interact():
-                    self.game.game_objects.collisions.check_interaction_collision()
+                    self.game.game_objects.physics.collision_queries.check_player_interaction()
 
             elif input.name == 'select':
                 input.processed()
@@ -55,7 +58,7 @@ class Gameplay(GameState):
 
             elif input.name == 'down':
                 input.processed()#should it be processed here or when passed through?
-                self.game.game_objects.collisions.pass_through(self.game.game_objects.player)
+                self.game.game_objects.physics.collision_queries.request_pass_through(self.game.game_objects.player)
 
             elif input.name in ('up', 'left', 'right'):#directional UI-style actions are ignored in gameplay
                 input.processed()

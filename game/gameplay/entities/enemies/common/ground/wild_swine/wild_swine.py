@@ -20,5 +20,6 @@ class WildSwine(Enemy):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 32, 32)
-        self.health = self.config['health']
+        self.vitals.set_max_health(self.config['health'])
+        self.vitals.set_health(self.vitals.max_health)
         self.currentstate = StateManager(self, custom_states=WILD_SWINE_STATES)

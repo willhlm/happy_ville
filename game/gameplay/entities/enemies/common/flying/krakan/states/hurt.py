@@ -16,7 +16,7 @@ class Hurt(BaseState):
         )
 
     def update_logic(self, dt):
-        if self.entity.collision_types['bottom']:
+        if self.entity.is_on_floor():
             self.entity.velocity[0] *= 0.8
             self.entity.velocity[1] = 0
         else:

@@ -18,6 +18,9 @@ class NPC_states():
     def increase_phase(self):
         pass
 
+    def consume_contact_state(self):
+        pass
+
 class Walk(NPC_states):#this object will never pop
     def __init__(self,entity):
         super().__init__(entity)

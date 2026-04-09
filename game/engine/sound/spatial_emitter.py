@@ -89,6 +89,10 @@ class SpatialAudioSystem:
         except Exception:
             pass
 
+    def clear(self, *, fade_ms: int = 0) -> None:
+        for emitter_id in list(self._emitters.keys()):
+            self.unregister(emitter_id, fade_ms=fade_ms)
+
     def update(self, listener_pos: Vec2) -> None:
         if not self._emitters:
             return

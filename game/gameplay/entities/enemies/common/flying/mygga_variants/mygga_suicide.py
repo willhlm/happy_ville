@@ -10,7 +10,8 @@ class MyggaSuicide(FlyingEnemy):#torpedo and explode
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
-        self.health = 1
+        self.vitals.set_max_health(1)
+        self.vitals.set_health(self.vitals.max_health)
 
         self.aggro_distance = [180,130]
         self.attack_distance = self.aggro_distance.copy()
@@ -31,14 +32,5 @@ class MyggaSuicide(FlyingEnemy):#torpedo and explode
         self.game_objects.projectiles.add_enemy(Explosion(self))
         self.game_objects.camera_manager.camera_shake(amp = 2, duration = 30)#amplitude and duration
 
-    def on_platform_side_collision(self, side, block, collision_type = 'Wall'):
-        super().on_platform_side_collision(side, block, collision_type)
-        self.currentstate.handle_input('collision')#for suicide
-
-    def on_platform_vertical_collision(self, side, block):
-        super().on_platform_vertical_collision(side, block)
-        self.currentstate.handle_input('collision')#for suicide
-
-    def on_ramp_collision(self, side, ramp):
-        super().on_ramp_collision(side, ramp)
+    def handle_platform_collision(self, collision):
         self.currentstate.handle_input('collision')#for suicide

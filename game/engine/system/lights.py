@@ -62,7 +62,7 @@ class Lights():
             self.occluder_start_index[index] = rectangle_cursor
             return rectangle_cursor
         else:
-            platforms = self.game_objects.collisions.sprite_collide(light, self.game_objects.platforms)  # Collision -> collision occurs at coordinates as per tiled position
+            platforms = self.game_objects.physics.collision_queries.sprite_collide(light, self.game_objects.platforms)  # Collision -> collision occurs at coordinates as per tiled position
             available = max(self.max_occluder_rectangles - rectangle_cursor, 0)
             platforms = platforms[:available]
             self.occluder_start_index[index] = rectangle_cursor

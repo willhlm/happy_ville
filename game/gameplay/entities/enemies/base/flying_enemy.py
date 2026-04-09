@@ -14,5 +14,5 @@ class FlyingEnemy(Enemy):
         self.body = EntityBody(self, anchor='center')
         self.currentstate = states_enemy_flying.Patrol(self)
 
-    def on_limit_y(self):
+    def apply_ground_snap_velocity(self):
         pass

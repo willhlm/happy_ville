@@ -9,7 +9,7 @@ class CheckCollisionsDecider:
     def choose(self, player_distance, dt):
         results = []        
         for direction in self.directions:
-            if self.entity.collision_types[direction]:
+            if self.entity.has_collision_side(direction):
                 return results.append(Decision(
                     next_state=self.cfg['next_state'],
                     score=self.cfg['score'],

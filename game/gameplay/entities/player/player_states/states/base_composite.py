@@ -44,4 +44,7 @@ class CompositeState():#will contain pre, main, post phases of a state
         return self.interaction_enabled
 
     def increase_phase(self):#called when an animation is finished for that state
-        self.current_phase.increase_phase()   
+        self.current_phase.increase_phase()  
+
+    def consume_contact_state(self):
+        self.current_phase.consume_contact_state()

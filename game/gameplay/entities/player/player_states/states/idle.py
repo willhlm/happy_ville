@@ -1,6 +1,5 @@
 from .base_composite import CompositeState
 from .base_state import PhaseBase
-from engine import constants as C
 
 class IdleState(CompositeState):
     def __init__(self, entity):
@@ -13,12 +12,12 @@ class IdleMain(PhaseBase):
 
     def enter(self, **kwarg):
         self.entity.animation.play('idle', f_rate = 0.1667)
-        self.entity.game_objects.timer_manager.remove_ID_timer('cayote')
+        self.entity.end_coyote_time()
 
     def update(self, dt):
-        if not self.entity.collision_types['bottom']:
+        if not self.entity.is_on_floor():
             self.enter_state('fall')
-            self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
+            self.entity.begin_coyote_time()
 
     def handle_press_input(self, input):
         if input.name == 'a':
@@ -61,8 +60,7 @@ class IdleMain(PhaseBase):
         if not self.entity.flags['attack_able']:
             return
         if self.entity.dir[1] == 0:
-            state = 'sword_stand' + str(int(self.entity.sword.swing) + 1)
+            state = 'sword_stand' + str(self.entity.combat_tracker.next_swing_index())
             self.enter_state(state)
-            self.entity.sword.swing = not self.entity.sword.swing
         elif self.entity.dir[1] > 0:
             self.enter_state('sword_up')

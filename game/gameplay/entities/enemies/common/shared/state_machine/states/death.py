@@ -2,8 +2,7 @@ from .base_state import BaseState
 
 class Death(BaseState):
     def __init__(self, entity, deciders, config_key, **kwarg):
-        super().__init__(entity, deciders, config_key)
-        self.entity.killed()
+        super().__init__(entity, deciders, config_key)  
         self.entity.animation.play('death', 0.2)
 
     @property

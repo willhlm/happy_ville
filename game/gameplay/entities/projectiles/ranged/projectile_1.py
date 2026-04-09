@@ -30,8 +30,8 @@ class Projectile_1(PlatformProjectile):
         self.velocity = [0,0]
         self.currentstate.handle_input('Death')
 
-    def on_ramp_collision(self, side, ramp):
+    def handle_platform_collision(self, collision):
         self.collision_platform(None)
 
-    def take_dmg(self, dmg):#called when fprojicle collides
+    def on_projectile_clash_lost(self, other):
         self.collision_platform(None)

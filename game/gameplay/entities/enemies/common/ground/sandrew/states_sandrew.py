@@ -15,6 +15,9 @@ class Enemy_states():
     def handle_input(self, input):
         pass
 
+    def consume_contact_state(self):
+        pass
+
     def increase_phase(self):
         pass
 
@@ -99,13 +102,15 @@ class Attack_main(Enemy_states):
         self.attack_box.hitbox[1] = self.entity.hitbox[1]
 
     def handle_input(self, input):
-        if input == 'Wall':
+        if input == 'sword':#if aila hits            
+            self.entity.velocity[0] *= 3            
+            self.entity.dir[0] *= -1
+
+    def consume_contact_state(self):
+        if self.entity.has_collision_kind('Wall'):
             self.entity.velocity[0] = -5 * self.dir[0] * self.entity.velocity[0]
             self.increase_phase()
             self.entity.game_objects.camera_manager.camera_shake(duration = 15)
-        elif input == 'sword':#if aila hits            
-            self.entity.velocity[0] *= 3            
-            self.entity.dir[0] *= -1
 
     def increase_phase(self):
         self.attack_box.kill()

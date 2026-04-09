@@ -11,7 +11,7 @@ class Spiritorb(Item):#the thing that gives spirit
         self.hitbox=self.rect.copy()
 
     def player_collision(self, player):
-        player.add_spirit(1)
+        player.gain_spirit(1)
         self.kill()
 
     def update_vel(self, dt):

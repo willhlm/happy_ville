@@ -28,19 +28,19 @@ class EntityShaderManager():
         self.effects.update_render(dt)
 
     # --- Drawing ---
-    def draw(self, base_texture, target, position, flip = False):        
+    def draw(self, base_texture, target, position, flip = False, angle = 0):        
         if not self.effects.shaders:
-            self.state.draw(base_texture, target, position, flip)# If no overlay effects, render base shader directly
-            self.draw_normal(position, flip)
+            self.state.draw(base_texture, target, position, flip, angle)# If no overlay effects, render base shader directly
+            self.draw_normal(position, flip, angle)
             return
 
-        self.effects.draw(base_texture, target, position, flip) # Pass through overlay pipeline
-        self.draw_normal(position, flip)
+        self.effects.draw(base_texture, target, position, flip, angle) # Pass through overlay pipeline
+        self.draw_normal(position, flip, angle)
 
     def clear_textures(self):#called when release_texture is called.
         self.effects.clear_textures()
 
-    def draw_normal(self, position, flip = False):
+    def draw_normal(self, position, flip = False, angle = 0):
         normal_texture = self._current_normal_texture()
         if normal_texture is None:
             return
@@ -51,6 +51,7 @@ class EntityShaderManager():
             self.entity.game_objects.lights.normal_map,
             position = position,
             flip = flip,
+            angle = angle,
             shader = self.entity.game_objects.shaders['normal_map'],
         )
 
@@ -98,7 +99,7 @@ class EntityProcess(PostProcess):#for entity overlay effects
             self.clear_textures()
             self._define_size(size)
 
-    def draw(self, base_texture, target, position, flip):
+    def draw(self, base_texture, target, position, flip, angle):
         """Apply overlay shaders to base_texture, last shader draws to target."""  
         self._ensure_size(base_texture.size)
         self.base_layer.clear(0, 0, 0, 0)
@@ -106,7 +107,7 @@ class EntityProcess(PostProcess):#for entity overlay effects
         self.temp_layer_b.clear(0, 0, 0, 0)
 
         dst = self.temp_layer_a
-        src = self.entity.shader_state.state.draw(base_texture, self.base_layer, position = (0, 0), flip = False)        
+        src = self.entity.shader_state.state.draw(base_texture, self.base_layer, position = (0, 0), flip = False, angle = 0) # First draw base shader to base_layer, then pass through overlay pipeline
 
         shader_items = list(self.shaders.items())
 
@@ -114,7 +115,7 @@ class EntityProcess(PostProcess):#for entity overlay effects
             is_last_shader = (i == len(shader_items) - 1)
 
             if is_last_shader:                
-                shader_obj.draw_to_composite(src, target, position, flip)# Last shader draws to final target
+                shader_obj.draw_to_composite(src, target, position, flip, angle)# Last shader draws to final target
             else:                
                 src = shader_obj.draw(src, dst)# Intermediate shader: draw src -> dst
                 dst = self.temp_layer_b if dst is self.temp_layer_a else self.temp_layer_a#needed for 3+ shaders in pipeline

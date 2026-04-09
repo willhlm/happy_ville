@@ -30,9 +30,11 @@ class Rav(Enemy):
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1], 32, 32)        
 
-        self.health = self.config['health']    
+        self.vitals.set_max_health(self.config['health'])
+        self.vitals.set_health(self.vitals.max_health)
         self.currentstate = StateManager(self, type = 'ground', custom_states = RAV_STATES, custom_deciders = RAV_DECIDERS)
 
     def attack(self):#called from states, attack main
+        print(self.dir)
         attack = HurtBox(self, lifetime = 10, dir = self.dir, size = [32, 32])#make the object
         self.game_objects.projectiles.add_enemy(attack)#add to group but in main phase

@@ -57,6 +57,7 @@ class WorldResetter:
         self.game_objects = game_objects
 
     def reset_for_new_map(self):
+        self.game_objects.sound.clear_spatial_sounds()
         self.game_objects.clean_groups()
         self.game_objects.game.screen_manager.clear_screens()
         self.game_objects.player.shader_state.handle_input("idle")
@@ -497,7 +498,7 @@ class ObjectSpawner:
 
             components = self._components_from_flags(props)
 
-            plat = GenericPlatform(object_position, self.game_objects, components=components, **props)
+            plat = ComponentPlatform(object_position, self.game_objects, components=components, **props)
             self.game_objects.platforms.add(plat)
 
     def load_paths(self, data, parallax, offset, ctx, map_def, biome_mgr, layer_name, viewport_center):
@@ -553,7 +554,7 @@ class ObjectSpawner:
 
                 fall_through = obj.get('properties',True)
                 new_block = CollisionRightAngle(object_position, points_list,fall_through)
-                self.game_objects.platforms_ramps.add(new_block)
+                self.game_objects.platforms.add(new_block)
                 continue
 
             source, firstgid, local_id = resolve_tileset(map_def, obj["gid"])
@@ -631,11 +632,11 @@ class ObjectSpawner:
                 for property in properties:
                     if property['name'] == 'particles':
                         types = property['value']
-                new_block = CollisionBlock(object_position,object_size,types)
+                new_block = SolidPlatform(object_position, size=object_size, run_particle=types)
                 self.game_objects.platforms.add(new_block)
 
             elif id == 8:#spike collision blocks
-                new_block = CollisionDamage(object_position,object_size)
+                new_block = HazardPlatform(object_position, size=object_size, damage=1, knockback_x=10, knockback_y=10)
                 self.game_objects.platforms.add(new_block)
 
             elif id == 9:
@@ -658,10 +659,11 @@ class ObjectSpawner:
                 self.game_objects.interactables.add(new_path)
 
             elif id == 11:#one way collision block (currently only top implemented)
+                types = 'dust'
                 for property in properties:
                     if property['name'] == 'particles':
                         types = property['value']
-                new_block = CollisionOnewayUp(object_position,object_size,types)
+                new_block = OneWayUpPlatform(object_position, size=object_size, run_particle=types)
                 self.game_objects.platforms.add(new_block)
 
             elif id == 12:#hole, if aila collides, aila will move to safe_spawn position
@@ -713,7 +715,7 @@ class ObjectSpawner:
                         kwarg['erect'] = property['value']
                     elif property['name'] == 'vertical':
                         kwarg['vertical'] = property['value']                        
-                gate = EvilGate(object_position,self.game_objects, object_size, **kwarg)
+                gate = EvilGatePlatform(object_position,self.game_objects, object_size, **kwarg)
                 self.game_objects.platforms.add(gate)
 
             elif id  == 18:#god rays
@@ -1005,7 +1007,7 @@ class ObjectSpawner:
                         kwarg['ID'] = property['value']
                     elif property['name'] == 'erect':
                         kwarg['erect'] = property['value']
-                gate = Gate_1(object_position,self.game_objects, **kwarg)
+                gate = GatePlatform(object_position,self.game_objects, **kwarg)
                 self.game_objects.platforms.add(gate)
 
             elif id == 12:#challenge monument
@@ -1034,7 +1036,7 @@ class ObjectSpawner:
                         kwarg['ID'] = property['value']
                     elif property['name'] == 'erect':
                         kwarg['erect'] = property['value']
-                gate = Gate_2(object_position,self.game_objects, **kwarg)
+                gate = GatePlatformAlt(object_position,self.game_objects, **kwarg)
                 self.game_objects.platforms.add(gate)
 
             elif id == 16:#air dash statue
@@ -1169,13 +1171,13 @@ class Village(Biome):
                         kwarg['erect'] = property['value']
                     elif property['name'] == 'key':
                         kwarg['key'] = property['value']
-                door = DoorRightOrient(object_position, self.level.game_objects, **kwarg)
+                door = RightDoorPlatform(object_position, self.level.game_objects, **kwarg)
                 door_i = DoorInteract(object_position, self.level.game_objects, door)
                 self.level.game_objects.platforms.add(door)
                 self.level.game_objects.interactables.add(door_i)
 
             elif id == 3:#boulder
-                new_tree = Boulder(object_position, self.level.game_objects)
+                new_tree = BoulderPlatform(object_position, self.level.game_objects)
                 self.level.game_objects.platforms.add(new_tree)                
 
 class Nordveden(Biome):
@@ -1291,7 +1293,7 @@ class Nordveden(Biome):
 
             elif id == 9:#vines
                 new_vine = InteractableVines(object_position, self.level.game_objects)
-                self.level.game_objects.interactables.add(new_vine)                                                                    
+                self.level.game_objects.interactables_fg.add(new_vine)                                                                    
 
 class Rhoutta_encounter(Biome):
     def __init__(self, level):
@@ -1447,7 +1449,7 @@ class Golden_fields(Biome):
             id = local_id
 
             if id == 2:#bridge that is built when the reindeer dies
-                new_bridge = Bridge(object_position, self.level.game_objects)
+                new_bridge = BridgePlatform(object_position, self.level.game_objects)
                 self.level.game_objects.platforms.add(new_bridge)
 
             elif id == 3:#droplet

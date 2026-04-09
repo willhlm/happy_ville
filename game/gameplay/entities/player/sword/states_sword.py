@@ -30,8 +30,7 @@ class Slash_1(Basic_states):
         super().__init__(entity)
         self.sign = sign(self.entity.dir[0])
         self.entity.lifetime = 10#swrod hitbox duration
-        self.entity.hitbox[2] = 45
-        self.entity.hitbox[3] = 29
+        self.entity.apply_hitbox_size(45, 29)
         self.entity.dir = [self.sign, 0]#sword dir
 
     def update_rect(self):
@@ -45,8 +44,7 @@ class Slash_up(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.lifetime = 10#swrod hitbox duration
-        self.entity.hitbox[2] = 40
-        self.entity.hitbox[3] = 35
+        self.entity.apply_hitbox_size(40, 35)
         self.entity.dir = [sign(self.entity.dir[0]), 1]#sword dir
 
         if self.entity.dir[0] > 0:
@@ -61,8 +59,7 @@ class Slash_down(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.lifetime = 10#swrod hitbox duration
-        self.entity.hitbox[2] = 40
-        self.entity.hitbox[3] = 35
+        self.entity.apply_hitbox_size(40, 35)
         self.entity.dir = [sign(self.entity.dir[0]), -1]#sword dir
 
         if self.entity.dir[0] > 0:
@@ -75,44 +72,3 @@ class Slash_down(Basic_states):
 
     def sword_jump(self):
         self.entity.entity.velocity[1] = C.pogo_vel
-
-#states for the stones (the stones alters the sword properties)
-class Stone_states():
-    def __init__(self, entity):
-        self.entity = entity
-
-    def enter_state(self, newstate, key, **kwarg):
-        self.entity.stone_states[key] = getattr(sys.modules[__name__], newstate)(self.entity,**kwarg)#make a class based on the name of the newstate: need to import sys
-
-    def projectile_collision(self, eprojectile, effect):#called when projectile collision
-        eprojectile.take_hit(effect)
-
-    def enemy_collision(self):#called when wnemy collision
-        pass
-
-    def slash_speed(self):#called whenever sing the sword
-        pass
-
-class Enemy_collision(Stone_states):#blue stone can set this satte
-    def __init__(self,entity):
-        super().__init__(entity)
-
-    def enemy_collision(self):
-        self.entity.entity.add_spirit()
-
-class Projectile_collision(Stone_states):#pirpöle stone ca nset this state
-    def __init__(self, entity):
-        super().__init__(entity)
-
-    def projectile_collision(self, eprojecitile, effect):
-        eprojecitile.reflect(self.entity.dir, self.entity.hitbox.center)
-
-    def sword_jump(self):
-        self.entity.entity.velocity[1] = C.pogo_vel
-
-class Slash(Stone_states):#green stone can set this
-    def __init__(self, entity):
-        super().__init__(entity)
-
-    def slash_speed(self):#called whenever sing the sword
-        self.entity.entity.animation.framerate = 0.33 #the frame rate is set back when the player exits the sword state

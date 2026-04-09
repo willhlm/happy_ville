@@ -47,13 +47,13 @@ class HudMeters:
 
     def init_hearts(self):
         self.hearts = [HealthFrame(self.game_objects)]
-        for i in range(0,self.game_objects.player.max_health - 1):
+        for i in range(0, self.game_objects.player.vitals.max_health - 1):
             self.hearts.append(Health(self.game_objects))
         self.update_hearts()
 
     def init_spirits(self):
         self.spirits = [SpiritFrame(self.game_objects)]
-        for i in range(0,self.game_objects.player.max_spirit - 1):
+        for i in range(0, self.game_objects.player.vitals.max_spirit - 1):
             self.spirits.append(Spirit(self.game_objects))
         self.update_spirits()
 
@@ -68,7 +68,7 @@ class HudMeters:
         self.money_visible_timer = max(0.0, self.money_visible_timer - dt * 0.01)
 
         health_target = 1.0
-        if self.game_objects.player.health >= self.game_objects.player.max_health and self.health_visible_timer <= 0:
+        if self.game_objects.player.vitals.health >= self.game_objects.player.vitals.max_health and self.health_visible_timer <= 0:
             health_target = self.HEALTH_IDLE_ALPHA
 
         money_target = 1.0 if self.money_visible_timer > 0 else self.MONEY_IDLE_ALPHA
@@ -137,29 +137,31 @@ class HudMeters:
 
     def remove_hearts(self,dmg):
         self._show_health()
-        index = int(self.game_objects.player.health)-1
+        player_health = self.game_objects.player.vitals.health
+        index = int(player_health) - 1
         index = max(index,-1)
-        for i in range(index+int(dmg+0.5+self.game_objects.player.health-int(self.game_objects.player.health)),index,-1):
+        for i in range(index + int(dmg + 0.5 + player_health - int(player_health)), index, -1):
             health = self.hearts[i].health
             self.hearts[i].take_dmg(dmg)
             dmg -= health
 
     def update_hearts(self):
         self._show_health()
-        for i in range(0,int(self.game_objects.player.health)):
+        player_health = self.game_objects.player.vitals.health
+        for i in range(0, int(player_health)):
             self.hearts[i].currentstate.handle_input('Idle')
-        if self.game_objects.player.health - i - 1 == 0.5:
+        if player_health - i - 1 == 0.5:
             self.hearts[i+1].currentstate.enter_state('Idle')
             self.hearts[i+1].take_dmg(0.5)
 
     def remove_spirits(self,spirit):
         self._show_health()
-        index = self.game_objects.player.spirit + spirit - 1
+        index = self.game_objects.player.vitals.spirit + spirit - 1
         index = max(index,0)
         for i in range(index,index+spirit):
             self.spirits[i].currentstate.handle_input('Hurt')
 
     def update_spirits(self):
         self._show_health()
-        for i in range(0,self.game_objects.player.spirit):
+        for i in range(0, self.game_objects.player.vitals.spirit):
             self.spirits[i].currentstate.handle_input('Idle')

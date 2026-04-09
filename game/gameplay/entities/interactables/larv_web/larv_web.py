@@ -1,7 +1,7 @@
 import pygame
 
 from gameplay.entities.interactables.base.interactables import Interactables
-from gameplay.entities.enemies.common.ground.larv.hangable_larv import HangableLarv
+from gameplay.entities.enemies.common.ground.larv.surface_larv import SurfaceLarv
 from engine.utils import read_files
 from . import states_larv_web 
 
@@ -21,10 +21,6 @@ class LarvWeb(Interactables):
         self.trigger_distance = list(trigger_distance)
         larv_type = kwargs.get('enemy_type', 'larv')
         larv_cls = self.game_objects.registry.fetch('enemies', larv_type)
-        if larv_cls is None:
-            raise ValueError(f"Unknown larv web enemy type: {larv_type}")
-        if not issubclass(larv_cls, HangableLarv):
-            raise TypeError(f"Larv web enemy type '{larv_type}' must inherit HangableLarv")
 
         larv_pos = [self.anchor_pos[0], self.anchor_pos[1]]
         self.larv = larv_cls(larv_pos, game_objects, initial_state = 'hanging', anchor_pos = self.anchor_pos)

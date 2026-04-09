@@ -1,12 +1,12 @@
 from gameplay.entities.base.animated_entity import AnimatedEntity
+import random
 from gameplay.entities.shared.components.body.entity_body import EntityBody
 from gameplay.entities.shared.components.hit.hitstop_component import HitstopComponent
 from gameplay.entities.shared.components.hit import hit_effects
-
+from gameplay.entities.projectiles.base.projectile_clash_component import ProjectileClashComponent
 
 class ProjectileBase(AnimatedEntity):
-    uses_platform_physics = False
-
+    uses_platform_collider = False
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects)
         self.body = EntityBody(self)
@@ -15,15 +15,14 @@ class ProjectileBase(AnimatedEntity):
         self.lifetime = kwarg.get('lifetime', 300)
         self.flags = {'invincibility': False, 'charge_blocks': kwarg.get('charge_blocks', False), 'aggro': True}
         self.dmg = kwarg.get('dmg', 1)
+        self.team = kwarg.get('team', None)
+        self.projectile_clash = ProjectileClashComponent(self)
 
     def update(self, dt):
         self.hitstop.update(dt)
         scaled_dt = self.hitstop.get_sim_dt(dt)
-        super().update(scaled_dt)
-
-        if not self.uses_platform_physics:
-            self.body.update_true_pos_x(scaled_dt)
-            self.body.update_true_pos_y(scaled_dt)
+        self.projectile_clash.update(scaled_dt)
+        super().update(scaled_dt)#animation and currentstate update
 
         self.lifetime -= scaled_dt
         self.destroy()
@@ -36,10 +35,6 @@ class ProjectileBase(AnimatedEntity):
         effect = self.create_effect()
         damage_applied, modified_effect = collision_plat.take_hit(effect)
 
-    def collision_projectile(self, eprojectile):
-        effect = self.create_effect()
-        damage_applied, modified_effect = eprojectile.take_hit(effect)
-
     def collision_enemy(self, collision_enemy):
         effect = self.create_effect()
         damage_applied, modified_effect = collision_enemy.take_hit(effect)
@@ -51,26 +46,45 @@ class ProjectileBase(AnimatedEntity):
     def collision_interactables_fg(self, interactable):
         pass
 
-    def reflect(self, dir, pos, clamp_value=10):
-        dy = max(-clamp_value, min(clamp_value, self.rect.centery - pos[1]))
-        dx = max(-clamp_value, min(clamp_value, self.rect.centerx - pos[0]))
+    def collision_projectile(self, eprojectile):
+        self.projectile_clash.handle_collision(eprojectile)        
 
-        if dir[1] != 0:
-            self.velocity[0] = dx * 0.2
-            self.velocity[1] = -10 * dir[1]
-        else:
-            self.velocity[0] = 10 * dir[0]
-            self.velocity[1] = dy * 0.2
+    def modify_projectile_clash_result(self, other, result):
+        return result
 
-    def take_hit(self, effect):
+    def on_projectile_clash_ignored(self, other):
         pass
+
+    def on_projectile_clash_won(self, other):
+        pass
+
+    def on_projectile_clash_lost(self, other):
+        self.kill()
+
+    def on_projectile_reflected(self, other, direction, position, team=None, clamp_value=10):
+        pass
+
+    def create_projectile_clash_effect(self, other, result):
+        center_x = (self.hitbox.centerx + other.hitbox.centerx) * 0.5
+        center_y = (self.hitbox.centery + other.hitbox.centery) * 0.5
+        return hit_effects.create_projectile_clash_effect(
+            self.game_objects,
+            attacker=self,
+            projectile=self,
+            hit_type='sword',
+            attacker_particles={
+                'preset': 'sword_clash',
+                'n': 5,
+                'args': {
+                    'angle': random.randint(-180, 180),
+                    'colour': [255, 255, 255, 255],
+                },
+            },
+            meta={'clash_pos': [center_x, center_y]},
+        )
 
     def create_effect(self):
         return hit_effects.HitEffect(self.game_objects, damage=self.dmg, attacker=self)
 
     def release_texture(self):
         pass
-
-    def on_invincibility_timeout(self):
-        self.flags['invincibility'] = False
-

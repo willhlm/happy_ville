@@ -29,7 +29,8 @@ class ScreenManager():
             self.activate_screen('player_fg')   
         
     def activate_screen(self, key):
-        self.active_screens.append(key)
+        if key not in self.active_screens:
+            self.active_screens.append(key)
         
     def deactivate_screen(self, key):
         self.active_screens.remove(key)
@@ -119,7 +120,10 @@ class ScreenLayer():
         self.game.display.render(input.texture, target, scale = self.game.scale, shader = self.game.game_objects.shaders['pp'])      
 
     def render(self, composite_target):
-        self.post_process.apply(source_layer=self.layer,final_target=composite_target)
+        if self.post_process.has_shaders():
+            self.post_process.apply(source_layer=self.layer, final_target=composite_target)
+        else:
+            self.apply_pp(self.layer, composite_target)
 
     def reset(self, parallax):  
         self.parallax = parallax

@@ -22,6 +22,7 @@ class Inventory():
     def __init__(self):
         self.items = {}#{"healthpotion": {"item": <Item instance>, "quantity": 3}}
         self.dyes = {}
+        self.infinity_stones = {}
 
     def get_item(self, item_name):
         if item_name in self.items:
@@ -30,6 +31,9 @@ class Inventory():
 
     def add_dye(self, dye, name):
         self.dyes[name] = dye
+
+    def add_infinity_stone(self, stone):
+        self.infinity_stones[type(stone).__name__] = stone
 
     def add(self, item, quantity=1, name = None):
         if name is None: name = type(item).__name__.lower()

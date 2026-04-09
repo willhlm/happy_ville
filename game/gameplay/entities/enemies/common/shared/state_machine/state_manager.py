@@ -41,6 +41,9 @@ class StateManager:
         self.check_player_distance()
         self.state.update(dt)
 
+    def consume_contact_state(self):
+        self.state.consume_contact_state()
+
     def handle_input(self, input_type):
         """Pass input to current state"""
         self.state.handle_input(input_type)
@@ -60,4 +63,5 @@ class StateManager:
             return
         if dead_state and isinstance(self.state, dead_state):
             return
+        self.entity.killed()
         self.enter_state("death")

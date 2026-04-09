@@ -20,7 +20,8 @@ class Hedge(Enemy):
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1], 32, 32)        
 
-        self.health = self.config['health']
+        self.vitals.set_max_health(self.config['health'])
+        self.vitals.set_health(self.vitals.max_health)
         self.chase_speed = self.config['speeds']['chase']       
         self.aggro_distance = self.config['distances']['aggro']
 

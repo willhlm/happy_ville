@@ -34,19 +34,16 @@ class Tagg(PlatformProjectile):
         blit_pos = [int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1])]
         self.game_objects.game.display.render(self.image, target, position = blit_pos, angle = self.angle, shader = self.shader)
 
-    def take_dmg(self, dmg):#aila sword without purple stone
+    def on_projectile_clash_lost(self, other):
         self.velocity = [0,0]
         self.currentstate.handle_input('Death')
 
-    def _collision_platform(self,platform):        
+    def _collision_platform(self, platform):        
         self.velocity = [0,0]
         self.currentstate.handle_input('Death')
 
     def pool(game_objects):
         Tagg.sprites = read_files.load_sprites_dict('assets/sprites/entities/projectiles/tagg/', game_objects)
 
-    def on_platform_side_collision(self, side, block, collision_type = 'Wall'):
-        self._collision_platform(block)
-
-    def on_platform_vertical_collision(self, side, block):
-        self._collision_platform(block)
+    def handle_platform_collision(self, collision):
+        self._collision_platform(collision.collider)

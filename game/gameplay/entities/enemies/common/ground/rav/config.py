@@ -6,7 +6,7 @@ All enemy stats defined here for easy balancing.
 ENEMY_CONFIG = {
     'rav': {
         'health': 4,
-        'speeds': {'chase': 0.9, 'patrol': 0.5},
+        'speeds': {'chase': 1.6, 'patrol': 0.5},
         'distances': {'aggro': [200, 20], 'attack': [50, 150], 'jump': [100, -10]},#x, y
         'cooldowns': {
             'melee_attack': [50, 80],#min max

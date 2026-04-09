@@ -10,9 +10,7 @@ class EnemyDrop(Item):
     def update(self, dt):
         super().update(dt)
         self.lifetime -= dt
-        self.destory()        
-        self.perform_bounce()     
-        self.bounce_directions.clear()             
+        self.destory()
 
     def attract(self,pos):#the omamori calls on this in loot group
         if self.lifetime < 350:

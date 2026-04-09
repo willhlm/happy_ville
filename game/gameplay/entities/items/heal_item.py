@@ -18,7 +18,7 @@ class HealItem(EnemyDrop):
     def use_item(self):
         if self.game_objects.player.backpack.inventory.get_quantity('heal_item') < 0: return
         self.game_objects.player.backpack.inventory.remove('heal_item')
-        self.game_objects.player.heal(1)
+        self.game_objects.player.heal_vitals(1)
 
     def pool(game_objects):#all things that should be saved in object pool: #obj = cls.__new__(cls)#creatate without runing initmethod
         HealItem.sprites = read_files.load_sprites_dict('assets/sprites/entities/items/heal_item/',game_objects)

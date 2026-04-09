@@ -64,14 +64,14 @@ class TwoDLiquid(StaticEntity):#inside interactables_fg group. fg because in fro
         vel_scale = max(entity.velocity[1] / C.max_vel[1], 0.5)
         self.splash(entity.hitbox.midbottom, vel_scale)
         #self.splash(entity.hitbox.midbottom, lifetime = 100, dir = [0,1], colour = [self.behavior.liquid_tint[0]*255, self.behavior.liquid_tint[1]*255, self.behavior.liquid_tint[2]*255, 255], vel = {'gravity': [7 * vel_scale, 14 * vel_scale]}, fade_scale = 0.3, gradient=0)
-        if hasattr(entity, 'timer_jobs') and 'wet' in entity.timer_jobs:
-            entity.timer_jobs['wet'].deactivate()#stop dropping if inside the water again
+        if hasattr(entity, 'status_component'):
+            entity.status_component.deactivate('wet')#stop dropping if inside the water again
         self.behavior.on_enter(entity)
 
     def on_noncollision(self, entity):
         entity.movement_manager.remove_modifier('two_d_liquid')
-        if hasattr(entity, 'timer_jobs') and 'wet' in entity.timer_jobs:
-            entity.timer_jobs['wet'].activate(self.behavior.liquid_tint)#water when player leaves
+        if hasattr(entity, 'status_component'):
+            entity.status_component.activate('wet', self.behavior.liquid_tint)#water when player leaves
         vel_scale = max(entity.velocity[1] / C.max_vel[1], 0.5)
         self.splash(entity.hitbox.midbottom, vel_scale)
         #self.splash(entity.hitbox.midbottom, lifetime = 100, dir = [0,1], colour = [self.behavior.liquid_tint[0]*255, self.behavior.liquid_tint[1]*255, self.behavior.liquid_tint[2]*255, 255], vel = {'gravity': [10 * vel_scale, 14 * vel_scale]}, fade_scale = 0.3, gradient=0)

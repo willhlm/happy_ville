@@ -27,8 +27,12 @@ class SwordAirMain(SwordAir):
         self.enter_state('fall')
 
     def handle_input(self, input, **kwarg):
-        if input == 'Ground':
-            if self.entity.acceleration[0] != 0:
-                self.enter_state('run')
-            else:
-                self.enter_state('idle')
+        pass
+
+    def consume_contact_state(self):
+        if not self.entity.is_on_floor():
+            return
+        if self.entity.acceleration[0] != 0:
+            self.enter_state('run')
+        else:
+            self.enter_state('idle')

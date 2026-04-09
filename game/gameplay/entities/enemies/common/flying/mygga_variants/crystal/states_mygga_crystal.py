@@ -46,7 +46,7 @@ class Patrol(EnemyStates):#patrol in a circle aorund the original position
     def check_position(self):
         if abs(self.target_position[0]-self.entity.rect.centerx) < 10 and abs(self.target_position[1]-self.entity.rect.centery) < 10:#5*self.init_time > 2*math.pi
             self.calculate_postion()
-        elif self.entity.collision_types['left'] or self.entity.collision_types['right'] or self.entity.collision_types['bottom'] or self.entity.collision_types['top']:
+        elif self.entity.contact_state.had_collision:
             self.calculate_postion()
 
     def check_sight(self):

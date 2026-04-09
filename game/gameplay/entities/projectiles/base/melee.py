@@ -9,14 +9,16 @@ class Melee(ProjectileBase):
         self.dir = kwarg.get('dir', entity.dir.copy())
         self.body = MeleeBody(self)
 
+    def update(self, dt):
+        self.hitstop.update(dt)
+        scaled_dt = self.hitstop.get_sim_dt(dt)
+        self.body.update_hitbox()
+        self.lifetime -= scaled_dt
+        self.destroy()
+
     def collision_enemy(self, collision_enemy):#projecticle enemy collision (including player)
         effect = self.create_effect()
         collision_enemy.take_hit(effect)     
-
-    def reflect(self, dir, pos):#called from sword collision_projectile, purple initinty stone
-        return
-        self.entity.countered()
-        self.kill()
 
     def create_effect(self):
         #pm_one = sign(collision_enemy.hitbox.center[0]-self.entity.hitbox.center[0])

@@ -32,7 +32,8 @@ class SmallBee(FlyingEnemy):#torpedo
         self.swarm_attack_commit = random.randint(*self.config['behavior']['attack_commit_time'])
         self.swarm_attack_jitter = [random.uniform(-0.2, 0.2), random.uniform(-0.12, 0.12)]
             
-        self.health = self.config['health']  
+        self.vitals.set_max_health(self.config['health'])
+        self.vitals.set_health(self.vitals.max_health)
         self.currentstate = StateManager(self, custom_states = TORPEDO_STATES, type = 'flying', universal_states = ['dead', 'death', 'hurt', 'attack_pre', 'attack_main', 'wait'])
 
     def knock_back(self, amp, dir):

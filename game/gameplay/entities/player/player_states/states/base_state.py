@@ -53,6 +53,9 @@ class PhaseBase():
     def do_ability(self):#called when pressing B (E). This is needed if all of them do not have pre animation, or vice versa
         self.enter_state(self.entity.abilities.equip.lower())
 
+    def consume_contact_state(self):
+        pass
+
 class PhaseAirBase(PhaseBase):
     def __init__(self, entity):
         super().__init__(entity)

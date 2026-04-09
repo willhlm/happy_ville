@@ -26,7 +26,8 @@ class VerticalMyggaTorpedo(FlyingEnemy):#torpedo
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
             
-        self.health = self.config['health']  
+        self.vitals.set_max_health(self.config['health'])
+        self.vitals.set_health(self.vitals.max_health)
         self.currentstate = StateManager(self, custom_states = TORPEDO_STATES, custom_deciders = TORPEDO_DECIDERS, type = 'flying', universal_states = ['death', 'dead', 'attack_pre', 'attack_main', 'wait'])
 
     def knock_back(self, amp, dir):

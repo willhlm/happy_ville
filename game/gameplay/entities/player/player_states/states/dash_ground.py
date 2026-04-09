@@ -27,7 +27,7 @@ class DashGroundPre(PhaseBase):
             self.dash_length += 1
         self.entity.shader_state.handle_input('motion_blur')
         self.entity.game_objects.cosmetics.add(Dusts(self.entity.hitbox.center, self.entity.game_objects, dir = self.entity.dir, state = 'one'))
-        self.entity.game_objects.timer_manager.remove_ID_timer('cayote')
+        self.entity.end_coyote_time()
         self.jump_dash_timer = C.jump_dash_timer
         self.entity.movement_manager.add_modifier('dash', entity = self.entity, authoritative = True)
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0], vol = 1)
@@ -49,16 +49,7 @@ class DashGroundPre(PhaseBase):
             self.increase_phase()
 
     def handle_input(self, input, **kwarg):
-        if input == 'Wall' or input == 'belt':
-            self.wall_buffer -= 1
-            if self.wall_buffer > 0:
-                return
-            if self.entity.acceleration[0] != 0:
-                state = input.lower() + '_glide'
-                self.enter_state(state, **kwarg)
-            else:
-                self.enter_state('idle')
-        elif input == 'interrupt':
+        if input == 'interrupt':
             self.enter_state('idle')
 
     def increase_phase(self):
@@ -74,6 +65,19 @@ class DashGroundPre(PhaseBase):
         self.entity.shader_state.handle_input('idle')
         self.entity.movement_manager.remove_modifier('dash')
         super().enter_state(state, **kwarg)
+
+    def consume_contact_state(self):
+        if self.entity.has_collision_kind('Wall') or self.entity.has_collision_kind('belt'):
+            self.wall_buffer -= 1
+            if self.wall_buffer > 0:
+                return
+            if self.entity.acceleration[0] != 0:
+                if self.entity.has_collision_kind('belt'):
+                    self.enter_state('belt_glide')
+                else:
+                    self.enter_state('wall_glide')
+            else:
+                self.enter_state('idle')
 
 
 class DashGroundMain(DashGroundPre):

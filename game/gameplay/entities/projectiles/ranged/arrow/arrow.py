@@ -62,13 +62,15 @@ class Arrow(PlatformProjectile):#should it be called seed?
     def collision_enemy(self,collision_enemy):
         self.kill()
 
-    def on_platform_side_collision(self, side, block, collision_type = 'Wall'):
-        self.collision_platform([1, 0] if side == 'right' else [-1, 0], block)
+    def handle_platform_collision(self, collision):
+        if collision.axis == 'x':
+            hit_direction = [1, 0] if collision.side == 'right' else [-1, 0]
+        else:
+            hit_direction = [0, -1] if collision.side == 'bottom' else [0, 1]
 
-    def on_platform_vertical_collision(self, side, block):
-        self.collision_platform([0, -1] if side == 'bottom' else [0, 1], block)
+        self._collide_with_platform(hit_direction, collision.collider)
 
-    def collision_platform(self, dir, block):
+    def _collide_with_platform(self, dir, block):
         self.velocity = [0,0]
         if self.once: return
         self.once = True

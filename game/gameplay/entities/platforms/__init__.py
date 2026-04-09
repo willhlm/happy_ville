@@ -1,23 +1,19 @@
-from .collisions.collision_block import CollisionBlock
-from .collisions.collision_damage import CollisionDamage
-from .collisions.collision_oneway_up import CollisionOnewayUp
+from .base.solid_platform import SolidPlatform
+from .base.hazard_platform import HazardPlatform
+from .base.one_way_up_platform import OneWayUpPlatform
 from .collisions.collision_polygon import CollisionPolygon
 from .collisions.collision_right_angle import CollisionRightAngle
-
 from .dynamic.bubble import Bubble
 from .dynamic.smacker.smacker import Smacker
-
 from .shadow_light.shadow_light_1 import ShadowLight_1
-
-from .texture.boulder.boulder import Boulder
+from .actors.boulder.boulder_platform import BoulderPlatform
 from .texture.seed_platform import SeedPlatform
-from .texture.bridge.bridge import Bridge
+from .actors.bridge.bridge_platform import BridgePlatform
 from .texture.conveyor_belt import ConveyorBelt
-from .texture.door.door_left_orient import DoorLeftOrient
-from .texture.door.door_right_orient import DoorRightOrient
-from .texture.door.door import Door
-from .texture.gate.gate_1 import Gate_1
-from .texture.gate.gate_2 import Gate_2
-from .texture.gate.evil_gate import EvilGate
-
-from .generic_platform import GenericPlatform
+from .actors.door.left_door_platform import LeftDoorPlatform
+from .actors.door.right_door_platform import RightDoorPlatform
+from .actors.door.locked_door_platform import LockedDoorPlatform
+from .actors.gate.gate_platform import GatePlatform
+from .actors.gate.gate_platform_alt import GatePlatformAlt
+from .actors.gate.evil_gate_platform import EvilGatePlatform
+from .component_platform import ComponentPlatform

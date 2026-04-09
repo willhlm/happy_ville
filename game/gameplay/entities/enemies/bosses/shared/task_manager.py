@@ -31,6 +31,11 @@ class TaskManager():#manager
 
     def handle_input(self, input):
         self.state.handle_input(input)
+
+    def consume_contact_state(self):
+        current_state = getattr(self, 'state', None)
+        if current_state and hasattr(current_state, 'consume_contact_state'):
+            current_state.consume_contact_state()
     
     def increase_phase(self):
         self.state.increase_phase()

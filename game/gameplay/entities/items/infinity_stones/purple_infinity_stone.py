@@ -18,4 +18,4 @@ class PurpleInfinityStone(InfinityStones):#reflect projectile -> crystal caves
         super().pool(game_objects)
 
     def attach(self, player):
-        player.sword.stone_states['projectile_collision'].enter_state('Projectile_collision', 'projectile_collision')
+        player.sword.modifier_manager.add_modifier('purple_stone')

@@ -21,7 +21,7 @@ class SwordUpMain(Sword):
         self.entity.game_objects.projectiles.add_friendly(self.entity.sword)
 
     def increase_phase(self):
-        if self.entity.collision_types['bottom']:
+        if self.entity.is_on_floor():
             if self.entity.acceleration[0] == 0:
                 self.enter_state('idle')
             else:

@@ -77,5 +77,8 @@ class GameAudio:
     def unregister_emitter(self, emitter_id, fade_ms = 1000):
         return self.spatial.unregister(emitter_id, fade_ms=fade_ms)
 
+    def clear_spatial_sounds(self, fade_ms=0):
+        return self.spatial.clear(fade_ms=fade_ms)
+
     def update_render(self, listener_pos):
         return self.spatial.update(listener_pos)

@@ -56,10 +56,6 @@ class JumpMain(PhaseAirBase):
             self.entity.velocity[1] = 0.5 * self.entity.velocity[1]
             self.enter_state('fall')
 
-    def handle_input(self, input, **kwarg):
-        if input == 'belt':
-            self.enter_state('belt_glide')
-
     def swing_sword(self):
         if not self.entity.flags['attack_able']:
             return
@@ -68,6 +64,9 @@ class JumpMain(PhaseAirBase):
         elif self.entity.dir[1] < C.down_angle * -1:
             self.enter_state('sword_down')
         else:
-            state = 'sword_air' + str(int(self.entity.sword.swing) + 1)
+            state = 'sword_air' + str(self.entity.combat_tracker.next_swing_index())
             self.enter_state(state)
-            self.entity.sword.swing = not self.entity.sword.swing
+
+    def consume_contact_state(self):
+        if self.entity.has_collision_kind('belt'):
+            self.enter_state('belt_glide')

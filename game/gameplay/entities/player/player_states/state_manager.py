@@ -1,5 +1,6 @@
 from .states import *
 
+
 class StateManager():
     def __init__(self, entity):
         self.entity = entity
@@ -28,7 +29,7 @@ class StateManager():
             'smash_up': SmashUpState(entity),
             'dash_air': DashAirState(entity),
             'death': DeathState(entity),
-            'respawn': ReSpawnState(entity),#used when respawning after death
+            'respawn': ReSpawnState(entity),
             'heal': HealState(entity),
             'crouch': CrouchState(entity),
             'plat_bone': PlantBoneState(entity),
@@ -41,25 +42,19 @@ class StateManager():
 
         self.composite_state = self.states['idle']
         self.composite_state.enter_phase('main')
-        self._state_factories = {'dash_air': [('dash_air', DashAirState)],
-                                'smash_up': [('smash_up', SmashUpState)],
-                                'wall': [('wall_jump', WallJumpState), ('wall_glide', WallGlideState), ('belt_glide', BeltGlideState)],
-                                'dash': [('dash_ground', DashGroundState), ('dash_jump', DashJumpState)],
-                                'bow': [('bow', BowState)],
-                                'thunder': [('thunder', ThunderState)],
-                                'shield': [('shield', ShieldState)],
-                                'wind': [('wind', WindState)],
-                                'slow_motion': [('slow_motion', SlowMotionState)]}#should contain all the states that can be created, so that they can be be appended to self.stataes when needed
 
-    def enter_state(self, state_name, phase = None, **kwargs):
+    def enter_state(self, state_name, phase=None, **kwargs):
         state = self.states.get(state_name)
-        if state and state.allowed():#if the requested state is unlocked
-            self.composite_state.exit()#exit the old one before entering/setting a new state
+        if state and state.allowed():
+            self.composite_state.exit()
             state.enter_state(phase, **kwargs)
             self.composite_state = state
 
-    def update(self, dt):#called from player
-        self.composite_state.update(dt)#main state
+    def update(self, dt):
+        self.composite_state.update(dt)
+
+    def consume_contact_state(self):
+        self.composite_state.consume_contact_state()
 
     def handle_input(self, input, **kwargs):
         self.composite_state.handle_input(input, **kwargs)
@@ -70,15 +65,11 @@ class StateManager():
     def handle_release_input(self, input):
         self.composite_state.handle_release_input(input)
 
-    def handle_movement(self, event):#called from gameplay loop state
+    def handle_movement(self, event):
         self.composite_state.handle_movement(event)
 
     def can_interact(self):
         return self.composite_state.can_interact()
 
-    def increase_phase(self):#called when an animation is finished for that state
+    def increase_phase(self):
         self.composite_state.increase_phase()
-
-    def unlock_state(self, name):#should be called when unlocking a new state
-        for state_name, cls in self._state_factories[name]:
-            self.states[state_name] = cls(self.entity)

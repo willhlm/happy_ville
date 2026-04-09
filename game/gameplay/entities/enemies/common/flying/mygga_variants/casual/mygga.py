@@ -14,5 +14,6 @@ class Mygga(FlyingEnemy):#a non aggro mygga that roams around
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
         
-        self.health = self.config['health']  
+        self.vitals.set_max_health(self.config['health'])
+        self.vitals.set_health(self.vitals.max_health)
         self.currentstate = StateManager(self, type = 'flying', universal_states = ['death', 'dead', 'wait'])

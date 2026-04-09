@@ -11,10 +11,10 @@ class BaseState():
     def update_render(self, dt):
         pass   
 
-    def draw(self, base_texture, target, position, flip):#called from post_process entity and entity_shader_manager
+    def draw(self, base_texture, target, position, flip, angle):#called from post_process entity and entity_shader_manager
         """Draw base_texture to target using current shader."""
         self.set_uniforms()
-        self.entity.game_objects.game.display.render(base_texture, target, position = position, flip = flip, shader = self.shader)#This part is inpricnple npt needed for idle state. However, to fix it, base_txture neeeds to be a layer -> i.e. make all textures into a layer in initialization.
+        self.entity.game_objects.game.display.render(base_texture, target, position = position, flip = flip, angle = angle, shader = self.shader)#This part is inpricnple npt needed for idle state. However, to fix it, base_txture neeeds to be a layer -> i.e. make all textures into a layer in initialization.
         return target
 
     def set_uniforms(self):#called before draw
