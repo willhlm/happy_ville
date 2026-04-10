@@ -33,7 +33,7 @@ class MovementManager:
             'dash_jump': DashJump,
             'dash': Dash,
             'up_stream': UpStream,
-            'tjasolmais_embrace': TjasolmaisEmbrace,
+            'shield_glide': ShieldGlide,
             'air_boost': AirBoost,
         }
 
@@ -242,23 +242,15 @@ class UpStreamHorizontal(UpStream):
     """Horizontal"""
     pass
 
-class TjasolmaisEmbrace(MovementModifier):
-    def __init__(self, priority, **kwarg):
+class ShieldGlide(MovementModifier):
+    def __init__(self, priority, **kwargs):
         super().__init__(priority)
-        self.entity = kwarg['entity']
+        self.gravity_scale = kwargs.get('gravity_scale', 0.2)
+        self.fall_friction = kwargs.get('fall_friction', 0.12)
 
     def apply(self, context):
-        if type(self.entity.currentstate.composite_state).__name__ != 'FallState':
-            return
-        if self.entity.velocity[1] < 0:
-            return
-        if not self.entity.game_objects.controller.is_held('a'):
-            return
-
-        #context.gravity *= 0.1
-        #context.friction[1] *= 2
-        self.entity.velocity[1]  *= 0.8
-        self.entity.game_objects.particles.emit("spirit_wisp", pos=self.entity.hitbox.center, n=1, colour=C.spirit_colour)    
+        context.gravity *= self.gravity_scale
+        context.friction[1] = max(context.friction[1], self.fall_friction)
 
 #authorivie ones.
 class WallGlide(MovementModifier):

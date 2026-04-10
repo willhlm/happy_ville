@@ -9,12 +9,12 @@ class Gameplay(GameState):
 
     def update(self, dt):
         self.game.game_objects.time_manager.update(dt)#setäs the timescale
-        dt *= self.game.game_objects.time_manager.time_scale#apply time scale
+        dt = self.game.game_objects.time_manager.get_dt(dt)#apply time scale
         self.handle_movement()
         self.game.game_objects.update(dt)
 
     def update_render(self, dt):
-        dt *= self.game.game_objects.time_manager.time_scale#apply time scale
+        dt = self.game.game_objects.time_manager.get_dt(dt)#apply time scale
         self.game.game_objects.update_render(dt)
         self.game.game_objects.world_transform_controller.update_render(dt)
         self.game.game_objects.ui.hud.update(dt)

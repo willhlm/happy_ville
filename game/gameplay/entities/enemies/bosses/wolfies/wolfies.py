@@ -1,5 +1,6 @@
 import pygame 
 from gameplay.entities.enemies.base.boss import Boss
+from gameplay.entities.shared.boss_rewards import ProgressionUnlockReward
 from engine.utils import read_files
 from gameplay.entities.enemies.bosses.shared import task_manager
 from gameplay.entities.projectiles import HurtBox
@@ -18,7 +19,10 @@ class Wolfies(Boss):
 
         self.currentstate = task_manager.TaskManager(self, wolfies_states.STATE_REGISTRY, WOLFIES_CONFIG['patterns'])
 
-        self.ability = WOLFIES_CONFIG['ability']#the stae of image that will be blitted to show which ability that was gained
+        self.reward = ProgressionUnlockReward(
+            preview_sprite='dash_ground_main',
+            progress_key='dash',
+        )
         self.attack_distance = WOLFIES_CONFIG['attack_distance']
         self.jump_distance = WOLFIES_CONFIG['jump_distance']
         self.vitals.set_max_health(WOLFIES_CONFIG['health'])

@@ -11,7 +11,7 @@ from gameplay.entities.visuals.cosmetics import *
 from gameplay.entities.visuals.effects import FadeEffect
 from gameplay.entities.effects import SlowmotionField
 from gameplay.ui.components.overlay import point_arrow
-from gameplay.entities.interactables import AbilityBall
+from gameplay.entities.interactables import BossRewardBall
 from gameplay.entities.visuals.particles.particles import Circle, Spark, Goop, FloatyParticles
 
 class Object_pool():#a class that contains the objecte one may one to spawn duirng the game: it preloads stiff that needs to be loaded from file
@@ -28,7 +28,7 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         PurpleInfinityStone.pool(game_objects)
 
         #interactbales
-        AbilityBall.pool(game_objects)
+        BossRewardBall.pool(game_objects)
 
         #radna
         BossHP.pool(game_objects)

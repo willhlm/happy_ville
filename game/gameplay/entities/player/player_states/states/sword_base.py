@@ -8,7 +8,7 @@ class Sword(PhaseBase):
     def enter(self, **kwarg):
         self.entity.flags['attack_able'] = False
         self.entity.game_objects.timer_manager.start_timer(C.sword_time_player, self.entity.on_attack_timeout)
-        self.entity.abilities.spirit_abilities['Shield'].sword()
+        self.entity.abilities.notify_sword_attack()
         self.entity.sword.use_sword()
 
 class SwordAir(PhaseAirBase):
@@ -18,5 +18,5 @@ class SwordAir(PhaseAirBase):
     def enter(self, **kwarg):
         self.entity.flags['attack_able'] = False
         self.entity.game_objects.timer_manager.start_timer(C.sword_time_player, self.entity.on_attack_timeout)
-        self.entity.abilities.spirit_abilities['Shield'].sword()
+        self.entity.abilities.notify_sword_attack()
         self.entity.sword.use_sword()

@@ -1,13 +1,11 @@
 import pygame
-from engine.utils import read_files
-from engine import constants as C
 from gameplay.entities.interactables.base.interactables import Interactables
+from gameplay.entities.shared.boss_rewards import BossReward
 from .states import Grow
-from gameplay.entities.shared.components.hit.hit_effects import screen_shake_callback
 from gameplay.entities.shared.components.hit.hitstop_component import HitstopComponent
 
-class AbilityBall(Interactables):
-    def __init__(self, pos, game_objects, ability):
+class BossRewardBall(Interactables):
+    def __init__(self, pos, game_objects, reward):
         super().__init__(pos, game_objects)        
         self.rect = pygame.Rect(0, 0, self.image.width, self.image.height)
         self.rect.center = pos
@@ -18,7 +16,7 @@ class AbilityBall(Interactables):
         self.hitstop = HitstopComponent()
         self.currentstate = Grow(self)#start with grow
         self.health = 3
-        self.ability = ability
+        self.reward = reward
 
         #shader uniforms
         self.explosion = 0        
@@ -32,8 +30,8 @@ class AbilityBall(Interactables):
         pass
 
     def pool(game_objects):
-        AbilityBall.size = (300,120)
-        AbilityBall.image = game_objects.game.display.make_layer(AbilityBall.size).texture
+        BossRewardBall.size = (300,120)
+        BossRewardBall.image = game_objects.game.display.make_layer(BossRewardBall.size).texture
 
     def take_dmg(self, effect):
         self.health -= effect.damage#take damage
@@ -48,7 +46,7 @@ class AbilityBall(Interactables):
             #effect.append_callback('attacker', 'hitstop', lambda eff: eff.attacker.hitstop.start(duration=10))##make sure default_attacker_hitstop is there                        
         else:#if dead
             self.game_objects.time_manager.modify_time(time_scale = 0, duration = 50)            
-            self.ability_ball_pickup(effect.attacker)               
+            self.collect_reward(effect.attacker)
         return effect
 
     def update_render(self, dt):    
@@ -72,8 +70,8 @@ class AbilityBall(Interactables):
         pos = (int(self.true_pos[0]-self.game_objects.camera_manager.camera.interp_scroll[0]),int(self.true_pos[1]-self.game_objects.camera_manager.camera.interp_scroll[1]))
         self.game_objects.game.display.render(self.image, target, position = pos, shader = self.game_objects.shaders['ability_ball'])#shader render        
 
-    def ability_ball_pickup(self, entity):
+    def collect_reward(self, entity):
         self.game_objects.camera_manager.camera_shake(amplitude = 15, duration = 15, scale = 0.9)
         self.currentstate.enter_state('death')#overrite any state and go to deat
-        self.game_objects.signals.emit('ability_ball')
-        entity.currentstate.unlock_state(self.ability)#append the ability
+        self.game_objects.signals.emit('boss_reward_collected')
+        self.reward.apply(entity)

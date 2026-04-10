@@ -14,8 +14,12 @@ class Timer_manager():
             del self.timers[ID]
 
     def remove_timer(self, timer):# Remove the specific timer from its ID category
-        self.timers[timer.ID].remove(timer)
-        if not self.timers[timer.ID]:  # Clean up if there are no more timers under this ID
+        timers = self.timers.get(timer.ID)
+        if not timers or timer not in timers:
+            return
+
+        timers.remove(timer)
+        if not timers:  # Clean up if there are no more timers under this ID
             del self.timers[timer.ID]
 
     def clear_timers(self):
@@ -37,8 +41,8 @@ class Timer():
     def update(self, dt):# Decrease the timer duration based on the game’s delta time
         self.duration -= dt  # Adjusted based on frame time
         if self.duration <= 0:
+            self.remove()  # Remove first so callback can safely manipulate timers
             self.callback()  # Trigger the callback when the timer ends
-            self.remove()  # Remove the timer from the manager
 
     def remove(self):# Remove the timer from the appropriate category (ID group)
         self.timer_manager.remove_timer(self)

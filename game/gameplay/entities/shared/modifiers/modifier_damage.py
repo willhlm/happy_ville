@@ -74,7 +74,7 @@ class ShieldModifier(HitModifier):
 
     def modify_hit(self, effect):
         # Shield takes damage instead
-        self.entity.abilities.spirit_abilities['Shield'].shield.take_dmg(effect.damage)
+        self.entity.abilities.get('shield').absorb_hit(effect)
         effect.result = HitResult.BLOCKED  # Cancel damage to main entity
 
 class ParryModifier(HitModifier):

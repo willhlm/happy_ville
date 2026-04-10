@@ -1040,7 +1040,7 @@ class ObjectSpawner:
                 self.game_objects.platforms.add(gate)
 
             elif id == 16:#air dash statue
-                statue = AirDashStatue(object_position, self.game_objects)
+                statue = AirDashUpgradeStatue(object_position, self.game_objects)
                 self.game_objects.interactables.add(statue)
 
             elif id == 17:

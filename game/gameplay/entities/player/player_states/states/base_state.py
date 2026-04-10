@@ -50,8 +50,8 @@ class PhaseBase():
         if multiplier > 0:
             self.entity.dir[0] = sign(value[0])
 
-    def do_ability(self):#called when pressing B (E). This is needed if all of them do not have pre animation, or vice versa
-        self.enter_state(self.entity.abilities.equip.lower())
+    def do_ability(self):#called when pressing B (E).
+        self.entity.abilities.enter_equipped_state(self.enter_state)
 
     def consume_contact_state(self):
         pass

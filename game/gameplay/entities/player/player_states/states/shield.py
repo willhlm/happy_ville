@@ -29,11 +29,7 @@ class ShieldMain(PhaseBase):
 
     def enter(self):
         self.entity.animation.play('shield_main')
-        ability = self.entity.abilities.spirit_abilities['Shield']
-        spirit_cost = getattr(ability, 'spirit_cost', 0)
-        if spirit_cost:
-            self.entity.consume_spirit_cost(spirit_cost)
-        ability.initiate()
+        self.entity.abilities.activate('shield')
 
     def increase_phase(self):
         self.enter_state('idle')

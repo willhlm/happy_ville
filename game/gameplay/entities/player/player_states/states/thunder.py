@@ -13,12 +13,12 @@ class ThunderPre(PhaseBase):
         super().__init__(entity)
 
     def enter(self, **kwarg):
-        self.ability = self.entity.abilities.spirit_abilities['Thunder']
+        self.ability = self.entity.abilities.get('thunder')
         self.ball = ThunderBall(self.entity.rect.topleft, self.entity.game_objects)
         self.entity.game_objects.cosmetics.add(self.ball)
         self.duration = 100
         self.entity.shader_state.enter_state('Swirl')
-        if self.ability.level == 2:
+        if self.ability.uses_directional_aim():
             self.arrow = self.entity.game_objects.ui.hud.widgets.show_point_arrow(
                 'thunder',
                 self.entity.rect.topleft,
@@ -28,7 +28,7 @@ class ThunderPre(PhaseBase):
     def update(self, dt):
         self.duration -= dt
         self.entity.velocity = [0, 0]
-        if self.ability.level == 2:
+        if self.ability.uses_directional_aim():
             self.arrow.set_pos(self.entity.rect.topleft)
         if self.duration < 0:
             self.exit_state()
@@ -36,11 +36,12 @@ class ThunderPre(PhaseBase):
     def exit_state(self):
         self.entity.shader_state.enter_state('Idle')
         self.ball.kill()
-        if self.ability.level == 1:
-            self.enter_phase('main', dir = [0, 1])
-        else:
+        if self.ability.uses_directional_aim():
             self.entity.game_objects.ui.hud.widgets.hide('thunder')
-            self.enter_phase('main', dir = [self.arrow.dir[0], -self.arrow.dir[1]])
+            aim_dir = [self.arrow.dir[0], -self.arrow.dir[1]]
+        else:
+            aim_dir = None
+        self.enter_phase('main', dir = self.ability.get_dive_direction(aim_dir))
 
     def handle_release_input(self, input):
         if input.name == 'b':
@@ -48,7 +49,7 @@ class ThunderPre(PhaseBase):
             self.exit_state()
 
     def handle_movement(self, axes):
-        if self.ability.level == 2:
+        if self.ability.uses_directional_aim():
             value = axes.move
             if value[0] != 0 or value[1] != 0:
                 self.arrow.dir = [value[0], -value[1]]

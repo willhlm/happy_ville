@@ -1,4 +1,4 @@
-from .ability_ball.ability_ball import AbilityBall
+from .ability_ball.boss_reward_ball import BossRewardBall
 
 from .chests.chest_3 import Chest_3 as Chest
 from .chests.amber_rock import AmberRock
@@ -39,8 +39,8 @@ from .sources.crystal_source import CrystalSource
 from .sources.falling_rock.falling_rock_source import FallingRockSource
 from .sources.droplet.droplet_source import DropletSource 
 
-from .statues.abilities.air_dash_statue import AirDashStatue
-from .statues.abilities.thunder_dive_statue import ThunderDiveStatue
+from .statues.abilities.air_dash_upgrade_statue import AirDashUpgradeStatue
+from .statues.abilities.ability_upgrade_statue import ThunderAbilityUpgradeStatue
 from .statues.quests.quest_statue import QuestStatue
 from .statues.quests.stone_wood import StoneWood
 from .statues.rhoutta.rhoutta import RhouttaStatue

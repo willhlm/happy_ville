@@ -6,7 +6,7 @@ class DefeatedBoss(StaticEntity):
     def __init__(self, game_objects, boss):
         super().__init__([0, 0], game_objects)
         self.boss = boss
-        self.game_objects.signals.subscribe('ability_ball', self.ability_ball_pickup)
+        self.game_objects.signals.subscribe('boss_reward_collected', self.on_reward_collected)
 
         self.game_objects.world_state.statistics_state.increase_progress()
         self.game_objects.world_state.narrative.mark_boss_defeated(str(type(boss).__name__).lower())
@@ -30,7 +30,7 @@ class DefeatedBoss(StaticEntity):
             #self.emit_particles(lifetime = 70, scale=3, colour = C.spirit_colour, gravity_scale = 0.5, gradient = 1, fade_scale = 3,  number_particles = 1, vel = {'wave': [0, -1]})
             self.time = 0
 
-    def ability_ball_pickup(self):#signal emiteed when abilty ball is pciked up
+    def on_reward_collected(self):
         self.game_objects.game.state_manager.enter_state(state_name = 'instructions')              
         self.game_objects.game.state_manager.enter_state(state_name = 'defeated_boss')#the particle stuff        
         self.timescale = 0

@@ -2,46 +2,82 @@ from .states import *
 
 
 class StateManager():
+    BASE_STATE_KEYS = (
+        'idle',
+        'invisible',
+        'run',
+        'walk',
+        'fall',
+        'land',
+        'jump',
+        'sword_stand1',
+        'sword_stand2',
+        'sword_air1',
+        'sword_air2',
+        'sword_down',
+        'sword_up',
+        'smash_side',
+        'smash_up',
+        'death',
+        'respawn',
+        'heal',
+        'crouch',
+        'plat_bone',
+    )
+
     def __init__(self, entity):
         self.entity = entity
-        self.states = {
-            'idle': IdleState(entity),
-            'invisible': InvisibleState(entity),
-            'run': RunState(entity),
-            'walk': WalkState(entity),
-            'sprint': SprintState(entity),
-            'fall': FallState(entity),
-            'land': LandState(entity),
-            'jump': JumpState(entity),
-            'jump_sprint': JumpSprintState(entity),
-            'dash_ground': DashGroundState(entity),
-            'dash_jump': DashJumpState(entity),
-            'wall_glide': WallGlideState(entity),
-            'belt_glide': BeltGlideState(entity),
-            'wall_jump': WallJumpState(entity),
-            'sword_stand1': SwordStand1State(entity),
-            'sword_stand2': SwordStand2State(entity),
-            'sword_air1': SwordAir1State(entity),
-            'sword_air2': SwordAir2State(entity),
-            'sword_down': SwordDownState(entity),
-            'sword_up': SwordUpState(entity),
-            'smash_side': SmashSideState(entity),
-            'smash_up': SmashUpState(entity),
-            'dash_air': DashAirState(entity),
-            'death': DeathState(entity),
-            'respawn': ReSpawnState(entity),
-            'heal': HealState(entity),
-            'crouch': CrouchState(entity),
-            'plat_bone': PlantBoneState(entity),
-            'thunder': ThunderState(entity),
-            'shield': ShieldState(entity),
-            'wind': WindState(entity),
-            'slow_motion': SlowMotionState(entity),
-            'bow': BowState(entity),
+        self._state_factories = {
+            'idle': IdleState,
+            'invisible': InvisibleState,
+            'run': RunState,
+            'walk': WalkState,
+            'sprint': SprintState,
+            'fall': FallState,
+            'land': LandState,
+            'jump': JumpState,
+            'jump_sprint': JumpSprintState,
+            'dash_ground': DashGroundState,
+            'dash_jump': DashJumpState,
+            'wall_glide': WallGlideState,
+            'belt_glide': BeltGlideState,
+            'wall_jump': WallJumpState,
+            'sword_stand1': SwordStand1State,
+            'sword_stand2': SwordStand2State,
+            'sword_air1': SwordAir1State,
+            'sword_air2': SwordAir2State,
+            'sword_down': SwordDownState,
+            'sword_up': SwordUpState,
+            'smash_side': SmashSideState,
+            'smash_up': SmashUpState,
+            'dash_air': DashAirState,
+            'death': DeathState,
+            'respawn': ReSpawnState,
+            'heal': HealState,
+            'crouch': CrouchState,
+            'plat_bone': PlantBoneState,
+            'thunder': ThunderState,
+            'shield': ShieldState,
+            'wind': WindState,
+            'slow_motion': SlowMotionState,
+            'bow': BowState,
         }
+        self.states = {}
+        self.install_states(self.BASE_STATE_KEYS)
 
         self.composite_state = self.states['idle']
         self.composite_state.enter_phase('main')
+
+    def install_state(self, state_name):
+        if state_name not in self.states:
+            self.states[state_name] = self._state_factories[state_name](self.entity)
+
+    def install_states(self, state_names):
+        for state_name in state_names:
+            self.install_state(state_name)
+
+    def has_state(self, state_name):
+        return state_name in self.states
 
     def enter_state(self, state_name, phase=None, **kwargs):
         state = self.states.get(state_name)

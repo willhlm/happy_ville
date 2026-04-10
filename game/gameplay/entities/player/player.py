@@ -10,7 +10,7 @@ from gameplay.entities.player.backpack import backpack
 from gameplay.entities.player.grounding import PlayerGrounding
 from gameplay.entities.visuals.cosmetics.slash import Slash
 from gameplay.entities.player.sword.sword import Sword
-from gameplay.entities.player.abilities.ability_manager import AbilityManager
+from gameplay.entities.player.progression_manager import PlayerProgressionManager
 from gameplay.entities.shared.status.status_component import StatusComponent
 from gameplay.entities.shared.status.wet import Wet
 from engine import constants as C
@@ -33,11 +33,11 @@ class Player(Character):
 
         self.combat_tracker = CombatTracker()
         self.sword = Sword(self)
-        self.abilities = AbilityManager(self)
 
         self._reset_flags()                
         self.grounding = PlayerGrounding(self)
         self.currentstate = StateManager(self)
+        self.progression = PlayerProgressionManager(self)
         self.death_manager = DeathManager(self)
         self.hazard_resolver = PlayerHazardResolver(self)    
 
@@ -101,6 +101,10 @@ class Player(Character):
     def gain_spirit(self, spirit=1):
         self.vitals.add_spirit(spirit)
         self.game_objects.ui.hud.meters.update_spirits()#update UI
+
+    @property
+    def abilities(self):
+        return self.progression.abilities
 
     def _reset_flags(self):
         self.flags = {'ground': False, 'shroompoline': False, 'attack_able': True, 'grounddash': True, 'sprint_chain_active': False}# flags to check if on ground (used for jumpåing), #a flag to make sure you can only swing sword when this is False        
