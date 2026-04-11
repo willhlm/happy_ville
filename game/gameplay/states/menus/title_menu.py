@@ -103,14 +103,14 @@ class TitleMenu(BaseUI):
             #self.game.game_objects.map.load_map(self,'wakeup_forest_3','1')
             #self.game.game_objects.map.load_map(self,'spirit_world_1','1')
             #self.game.game_objects.map.load_map(self,'crystal_mines_3','1')
-            #self.game.game_objects.map.load_map(self,'village_5','1')
+            self.game.game_objects.map.load_map(self,'village_5','1')
             #self.game.game_objects.map.load_map(self,'nordveden_windtest','1')
-            self.game.game_objects.map.load_map(self,'nordveden_2','1')
+            #self.game.game_objects.map.load_map(self,'nordveden_1','1')
             #self.game.game_objects.map.load_map(self,'tall_trees_1','1')
             #self.game.game_objects.map.load_map(self,'dark_forest_1','5')
             #self.game.game_objects.map.load_map(self,'hlifblom_10','1')
             #self.game.game_objects.map.load_map(self,'rhoutta_encounter_3','1')
-            #self.game.game_objects.map.load_map(self,'golden_fields_2','1')
+            #self.game.game_objects.map.load_map(self,'golden_fields_1','1')
             #self.game.game_objects.map.load_map(self,'collision_map_4','1')
 
         elif self.current_button == 1:

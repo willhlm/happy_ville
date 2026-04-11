@@ -19,7 +19,7 @@ class SprintMain(PhaseBase):
 
     def update(self, dt):
         self.sprint_time += dt
-        if not self.entity.is_on_floor():
+        if not self.entity.has_ground_grace():
             self.entity.flags['sprint_chain_active'] = True
             self.enter_state('fall')
             self.entity.begin_coyote_time()
@@ -51,7 +51,7 @@ class SprintPost(PhaseBase):
         self.entity.animation.play('sprint_post')
 
     def update(self, dt):
-        if not self.entity.is_on_floor():
+        if not self.entity.has_ground_grace():
             self.entity.flags['sprint_chain_active'] = True
             self.enter_state('fall')
             self.entity.begin_coyote_time()

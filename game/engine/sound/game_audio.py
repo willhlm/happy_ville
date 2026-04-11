@@ -12,10 +12,10 @@ from .spatial_emitter import SpatialAudioSystem
 
 class GameAudio:
     """High-level game audio interface + simple spatial emitters."""
-    def __init__(self):
+    def __init__(self, camera_scroll_getter=None):
         self.audio_manager = AudioManager(AUDIO_CONFIG)
         self.sound_player = SoundPlayer(self.audio_manager)
-        self.spatial = SpatialAudioSystem(self.sound_player.play_sfx)
+        self.spatial = SpatialAudioSystem(self.sound_player.play_sfx, camera_scroll_getter=camera_scroll_getter)
 
         # Sound libraries
         self.sfx_library = SFXLibrary()

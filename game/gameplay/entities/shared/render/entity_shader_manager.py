@@ -1,22 +1,19 @@
-from . import shader_states
-from engine.render.post_process import PostProcess
-from . import shaders
+from .entity_effect_pipeline import EntityEffectPipeline
+from .entity_shader_state_controller import EntityShaderStateController
+
 
 class EntityShaderManager():
-    def __init__(self, entity, default = 'idle', **kwargs):
+    def __init__(self, entity, default='idle', **kwargs):
         self.entity = entity
-        self.state = None
-        self.effects = EntityProcess(entity)               # Overlay effects pipeline
-        self.enter_state(default, **kwargs)
+        self.state_controller = EntityShaderStateController(entity, default, **kwargs)
+        self.effects = EntityEffectPipeline(entity, self.state_controller)
 
-    # --- State handling ---
     def enter_state(self, new_state, **kwargs):
-        self.state = getattr(shader_states, new_state.capitalize())(self.entity, **kwargs)#make a class based on the name of the newstate: need to import sys
+        self.state_controller.enter_state(new_state, **kwargs)
 
-    def handle_input(self, input, **kwargs):
-        self.state.handle_input(input, **kwargs)
+    def handle_input(self, input_name, **kwargs):
+        self.state_controller.handle_input(input_name, **kwargs)
 
-    # --- Effect handling ---
     def add_shader(self, name, **kwargs):
         self.effects.append_shader(name, **kwargs)
 
@@ -24,23 +21,22 @@ class EntityShaderManager():
         self.effects.remove_shader(name)
 
     def update_render(self, dt):
-        self.state.update_render(dt)
+        self.state_controller.update_render(dt)
         self.effects.update_render(dt)
 
-    # --- Drawing ---
-    def draw(self, base_texture, target, position, flip = False, angle = 0):        
-        if not self.effects.shaders:
-            self.state.draw(base_texture, target, position, flip, angle)# If no overlay effects, render base shader directly
+    def draw(self, base_texture, target, position, flip=False, angle=0):
+        if not self.effects.has_shaders():
+            self.state_controller.draw(base_texture, target, position, flip, angle)
             self.draw_normal(position, flip, angle)
             return
 
-        self.effects.draw(base_texture, target, position, flip, angle) # Pass through overlay pipeline
+        self.effects.draw(base_texture, target, position, flip, angle)
         self.draw_normal(position, flip, angle)
 
-    def clear_textures(self):#called when release_texture is called.
+    def clear_textures(self):
         self.effects.clear_textures()
 
-    def draw_normal(self, position, flip = False, angle = 0):
+    def draw_normal(self, position, flip=False, angle=0):
         normal_texture = self._current_normal_texture()
         if normal_texture is None:
             return
@@ -49,10 +45,10 @@ class EntityShaderManager():
         self.entity.game_objects.game.display.render(
             normal_texture,
             self.entity.game_objects.lights.normal_map,
-            position = position,
-            flip = flip,
-            angle = angle,
-            shader = self.entity.game_objects.shaders['normal_map'],
+            position=position,
+            flip=flip,
+            angle=angle,
+            shader=self.entity.game_objects.shaders['normal_map'],
         )
 
     def _current_normal_texture(self):
@@ -64,63 +60,5 @@ class EntityShaderManager():
         animation_name = self.entity.animation.animation_name
         image_frame = self.entity.animation.image_frame
         textures = normal_maps.get(animation_name)
- 
+
         return textures[image_frame]
-
-class EntityProcess(PostProcess):#for entity overlay effects
-    def __init__(self, entity):   
-        self.entity = entity             
-        self.shaders = {}
-        self.size = None
-        self.base_layer = None
-        self.temp_layer_a = None
-        self.temp_layer_b = None
-
-    def clear_textures(self):
-        if self.base_layer:
-            self.base_layer.release()
-            self.base_layer = None
-        if self.temp_layer_a:
-            self.temp_layer_a.release()
-            self.temp_layer_a = None
-        if self.temp_layer_b:
-            self.temp_layer_b.release()
-            self.temp_layer_b = None
-        self.size = None
-
-    def _define_size(self, size):
-        self.size = tuple(size)
-        self.base_layer = self.entity.game_objects.game.display.make_layer(size)
-        self.temp_layer_a = self.entity.game_objects.game.display.make_layer(size)
-        self.temp_layer_b = self.entity.game_objects.game.display.make_layer(size)
-
-    def _ensure_size(self, size):
-        if self.size is None or self.size != tuple(size):
-            self.clear_textures()
-            self._define_size(size)
-
-    def draw(self, base_texture, target, position, flip, angle):
-        """Apply overlay shaders to base_texture, last shader draws to target."""  
-        self._ensure_size(base_texture.size)
-        self.base_layer.clear(0, 0, 0, 0)
-        self.temp_layer_a.clear(0, 0, 0, 0)
-        self.temp_layer_b.clear(0, 0, 0, 0)
-
-        dst = self.temp_layer_a
-        src = self.entity.shader_state.state.draw(base_texture, self.base_layer, position = (0, 0), flip = False, angle = 0) # First draw base shader to base_layer, then pass through overlay pipeline
-
-        shader_items = list(self.shaders.items())
-
-        for i, (name, shader_obj) in enumerate(shader_items):
-            is_last_shader = (i == len(shader_items) - 1)
-
-            if is_last_shader:                
-                shader_obj.draw_to_composite(src, target, position, flip, angle)# Last shader draws to final target
-            else:                
-                src = shader_obj.draw(src, dst)# Intermediate shader: draw src -> dst
-                dst = self.temp_layer_b if dst is self.temp_layer_a else self.temp_layer_a#needed for 3+ shaders in pipeline
-                dst.clear(0, 0, 0, 0)
-
-    def append_shader(self, shader_name, **kwargs):        
-        shader_class = getattr(shaders, shader_name.capitalize())
-        self.shaders[shader_name] = shader_class(self.entity.game_objects, **kwargs)

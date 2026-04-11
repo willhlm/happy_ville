@@ -15,7 +15,7 @@ class IdleMain(PhaseBase):
         self.entity.end_coyote_time()
 
     def update(self, dt):
-        if not self.entity.is_on_floor():
+        if not self.entity.has_ground_grace():
             self.enter_state('fall')
             self.entity.begin_coyote_time()
 

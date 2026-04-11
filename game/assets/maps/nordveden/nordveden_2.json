@@ -338,7 +338,7 @@
                  "name":"platforms",
                  "objects":[
                         {
-                         "gid":47988,
+                         "gid":47989,
                          "height":64,
                          "id":896,
                          "name":"",
@@ -371,7 +371,7 @@
                          "y":720
                         }, 
                         {
-                         "gid":47988,
+                         "gid":47989,
                          "height":64,
                          "id":898,
                          "name":"",
@@ -1957,7 +1957,7 @@
          "y":0
         }],
  "nextlayerid":106,
- "nextobjectid":917,
+ "nextobjectid":918,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -2120,7 +2120,7 @@
         }, 
         {
          "columns":190,
-         "firstgid":31004,
+         "firstgid":31005,
          "image":"tilesets\/cliffs.png",
          "imageheight":1344,
          "imagewidth":3040,
@@ -2133,7 +2133,7 @@
         }, 
         {
          "columns":32,
-         "firstgid":46964,
+         "firstgid":46965,
          "image":"tilesets\/props.png",
          "imageheight":512,
          "imagewidth":512,
@@ -2145,7 +2145,7 @@
          "tilewidth":16
         }, 
         {
-         "firstgid":47988,
+         "firstgid":47989,
          "source":"..\/_objects\/platforms.tsx"
         }],
  "tilewidth":16,

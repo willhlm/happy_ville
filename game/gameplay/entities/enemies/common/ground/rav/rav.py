@@ -35,6 +35,5 @@ class Rav(Enemy):
         self.currentstate = StateManager(self, type = 'ground', custom_states = RAV_STATES, custom_deciders = RAV_DECIDERS)
 
     def attack(self):#called from states, attack main
-        print(self.dir)
         attack = HurtBox(self, lifetime = 10, dir = self.dir, size = [32, 32])#make the object
         self.game_objects.projectiles.add_enemy(attack)#add to group but in main phase

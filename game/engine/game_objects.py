@@ -30,7 +30,6 @@ class GameObjects():
         self.normal_map_generator = NormalMapGenerator(self)
         self.controller = controller.Controller()
         self.object_pool = object_pool.Object_pool(self)
-        self.sound = game_audio.GameAudio()
         self.lights = lights.Lights(self)
         self.timer_manager = timer.Timer_manager(self)
         self._create_groups()
@@ -40,14 +39,17 @@ class GameObjects():
         
         self.transition = transition_controller.TransitionController(self)
         self.map = MapCoordinator(self) 
-        self.camera_manager = camera.Camera_manager(self)                    
+        self.camera_manager = camera.Camera_manager(self)
+        self.sound = game_audio.GameAudio(
+            camera_scroll_getter=lambda: self.camera_manager.camera.interp_scroll
+        )
         self.world_state = world_state.World_state(self)#save/handle all world state stuff here
         self.ui = ui.UiManager(self)
         self.save_load = save_load.Save_load(self)#contains save and load attributes to load and save game
         self.quests_events = QuestsEventsManager(self)        
         self.input_interpreter = input_interpreter.InputInterpreter(self)
         self.time_manager = time_manager.Time_manager(self)
-        self.post_process = post_process.PostProcess(self)
+        self.post_process = post_process.CompositePipeline(self)
         self.registry = RegistryManager()
         self.particles = ParticleSystem(self)
         self.world_transform_controller = WorldTransformController(self)

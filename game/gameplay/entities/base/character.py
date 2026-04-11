@@ -105,6 +105,9 @@ class Character(AnimatedEntity):#enemy, NPC,player
     def is_on_floor(self):
         return self.contact_state.is_on_floor()
 
+    def has_ground_grace(self):
+        return self.is_on_floor() or self.was_on_floor()
+
     def is_on_wall(self):
         return self.contact_state.is_on_wall()
 

@@ -233,7 +233,9 @@ class PlatformCollisionSolver:
             sample.source.on_platform_collision(entity, sample.side, axis, sample.collision_kind)
 
     def _resolve_horizontal_contacts(self, entity, colliders, motion):
-        support_collider = self._resolve_floor_contacts(entity, colliders, motion)
+        support_collider = None
+        if self._should_resolve_floor_on_horizontal(entity, motion):
+            support_collider = self._resolve_floor_contacts(entity, colliders, motion)
         if support_collider is not None:
             colliders = self._refresh_colliders(entity, axis='x', phase='floor')
 
@@ -245,6 +247,16 @@ class PlatformCollisionSolver:
 
     def _refresh_colliders(self, entity, axis, phase):
         return self._gather_platform_colliders(entity)
+
+    def _should_resolve_floor_on_horizontal(self, entity, motion):
+        contact_state = getattr(entity, 'contact_state', None)
+        if contact_state is None:
+            return True
+
+        if contact_state.was_on_wall and motion.requested_motion[1] > 0:
+            return False
+
+        return True
 
     def _clip_remaining_motion(self, entity, remaining_motion, axis):
         collision = self._get_latest_axis_collision(entity, axis)

@@ -3,7 +3,7 @@ import math, numpy as np
 
 class Shaders():
     def __init__(self, post_process):
-        self.post_process = post_process#TODO change this to game_objects
+        self.post_process = post_process
 
     def update_render(self, dt):
         pass
@@ -24,7 +24,7 @@ class Vignette(Shaders):
         super().__init__(post_process)
         self.colour = kwargs.get('colour', [0.0, 0.0, 0.0, 1.0])
         self.vignette_intensity = kwargs.get('vignette_intensity', 1.0)
-        self.vignette_opacity = kwargs.get('vignette_opacity', 0.1)  # More visible
+        self.vignette_opacity = kwargs.get('vignette_opacity', 0.1)
 
     def set_uniforms(self, **kwargs):
         shader = self.post_process.game_objects.shaders['vignette']

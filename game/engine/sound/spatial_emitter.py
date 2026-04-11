@@ -3,9 +3,10 @@ from __future__ import annotations
 import math
 import pygame
 from dataclasses import dataclass, field
-from typing import Callable, Dict, Optional, Tuple
+from typing import Callable, Optional, Tuple
 
 from engine.utils.functions import track_distance
+from .spatial_spaces import ParallaxScreenSpace
 
 Vec2 = Tuple[float, float]
 
@@ -27,11 +28,51 @@ class SpatialEmitter:
     base_volume: float
     min_dist: float
     max_dist: float
-    listener_transform: Callable[[Vec2], Vec2] = field(default=lambda p: p)  # NEW
+    listener_transform: Callable[[Vec2], Vec2] = field(default=lambda p: p)
 
 class SpatialAudioSystem:
-    """Owns spatial emitters and updates their volumes each frame."""
-    def __init__(self, play_sfx_fn: Callable[..., pygame.mixer.Channel]):
+    """Owns spatial emitters and updates their volumes each frame.
+
+    Registration examples:
+        World-space point emitter:
+            sound.register_spatial_point(
+                sound=sfx,
+                get_point=lambda: entity.hitbox.center,
+            )
+
+        Parallax rect emitter:
+            sound.register_spatial_rect(
+                sound=sfx,
+                get_rect=lambda: entity.rect,
+                parallax=entity.parallax,
+            )
+
+        Custom transformed point emitter:
+            my_space = ParallaxScreenSpace(
+                lambda: game_objects.camera_manager.camera.interp_scroll,
+                entity.parallax,
+            )
+            sound.register_spatial_point(
+                sound=sfx,
+                get_point=lambda: entity.rect.center,
+                listener_transform=my_space.listener_point,
+                source_transform=my_space.point,
+            )
+
+        Custom transformed rect emitter:
+            my_space = ParallaxScreenSpace(
+                lambda: game_objects.camera_manager.camera.interp_scroll,
+                entity.parallax,
+            )
+            sound.register_spatial_rect(
+                sound=sfx,
+                get_rect=lambda: entity.rect,
+                listener_transform=my_space.listener_point,
+                source_transform=my_space.rect,
+            )
+
+    """
+    def __init__(self, play_sfx_fn: Callable[..., pygame.mixer.Channel], camera_scroll_getter=None):
         """
         play_sfx_fn must be something like:
             play_sfx_fn(sound, loops=-1, volume=0.0, fade_ms=0) -> pygame.mixer.Channel
@@ -39,10 +80,28 @@ class SpatialAudioSystem:
         self._play_sfx = play_sfx_fn
         self._emitters = {}
         self._next_id = 1
+        self._camera_scroll_getter = camera_scroll_getter
 
-    def register_point(self, sound, get_point, *, base_volume=0.3, loops=-1, fade_ms=0, min_dist=48, max_dist=300, listener_transform=None):
+    def _resolve_space(self, parallax, listener_transform, source_transform, source_kind):
+        if parallax is None:
+            return listener_transform, source_transform
+
+        if self._camera_scroll_getter is None:
+            raise RuntimeError("SpatialAudioSystem requires a camera scroll getter before using parallax emitters.")
+
+        space = ParallaxScreenSpace(self._camera_scroll_getter, parallax)
+        default_source_transform = space.rect if source_kind == 'rect' else space.point
+        return (
+            listener_transform or space.listener_point,
+            source_transform or default_source_transform,
+        )
+
+    def register_point(self, sound, get_point, *, base_volume=0.3, loops=-1, fade_ms=0, min_dist=48, max_dist=300, listener_transform=None, source_transform=None, parallax=None):
+        listener_transform, source_transform = self._resolve_space(parallax, listener_transform, source_transform, source_kind='point')
         if listener_transform is None:
             listener_transform = lambda p: p
+        if source_transform is None:
+            source_transform = lambda value: value
 
         channel = self._play_sfx(sound, loops=loops, volume=0.0, fade_ms=fade_ms)
         eid = self._next_id; self._next_id += 1
@@ -50,7 +109,7 @@ class SpatialAudioSystem:
         self._emitters[eid] = SpatialEmitter(
             emitter_id=eid,
             channel=channel,
-            get_pos2=lambda _listener_pos: get_point(),
+            get_pos2=lambda _listener_pos: source_transform(get_point()),
             base_volume=base_volume,
             min_dist=min_dist,
             max_dist=max_dist,
@@ -59,9 +118,12 @@ class SpatialAudioSystem:
         return eid
 
 
-    def register_rect(self, sound, get_rect, *, base_volume=0.5, loops=-1, fade_ms=0, min_dist=96, max_dist=600, listener_transform=None):
+    def register_rect(self, sound, get_rect, *, base_volume=0.5, loops=-1, fade_ms=0, min_dist=96, max_dist=600, listener_transform=None, source_transform=None, parallax=None):
+        listener_transform, source_transform = self._resolve_space(parallax, listener_transform, source_transform, source_kind='rect')
         if listener_transform is None:
             listener_transform = lambda p: p
+        if source_transform is None:
+            source_transform = lambda value: value
 
         channel = self._play_sfx(sound, loops=loops, volume=0.0, fade_ms=fade_ms)
         eid = self._next_id; self._next_id += 1
@@ -69,7 +131,7 @@ class SpatialAudioSystem:
         self._emitters[eid] = SpatialEmitter(
             emitter_id=eid,
             channel=channel,
-            get_pos2=lambda listener_pos: _closest_point_on_rect(listener_pos, get_rect()),
+            get_pos2=lambda listener_pos: _closest_point_on_rect(listener_pos, source_transform(get_rect())),
             base_volume=base_volume,
             min_dist=min_dist,
             max_dist=max_dist,
@@ -104,7 +166,7 @@ class SpatialAudioSystem:
                     dead.append(eid)
                     continue
 
-                lpos = emitter.listener_transform(listener_pos)   # NEW: convert listener to emitter space
+                lpos = emitter.listener_transform(listener_pos)
                 pos2 = emitter.get_pos2(lpos)
                 amp = track_distance(lpos, pos2, r0=emitter.max_dist, r1=emitter.min_dist)
                 emitter.channel.set_volume(emitter.base_volume * amp)

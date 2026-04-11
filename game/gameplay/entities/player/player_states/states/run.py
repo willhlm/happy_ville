@@ -20,7 +20,7 @@ class RunPre(PhaseBase):
         if self.particle_timer < 0:
             self.running_particles()
 
-        if not self.entity.is_on_floor():
+        if not self.entity.has_ground_grace():
             self.enter_state('fall')
             self.entity.begin_coyote_time()
 
@@ -91,7 +91,7 @@ class RunMain(PhaseBase):
             self.entity.game_objects.sound.play_sfx(self.entity.sounds['run'][self.sfx_timer % 2], vol = 0.8)
             self.sfx_timer = self.sfx_loop_time
 
-        if not self.entity.is_on_floor():
+        if not self.entity.has_ground_grace():
             self.enter_state('fall')
             self.entity.begin_coyote_time()
 
@@ -143,7 +143,7 @@ class RunPost(PhaseBase):
         self.entity.animation.play('run_post')
 
     def update(self, dt):
-        if not self.entity.is_on_floor():
+        if not self.entity.has_ground_grace():
             self.enter_state('fall')
             self.entity.begin_coyote_time()
 
