@@ -40,6 +40,7 @@ vec2 rotate_uv(vec2 uv, vec2 pivot, float rotation) {
 
 void main(){
     vec2 UV = fragmentTexCoord;
+    vec4 base = texture(imageTexture, UV);
     vec2 center_screen = vec2(center.x, 1- center.y);
     vec2 polar_uv = polar_coordinates(rotate_uv(UV, center_screen, floor(fract(TIME) * animation_speed) ) , center_screen, 0.01, line_count); // Use center as reference position
     vec3 lines = texture(noise, polar_uv).rgb;
@@ -50,6 +51,7 @@ void main(){
     
     result = smoothstep(result, result + line_faloff, lines.r);
     
-    COLOR.rgb = vec3(line_color.rgb);
-    COLOR.a = min(line_color.a, result);
+    float alpha = min(line_color.a, result);
+    vec3 combined = mix(base.rgb, line_color.rgb, alpha);
+    COLOR = vec4(combined, max(base.a, alpha));
 }

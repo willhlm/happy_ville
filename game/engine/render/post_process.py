@@ -2,12 +2,11 @@ from . import shaders
 from .shader_chain import ShaderChain
 
 class CompositePipeline:
-    def __init__(self, game_objects, default_shader = None, **kwargs):
+    def __init__(self, game_objects):
         self.game_objects = game_objects
         self.shader_chain = ShaderChain(self._create_shader)
-        self.temp_layer = game_objects.game.display.make_layer(game_objects.game.display_size)
-        if default_shader:
-            self.set_shader(default_shader, **kwargs)
+        self.temp_layer_a = game_objects.game.display.make_layer(game_objects.game.display_size)
+        self.temp_layer_b = game_objects.game.display.make_layer(game_objects.game.display_size)   
 
     @property
     def shaders(self):
@@ -43,14 +42,25 @@ class CompositePipeline:
         if not shader_items:
             return
 
+        src = composite_screen
+        dst = self.temp_layer_a
+
+        self.temp_layer_a.clear(0, 0, 0, 0)
+        self.temp_layer_b.clear(0, 0, 0, 0)
+
         for index, (_, shader_obj) in enumerate(shader_items):
             is_last_shader = index == len(shader_items) - 1
-            self.temp_layer.clear(0, 0, 0, 0)
 
             if is_last_shader:
-                shader_obj.draw_to_composite(self.temp_layer, composite_screen)
+                if src is composite_screen:
+                    dst.clear(0, 0, 0, 0)
+                    self.game_objects.game.display.render(src.texture, dst)
+                    src = dst
+                shader_obj.draw_to_composite(src, composite_screen)
             else:
-                composite_screen = shader_obj.draw(self.temp_layer, composite_screen)
+                src = shader_obj.draw(dst, src)
+                dst = self.temp_layer_b if dst is self.temp_layer_a else self.temp_layer_a
+                dst.clear(0, 0, 0, 0)
 
     def _create_shader(self, shader_name, **kwargs):
         shader_class = getattr(shaders, shader_name.capitalize())

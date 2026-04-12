@@ -138,15 +138,15 @@ class NarrativeState:
     QUEST_COMPLETED = 'completed'
     QUEST_FAILED = 'failed'
 
-    def __init__(self, *, events, quests, cutscenes_complete, defeated_bosses, dialogue):
+    def __init__(self, *, events, quests, flows_complete, defeated_bosses, dialogue):
         self.events = events
         self.quests = quests
-        self.cutscenes_complete = cutscenes_complete
+        self.flows_complete = flows_complete
         self.defeated_bosses = defeated_bosses
         self.dialogue = DialogueState(dialogue)
 
-    def mark_cutscene_complete(self, cutscene_name):
-        self.cutscenes_complete[cutscene_name] = True
+    def mark_flow_complete(self, flow_name):
+        self.flows_complete[flow_name] = True
 
     def update_event(self, event_name):
         self.events[event_name] = True
@@ -160,8 +160,8 @@ class NarrativeState:
     def is_event_complete(self, event_name):
         return self.events.get(event_name, False)
 
-    def is_cutscene_complete(self, cutscene_name):
-        return self.cutscenes_complete.get(cutscene_name, False)
+    def is_flow_complete(self, flow_name):
+        return self.flows_complete.get(flow_name, False)
 
     def get_quest_status(self, quest_name):
         return self.quests.get(quest_name, self.QUEST_INACTIVE)
@@ -205,7 +205,7 @@ class World_state():
         self.narrative = NarrativeState(
             events=save.get('events', {}),
             quests=save.get('quests', {}),
-            cutscenes_complete=save.get('cutscenes_complete', {}),
+            flows_complete=save.get('flows_complete', {}),
             defeated_bosses=save.get('defeated_bosses', {}),
             dialogue=save.get('dialogue', {}),
         )

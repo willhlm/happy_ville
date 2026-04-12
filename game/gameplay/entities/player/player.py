@@ -28,7 +28,7 @@ class Player(Character):
 
         self.vitals.set_max_health(20)
         self.vitals.set_max_spirit(4)
-        self.vitals.set_health(20)
+        self.vitals.set_health(2)
         self.vitals.set_spirit(2)
 
         self.combat_tracker = CombatTracker()

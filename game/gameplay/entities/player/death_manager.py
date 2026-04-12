@@ -18,7 +18,7 @@ class DeathManager:
 
     def finish_death(self):#caleld from death animation when it finishes
         self.entity.game_objects.world_state.statistics_state.update_statistic('death')
-        self.entity.game_objects.game.state_manager.enter_state(state_name='death')
+        self.entity.game_objects.sequence_manager.start_sequence('death')
 
     def set_override(self, callback):
         self.override = callback

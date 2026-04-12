@@ -779,8 +779,8 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":1760,
-                         "y":304
+                         "x":1840,
+                         "y":592
                         }, 
                         {
                          "gid":8,
@@ -864,6 +864,24 @@
                          "width":16,
                          "x":400,
                          "y":416
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":272,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"cultist_warrior"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1216,
+                         "y":496
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -956,7 +974,7 @@
          "y":0
         }],
  "nextlayerid":105,
- "nextobjectid":272,
+ "nextobjectid":273,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

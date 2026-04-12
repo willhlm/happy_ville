@@ -3,12 +3,16 @@ from gameplay.states import *
 class State_manager():
     def __init__(self, game, initial_state = 'title_menu'):
         self.game = game
-        self.state_stack = [REGISTERY[initial_state](self.game)]  # Initialize with the first state
+        self.state_stack = [self._build_state(initial_state)]  # Initialize with the first state
+
+    def _build_state(self, state_name, **kwarg):
+        state = REGISTERY[state_name](self.game, **kwarg)
+        state.state_name = state_name
+        return state
 
     def enter_state(self, state_name, **kwarg):
         """Push a new state onto the stack."""
-        # Get the state class dynamically and instantiate it
-        state = REGISTERY[state_name](self.game, **kwarg)        
+        state = self._build_state(state_name, **kwarg)
         self.state_stack[-1].on_exit()
         self.state_stack.append(state)        
 
@@ -17,6 +21,14 @@ class State_manager():
         state = self.state_stack.pop()
         state.on_pop()  # Call on_exit for the state we're exiting
         self.state_stack[-1].on_resume()  # Resume the previous state
+
+    def exit_to_state(self, state_name):
+        while len(self.state_stack) > 1 and self.state_stack[-1].state_name != state_name:
+            state = self.state_stack.pop()
+            state.on_pop()
+
+        if self.state_stack[-1].state_name == state_name:
+            self.state_stack[-1].on_resume()
 
     def update(self, dt):
         """Update the current active state."""
@@ -37,6 +49,9 @@ class State_manager():
     def peek_below_top(self):
         'return the state just below the current one'
         return self.state_stack[-2]
+
+    def has_state(self, state_name):
+        return state_name in REGISTERY
 
 REGISTERY = {
     # Menus
@@ -72,15 +87,6 @@ REGISTERY = {
     'weaver': Weaver,
 
     # Cutscenes
-    "boss_encounter": BossEncounter,
-    "boss_deer_encounter": BossDeerEncounter,
-    "butterfly_encounter": ButterflyEncounter,
-    "cultist_encounter": CultistEncounter,
-    "death": Death,
-    "deer_encounter": DeerEncounter,
-    "defeated_boss": DefeatedBoss,
-    "start_game": StartGame,
     "rhoutta_encounter_defeat": RhouttaEncounterDefeat,
-    "title_screen": TitleScreen,
     "new_game": NewGame,
 }

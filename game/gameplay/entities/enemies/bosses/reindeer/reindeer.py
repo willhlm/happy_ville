@@ -39,7 +39,7 @@ class Reindeer(Boss):
 
     def dead(self):#called when death animation is finished
         super().dead()
-        self.game_objects.world_state.narrative.mark_cutscene_complete('boss_deer_encounter')#so not to trigger the cutscene again
+        self.game_objects.world_state.narrative.mark_flow_complete('boss_deer_encounter')#so not to trigger the flow again
 
     def kill(self):
         super().kill()

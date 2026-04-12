@@ -13,7 +13,7 @@ class Save_load():
             'progress': world_state.progress,
             'events': world_state.events,
             'quests': world_state.quests,
-            'cutscenes_complete': world_state.cutscenes_complete,
+            'flows_complete': world_state.flows_complete,
             'defeated_bosses': world_state.defeated_bosses,
             'dialogue': world_state.dialogue,
         }

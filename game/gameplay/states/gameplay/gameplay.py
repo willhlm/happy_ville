@@ -28,16 +28,23 @@ class Gameplay(GameState):
         self.game.game_objects.lights.draw(self.game.screen_manager.composite_screen)#before post procssing shader?
 
         self.game.game_objects.post_process.apply(self.game.screen_manager.composite_screen)#apply post process shaders to the composite screen, which is large
-
         self.game.game_objects.ui.hud.draw(self.game.screen_manager.composite_screen)#renders hud elements to the composite
+        self.game.game_objects.sequence_manager.draw(self.game.screen_manager.composite_screen)
         self.game.render_display(self.game.screen_manager.composite_screen.texture, scale = False)
 
     def handle_movement(self):#every frame
+        if self.game.game_objects.sequence_manager.blocks_gameplay_movement():
+            return
+
         axes = self.game.game_objects.controller.frame.axes
         self.game.game_objects.player.currentstate.handle_movement(axes)#move around
         self.game.game_objects.camera_manager.handle_movement(axes)
 
     def handle_events(self, input):
+        if self.game.game_objects.sequence_manager.blocks_gameplay_input():
+            input.processed()
+            return
+
         if input.pressed:#press
             if input.name == 'start':#escape button
                 input.processed()                

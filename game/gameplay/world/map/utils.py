@@ -608,7 +608,7 @@ class ObjectSpawner:
                 if not self.game_objects.world_state.narrative.is_boss_defeated(path_props['ID']):
                     from gameplay.data.boss_encounter_configs import get_boss_encounter_config
 
-                    aggro = self.game_objects.world_state.narrative.is_cutscene_complete(path_props['ID'])
+                    aggro = self.game_objects.world_state.narrative.is_flow_complete(path_props['ID'])
                     new_boss = self.game_objects.registry.fetch('enemies', path_props['class'])(object_position, self.game_objects, path_props['ID'])
                     self.game_objects.enemies.add(new_boss)
                     ctx.references[path_props['ID']] = new_boss
@@ -741,16 +741,22 @@ class ObjectSpawner:
 
             elif id == 19:#trigger
                 kwarg = props_list_to_dict(properties)
-                completion_key = kwarg.get('ID', kwarg['event'])
-
-                if self.game_objects.world_state.narrative.is_cutscene_complete(completion_key): continue#if the cutscene has been shown before, return.
-                if self.game_objects.world_state.narrative.is_event_complete(kwarg['event']): continue#if event has already been done 
-                
                 obj = self.game_objects.registry.fetch('event_triggers',  kwarg['event'])
+                trigger_cls = obj or self.game_objects.registry.fetch('event_triggers', 'default')
+                completion_key = trigger_cls.get_completion_key(kwarg)
+
+                if getattr(trigger_cls, 'blocks_on_flow_complete', False):
+                    if self.game_objects.world_state.narrative.is_flow_complete(completion_key):
+                        continue
+
+                if getattr(trigger_cls, 'blocks_on_event_complete', False):
+                    if self.game_objects.world_state.narrative.is_event_complete(kwarg['event']):
+                        continue
+
                 if obj:#if event is registered
                     new_trigger = obj(object_position, self.game_objects, object_size, **kwarg)
                 else:#if not, load the default
-                    new_trigger = self.game_objects.registry.fetch('event_triggers', 'default')(object_position, self.game_objects, object_size, **kwarg)
+                    new_trigger = trigger_cls(object_position, self.game_objects, object_size, **kwarg)
 
                 self.game_objects.interactables.add(new_trigger)
 

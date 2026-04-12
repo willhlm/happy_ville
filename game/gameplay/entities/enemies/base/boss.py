@@ -1,5 +1,4 @@
 from gameplay.entities.enemies.base.enemy import Enemy
-from gameplay.entities.enemies.bosses.shared.defeated_boss import DefeatedBoss
 from gameplay.entities.interactables import BossRewardBall
 from gameplay.entities.shared.boss_rewards import ProgressionUnlockReward
 
@@ -20,6 +19,7 @@ class Boss(Enemy):
         self.currentstate.start_next_task()
 
     def dead(self):#called when death animation is finished
+        self.flags['aggro'] = False
         self.hit_component.set_invinsibility(True) 
         self.game_objects.world_state.narrative.mark_boss_defeated(self.ID)
 
@@ -28,7 +28,7 @@ class Boss(Enemy):
             position = [self.hitbox.centerx, self.hitbox.centery - 50]
             self.game_objects.interactables.add(BossRewardBall(position, self.game_objects, reward))
 
-        self.game_objects.cosmetics.add(DefeatedBoss(self.game_objects, self))
+        self.game_objects.sequence_manager.start_sequence('defeated_boss', boss=self)
 
     def build_reward(self):
         if self.reward is not None:

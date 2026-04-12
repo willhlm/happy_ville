@@ -15,7 +15,7 @@ class ButterflyEncounter(Tasks):#called from cutscene if aggro path is chosen: a
         self.game_objects.signals.subscribe('player_died', self.handle_player_death)
 
     def complete(self):#called when butterfly is dead
-        self.game_objects.world_state.narrative.mark_cutscene_complete(type(self).__name__.lower())
+        self.game_objects.world_state.narrative.mark_flow_complete(type(self).__name__.lower())
         self.game_objects.world_state.narrative.update_event(type(self).__name__.lower())
         self.cleanup()
 

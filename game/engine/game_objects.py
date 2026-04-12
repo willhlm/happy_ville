@@ -1,6 +1,6 @@
 import pygame
 from engine.utils import read_files
-from engine.system import activation_manager, time_field_manager, save_load, object_pool, controller, lights, timer, signals, time_manager, alphabet, input_interpreter, transition_controller
+from engine.system import activation_manager, time_field_manager, save_load, object_pool, controller, lights, timer, signals, time_manager, alphabet, input_interpreter, transition_controller, sequence_manager
 from engine import groups
 from engine.sound import game_audio
 from gameplay.entities.player import player
@@ -38,6 +38,7 @@ class GameObjects():
         self.physics = PhysicsManager(self)
         
         self.transition = transition_controller.TransitionController(self)
+        self.sequence_manager = sequence_manager.SequenceManager(self)
         self.map = MapCoordinator(self) 
         self.camera_manager = camera.Camera_manager(self)
         self.sound = game_audio.GameAudio(
@@ -139,6 +140,7 @@ class GameObjects():
         self.interactables.update(dt)
         self.weather.update(dt)
         self.interactables_fg.update(dt)#twoD water use it
+        self.sequence_manager.update(dt)
         self.lights.update_render(dt)
 
     def update_render(self, dt):#called after update_physics
@@ -159,6 +161,7 @@ class GameObjects():
         self.cosmetics_bg.update_render(dt)
         self.interactables.update_render(dt)
         self.interactables_fg.update_render(dt)#twoD water use it
+        self.sequence_manager.update_render(dt)
 
     def draw(self):#called from render states         
         self.lights.clear_normal_map()

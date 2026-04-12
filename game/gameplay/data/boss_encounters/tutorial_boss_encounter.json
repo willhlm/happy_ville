@@ -79,7 +79,7 @@
           "type": "boss_start_aggro"
         },
         {
-          "type": "mark_cutscene_complete"
+          "type": "mark_flow_complete"
         },
         {
           "type": "exit_state"

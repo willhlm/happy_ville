@@ -16,10 +16,8 @@ float vignette(vec2 uv){
 }
 
 void main(){
-	vec4 color = texture(imageTexture, fragmentTexCoord);
-	vec4 text = vec4 (1,1,1,1);
-
-	text.rgba *= (1.0 - vignette(fragmentTexCoord));
-
-	COLOR = vec4(text.rgb * color.rgb + colour.rgb, text.a * colour.a);
+	vec4 base = texture(imageTexture, fragmentTexCoord);
+	float factor = clamp(vignette(fragmentTexCoord), 0.0, 1.0);
+	vec3 mixed = mix(colour.rgb, base.rgb, factor);
+	COLOR = vec4(mixed, base.a);
 }
