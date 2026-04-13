@@ -43,7 +43,7 @@ class Inventory():
         else:#new item
             new_item = type(item)([0,0], item.game_objects)#make a copy
             new_item.set_ui()
-            self.items[name] = {"item": new_item, "quantity": quantity}            
+            self.items[name] = {"item": new_item, "quantity": quantity}             
 
     def remove(self, item_name, quantity=1):
         self.items[item_name]["quantity"] -= quantity
@@ -68,7 +68,7 @@ class Map():
         self.spawn_point['safe_spawn'] = coordinate
 
     def save_bone(self, map, point):#called when plaiting a bone
-        self.spawn_point['bone'] = {'map':self.game_objects.map.level_name, 'point':self.game_objects.camera_manager.camera.scroll}     
+        self.spawn_point['bone'] = {'map': map, 'point': point}
 
     def save_travelpoint(self, map, cord):#called when inetracted with fast travel
         if not self.travel_points.get(map, False):#if first time intercted with it

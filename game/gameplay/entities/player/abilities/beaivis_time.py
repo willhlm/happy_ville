@@ -1,6 +1,6 @@
 from .base_ability import Ability
 from engine.utils import read_files
-from gameplay.entities.effects import SlowmotionField
+from gameplay.entities.areas import SlowmotionField
 
 class BeaivisTime(Ability):#slow motion -> sun god: Beaiviáigi in sami
     id = 'slow_motion'

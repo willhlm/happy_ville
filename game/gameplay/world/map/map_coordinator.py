@@ -3,8 +3,10 @@
 from time import perf_counter
 from typing import Optional
 
-from .utils import WorldResetter, MapDataLoader, BiomeManager, SceneBuilder, LoadContext
-from .map_data import MapDefinition  # make sure this import is correct in your project
+from .biome_manager import BiomeManager
+from .map_data import LoadContext, MapDefinition
+from .map_loader import MapDataLoader, WorldResetter
+from .scene_builder import SceneBuilder
 
 class MapCoordinator:
     """
@@ -13,7 +15,7 @@ class MapCoordinator:
     """
     def __init__(self, game_objects):
         self.game_objects = game_objects
-        self.level_name: str = ""
+        self.biome_room_name: str = ""
 
         self.resetter = WorldResetter(game_objects)
 
@@ -26,27 +28,27 @@ class MapCoordinator:
         self.ctx: Optional[LoadContext] = None
         self.map_def: Optional[MapDefinition] = None
 
-    def load_map(self, previous_state, map_name: str, spawn="1", fade=True):
-        map_name = map_name.lower()
-        self.game_objects.transition.run(previous_state, style = "fade_black", action = lambda: self.load_now(map_name, spawn))
+    def load_map(self, previous_state, biome_room_name: str, spawn="1", fade=True):
+        biome_room_name = biome_room_name.lower()
+        self.game_objects.transition.run(previous_state, style = "fade_black", action = lambda: self.load_now(biome_room_name, spawn))
 
-    def load_now(self, map_name: str, spawn="1"):
+    def load_now(self, biome_room_name: str, spawn="1"):
         """Call this ONLY when screen is already black."""
-        map_name = map_name.lower()
-        self.level_name = map_name
-        self._do_load(map_name, spawn)
+        biome_room_name = biome_room_name.lower()
+        self.biome_room_name = biome_room_name
+        self._do_load(biome_room_name, spawn)
 
     # ---- internal pipeline ----
-    def _do_load(self, map_name: str, spawn):
+    def _do_load(self, biome_room_name: str, spawn):
         self.resetter.reset_for_new_map()
 
         t0 = perf_counter()
-        self.ctx = LoadContext(level_name=map_name, spawn=spawn)
+        self.ctx = LoadContext(biome_room_name=biome_room_name, spawn=spawn)
 
-        self.biome_mgr.update_for_level(map_name)
+        self.biome_mgr.update_for_biome_room(biome_room_name)
 
-        self.map_def = self.data_loader.load(map_name)
-        self.game_objects.world_state.map_state.visit_area(self.map_def.biome_name, self.map_def.level_name)
+        self.map_def = self.data_loader.load(biome_room_name)
+        self.game_objects.world_state.map_state.visit_area(self.map_def.biome_name, self.map_def.biome_room_name)
 
         self.scene_builder.build(self.map_def, self.ctx, self.biome_mgr)
 

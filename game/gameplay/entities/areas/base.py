@@ -1,20 +1,21 @@
 from gameplay.entities.interactables.base.interactables import Interactables
 
-class BaseCollisions(Interactables):#with sprites
+
+class BaseArea(Interactables):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
         self.hit_component.set_invinsibility(True)
 
-    def update(self, dt):      
+    def update(self, dt):
         pass
 
-    def update_render(self, dt):      
+    def update_render(self, dt):
         pass
 
-    def on_collision(self, entity):#one time collision
+    def on_collision(self, entity):
         pass
 
-    def on_noncollision(self, entity):#one time none collision
+    def on_noncollision(self, entity):
         pass
 
     def release_texture(self):

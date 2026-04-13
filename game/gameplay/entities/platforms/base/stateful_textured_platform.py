@@ -34,7 +34,7 @@ class WorldStateDrivenPlatform(StatefulTexturedPlatform):
     def __init__(self, pos, game_objects, **kwargs):
         self.ID_key = kwargs.get("ID")
         initial_erect = game_objects.world_state.objects.load_bool(
-            game_objects.map.level_name,
+            game_objects.map.biome_room_name,
             self.world_state_group,
             self.ID_key,
             initial=kwargs.get("erect", False),
@@ -47,7 +47,7 @@ class WorldStateDrivenPlatform(StatefulTexturedPlatform):
     def toggle_platform(self):
         if self.ID_key is not None:
             self.game_objects.world_state.objects.toggle_bool(
-                self.game_objects.map.level_name,
+                self.game_objects.map.biome_room_name,
                 self.world_state_group,
                 self.ID_key,
             )

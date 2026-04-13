@@ -1,7 +1,9 @@
 import pygame
 import random
+
 from gameplay.entities.base.static_entity import StaticEntity
 from gameplay.entities.projectiles import FallingRock
+
 
 class PendingStrike:
     def __init__(self, impact_position, spawn_position, timer, warning_window):
@@ -24,29 +26,30 @@ class PendingStrike:
     def should_spawn(self):
         return self.timer <= 0
 
+
 class AreaSpawner(StaticEntity):
     def __init__(self, pos, game_objects, size, **kwarg):
         super().__init__(pos, game_objects)
         self.game_objects = game_objects
         self.rect = pygame.Rect(pos, size)
         self.hitbox = self.rect.copy()
-        
+
         self.attack_id = kwarg.get('attack_id', 'bjorn_slam')
         self.projectile_count = int(kwarg.get('count', 10))
-        self.warning_delay = int(kwarg.get('warning_delay', 40)) #how long the projectile waits to spawn from the warning particles
-        self.spawn_height = int(kwarg.get('spawn_height', game_objects.game.window_size[1])) #approximate fall distance below the spawner area
-        self.warning_particles = int(kwarg.get('warning_particles', 4))#number
-        self.warning_spread = int(kwarg.get('warning_spread', 10))#particle spread
-        self.warning_interval = int(kwarg.get('warning_interval', 6))#how often the particle is emmited
+        self.warning_delay = int(kwarg.get('warning_delay', 40))
+        self.spawn_height = int(kwarg.get('spawn_height', game_objects.game.window_size[1]))
+        self.warning_particles = int(kwarg.get('warning_particles', 4))
+        self.warning_spread = int(kwarg.get('warning_spread', 10))
+        self.warning_interval = int(kwarg.get('warning_interval', 6))
         self.offscreen_margin = int(kwarg.get('offscreen_margin', 24))
         self.spawn_mode = kwarg.get('spawn_mode', 'sequential')
-        self.spawn_interval = int(kwarg.get('spawn_interval', 40))#interval inbetween the projecitles
+        self.spawn_interval = int(kwarg.get('spawn_interval', 40))
 
         self.burst_size = max(1, int(kwarg.get('burst_size', 3)))
         self.pending_projectiles = []
 
         self.game_objects.signals.subscribe('fall_projectiles', self.start_falling_projectiles)
-            
+
     def draw(self, target):
         pass
 

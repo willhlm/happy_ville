@@ -7,7 +7,7 @@ class MapDefinition:
     """
     Parsed Tiled map data (unchanged schema), but wrapped for clarity.
     """
-    level_name: str
+    biome_room_name: str
     biome_name: str
     map_data: dict
     statics_firstgid: int
@@ -16,12 +16,16 @@ class MapDefinition:
     platforms_firstgid: int
     tileset_ranges: list
 
+    @property
+    def room_id(self):
+        return self.biome_room_name[self.biome_room_name.rfind("_") + 1 :]
+
 @dataclass
 class LoadContext:
     """
     Per-load transient state: anything that should NOT live forever on MapLoader.
     """
-    level_name: str
+    biome_room_name: str
     spawn: Any
 
     references: Dict[str, list] = field(default_factory=lambda: {"bg_fade": []})

@@ -3,13 +3,13 @@ from gameplay.ui.components import MenuArrow, LogoLoadingOverlay
 from gameplay.entities.visuals.particles import screen_particles
 from gameplay.world.weather import weather
 from gameplay.states import Bank, OptionMenu, OptionDisplay, OptionSounds
+from gameplay.entities.areas import SlowmotionField
 from gameplay.entities.enemies import Reindeer, CultistWarrior, CultistRogue
 from gameplay.entities.platforms import Bubble, SeedPlatform
 from gameplay.entities.items import *
 from gameplay.entities.projectiles import *
 from gameplay.entities.visuals.cosmetics import *
 from gameplay.entities.visuals.effects import FadeEffect
-from gameplay.entities.effects import SlowmotionField
 from gameplay.ui.components.overlay import point_arrow
 from gameplay.entities.interactables import BossRewardBall
 from gameplay.entities.visuals.particles.particles import Circle, Spark, Goop, FloatyParticles

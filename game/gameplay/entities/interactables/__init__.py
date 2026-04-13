@@ -5,13 +5,6 @@ from .chests.amber_rock import AmberRock
 from .chests.amber_tree import AmberTree
 
 from .cocoon import InteractableCocoon
-from .collisions.hole import Hole
-from .collisions.path_collision import PathCollision
-from .collisions.path_interact import PathInteract
-from .collisions.safe_spawn import SafeSpawn
-from .collisions.layer_trigger import LayerTrigger
-from .collisions.zoom_collision import ZoomCollision
-from .collisions.event_triggers import ButterflyEncounter, StartLarvParty, StopLarvParty, MiniBoss, BossEncounter
 
 from .doors.door_interact import DoorInteract
 from .doors.door import Door

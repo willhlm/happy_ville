@@ -1,6 +1,10 @@
+from gameplay.entities.shared.components.hazard import VoidHazardComponent
+
+
 class LiquidBehavior:
     def __init__(self, entity):
         self.entity = entity
+        self.void_hazard = VoidHazardComponent(entity)
 
     def update(self):#called when animation is finished in reset_timer
         pass
@@ -28,10 +32,7 @@ class PoisonBehavior(LiquidBehavior):
         self.entity.shader['line_color'] = properties.get('line_color',(0.4, 1, 0.7, 1))        
    
     def on_enter(self, entity):
-        if hasattr(entity, 'hazard_resolver'):#player
-            entity.hazard_resolver.handle_void(self)
-        else:
-            entity.currentstate.die()
+        self.void_hazard.trigger(entity)
 
 class VerticalPoisonBehavior(PoisonBehavior):
     def __init__(self, entity, **properties):

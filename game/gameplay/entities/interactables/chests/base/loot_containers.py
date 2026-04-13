@@ -46,7 +46,7 @@ class LootContainers(Interactables):
             pass
         else:  # dead
             self.currentstate.handle_input('open')        
-            self.game_objects.world_state.objects.set_bool(self.game_objects.map.level_name,'loot_container',self.ID_key,True)
+            self.game_objects.world_state.objects.set_bool(self.game_objects.map.biome_room_name,'loot_container',self.ID_key,True)
 
         return effect
 
