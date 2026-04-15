@@ -6,7 +6,7 @@ class BankWidthdraw(Bank):#caled from mr banks
         self.ammount = 0
 
     def select(self):
-        self.game_objects.player.backpack.inventory.add('amber_droplet', self.ammount)
+        self.game_objects.player.backpack.inventory.add_item('amber_droplet', self.ammount)
         self.npc.ammount-=self.ammount
         self.game_state.state.pop()
 
@@ -35,4 +35,3 @@ class BankWidthdraw(Bank):#caled from mr banks
                 self.ammount = max(self.ammount,0)
             elif input.name=='a' or input.name=='return':
                 self.select()
-

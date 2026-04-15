@@ -1,10 +1,18 @@
 import pygame
 from engine.utils import read_files
-from gameplay.entities.items.base.enemy_drop import EnemyDrop
+from gameplay.entities.items.base.item_definition import ItemDefinition
+from gameplay.entities.items.base.components import ItemLifetimeComponent, CollisionPickupComponent
+from gameplay.entities.items.base.world_item import WorldItem
 
-class HealItem(EnemyDrop):
+class HealItem(WorldItem):
+    item_definition = ItemDefinition(
+        description='Use it to heal',
+    )
+    pickup_component_cls = CollisionPickupComponent
+
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
+        self.lifetime_component = ItemLifetimeComponent(self, lifetime=500)
         self.sprites = HealItem.sprites
         self.sounds = HealItem.sounds
         self.image = self.sprites['idle'][0]
@@ -13,12 +21,19 @@ class HealItem(EnemyDrop):
 
         self.hitbox.midbottom = self.rect.midbottom
         self.true_pos = list(self.rect.topleft)
-        self.description = 'Use it to heal'
 
-    def use_item(self):
-        if self.game_objects.player.backpack.inventory.get_quantity('heal_item') < 0: return
-        self.game_objects.player.backpack.inventory.remove('heal_item')
-        self.game_objects.player.heal_vitals(1)
+    def pickup(self, player):
+        self.pickup_component.collect_to_inventory(self, player)
+
+    @staticmethod
+    def use_from_inventory(record):
+        inventory = record.game_objects.player.backpack.inventory
+        if inventory.get_quantity(record.item_id) <= 0:
+            return False
+
+        inventory.remove(record.item_id)
+        record.game_objects.player.heal_vitals(1)
+        return True
 
     def pool(game_objects):#all things that should be saved in object pool: #obj = cls.__new__(cls)#creatate without runing initmethod
         HealItem.sprites = read_files.load_sprites_dict('assets/sprites/entities/items/heal_item/',game_objects)

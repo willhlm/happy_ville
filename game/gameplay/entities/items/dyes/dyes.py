@@ -1,11 +1,15 @@
 import pygame
 from engine.utils import read_files
-from gameplay.entities.items.base.interactable_item import InteractableItem
+from gameplay.entities.items.base.components import ItemInteractComponent, InteractionPickupComponent
+from gameplay.entities.items.base.world_item import WorldItem
 from .config import DYES, PALETTE_CHANNELS
 
-class Dyes(InteractableItem):#ring in which to attach radnas
+class Dyes(WorldItem):#ring in which to attach radnas
+    pickup_component_cls = InteractionPickupComponent
+
     def __init__(self, pos, game_objects, **kwarg):
-        super().__init__(pos, game_objects, **kwarg)
+        super().__init__(pos, game_objects)
+        self.interact_component = ItemInteractComponent(self, **kwarg)
         self.name = kwarg['name']
         self.sprites = read_files.load_sprites_dict('assets/sprites/entities/items/dyes/' + self.name + '/', game_objects)
         self.image = self.sprites['idle'][0]
@@ -18,5 +22,11 @@ class Dyes(InteractableItem):#ring in which to attach radnas
         self.replace_colour = dye_config['target']
 
     def pickup(self, player):
-        super().pickup(player)
-        player.backpack.inventory.add_dye(self, name = self.name)
+        self.mark_picked_up()
+        player.backpack.inventory.add_dye(self)
+
+    def interact(self, player):
+        self.interact_component.interact_with_pickup_text(player)
+
+    def get_pickup_persistence_key(self):
+        return self.name

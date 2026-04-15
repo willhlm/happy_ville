@@ -2,6 +2,7 @@ import random
 from gameplay.entities.base.character import Character
 from engine.utils.functions import sign
 from gameplay.entities.shared.components.hit import hit_effects
+from gameplay.entities.shared.components.loot.item_loot_emitter import ItemLootEmitterComponent
 from gameplay.entities.enemies.common.shared.effects.death_effects import EnemyDeathEffects
 from gameplay.entities.enemies.common.shared.state_machine import StateManager
 from gameplay.data.enemy import ENEMY_CONFIG 
@@ -24,6 +25,7 @@ class Enemy(Character):
         self.flags = {'aggro': True, 'attack_able': True, 'hurt_able': True}#'attack able': a flag used as a cooldown of attack
         self.dmg = 1
         self.death_effects = EnemyDeathEffects(self)
+        self.loot_emitter = ItemLootEmitterComponent(self, spawn_velocity=[0, -3], spawn_velocity_range=[3, 0])
         
     def update_render(self, dt):
         dt = self.game_objects.time_field_manager.get_dt_at(dt, self.hitbox.center)
@@ -73,12 +75,4 @@ class Enemy(Character):
         self.death_effects.start_visual()
 
     def _emit_loot(self):
-        for key in self.inventory.keys():#go through all loot
-            for i in range(0, self.inventory[key]):#make that many object for that specific loot and add to gorup
-                obj = self.game_objects.registry.fetch('items', key)(self.hitbox.midtop, self.game_objects)
-                obj.hitbox.midbottom = (self.hitbox.centerx, self.hitbox.top - 1)
-                obj.body.update_rect_x()
-                obj.body.update_rect_y()
-                obj.spawn_position()
-                self.game_objects.loot.add(obj)
-            self.inventory[key] = 0
+        self.loot_emitter.emit_inventory(self.inventory)

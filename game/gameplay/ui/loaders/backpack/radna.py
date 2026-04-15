@@ -39,7 +39,7 @@ class RadnaLoader(BaseLoader):
                 else:
                     self.containers.append(InventoryContainer(topleft_object_position, self.game_objects, item))
             elif local_id == 2:
-                self.items["half_dmg"] = topleft_object_position
+                self.items["half_damage"] = topleft_object_position
             elif local_id == 3:
                 self.rings["index"] = topleft_object_position
             elif local_id == 5:

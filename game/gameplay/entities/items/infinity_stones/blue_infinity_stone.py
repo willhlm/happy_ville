@@ -1,8 +1,13 @@
 import pygame
 from engine.utils import read_files
+from gameplay.entities.items.base.item_definition import ItemDefinition
 from gameplay.entities.items.infinity_stones.base_infinity_stone import InfinityStones
 
 class BlueInfinityStone(InfinityStones):#get spirit at collision
+    item_definition = ItemDefinition(
+        description='add spirit to the swinger',
+    )
+
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
         self.sprites = BlueInfinityStone.sprites
@@ -10,12 +15,13 @@ class BlueInfinityStone(InfinityStones):#get spirit at collision
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
         self.colour = {'blue':[0,0,205,255]}
-        self.description = 'add spirit to the swinger'
+        self.interact_component.apply_spawn()
 
     @classmethod
     def pool(cls, game_objects):
         cls.sprites = read_files.load_sprites_dict('assets/sprites/entities/items/infinity_stones/blue/',game_objects)#for inventory
         super().pool(game_objects)
 
-    def attach(self, player):
+    @classmethod
+    def entry_on_attach(cls, entry, player):
         player.sword.modifier_manager.add_modifier('blue_stone')

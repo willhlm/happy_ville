@@ -1,9 +1,12 @@
 import pygame
 from engine.utils import read_files
-from gameplay.entities.items.base.item import Item
+from gameplay.entities.items.base.world_item import WorldItem
+from gameplay.entities.items.base.components import CollisionPickupComponent
 #from gameplay.entities.visuals.particles import particles
 
-class SoulEssence(Item):#genkidama
+class SoulEssence(WorldItem):#genkidama
+    pickup_component_cls = CollisionPickupComponent
+
     def __init__(self, pos, game_objects, ID_key = None):
         super().__init__(pos, game_objects)
         self.sprites = read_files.load_sprites_dict('assets/sprites/entities/items/soul_essence/',game_objects)
@@ -13,9 +16,9 @@ class SoulEssence(Item):#genkidama
         self.description = 'An essence container'#for shops
         self.ID_key = ID_key#an ID key to identify which item that the player is intracting with in the world
 
-    def player_collision(self, player):
-        player.backpack.inventory.add(self)
-        self.game_objects.world_state.objects.set_bool(self.game_objects.map.level_name, 'soul_essence', self.ID_key, True)#write in the state file that this has been picked up
+    def pickup(self, player):
+        player.backpack.inventory.add_item(self.get_item_id())
+        self.game_objects.world_state.objects.set_bool(self.game_objects.map.biome_room_name, 'soul_essence', self.ID_key, True)#write in the state file that this has been picked up
         #make a cutscene?TODO
         self.kill()
 

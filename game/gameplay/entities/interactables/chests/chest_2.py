@@ -4,8 +4,7 @@ from gameplay.entities.interactables.chests.base.loot_containers import LootCont
 class Chest_2(LootContainers):
     def __init__(self, pos, game_objects, state, ID_key):
         super().__init__(pos, game_objects, state, ID_key)
-        self.inventory = {'Amber_droplet':1}
+        self.inventory = {'amber_droplet':1}
 
     def hit_loot(self):
         pass
-

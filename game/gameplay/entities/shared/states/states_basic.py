@@ -24,7 +24,7 @@ class Idle(Basic_states):
     def handle_input(self,input,**kwarg):
         if input == 'Once':
             self.enter_state('Once',**kwarg)
-        elif input == 'Death':
+        elif input == 'death':
              self.enter_state('Death')
         elif input == 'Invisible':
             self.enter_state('Invisible')

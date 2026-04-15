@@ -31,5 +31,5 @@ class StoneWood(Statues):#the stone "statue" to initiate the lumberjacl quest
 
     def on_conversation_complete(self):
         self.game_objects.signals.subscribe('item_interacted', self.on_interact)
-        item = getattr(sys.modules[__name__], self.item.capitalize())(self.rect.center, self.game_objects, state = 'wild')#make a class based on the name of the newstate: need to import sys
+        item = getattr(sys.modules[__name__], self.item.capitalize())(self.rect.center, self.game_objects, spawn_mode='wild')#make a class based on the name of the newstate: need to import sys
         self.game_objects.loot.add(item)

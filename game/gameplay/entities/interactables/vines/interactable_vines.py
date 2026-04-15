@@ -1,17 +1,11 @@
-import math
-import pygame
-import random
-
+import math, pygame, random
 from engine.utils import read_files
 from gameplay.entities.interactables.base.interactables import Interactables
 
 class InteractableVines(Interactables):#issue when player lands on a bent vine, and the bottom hitbox will "hook" it
-    def __init__(self, pos, game_objects):
+    def __init__(self, pos, game_objects, path):
         super().__init__(pos, game_objects)
-        self.sprites = read_files.load_sprites_dict(
-            'assets/sprites/entities/interactables/vines/nordveden/vines_1/',
-            game_objects,
-        )
+        self.sprites = read_files.load_sprites_dict('assets/sprites/entities/interactables/vines/' + path, game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
 

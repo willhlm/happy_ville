@@ -16,7 +16,7 @@ class Froggy(Enemy):
         self.attack_distance = [150,50]
 
         self.currentstate = states_froggy.Idle(self)
-        self.inventory = {'Amber_droplet':random.randint(5,15)}#thigs to drop wgen killed
+        self.inventory = {'amber_droplet':random.randint(5,15)}#thigs to drop wgen killed
 
     def knock_back(self,dir):
         pass

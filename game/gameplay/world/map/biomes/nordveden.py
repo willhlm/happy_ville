@@ -14,8 +14,7 @@ class Nordveden(Biome):
 
     def post_process(self, layer_name, parallax):
         if self.live_blur:
-            if parallax[0] == 1:
-                return
+            if parallax[0] == 1: return                
             radius = functions.blur_radius(parallax)
             self.level.game_objects.game.screen_manager.append_shader("Blur_fast", [layer_name], radius=radius)
 
@@ -87,5 +86,6 @@ class Nordveden(Biome):
                 self.level.game_objects.interactables.add(new_boss)
 
             elif id == 9:
-                new_vine = InteractableVines(object_position, self.level.game_objects)
+                sprite_path = 'nordveden/vines_1/'
+                new_vine = InteractableVines(object_position, self.level.game_objects, path = sprite_path)
                 self.level.game_objects.interactables_fg.add(new_vine)

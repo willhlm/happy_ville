@@ -33,8 +33,8 @@ class InventoryLoader(BaseLoader):
                 item = properties.get("item", str(obj["id"]))
                 self.containers.append(InventoryContainer(topleft_object_position, self.game_objects, item))
             elif local_id == 11:
-                self.items["amberdroplet"] = topleft_object_position
+                self.items["amber_droplet"] = topleft_object_position
             elif local_id == 12:
                 self.items["bone"] = topleft_object_position
             elif local_id == 13:
-                self.items["healitem"] = topleft_object_position
+                self.items["heal_item"] = topleft_object_position

@@ -1012,6 +1012,52 @@
                          "width":96,
                          "x":3056,
                          "y":896
+                        }, 
+                        {
+                         "gid":31001,
+                         "height":16,
+                         "id":1186,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"interactable_item",
+                                 "type":"string",
+                                 "value":"loot_magnet"
+                                }, 
+                                {
+                                 "name":"spawn_mode",
+                                 "type":"string",
+                                 "value":"wild"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":3632,
+                         "y":896
+                        }, 
+                        {
+                         "gid":31001,
+                         "height":16,
+                         "id":1187,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"interactable_item",
+                                 "type":"string",
+                                 "value":"rings"
+                                }, 
+                                {
+                                 "name":"spawn_mode",
+                                 "type":"string",
+                                 "value":"wild"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":3584,
+                         "y":880
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -2124,7 +2170,7 @@
          "y":0
         }],
  "nextlayerid":112,
- "nextobjectid":1184,
+ "nextobjectid":1188,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

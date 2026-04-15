@@ -1,26 +1,44 @@
-from gameplay.entities.items.base.interactable_item import InteractableItem
+from gameplay.entities.items.base.entries import RadnaEntry
+from gameplay.entities.items.base.components import ItemInteractComponent, pool_interactable_sprite, InteractionPickupComponent
+from gameplay.entities.items.base.world_item import WorldItem
 
-class Radna(InteractableItem):
+class Radna(WorldItem):
+    inventory_level = 1
+    inventory_description = ''
+    pickup_component_cls = InteractionPickupComponent
+
     def __init__(self,pos, game_objects, **kwarg):
-        super().__init__(pos, game_objects, **kwarg)
-        self.description = ''#for inventory
-        self.level = 1#the level of ring reuried to equip
-        self.entity = None#defualt is no owner
-
-    def equipped(self):#called from the rings, when rings are updated
-        pass
-
-    def handle_press_input(input):#called from neckalce
-        pass
+        super().__init__(pos, game_objects)
+        self.interact_component = ItemInteractComponent(self, **kwarg)
+        self.description = type(self).inventory_description
+        self.level = type(self).inventory_level#the level of ring reuried to equip
 
     def pickup(self, player):
-        super().pickup(player)
-        copy_item = type(self)([0,0], self.game_objects)
+        self.mark_picked_up()
+        copy_item = RadnaEntry.from_item_class(type(self), self.game_objects)
         player.backpack.radna.add(copy_item)
         self.game_objects.signals.emit('item_interacted', item = self, player = player)
+        self.kill()
 
-    def detach(self):#called when de-taching the radna to ring
-        self.shader = None#for ui
+    def interact(self, player):
+        self.interact_component.interact_with_pickup_text(player)
 
-    def attach(self):#called when attaching the radna to ring
-        self.shader = self.game_objects.shaders['colour'] #for ui
+    @classmethod
+    def entry_update_equipped(cls, entry):
+        pass
+
+    @classmethod
+    def entry_on_handle_press_input(cls, entry, input):
+        pass
+
+    @classmethod
+    def entry_on_attach(cls, entry):
+        pass
+
+    @classmethod
+    def entry_on_detach(cls, entry):
+        pass
+
+    @classmethod
+    def pool(cls, game_objects):
+        pool_interactable_sprite(cls, game_objects)

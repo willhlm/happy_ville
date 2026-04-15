@@ -173,12 +173,11 @@ class InventoryUI(BaseUI):
 
     def use_item(self):
         item_name = self.selected_container.get_item()
-        item = self.iventory_UI.items.get('item_name', False)
+        item = self.game_objects.player.backpack.inventory.get_item(item_name)
 
-        if not hasattr(item, 'use_item'): return#if it is a item that cannot be used
+        if not item: return#if it is a item that cannot be used
         if self.game_objects.player.backpack.inventory.get_quantity(item_name) <= 0: return#if we have more than 0 item
         item.use_item()
-        self.game_objects.player.backpack.inventory.remove_item(item_name, 1)#remove one item from the inventory
 
 class RadnaUI(BaseUI):
     def __init__(self, game_objects, **kwarg):
@@ -192,6 +191,8 @@ class RadnaUI(BaseUI):
 
         for key in self.game_objects.player.backpack.radna.rings.keys():#blit the rings there is in inventory
             ring = self.game_objects.player.backpack.radna.get_ring(key)
+            if not ring.unlocked:
+                continue
             ring.animation.update(dt)      
 
     def render(self):
@@ -221,14 +222,18 @@ class RadnaUI(BaseUI):
             self.game_objects.shaders['colour']['colour'] = (0,0,0,255)#item.shader toggle sbetween colour and None                   
             self.game_objects.game.display.render(item.image, self.game_objects.ui.screen, position = self.radna_UI.items[key], shader = item.shader)#shader render        
 
-        for finger in self.game_objects.player.backpack.radna.equipped.keys():#blit the equipped radnas
+        for finger in self.game_objects.player.backpack.radna.rings.keys():#blit the equipped radnas
             ring = self.game_objects.player.backpack.radna.rings[finger]            
-            self.game_objects.game.display.render(ring.radna.image, self.game_objects.ui.screen, position = self.radna_UI.equipped_containers[finger].rect.topleft)#shader render        
+            if not ring.attached_radna:
+                continue
+            self.game_objects.game.display.render(ring.attached_radna.image, self.game_objects.ui.screen, position = self.radna_UI.equipped_containers[finger].rect.topleft)#shader render        
 
     def blit_rings(self): 
         for key in self.game_objects.player.backpack.radna.rings.keys():#blit the rings there is in inventory
             ring = self.game_objects.player.backpack.radna.get_ring(key)
-            ring.animation.update()            
+            if not ring.unlocked:
+                continue
+            ring.animation.update(dt=1)            
             self.game_objects.game.display.render(ring.image, self.game_objects.ui.screen, position = self.radna_UI.rings[key])#shader render        
 
     def blit_pointer(self):
@@ -251,8 +256,8 @@ class RadnaUI(BaseUI):
             text.release()
 
     def dark(self, item):        
-        if item.entity: return#if it is equpped
-        slot = self.game_objects.player.backpack.radna.check_position(item)#blit a dark radna at this potsion
+        if item.equipped_ring is not None: return#if it is equpped
+        slot = self.game_objects.player.backpack.radna.find_compatible_slot(item)#blit a dark radna at this potsion
         if not slot: return
         self.game_objects.shaders['colour']['colour'] = (0,0,0,255)
         self.game_objects.game.display.render(item.image, self.game_objects.ui.screen, position =self.radna_UI.equipped_containers[slot].rect.topleft,shader = self.game_objects.shaders['colour'])#shader render           
@@ -332,7 +337,7 @@ class RadnaUI(BaseUI):
         item_name = self.selected_container.get_item()
         new_radna = self.game_objects.player.backpack.radna.get_radna(item_name)       
         if not new_radna: return#if there is not in inventory
-        if not new_radna.entity:#if it has an owner, i.e. equipped           
+        if new_radna.equipped_ring is None:
             self.game_objects.player.backpack.radna.equip_item(new_radna)
         else:
             self.game_objects.player.backpack.radna.remove_item(new_radna)
@@ -453,7 +458,7 @@ class MapUI(BaseUI):#local maps
 
     def on_enter(self, **kwarg):
         super().on_enter(**kwarg)
-        self.map_name = kwarg.get('map', self.game_objects.map.biome_mgr.biome_name)
+        self.map_name = kwarg.get('map', self.game_objects.map.biome_mgr.current_biome_name)
         self.map_UI = self.resolve_map_loader(self.map_name)
         self.selected_container = self.find_initial_selection()
         self.center_on_selection()
@@ -502,7 +507,7 @@ class MapUI(BaseUI):#local maps
 
             elif input.name == 'x':#when pressing a
                 if self.map_name == self.world_map_name:
-                    map_name = self.game_objects.map.biome_mgr.biome_name
+                    map_name = self.game_objects.map.biome_mgr.current_biome_name
                 else:
                     map_name = self.world_map_name
                 self.game_objects.ui.set_ui('map', screen_alpha = 230, map = map_name)
@@ -625,7 +630,7 @@ class MapUI(BaseUI):#local maps
         if not self.map_UI.markers:
             return None
 
-        current_biome = self.game_objects.map.biome_mgr.biome_name
+        current_biome = self.game_objects.map.biome_mgr.current_biome_name
         for object in self.map_UI.markers:
             if getattr(object, 'map_text', None) == current_biome:
                 return object
