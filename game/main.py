@@ -5,7 +5,7 @@ if __name__ == '__main__':
     pygame.mixer.pre_init(44100, -16, 2, 4096)# Optimize audio before pygame.init(). 16 or -16?
     pygame.init()
     
-    pygame.display.set_caption("My Game")# Optionally set window title
+    pygame.display.set_caption("My Game")
 
     # Create game instance and run
     game = Game()

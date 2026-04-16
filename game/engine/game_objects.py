@@ -41,9 +41,7 @@ class GameObjects():
         self.sequence_manager = sequence_manager.SequenceManager(self)
         self.map = MapCoordinator(self) 
         self.camera_manager = camera.Camera_manager(self)
-        self.sound = game_audio.GameAudio(
-            camera_scroll_getter=lambda: self.camera_manager.camera.interp_scroll
-        )
+        self.sound = game_audio.GameAudio(camera_scroll_getter=lambda: self.camera_manager.camera.true_scroll)
         self.world_state = world_state.World_state(self)#save/handle all world state stuff here
         self.ui = ui.UiManager(self)
         self.save_load = save_load.Save_load(self)#contains save and load attributes to load and save game
@@ -100,6 +98,12 @@ class GameObjects():
         self.timer_manager.clear_timers()
         self.weather.empty()
         self.physics.clear_state()
+
+    def clear_world_state(self):#called when poping gameplay state
+        self.sound.fade_all_music()
+        self.sound.clear_spatial_sounds()
+        self.clean_groups()
+        self.map.reset()
 
     def collide_all(self, dt):
         self.physics.dispatch_overlaps(dt)

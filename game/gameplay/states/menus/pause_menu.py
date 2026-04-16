@@ -92,10 +92,7 @@ class PauseMenu(BaseUI):#when pressing ESC duing gameplay
             self.game.state_manager.enter_state('option_menu')
 
         elif self.current_button == 2:#exit to main menu
-            for state in self.game.state_manager.state_stack[1:]:#except the first one
-                state.release_texture()            
-            self.game.state_manager.state_stack = [self.game.state_manager.state_stack[0]]
-            self.game.state_manager.state_stack[-1]._play_music()
+            self.game.state_manager.exit_to_state('title_menu')
 
     def on_pop(self):
         self.release_texture()

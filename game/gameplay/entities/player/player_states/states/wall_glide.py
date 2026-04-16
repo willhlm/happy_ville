@@ -17,8 +17,11 @@ class WallGlide(PhaseBase):
         self.entity.movement_manager.add_modifier('wall_glide', authoritative = True)
         if self.entity.is_on_wall_side('right'):
             self.dir = [1, 0]
-        else:
+        elif self.entity.is_on_wall_side('left'):
             self.dir = [-1, 0]
+        else:
+            self.dir = [self.entity.dir[0], 0]
+        self.entity.dir[0] = self.dir[0]
         self.timer_init = 6
         self.timer = self.timer_init
         self.count_timer = False

@@ -72,7 +72,7 @@ REGISTERY = {
     "conversation": Conversation,
     "fade_in": FadeIn,
     "fade_out": FadeOut,
-    "uis": UIs,
+    "backpack_ui": BackpackUIState,
 
     # Facilities
     "bank_deposite": BankDeposite,

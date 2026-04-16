@@ -38,6 +38,12 @@ class MapCoordinator:
         self.biome_room_name = biome_room_name
         self._do_load(biome_room_name, spawn)
 
+    def reset(self):
+        self.biome_room_name = ""
+        self.ctx = None
+        self.map_def = None
+        self.biome_mgr.reset()
+
     # ---- internal pipeline ----
     def _do_load(self, biome_room_name: str, spawn):
         self.resetter.reset_for_new_map()

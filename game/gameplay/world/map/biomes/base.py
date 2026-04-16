@@ -37,7 +37,10 @@ class Biome:
         }
 
     def clear_biome(self):
-        pass
+        self.live_blur = False
+        self.weather_config = {}
+        self.active_room_id = None
+        self._current_music_signature = None
 
     def set_camera(self, ctx):
         pass

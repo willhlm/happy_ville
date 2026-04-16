@@ -7,6 +7,9 @@ class Gameplay(GameState):
     def __init__(self, game):
         super().__init__(game)
 
+    def on_pop(self):
+        self.game.game_objects.clear_world_state()
+
     def update(self, dt):
         self.game.game_objects.time_manager.update(dt)#setäs the timescale
         dt = self.game.game_objects.time_manager.get_dt(dt)#apply time scale
@@ -61,7 +64,7 @@ class Gameplay(GameState):
 
             elif input.name == 'select':
                 input.processed()
-                self.game.state_manager.enter_state('uis', page = 'inventory')
+                self.game.state_manager.enter_state('backpack_ui', page = 'inventory')
 
             elif input.name == 'down':
                 input.processed()#should it be processed here or when passed through?

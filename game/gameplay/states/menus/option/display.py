@@ -50,7 +50,7 @@ class OptionDisplay(BaseUI):
 
     def update_render(self, dt):
         """Called every frame"""
-        self.game.game_objects.ui.uis['menu'].update_time(dt)
+        self.game.game_objects.ui.menu.update_time(dt)
         for arrow in self.menu_ui.arrows:
             arrow.update(dt)
         
@@ -73,7 +73,7 @@ class OptionDisplay(BaseUI):
 
     def render(self):
         self.game.screen_manager.screen.clear(0, 0, 0, 0)        
-        self.game.game_objects.ui.uis['menu'].render_background(self.game.screen_manager.screen)
+        self.game.game_objects.ui.menu.render_background(self.game.screen_manager.screen)
 
         # Render buttons with their current values
         for i, button in enumerate(self.menu_ui.buttons):

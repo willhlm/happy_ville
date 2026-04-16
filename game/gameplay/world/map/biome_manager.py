@@ -26,6 +26,12 @@ class BiomeManager:
         self.current_room_id = biome_room_name[biome_room_name.rfind("_") + 1 :]
         self.biome.apply_room(self.current_room_id)
 
+    def reset(self):
+        self.biome.clear_biome()
+        self.current_biome_name = ""
+        self.current_room_id = ""
+        self.biome_changed = True
+
     def set_camera(self, ctx):
         self.loader.game_objects.camera_manager.camera.reset_player_center()
         self.biome.set_camera(ctx)
