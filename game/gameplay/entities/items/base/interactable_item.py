@@ -17,7 +17,7 @@ class InteractableItem(Item):#need to press Y to pick up - #key items: need to p
         self.bounce_directions.clear()     
 
     def pickup(self, player):
-        self.game_objects.world_state.state[self.game_objects.map.level_name]['interactable_items'][type(self).__name__] = True#save in state file that the items on this map has picked up (assume that only one interactable item on each room)
+        self.game_objects.world_state.objects.get_bucket(self.game_objects.map.level_name, 'interactable_items')[type(self).__name__] = True#save in state file that the items on this map has picked up (assume that only one interactable item on each room)
 
     def twinkle(self):#called from interactale_item_states in wild state, in its update
         return

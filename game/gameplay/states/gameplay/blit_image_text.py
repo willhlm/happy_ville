@@ -48,10 +48,9 @@ class BlitImageText(Gameplay):#when player obtaines a new ability, pick up inetr
             self.game.state_manager.exit_state()
 
     def handle_events(self,input):
-        event = input.output()
         input.processed()
-        if event[0]:#press
-            if event[-1] == 'start':
+        if input.pressed:#press
+            if input.name == 'start':
                 self.page = 1
-            elif event[-1] == 'a':
+            elif input.name == 'a':
                 self.page = 1

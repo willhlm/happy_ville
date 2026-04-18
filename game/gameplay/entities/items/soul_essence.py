@@ -15,7 +15,7 @@ class SoulEssence(Item):#genkidama
 
     def player_collision(self, player):
         player.backpack.inventory.add(self)
-        self.game_objects.world_state.state[self.game_objects.map.level_name]['soul_essence'][self.ID_key] = True#write in the state file that this has been picked up
+        self.game_objects.world_state.objects.get_bucket(self.game_objects.map.level_name, 'soul_essence')[self.ID_key] = True#write in the state file that this has been picked up
         #make a cutscene?TODO
         self.kill()
 

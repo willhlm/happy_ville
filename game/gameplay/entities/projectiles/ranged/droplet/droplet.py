@@ -14,7 +14,7 @@ class ProjectileDroplet(Projectiles):#droplet that can be placed, the source mak
         self.lifetime = 100
         self.currentstate = states_droplet.Idle(self)
 
-        if game_objects.world_state.events.get('tjasolmai', False):#if water boss (golden fields) is dead
+        if game_objects.world_state.narrative.events.get('tjasolmai', False):#if water boss (golden fields) is dead
             self.dmg = 1#acid
             self.shader_state = states_shader.Palette_swap(self)
             self.original_colour = [[46, 74,132, 255]]#can append more to replace more

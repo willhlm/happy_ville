@@ -15,6 +15,8 @@ class Character(PlatformEntity):#enemy, NPC,player
         self.hit_component = HitComponent(self)
 
     def update(self, dt):
+        dt = self.game_objects.time_field_manager.get_dt_at(dt, self.hitbox.center)
+
         self.hitstop.update(dt)
         scaled_dt = self.hitstop.get_sim_dt(dt)
 
@@ -23,7 +25,9 @@ class Character(PlatformEntity):#enemy, NPC,player
         self.animation.update(scaled_dt)#need to be after currentstate since animation will animate the current state
 
     def update_render(self, dt):
-        self.shader_state.update_render(dt)    
+        dt = self.game_objects.time_field_manager.get_dt_at(dt, self.hitbox.center)
+        scaled_dt = self.hitstop.get_sim_dt(dt)
+        self.shader_state.update_render(scaled_dt)
 
     def update_vel(self, dt):#called from hitsop_states
         self.velocity[1] += dt * (self.acceleration[1] - self.velocity[1] * self.friction[1])#gravity

@@ -1,5 +1,12 @@
 {
-    "state_0" : {
-        "0" : "give my love the wood he needs"
+  "conversation_nodes": [
+    {
+      "id": "fallback_default",
+      "category": "fallback",
+      "conditions": [],
+      "lines": [
+        "give my love the wood he needs"
+      ]
     }
+  ]
 }

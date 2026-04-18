@@ -5,7 +5,7 @@ class MrBanks(NPC):#bank
         super().__init__(pos,game_objects)
         self.ammount = 0
 
-    def buisness(self):#enters after conversation
+    def on_conversation_complete(self):
         self.game_objects.game.state_manager.enter_state(state_name = 'Bank', category = 'game_states_facilities', npc = self)
 
     def load_sprites(self):

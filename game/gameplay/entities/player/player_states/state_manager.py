@@ -1,4 +1,4 @@
-from .states.composite_states import *
+from .states import *
 
 class StateManager():
     def __init__(self, entity):

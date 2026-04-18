@@ -63,7 +63,7 @@ class GameAudio:
     def register_spatial_rect(self, sound, get_rect, **kwargs):
         return self.spatial.register_rect(sound, get_rect, **kwargs)
 
-    def unregister_emitter(self, emitter_id, fade_ms=200):
+    def unregister_emitter(self, emitter_id, fade_ms = 1000):
         return self.spatial.unregister(emitter_id, fade_ms=fade_ms)
 
     def update_render(self, listener_pos):

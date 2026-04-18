@@ -48,29 +48,23 @@ class Player(Character):
         self.hit_component.set_invinsibility_time(C.invincibility_time_player)
         self.reset_movement()
 
-        self.colliding_platform = None#save the last collising platform
-
     def ramp_down_collision(self, ramp):#when colliding with platform beneth
         super().ramp_down_collision(ramp)
         self.movement_manager.handle_input('ground')
-        self.colliding_platform = ramp#save the latest platform
         self.flags['ground'] = True
 
     def down_collision(self, block):#when colliding with platform beneth
         super().down_collision(block)
         self.movement_manager.handle_input('ground')
-        self.colliding_platform = block#save the latest platform
         self.flags['ground'] = True
 
     def right_collision(self, block, type = 'Wall'):
         super().right_collision(block, type)
         self.movement_manager.handle_input('wall')
-        self.colliding_platform = block#save the latest platform
 
     def left_collision(self, block, type = 'Wall'):
         super().left_collision(block, type)
         self.movement_manager.handle_input('wall')
-        self.colliding_platform = block#save the latest platform
 
     def update_vel(self, dt):#called from hitsop_states
         context = self.movement_manager.resolve()
@@ -85,7 +79,7 @@ class Player(Character):
     def take_dmg(self, effect):
         """Called by hit_component after modifiers run. Apply damage and effects."""
         self.health -= effect.damage
-        self.game_objects.ui.hud.remove_hearts(effect.damage)# * self.dmg_scale)#update UI
+        self.game_objects.ui.hud.meters.remove_hearts(effect.damage)# * self.dmg_scale)#update UI
 
         if self.health > 0:  # Still alive
             self.shader_state.handle_input('Hurt')#turn white and shake
@@ -112,20 +106,20 @@ class Player(Character):
         self.game_objects.time_manager.modify_time(time_scale = 0, duration = 50)#freeze
 
     def dead(self):#called when death animation is finished
-        self.game_objects.world_state.update_statistcis('death')#count the number of times aila has died
+        self.game_objects.world_state.statistics_state.update_statistic('death')#count the number of times aila has died
         self.game_objects.game.state_manager.enter_state(state_name = 'death')
 
     def heal(self, health = 1):
         self.health += health
-        self.game_objects.ui.hud.update_hearts()#update UI
+        self.game_objects.ui.hud.meters.update_hearts()#update UI
 
     def consume_spirit(self, spirit = 1):
         self.spirit -= spirit
-        self.game_objects.ui.hud.remove_spirits(spirit)#update UI
+        self.game_objects.ui.hud.meters.remove_spirits(spirit)#update UI
 
     def add_spirit(self, spirit = 1):
         self.spirit += spirit
-        self.game_objects.ui.hud.update_spirits()#update UI
+        self.game_objects.ui.hud.meters.update_spirits()#update UI
 
     def reset_movement(self):#called when loading new map or entering conversations
         self.acceleration =  [0, C.acceleration[1]]
@@ -170,7 +164,7 @@ class Player(Character):
 
     def on_cayote_timeout(self):
         self.flags['ground'] = False
-        self.colliding_platform = None
+        self.standing_platform = None
 
     def on_go_through_timeout(self):
         self.flags['go_through'] = False

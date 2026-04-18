@@ -29,39 +29,73 @@ class Weather():#initialied in game_objects: a container of weather objects
 class WeatherManagers():
     def __init__(self, game_objects):
         self.game_objects = game_objects
-        self.fx_list = []#add windfx from map loader
+        self.fx_by_layer = {}
+        self.configs = {}
         self.currentstate = weather_states.Idle(self)
 
     def update(self, dt):        
         self.currentstate.update(dt)
 
     def add_fx(self, fx):#called from maploader
-        self.fx_list.append(fx)
+        self.fx_by_layer.setdefault(fx.layer_name, []).append(fx)
+
+    def configure(self, layer_name, config):
+        self.configs[layer_name] = config.copy()
+
+    def get_fx(self, layer_name):
+        return self.fx_by_layer.get(layer_name, [])
 
     def empty(self):
-        self.fx_list = []
+        self.fx_by_layer = {}
+        self.configs = {}
 
 class WindManager(WeatherManagers):#will handle winds in all layers, and common things such as velocity, soudns etc.
     def __init__(self, game_objects, **kwarg):
         super().__init__(game_objects)
-        self.velocity = [0, 0]
-        self.lifetime = 0
+        self.active_wind = {}
+        self.channel = None
         self.sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/visuals/environments/wind/')
         self.currentstate = weather_states.IdleWind(self)
 
-    def start_wind(self, velocity, lifetime):#called from weather_states
-        self.velocity = velocity
-        self.lifetime = lifetime
-        self.channel = self.game_objects.sound.play_sfx(self.sounds['idle'][0], loop = -1, fade = 1000, vol = 0.2)
-        for windfx in self.fx_list:
-            windfx.activate()
+    def get_velocity(self, layer_name):
+        return self.active_wind.get(layer_name, {}).get('velocity', [0, 0])
 
-    def stop_wind(self):#stopped from weather_states
-        self.velocity = [0, 0]
-        self.lifetime = 0
-        self.game_objects.sound.fade_channel(self.channel)
-        for windfx in self.fx_list:
-            windfx.deactivate()      
+    def get_lifetime(self, layer_name):
+        return self.active_wind.get(layer_name, {}).get('lifetime', 0)
+
+    def start_wind(self):#called from weather_states
+        if self.channel is None:
+            self.channel = self.game_objects.sound.play_sfx(self.sounds['idle'][0], loop = -1, fade = 1000, vol = 0.2)
+
+        for layer_name, config in self.configs.items():
+            duration_range = config.get('duration_range', [180, 420])
+            self.active_wind[layer_name] = {
+                'velocity': config.get('velocity', [0, 0]).copy(),
+                'lifetime': random.randint(*duration_range),
+            }
+            for windfx in self.get_fx(layer_name):
+                windfx.activate()
+
+    def stop_wind(self, layer_name = None):#stopped from weather_states
+        if layer_name is None:
+            layers = list(self.active_wind.keys())
+        else:
+            layers = [layer_name]
+
+        for current_layer in layers:
+            self.active_wind.pop(current_layer, None)
+            for windfx in self.get_fx(current_layer):
+                windfx.deactivate()
+
+        if not self.active_wind and self.channel is not None:
+            self.game_objects.sound.fade_channel(self.channel)
+            self.channel = None
+
+    def empty(self):
+        self.stop_wind()
+        self.active_wind = {}
+        self.currentstate = weather_states.IdleWind(self)
+        super().empty()
 
 class FogManager(WeatherManagers):
     def __init__(self, game_objects, **kwarg):
@@ -76,10 +110,11 @@ class SnowManager(WeatherManagers):
         super().__init__(game_objects)                     
     
 class WeatherFX(pygame.sprite.Sprite):#make a layer on screen, then use shaders to generate stuff
-    def __init__(self, game_objects, parallax):
+    def __init__(self, game_objects, parallax, layer_name = ""):
         super().__init__()
         self.game_objects = game_objects
         self.parallax = parallax
+        self.layer_name = layer_name
         self.currentstate = weatherfx_states.Idle(self)
 
     def update_render(self, dt):
@@ -93,7 +128,7 @@ class WeatherFX(pygame.sprite.Sprite):#make a layer on screen, then use shaders 
 
 class WindFX(WeatherFX):#the shader that will draw things: will be added in all_bg/fg s
     def __init__(self, game_objects, **kwarg):
-        super().__init__(game_objects, kwarg.get('parallax', [1,1]))
+        super().__init__(game_objects, kwarg.get('parallax', [1,1]), kwarg.get('layer_name', ""))
         self.image = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.noise_layer = game_objects.game.display.make_layer(game_objects.game.window_size)
 
@@ -109,7 +144,7 @@ class WindFX(WeatherFX):#the shader that will draw things: will be added in all_
 
 class FogFX(WeatherFX):
     def __init__(self, game_objects, parallax, **kwarg):
-        super().__init__(game_objects, parallax)
+        super().__init__(game_objects, parallax, kwarg.get('layer_name', ""))
         self.image = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.noise_layer = game_objects.game.display.make_layer(game_objects.game.window_size)        
         self.time = 0
@@ -137,8 +172,9 @@ class FogFX(WeatherFX):
         self.noise_layer.release()
 
 class RainFX(ScreenParticles):
-    def __init__(self, game_objects, parallax, number_particles = 20):
+    def __init__(self, game_objects, parallax, number_particles = 20, layer_name = "", **kwarg):
         super().__init__(game_objects, parallax, number_particles)
+        self.layer_name = layer_name
         size = 5
         width = int(game_objects.game.window_size[0] + 2*size)#size of the canvas
         height = int(game_objects.game.window_size[1] + 2*size)#size of the canvas
@@ -171,8 +207,8 @@ class RainFX(ScreenParticles):
         self.velocity[i]  = [-1, 5]        
 
 class SnowFX(RainFX):
-    def __init__(self, game_objects, parallax, number_particles):
-        super().__init__(game_objects, parallax, number_particles)
+    def __init__(self, game_objects, parallax, number_particles, layer_name = "", **kwarg):
+        super().__init__(game_objects, parallax, number_particles, layer_name = layer_name, **kwarg)
         self.shader['colour'] = (255,255,255,255)
         self.shader['scale'] = (self.parallax[0]*2,self.parallax[0]*0.33)#to make it square
 

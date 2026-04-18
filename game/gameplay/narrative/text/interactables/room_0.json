@@ -1,5 +1,12 @@
 {
-    "state_0" : {
-        "0" : "The goddess hylia challenge you into a duel"
+  "conversation_nodes": [
+    {
+      "id": "fallback_default",
+      "category": "fallback",
+      "conditions": [],
+      "lines": [
+        "The goddess hylia challenge you into a duel"
+      ]
     }
+  ]
 }

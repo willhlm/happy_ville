@@ -1,0 +1,60 @@
+{
+  "conversation_nodes": [
+    {
+      "id": "reactive_reindeer",
+      "category": "reactive",
+      "conditions": [
+        {"type": "event", "name": "reindeer", "value": true}
+      ],
+      "once": true,
+      "lines": [
+        "Took a while but should be safe to pass"
+      ]
+    },
+    {
+      "id": "fallback_state_1",
+      "category": "fallback",
+      "conditions": [
+        {"type": "progress_eq", "value": 1}
+      ],
+      "lines": [
+        "Someone have blocked the path. Don't worry, I will sort it out"
+      ]
+    },
+    {
+      "id": "fallback_state_2",
+      "category": "fallback",
+      "conditions": [
+        {"type": "progress_eq", "value": 2}
+      ],
+      "lines": [
+        "Nice weather",
+        "Wood please"
+      ]
+    }
+  ],
+  "comment_nodes": [
+    {
+      "id": "comment_state_1",
+      "category": "ambient",
+      "conditions": [
+        {"type": "progress_eq", "value": 1}
+      ],
+      "lines": [
+        "Hej",
+        "Zup"
+      ]
+    },
+    {
+      "id": "comment_state_2",
+      "category": "ambient",
+      "conditions": [
+        {"type": "progress_eq", "value": 2}
+      ],
+      "lines": [
+        "yolo",
+        "nice weather"
+      ]
+    }
+  ]
+}

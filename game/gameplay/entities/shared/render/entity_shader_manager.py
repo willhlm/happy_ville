@@ -44,33 +44,40 @@ class EntityProcess(PostProcess):#for entity overlay effects
         self.shaders = {}
         self.size = None
         self.base_layer = None
-        self.temp_layer = None
+        self.temp_layer_a = None
+        self.temp_layer_b = None
 
     def clear_textures(self):
         if self.base_layer:
             self.base_layer.release()
             self.base_layer = None
-        if self.temp_layer:
-            self.temp_layer.release()
-            self.temp_layer = None
+        if self.temp_layer_a:
+            self.temp_layer_a.release()
+            self.temp_layer_a = None
+        if self.temp_layer_b:
+            self.temp_layer_b.release()
+            self.temp_layer_b = None
         self.size = None
 
     def _define_size(self, size):
         self.size = tuple(size)
         self.base_layer = self.entity.game_objects.game.display.make_layer(size)
-        self.temp_layer = self.entity.game_objects.game.display.make_layer(size)
+        self.temp_layer_a = self.entity.game_objects.game.display.make_layer(size)
+        self.temp_layer_b = self.entity.game_objects.game.display.make_layer(size)
 
     def _ensure_size(self, size):
-        if self.size is None:
+        if self.size is None or self.size != tuple(size):
+            self.clear_textures()
             self._define_size(size)
 
     def draw(self, base_texture, target, position, flip):
         """Apply overlay shaders to base_texture, last shader draws to target."""  
         self._ensure_size(base_texture.size)
         self.base_layer.clear(0, 0, 0, 0)
-        self.temp_layer.clear(0, 0, 0, 0)        
-        
-        dst = self.temp_layer
+        self.temp_layer_a.clear(0, 0, 0, 0)
+        self.temp_layer_b.clear(0, 0, 0, 0)
+
+        dst = self.temp_layer_a
         src = self.entity.shader_state.state.draw(base_texture, self.base_layer, position = (0, 0), flip = False)        
 
         shader_items = list(self.shaders.items())
@@ -82,6 +89,8 @@ class EntityProcess(PostProcess):#for entity overlay effects
                 shader_obj.draw_to_composite(src, target, position, flip)# Last shader draws to final target
             else:                
                 src = shader_obj.draw(src, dst)# Intermediate shader: draw src -> dst
+                dst = self.temp_layer_b if dst is self.temp_layer_a else self.temp_layer_a
+                dst.clear(0, 0, 0, 0)
 
     def append_shader(self, shader_name, **kwargs):        
         shader_class = getattr(shaders, shader_name.capitalize())

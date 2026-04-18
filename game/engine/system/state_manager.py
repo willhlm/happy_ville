@@ -9,7 +9,7 @@ class State_manager():
         """Push a new state onto the stack."""
         # Get the state class dynamically and instantiate it
         state = REGISTERY[state_name](self.game, **kwarg)        
-        self.state_stack[-1].on_exit()  # Resume the previous state
+        self.state_stack[-1].on_exit()
         self.state_stack.append(state)        
 
     def exit_state(self):
@@ -57,8 +57,6 @@ REGISTERY = {
     "conversation": Conversation,
     "fade_in": FadeIn,
     "fade_out": FadeOut,
-    "safe_spawn_1": SafeSpawn_1,
-    "safe_spawn_2": SafeSpawn_2,
     "uis": UIs,
 
     # Facilities

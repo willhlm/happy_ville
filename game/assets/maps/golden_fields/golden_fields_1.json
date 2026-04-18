@@ -466,7 +466,7 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"village_2"
+                                 "value":"village_1"
                                 }, 
                                 {
                                  "name":"spawn",
@@ -745,7 +745,7 @@
                                 {
                                  "name":"event",
                                  "type":"string",
-                                 "value":"Cultist_encounter"
+                                 "value":"cultist_encounter"
                                 }, 
                                 {
                                  "name":"new_state",

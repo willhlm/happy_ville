@@ -9,7 +9,7 @@ class Boulder(BaseTexture):#blocks village cave
         super().__init__(pos, game_objects)
         self.sprites = read_files.load_sprites_dict('assets/sprites/entities/platforms/boulder/', game_objects)
 
-        if game_objects.world_state.events.get('reindeer', False):#if reindeer has been deafeated
+        if game_objects.world_state.narrative.events.get('reindeer', False):#if reindeer has been deafeated
             state = 'down'
         else:
             state = 'erect'

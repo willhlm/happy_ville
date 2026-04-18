@@ -47,21 +47,20 @@ class FastTravelUnlock(BaseUI):
         self.game.render_display(self.game.screen_manager.screen.texture)  
 
     def handle_events(self,input):
-        event = input.output()
         input.processed()           
-        if event[0]:#press
-            if event[-1] == 'select':
+        if input.pressed:#press
+            if input.name == 'select':
                 self.game.state_manager.exit_state()
 
-            elif event[-1] =='right':
+            elif input.name == 'right':
                 self.index[0] += 1
                 self.index[0] = min(self.index[0],len(self.pos)-1)
 
-            elif event[-1] =='left':
+            elif input.name == 'left':
                 self.index[0] -= 1
                 self.index[0] = max(0,self.index[0])
 
-            elif event[-1] == 'a' or 'return':
+            elif input.name in ('a', 'return'):
                 if self.index[0] == 1:#no
                     self.game.state_manager.exit_state()
                 elif self.index[0] == 0:#yes
@@ -69,4 +68,3 @@ class FastTravelUnlock(BaseUI):
                         self.game.state_manager.exit_state()
                     else:#not enout money
                         pass
-

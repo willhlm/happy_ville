@@ -1,4 +1,4 @@
-from gameplay.entities.visuals.particles.component_based.particle_presets import PRESETS
+from gameplay.entities.visuals.particles.particle_presets import PRESETS
 
 class ParticleSystem:
     def __init__(self, game_objects):

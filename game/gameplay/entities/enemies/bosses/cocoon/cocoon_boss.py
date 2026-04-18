@@ -27,5 +27,4 @@ class CocoonBoss(InteractableCocoon):#boss cocoon in light forest
     def take_dmg(self,projectile):
         if self.flags['invincibility']: return
         self.flags['invincibility'] = True
-        self.game_objects.quests_events.initiate_quest('butterfly_encounter')
-
+        self.game_objects.quests_events.initiate_event('butterfly_encounter')

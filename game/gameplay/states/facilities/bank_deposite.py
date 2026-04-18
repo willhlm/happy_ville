@@ -19,21 +19,20 @@ class BankDeposite(Bank):#caled from mr banks
         pass
 
     def handle_events(self,input):
-        event = input.output()
         input.processed()           
-        if event[0]:#press
-            if event[-1] =='down':
+        if input.pressed:#press
+            if input.name =='down':
                 self.ammount -= 1
                 self.ammount = max(self.ammount,0)
-            elif event[-1] =='up':
+            elif input.name =='up':
                 self.ammount += 1
                 self.ammount = min(self.ammount,self.game_objects.player.backpack.inventory.get_quantity('amber_droplet'))
-            elif event[-1] =='right':
+            elif input.name =='right':
                 self.ammount += 100
                 self.ammount = min(self.ammount,self.game_objects.player.backpack.inventory.get_quantity('amber_droplet'))
-            elif event[-1] == 'left':
+            elif input.name == 'left':
                 self.ammount -= 100
                 self.ammount = max(self.ammount,0)
-            elif event[-1]=='a' or event[-1]=='return':
+            elif input.name=='a' or input.name=='return':
                 self.select()
 

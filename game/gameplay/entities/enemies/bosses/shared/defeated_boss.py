@@ -8,9 +8,9 @@ class DefeatedBoss(StaticEntity):
         self.boss = boss
         self.game_objects.signals.subscribe('ability_ball', self.ability_ball_pickup)
 
-        self.game_objects.world_state.increase_progress()
-        self.game_objects.world_state.mark_boss_defeated(str(type(boss).__name__).lower())
-        self.game_objects.world_state.cutscene_complete('boss_enconuter')#so not to trigger the cutscene again. TODO need to be spacific for the boss 
+        self.game_objects.world_state.statistics_state.increase_progress()
+        self.game_objects.world_state.narrative.mark_boss_defeated(str(type(boss).__name__).lower())
+        self.game_objects.world_state.narrative.mark_cutscene_complete('boss_enconuter')#so not to trigger the cutscene again. TODO need to be spacific for the boss 
         
         self.time = 0    
         self.timescale = 1

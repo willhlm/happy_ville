@@ -191,8 +191,8 @@ class SceneBuilder:
         self.spawner = ObjectSpawner(game_objects)
 
     def ensure_state_file(self, level_name: str):
-        if not self.game_objects.world_state.state.get(level_name, False):
-            self.game_objects.world_state.init_state_file(level_name)
+        if not self.game_objects.world_state.objects.has_level(level_name):
+            self.game_objects.world_state.objects.init_level(level_name)
 
     def build(self, map_def: MapDefinition, ctx: LoadContext, biome_mgr: BiomeManager):
         map_data = map_def.map_data
@@ -356,10 +356,15 @@ class SceneBuilder:
             if 'fade' in tile_layer:#add fade blocks
                 for fade in blit_fade_surfaces.keys():
                     if 'fade' in fade:#is needed
-                        bg = BgFade(pos, self.game_objects, blit_fade_surfaces[fade], parallax, blit_fade_pos[fade], data[fade]['id'])
-                        if layer_name.startswith('bg'): self.game_objects.all_bgs.add(layer_name,bg)#bg
-                        else: self.game_objects.all_fgs.add(layer_name,bg)
-                        self.game_objects.bg_fade.add(bg)
+                        layer_props = props_list_to_dict(data[fade].get("properties", []))
+
+                        bg = BgFade(pos, self.game_objects, blit_fade_surfaces[fade], parallax, blit_fade_pos[fade], data[fade]['id'], **layer_props)
+                        if layer_name.startswith('bg'):
+                            self.game_objects.all_bgs.add(layer_name,bg)#bg
+                        else:
+                            self.game_objects.all_fgs.add(layer_name,bg)
+
+                        self.game_objects.bg_fade.add(bg)#this layer is for collision
                         ctx.references['bg_fade'].append(bg)
 
             elif 'interact' in tile_layer:#the stuff that blits in front of interactables, e.g. grass
@@ -400,7 +405,7 @@ class ObjectSpawner:
             "breakable": False,
 
             # signals
-            "signal_id": "",
+            #"ID": "",
 
             #'sprite_path': ''#sprite path/name rellative from assets/sprites/entities/platforms/
         }
@@ -665,13 +670,17 @@ class ObjectSpawner:
                 self.game_objects.interactables.add(new_block)
 
             elif id == 14:#camera stop
+                values = 'center'
                 camera_offset = 0
+                priority = 0
                 for property in properties:
-                    if property['name'] == 'direction':
+                    if property['name'] in ('direction', 'mode'):
                         values = property['value']
                     if property['name'] == 'offset':
                         camera_offset = property['value']
-                new_camera_stop = Stop(self.game_objects, object_size, object_position, values, camera_offset)
+                    if property['name'] == 'priority':
+                        priority = property['value']
+                new_camera_stop = Stop(self.game_objects, object_size, object_position, values, camera_offset, priority)
                 self.game_objects.camera_blocks.add(new_camera_stop)
 
             elif id == 15:#bg_particles -> circles, etc
@@ -721,8 +730,8 @@ class ObjectSpawner:
             elif id == 19:#trigger
                 kwarg = props_list_to_dict(properties)
 
-                if self.game_objects.world_state.is_cutscene_complete(kwarg['event']): continue#if the cutscene has been shown before, return.
-                if self.game_objects.world_state.is_event_complete(kwarg['event']): continue#if event has already been done
+                if self.game_objects.world_state.narrative.is_cutscene_complete(kwarg['event']): continue#if the cutscene has been shown before, return.
+                if self.game_objects.world_state.narrative.is_event_complete(kwarg['event']): continue#if event has already been done
 
                 obj = self.game_objects.registry.fetch('event_triggers',  kwarg['event'])
                 if obj:#if event is registered
@@ -766,7 +775,8 @@ class ObjectSpawner:
                 self.game_objects.interactables.add(new_zoom)
 
             elif id == 22:#projectile spawner
-                kwarg = {}
+                kwarg = props_list_to_dict(properties)
+
                 new_spawner = AreaSpawner(object_position, self.game_objects, object_size, **kwarg)
                 self.game_objects.cosmetics.add(new_spawner)
 
@@ -920,12 +930,12 @@ class ObjectSpawner:
                 for property in properties:
                     if property['name'] == 'ID':
                         ID = property['value']
-                state = self.game_objects.world_state.state[self.game_objects.map.level_name]['runestone'].get(ID, False)
+                state = self.game_objects.world_state.objects.get_bucket(self.game_objects.map.level_name, 'runestone').get(ID, False)
                 new_rune = Runestones(object_position, self.game_objects, state, ID)
                 self.game_objects.interactables.add(new_rune)
 
             elif id == 4:#chests
-                state = self.game_objects.world_state.state[self.game_objects.map.level_name]['loot_container'].get(str(loot_container), False)
+                state = self.game_objects.world_state.objects.get_bucket(self.game_objects.map.level_name, 'loot_container').get(str(loot_container), False)
                 new_interacable = Chest(object_position,self.game_objects, state, str(loot_container))
                 self.game_objects.interactables.add(new_interacable)
                 loot_container += 1
@@ -995,7 +1005,7 @@ class ObjectSpawner:
                 self.game_objects.interactables.add(statue)
 
             elif id == 13:#Soul_essence
-                if not self.game_objects.world_state.state[self.game_objects.map.level_name]['soul_essence'].get(soul_essence_int, False):#if it has not been interacted with
+                if not self.game_objects.world_state.objects.get_bucket(self.game_objects.map.level_name, 'soul_essence').get(soul_essence_int, False):#if it has not been interacted with
                     new_loot = SoulEssence(object_position, self.game_objects, soul_essence_int)
                     self.game_objects.loot.add(new_loot)
                 soul_essence_int += 1
@@ -1004,7 +1014,7 @@ class ObjectSpawner:
                 for property in properties:
                     if property['name'] == 'interactable_item':
                         name = property['value']
-                if not self.game_objects.world_state.state[self.game_objects.map.level_name]['interactable_items'].get(name, False):#if it has not been interacted with: (assume only one interactable)
+                if not self.game_objects.world_state.objects.get_bucket(self.game_objects.map.level_name, 'interactable_items').get(name, False):#if it has not been interacted with: (assume only one interactable)
                     obj = self.game_objects.registry.fetch('items', name)(object_position, self.game_objects, state = 'wild')
                     self.game_objects.loot.add(obj)
 
@@ -1023,7 +1033,7 @@ class ObjectSpawner:
                 self.game_objects.interactables.add(statue)
 
             elif id == 18:
-                state = self.game_objects.world_state.state[self.game_objects.map.level_name]['loot_container'].get(str(loot_container), False)
+                state = self.game_objects.world_state.objects.get_bucket(self.game_objects.map.level_name, 'loot_container').get(str(loot_container), False)
                 amber_rock = AmberRock(object_position, self.game_objects, state, str(loot_container))
                 self.game_objects.interactables.add(amber_rock)
                 loot_container += 1
@@ -1082,7 +1092,8 @@ class Biome:
         for weather_type in self.weather_config.keys():#wind, rain, for etc.
             if self.weather_config[weather_type]['layers'].get(group, False):
                 kwarg = self.weather_config[weather_type]['layers'][group]
-                new_weather = getattr(weather, self._weather_registry[weather_type]['fx_class'])(self.level.game_objects, parallax = parallax, **kwarg)
+                self._weather_registry[weather_type]['manager'].configure(group, kwarg)
+                new_weather = getattr(weather, self._weather_registry[weather_type]['fx_class'])(self.level.game_objects, parallax = parallax, layer_name = group, **kwarg)
 
                 self._weather_registry[weather_type]['manager'].add_fx(new_weather)
                 if group.startswith('fg'):
@@ -1160,9 +1171,9 @@ class Nordveden(Biome):
         self.weather_config = {
             "wind": {
                 "layers": {
-                    "bg1": {"velocity": [-2, 0.1], "duration_range": [3000, 7000] },
-                    "bg2": {"velocity": [-2, 0.1], "duration_range": [3000, 7000] },
-                    "bg3": {"velocity": [-2, 0.1], "duration_range": [3000, 7000] }
+                    "bg1": {"velocity": [-2, 0.1], "duration_range": [180, 420] },
+                    "bg2": {"velocity": [-2, 0.1], "duration_range": [180, 420] },
+                    "bg3": {"velocity": [-2, 0.1], "duration_range": [180, 420] }
                 }
             },
             "rain": {
@@ -1294,7 +1305,7 @@ class Rhoutta_encounter(Biome):
     def room(self, room):
         if room == '2':
             self.level.game_objects.lights.ambient = (30/255,30/255,30/255,230/255)#230
-            if self.level.game_objects.world_state.events.get('guide', False):#if guide interaction has happened
+            if self.level.game_objects.world_state.narrative.events.get('guide', False):#if guide interaction has happened
                 self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,200/255],interact = False)
 
     #def set_camera(self, ctx):
@@ -1550,18 +1561,6 @@ class Dark_forest(Biome):
             }
         }
 
-    def configure_weather(self, group, parallax):
-        for weather_type in self.weather_config.keys():#wind, rain, for etc.
-            if self.weather_config[weather_type]['layers'].get(group, False):
-                kwarg = self.weather_config[weather_type]['layers'][group]
-                new_weather = getattr(weather, self._weather_registry[weather_type]['fx_class'])(self.level.game_objects, parallax = parallax, **kwarg)
-
-                self._weather_registry[weather_type]['manager'].add_fx(new_weather)
-                if group.startswith('fg'):
-                    self.level.game_objects.all_fgs.add(group, new_weather)
-                else:
-                    self.level.game_objects.all_bgs.add(group, new_weather)
-
     def room(self, room = 1):
         #if room == '2':
         self.level.game_objects.lights.ambient = [30/255,30/255,30/255,170/255]
@@ -1658,7 +1657,7 @@ class Wakeup_forest(Biome):
         self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,255/255], normal_interact = False)
         if room in ['99']:
             self.level.game_objects.lights.ambient = (30/255,20030/255,30/255,230/255)#230
-            if self.level.game_objects.world_state.events.get('guide', False):#if guide interaction has happened
+            if self.level.game_objects.world_state.narrative.events.get('guide', False):#if guide interaction has happened
                 self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,255/255], interact = False)
 
     def play_music(self):

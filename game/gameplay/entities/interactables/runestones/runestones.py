@@ -23,5 +23,4 @@ class Runestones(Interactables):
         if type(self.currentstate).__name__ == 'Interacted': return
         self.game_objects.player.currentstate.enter_state('crouch')
         self.currentstate.handle_input('transform')#goes to interacted after transform
-        self.game_objects.world_state.state[self.game_objects.map.level_name]['runestone'][self.ID_key] = True#write in the state dict that this has been picked up
-
+        self.game_objects.world_state.objects.get_bucket(self.game_objects.map.level_name, 'runestone')[self.ID_key] = True#write in the state dict that this has been picked up

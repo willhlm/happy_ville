@@ -12,8 +12,6 @@ from .gameplay.blit_image_text import BlitImageText
 from .gameplay.conversation import Conversation
 from .gameplay.fade_in import FadeIn
 from .gameplay.fade_out import FadeOut
-from .gameplay.safe_spawn_1 import SafeSpawn_1
-from .gameplay.safe_spawn_2 import SafeSpawn_2
 from .gameplay.uis import UIs
 from .gameplay.instructions import Instructions
 

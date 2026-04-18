@@ -1,0 +1,49 @@
+{
+  "conversation_nodes": [
+    {
+      "id": "fallback_state_1",
+      "category": "fallback",
+      "conditions": [
+        {"type": "progress_eq", "value": 1}
+      ],
+      "lines": [
+        "I thought it would be nice to make a bridge. We would not have to take the long road through the crystal mines to get to the golden fields."
+      ]
+    },
+    {
+      "id": "fallback_state_2",
+      "category": "fallback",
+      "conditions": [
+        {"type": "progress_eq", "value": 2}
+      ],
+      "lines": [
+        "There, what did I tell you.",
+        "Wood please"
+      ]
+    }
+  ],
+  "comment_nodes": [
+    {
+      "id": "comment_state_1",
+      "category": "ambient",
+      "conditions": [
+        {"type": "progress_eq", "value": 1}
+      ],
+      "lines": [
+        "Hej",
+        "Zup"
+      ]
+    },
+    {
+      "id": "comment_state_2",
+      "category": "ambient",
+      "conditions": [
+        {"type": "progress_eq", "value": 2}
+      ],
+      "lines": [
+        "yolo",
+        "nice weather"
+      ]
+    }
+  ]
+}

@@ -4,7 +4,7 @@ class MrSmith(NPC):#balck smith
     def __init__(self, pos,game_objects):
         super().__init__(pos,game_objects)
 
-    def buisness(self):#enters after conversation
+    def on_conversation_complete(self):
         self.game_objects.game.state_manager.enter_state(state_name = 'Smith', category = 'game_states_facilities', npc = self)
 
     def load_sprites(self):

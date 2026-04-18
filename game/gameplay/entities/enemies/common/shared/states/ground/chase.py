@@ -13,7 +13,7 @@ class GroundChase(BaseState):
         # Chase if beyond stopping distance
         if abs(self.player_distance[0]) > self.stop_distance:#don't get closer than stop distance
             self.look_target()
-            self.entity.velocity[0] += self.entity.dir[0] * self.chase_speed
+            self.entity.velocity[0] += dt * self.entity.dir[0] * self.chase_speed
         else:
             pass
 

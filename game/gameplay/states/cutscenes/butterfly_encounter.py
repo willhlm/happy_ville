@@ -32,5 +32,5 @@ class ButterflyEncounter(CutsceneEngine):#intialised from cutscene trigger
         elif self.stage == 2:#spawn
             self.entity.particle_release()
             if self.timer > 400:
-                self.game_objects.quests_events.initiate_quest('butterfly_encounter')
+                self.game_objects.quests_events.initiate_event('butterfly_encounter')
                 self.game.state_manager.exit_state()

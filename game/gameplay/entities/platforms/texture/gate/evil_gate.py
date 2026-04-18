@@ -6,7 +6,7 @@ class EvilGate(CollisionBlock):#a gate. The ones that are owned by the lever wil
         super().__init__(pos, size)
         self.game_objects = game_objects
         self.ID_key = kwarg.get("ID", None)                
-        erect = self.game_objects.world_state.load_bool(self.game_objects.map.level_name, "gate", self.ID_key, initial=kwarg.get("erect", False))
+        erect = self.game_objects.world_state.objects.load_bool(self.game_objects.map.level_name, "gate", self.ID_key, initial=kwarg.get("erect", False))
 
         self.image = game_objects.game.display.make_layer(size)
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)

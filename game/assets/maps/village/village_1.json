@@ -1452,12 +1452,12 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"village_2"
+                                 "value":"golden_fields_1"
                                 }, 
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"2"
+                                 "value":"1"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -1509,7 +1509,7 @@
                         }, 
                         {
                          "gid":15,
-                         "height":16,
+                         "height":176,
                          "id":50,
                          "name":"",
                          "properties":[
@@ -1544,9 +1544,9 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":16,
-                         "x":176,
-                         "y":592
+                         "width":384,
+                         "x":192,
+                         "y":576
                         }, 
                         {
                          "gid":8,
@@ -1832,7 +1832,7 @@
                         }, 
                         {
                          "gid":15,
-                         "height":12,
+                         "height":224,
                          "id":136,
                          "name":"",
                          "properties":[
@@ -1844,9 +1844,9 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":1920,
+                         "width":1784,
                          "x":352,
-                         "y":96
+                         "y":304
                         }, 
                         {
                          "gid":12,

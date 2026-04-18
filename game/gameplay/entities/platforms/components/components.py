@@ -1,7 +1,6 @@
 import math, pygame
 from .states_time_collision import Idle
 from gameplay.entities.shared.components import hit_effects
-from gameplay.entities.shared.components.hit_results import HitResult
 
 # ----------------------------
 # Component base
@@ -32,6 +31,9 @@ class PlatformComponent:
 
     def collide_y(self, entity):
         pass
+
+    def pre_entity_y_collision(self, entity):
+        return False
 
     def take_dmg(self, effect):
         return effect
@@ -81,18 +83,30 @@ class SolidCollision(PlatformComponent):
         entity.update_rect_y()
 
 class CarryOnTop(PlatformComponent):
-    def collide_y(self, entity):
-        # landing or standing (add eps if needed)
-        eps = 2
-        on_top_now = abs(entity.hitbox.bottom - self.p.hitbox.top) <= eps
-        was_on_top = abs(entity.old_hitbox.bottom - self.p.old_hitbox.top) <= eps
+    def pre_entity_y_collision(self, entity):
+        old_platform_hitbox = getattr(self.p, "old_hitbox", None)
+        if old_platform_hitbox is None:
+            return False
 
-        if on_top_now and was_on_top:
-            entity.true_pos[0] += self.p.delta[0]
-            entity.true_pos[1] += self.p.delta[1]
-            entity.rect.left = round(entity.true_pos[0])
-            entity.rect.top  = round(entity.true_pos[1])
-            entity.update_hitbox()
+        if self.p.delta[0] == 0 and self.p.delta[1] == 0:
+            return False
+
+        eps = 2
+        was_on_top = abs(entity.old_hitbox.bottom - old_platform_hitbox.top) <= eps
+        overlap_x = (
+            entity.old_hitbox.right > old_platform_hitbox.left and
+            entity.old_hitbox.left < old_platform_hitbox.right
+        )
+
+        if not (was_on_top and overlap_x):
+            return False
+
+        entity.true_pos[0] += self.p.delta[0]
+        entity.true_pos[1] += self.p.delta[1]
+        entity.rect.left = round(entity.true_pos[0])
+        entity.rect.top = round(entity.true_pos[1])
+        entity.update_hitbox()
+        return True
 
 class OneWayUpCollision(PlatformComponent):
     """CollisionOnewayUp behavior :contentReference[oaicite:6]{index=6}"""
@@ -114,7 +128,7 @@ class DamageCollision(PlatformComponent):
        If you only want damage on landing, use DamageOnLand instead.
     """
     def on_added(self):
-        dmg = float(self.props.get("dmg", 1))
+        dmg = float(self.props.get("damage", 1))
         self.effect = hit_effects.HitEffect(damage=dmg)
 
         # knockback defaults (can be overridden)
@@ -149,7 +163,7 @@ class DamageCollision(PlatformComponent):
 class DamageOnLand(PlatformComponent):
     """Only hurts when the entity lands from above (common 'spikes-on-top' variant)."""
     def on_added(self):
-        dmg = float(self.props.get("dmg", 1))
+        dmg = float(self.props.get("damage", 1))
         self.effect = hit_effects.HitEffect(damage=dmg)
         self.ky = float(self.props.get("knockback_y", 10))
 
@@ -173,7 +187,7 @@ class DamageOnLand(PlatformComponent):
 # ----------------------------
 
 class Move(PlatformComponent):#wrapper
-    def on_added(self):
+    def on_added(self):        
         t = str(self.props.get("move_type", "direction_distance")).lower()
 
         variants = {
@@ -208,11 +222,13 @@ class MovePath(PlatformComponent):
       eps: float (default 1.0) snapping tolerance
     """
 
-    def on_added(self):
+    def on_added(self):        
         pts = self.props.get("path_points")
         self.points = list(pts) if pts else []
 
-        self.speed = float(self.props.get("speed", 80.0)) * 100
+        # Updates run with dt scaled so ~1.0 == one 60 Hz frame.
+        # Convert designer-friendly px/s into px/frame.
+        self.speed = float(self.props.get("speed", 80.0)) / 60.0
         self.eps = float(self.props.get("eps", 1.0))
 
         self.pingpong = bool(self.props.get("pingpong", True))
@@ -465,7 +481,7 @@ class MovePath(PlatformComponent):
             y += uy * remaining
             remaining = 0.0
 
-        self.p.velocity[0] = (x - x0) / dt
+        self.p.velocity[0] = (x - x0) /dt
         self.p.velocity[1] = (y - y0) / dt
 
 class MoveDirectionDistance(PlatformComponent):
@@ -508,18 +524,14 @@ class DisappearOnStand(PlatformComponent):
       platform.respawn
     """
     def on_added(self):
-        dt = int(self.props.get("disappear_time", 60))
-        rt = int(self.props.get("respawn_time", 120))
-        self.disappear_time = dt if dt > 0 else 60
-        self.respawn_time = rt if rt > 0 else 120
+        self.disappear_time = int(self.props.get("disappear_time", 60)) 
+        self.respawn_time = int(self.props.get("respawn_time", 120))
 
         self._pending = False
 
         self.timers = self.p.game_objects.timer_manager
-
-        # ensure this platform has the right state machine
-        if self.p.currentstate.__class__.__name__ == "_NullState":
-            self.p.currentstate = Idle(self.p)        
+        
+        self.p.currentstate = Idle(self.p)# ensure this platform has the right state machine
 
     def collide_y(self, entity):
         if self._pending:
@@ -579,6 +591,7 @@ class Breakable(PlatformComponent):
 
         self.camera = self.p.game_objects.camera_manager
         self.p.hit_component.damage_manager.remove_modifier('block_damage')
+        self.signal_id = self.props.get("ID", False)
 
     def _get_hit_side(self, src) -> str | None:
         # Require rects
@@ -612,7 +625,7 @@ class Breakable(PlatformComponent):
         Only applies damage if hit direction is allowed by vulnerable_sides.
         """
         source = getattr(effect, "projectile", None) or getattr(effect, "attacker", None)
-        if source is not None and hasattr(source, "hitbox"):
+        if source is not None:
             hit_side = self._get_hit_side(source)
             if hit_side not in self.vuln:               
                 self.p.material = 'stone'#different sounds depedning on if the hit lands
@@ -623,6 +636,7 @@ class Breakable(PlatformComponent):
         self.p.material = 'flesh'#different sounds depedning on if the hit lands
 
         if self.health <= 0:
+            if self.signal_id: self.p.game_objects.signals.emit(str(signal_id), platform=self.p)                
             self.p.kill()
         return effect
 

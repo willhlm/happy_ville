@@ -9,6 +9,7 @@ class PlatformEntity(AnimatedEntity):#Things to collide with platforms
         self.go_through = {'ramp': True, 'one_way':True}#a flag for entities to go through ramps from side or top
         self.velocity = [0, 0]
         self.hitstop = HitstopComponent()
+        self.standing_platform = None#save the last collising platform     
 
     def update_hitbox(self):
         self.hitbox.midbottom = self.rect.midbottom
@@ -48,6 +49,7 @@ class PlatformEntity(AnimatedEntity):#Things to collide with platforms
         self.collision_types['bottom'] = True
         self.currentstate.handle_input('Ground')
         self.velocity[1] = C.max_vel[1] + 10#make aila sticj to ground to avoid falling animation: The extra gravity on ramp
+        self.standing_platform = ramp#save the latest platform
 
     #pltform collisions.
     def right_collision(self, block, type = 'Wall'):
@@ -64,6 +66,7 @@ class PlatformEntity(AnimatedEntity):#Things to collide with platforms
         self.hitbox.bottom = block.hitbox.top
         self.collision_types['bottom'] = True
         self.currentstate.handle_input('Ground')
+        self.standing_platform = block#save the latest platform
 
     def top_collision(self, block):
         self.hitbox.top = block.hitbox.bottom

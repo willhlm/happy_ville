@@ -1,6 +1,6 @@
 class Backpack():#Ailas back pack. Can append new things such as journal, if picked up
     def __init__(self, entity):
-        self.holdings = {'map': Map(), 'inventory': Inventory(), 'radna': Radna(entity), 'journal': Journal()}
+        self.holdings = {'map': Map(), 'inventory': Inventory(), 'radna': Radna(), 'journal': Journal()}
         
     @property
     def inventory(self):
@@ -66,8 +66,7 @@ class Map():
             self.travel_points[map] = cord
 
 class Radna():        
-    def __init__(self, entity):
-        self.entity = entity
+    def __init__(self):
         self.equipped = {}#rings with radna {'fingers': <Ring instance>}
         self.inventory = {}#radnas in inventory: # {"half_dmg":  <Half_dmg instance>}
         self._available_slots = ['index', 'long', 'ring', 'small']

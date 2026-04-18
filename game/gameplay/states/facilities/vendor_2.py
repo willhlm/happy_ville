@@ -37,17 +37,16 @@ class Vendor_2(Vendor):#called from vendor when selecting an item
         else:#not enough money
             self.set_response('Get loss you poor piece of shit')
 
-    def handle_frame2(self,input):
-        event = input.output()
+    def handle_frame2(self,input):        
         input.processed()             
-        if event[0]:#press
-            if event[-1] == 'y':
+        if input.pressed:#press
+            if input.name == 'y':
                 self.game.state_manager.exit_state()
-            elif event[-1] =='down':
+            elif input.name =='down':
                 self.pointer_index[1] += 1
                 self.pointer_index[1] = min(self.pointer_index[1],1)
-            elif event[-1] =='up':
+            elif input.name =='up':
                 self.pointer_index[1] -= 1
                 self.pointer_index[1] = max(self.pointer_index[1],0)
-            elif event[-1]=='a' or event[-1]=='return':
+            elif input.name=='a' or input.name=='return':
                 self.select()

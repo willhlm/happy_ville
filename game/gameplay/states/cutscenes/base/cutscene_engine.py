@@ -36,10 +36,9 @@ class CutsceneEngine(Gameplay):#cut scenens that is based on game engien
         self.game.render_display(self.game.screen_manager.screen.texture)  
 
     def handle_events(self,input):
-        event = input.output()
         input.processed()
-        if event[0]:#press
-            if event[-1] == 'start':
+        if input.pressed:#press
+            if input.name == 'start':
                 self.game.state_manager.exit_state()
-            elif event[-1] == 'a':
+            elif input.name == 'a':
                 self.press = True

@@ -13,7 +13,7 @@ class Collisions():
         return False
 
     def pass_through(self, entity):#called when pressing down
-        hitbox = self.game_objects.player.hitbox.copy()
+        hitbox = entity.hitbox.copy()
         offset = 1#looks better if it is 1, but if it is 1, the fall through doesn't work when going dow the ramp
         hitbox.bottom += offset
 
@@ -28,12 +28,12 @@ class Collisions():
                 break
 
         if ramp:
-            target = ramp.get_target(self.game_objects.player)#in case there are multiple enteties, need to calcuate the tyarget specifically for the playter
+            target = ramp.get_target(entity)#in case there are multiple enteties, need to calcuate the tyarget specifically for the playter
             if target > hitbox.bottom + offset:
                 return #if from above, do nothing
-            elif not self.game_objects.player.go_through['ramp']:#enter only once
-                self.game_objects.player.velocity[1] = offset#so that it looks more natural (cannot be 0, needs to be finite)
-                self.game_objects.player.go_through['ramp'] = ramp.go_through#a flag that determines if one can go through
+            elif not entity.go_through['ramp']:#enter only once
+                entity.velocity[1] = offset#so that it looks more natural (cannot be 0, needs to be finite)
+                entity.go_through['ramp'] = ramp.go_through#a flag that determines if one can go through
 
     #npc player conversation, when pressing t
     def check_interaction_collision(self):
@@ -103,10 +103,12 @@ class Collisions():
     #collision of player, enemy and loot: setting the flags depedning on the collisoin directions collisions between entities-groups: a dynamic and a static one
     def platform_collision(self, dynamic_Entities, dt):
         for entity in dynamic_Entities:
-            entity.collision_types = {'top':False,'bottom':False,'right':False,'left':False, 'standing_platform': None}
+            entity.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
 
             #move in x every dynamic sprite
             entity.old_hitbox = entity.hitbox.copy()#save old position
+            if entity.standing_platform:
+                entity.standing_platform.pre_entity_y_collision(entity)
 
             entity_dt = entity.hitstop.get_sim_dt(dt)#hitstop can set it to 0
             entity.update_true_pos_x(entity_dt)#it sets the true pos and update the hitbox

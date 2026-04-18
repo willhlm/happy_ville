@@ -18,6 +18,8 @@ class AttackMain(BaseState):
         cooldown = self.entity.config["cooldowns"]["melee_attack"]
         self.entity.currentstate.cooldowns.set("melee_attack",  random.randint(cooldown[0], cooldown[1]))
 
+        self.entity.game_objects.sound.play_sfx(random.choice(self.entity.sounds['attack']), vol = 0.8)
+
     def increase_phase(self):
         self.enter_state("attack_post")
 

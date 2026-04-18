@@ -1,5 +1,4 @@
 import pygame
-
 from gameplay.entities.base.static_entity import StaticEntity
 from . import states_portal
 
@@ -22,10 +21,8 @@ class Portal(StaticEntity):#portal to make a small spirit world with challenge r
         self.radius_limit = 1#one is screen size
         
     def release_texture(self):
-        self.game_objects.render_state.handle_input('idle')#go back to normal rendering
         self.empty_layer.release()
         self.noise_layer.release()
-        self.bg_grey_layer.release()
 
     def interact(self):#when player press T at place holder interactavle
         self.currentstate.handle_input('grow')

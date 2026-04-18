@@ -12,4 +12,4 @@ class GroundPatrol(BaseState):
         self.entity.dir[0] *=  kwargs.get('dir',value) 
 
     def update_logic(self, dt):        
-        self.entity.velocity[0] += self.entity.dir[0] * self.patrol_speed
+        self.entity.velocity[0] += dt * self.entity.dir[0] * self.patrol_speed

@@ -20,16 +20,24 @@ class DynamicPlatform(Platform):
         for c in self.components:
             c.collide_y(entity)
 
+    def pre_entity_y_collision(self, entity):
+        handled = False
+        for c in self.components:
+            handled = c.pre_entity_y_collision(entity) or handled
+        return handled
+
     # per-frame behavior
     def update_components(self, dt):
         for c in self.components:
             c.update(dt)
 
     def update_render(self, dt):
-        self.animation.update(dt)
+        pass
 
     def update(self, dt):
-        # 1 — animation/state        
+        dt = self.game_objects.time_field_manager.get_dt_at(dt, self.hitbox.center)
+
+        # 1 — animation/state                
         self.currentstate.update(dt)
         self.animation.update(dt)
 
@@ -44,7 +52,7 @@ class DynamicPlatform(Platform):
     def begin_step(self):
         self.old_hitbox = self.hitbox.copy()
 
-    def integrate(self, dt):
+    def integrate(self, dt):        
         self.true_pos[0] += dt * self.velocity[0]
         self.true_pos[1] += dt * self.velocity[1]
         self.update_rect_from_true()

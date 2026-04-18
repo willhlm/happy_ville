@@ -34,23 +34,21 @@ class FastTravelMenu(BaseUI):
         self.game.render_display(self.game.screen_manager.screen.texture)  
 
     def handle_events(self,input):
-        event = input.output()
         input.processed()              
-        if event[0]:#press
-            if event[-1] == 'select':
+        if input.pressed:#press
+            if input.name == 'select':
                 self.game.state_manager.exit_state()
 
-            elif event[-1] =='down':
+            elif input.name == 'down':
                 self.index[0] += 1
                 self.index[0] = min(self.index[0],len(self.destinations)-1)
 
-            elif event[-1] =='up':
+            elif input.name == 'up':
                 self.index[0] -= 1
                 self.index[0] = max(0,self.index[0])
 
-            elif event[-1] == 'a':
+            elif input.name == 'a':
                 self.game.state_manager.exit_state()
                 level = self.destinations[self.index[0]]
                 cord = self.game_objects.world_state.travel_points[level]
                 self.game_objects.load_map(self,level,cord)
-
