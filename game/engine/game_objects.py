@@ -145,11 +145,11 @@ class GameObjects():
         self.weather.update(dt)
         self.interactables_fg.update(dt)#twoD water use it
         self.sequence_manager.update(dt)
-        self.lights.update_render(dt)
 
     def update_render(self, dt):#called after update_physics
         #self.camera_blocks.update(dt)#need to be before camera: caemras stop needs to be calculated before the scroll
         self.camera_manager.update_render(dt)#should be first
+        self.lights.update_render(dt)
 
         self.platforms.update_render(dt)
         self.all_bgs.update_render(dt)

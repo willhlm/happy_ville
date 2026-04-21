@@ -1,5 +1,5 @@
 from engine import constants as C
-import math, numpy as np
+from engine.render.blur_kernel import build_gaussian_kernel
 
 class Shaders():
     def __init__(self, post_process):
@@ -104,32 +104,11 @@ class Blur_fast(Shaders):
         super().__init__(post_process)
         self.radius = float(kwarg.get("radius", 2.0))
         self._r_int = 0
-        self._weights = np.zeros(64, dtype="f4")
+        self._weights = None
         self._rebuild_kernel()
 
     def _rebuild_kernel(self):# IMPORTANT: 2D blur cost grows as (2r+1)^2. Keep r small (1–4 typical).        
-        r = int(max(0, min(31, round(self.radius))))
-        self._r_int = r
-
-        w = np.zeros(64, dtype="f4")
-        if r == 0:
-            w[0] = 1.0
-            self._weights = w
-            return
-
-        # 1D Gaussian weights for distance 0..r
-        sigma = max(self.radius, 0.001)
-        vals = []
-        for i in range(0, r + 1):
-            vals.append(math.exp(-0.5 * (i * i) / (sigma * sigma)))
-
-        s = vals[0] + 2.0 * sum(vals[1:])
-        vals = [v / s for v in vals]
-
-        for i in range(0, r + 1):
-            w[i] = vals[i]
-
-        self._weights = w
+        self._r_int, self._weights = build_gaussian_kernel(self.radius)
 
     def set_radius(self, radius):
         self.radius = float(radius)

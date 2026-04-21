@@ -32,3 +32,7 @@ class BossEncounter(BaseArea):
                 kwarg['entity'] = self.game_objects.map.ctx.references[self.ID]
             self.game_objects.sequence_manager.start_sequence(self.event, **kwarg)
         self.kill()
+
+    @classmethod
+    def get_completion_key(cls, kwarg):
+        return kwarg.get('ID', kwarg['event'])

@@ -52,7 +52,7 @@ class StaticSpawner(c.SpawnerCommon):
                 self.game_objects.enemies.add(self.game_objects.registry.fetch("enemies", enemy_name)(object_position, self.game_objects))
 
             elif local_id == 3:
-                path_props = props_list_to_dict(obj.get("properties", []))
+                path_props = c.props_list_to_dict(obj.get("properties", []))
                 if not self.game_objects.world_state.narrative.is_boss_defeated(path_props["ID"]):
                     from gameplay.data.boss_encounter_configs import get_boss_encounter_config
 
