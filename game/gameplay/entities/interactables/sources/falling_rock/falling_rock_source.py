@@ -15,4 +15,4 @@ class FallingRockSource(LayeredObjects):
 
     def drop(self):#called from states
         obj = FallingRock(self.rect.bottomleft, self.game_objects)
-        self.game_objects.eprojectiles.add(obj)
+        self.game_objects.projectiles.add_enemy(obj)

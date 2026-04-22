@@ -1,8 +1,8 @@
 import pygame, math
 from engine.utils import read_files
-from gameplay.entities.items.base.item import Item
+from gameplay.entities.items.base.world_item import WorldItem
 
-class MemoryShard(Item):
+class MemoryShard(WorldItem):
     def __init__(self,pos,game_objects):
         super().__init__(pos, game_objects)
         self.sprites = read_files.load_sprites_dict('assets/sprites/entities/items/memory_shard/',game_objects)

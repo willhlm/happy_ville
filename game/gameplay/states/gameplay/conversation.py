@@ -72,10 +72,10 @@ class Conversation(Gameplay):
     def fade_back(self):
         self.sign = -1
 
-    def on_exit(self):
+    def on_pop(self):
         self.conv_screen.release()
-        self.background.release()
-        if self.completed:
+        self.background.release()        
+        if self.completed:            
             self.speaker.on_conversation_complete()
         else:
             self.speaker.on_conversation_cancelled()

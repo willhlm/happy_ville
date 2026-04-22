@@ -10,5 +10,6 @@ REGISTER_ITEMS = {
     'soul_essence': SoulEssence,
     'red_infinity_stone': RedInfinityStone,
     'memory_shard': MemoryShard,
+    'dyes': Dyes,
 
 }

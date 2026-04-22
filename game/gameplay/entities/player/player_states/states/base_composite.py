@@ -5,6 +5,7 @@ class CompositeState():#will contain pre, main, post phases of a state
         self.entity = entity
         self.phases = {}
         self.current_phase = NullPhase(entity)
+        self.interaction_enabled = True
 
     def enter_phase(self, phase_name, **kwarg):#called when entering a new phase
         self.current_phase = self.phases[phase_name]
@@ -39,5 +40,11 @@ class CompositeState():#will contain pre, main, post phases of a state
     def handle_movement(self, event):
         self.current_phase.handle_movement(event)
 
+    def can_interact(self):
+        return self.interaction_enabled
+
     def increase_phase(self):#called when an animation is finished for that state
-        self.current_phase.increase_phase()   
+        self.current_phase.increase_phase()  
+
+    def consume_contact_state(self):
+        self.current_phase.consume_contact_state()

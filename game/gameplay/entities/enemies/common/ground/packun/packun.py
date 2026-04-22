@@ -11,7 +11,8 @@ class Packun(Enemy):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 32, 32)
-        self.health = 3
+        self.vitals.set_max_health(3)
+        self.vitals.set_health(self.vitals.max_health)
 
         self.currentstate = packun_states.Idle(self)
         self.angle_state = getattr(packun_states, kwarg['direction'])(self)
@@ -22,7 +23,7 @@ class Packun(Enemy):
     def attack(self):#called from states, attack main
         dir, amp = self.angle_state.get_angle()
         attack = Projectile_1(self.rect.topleft, self.game_objects, dir = dir, amp = amp)#make the object
-        self.projectiles.add(attack)#add to group but in main phase
+        self.game_objects.projectiles.add_enemy(attack)#add to group but in main phase
 
     def update_vel(self, dt):
         pass

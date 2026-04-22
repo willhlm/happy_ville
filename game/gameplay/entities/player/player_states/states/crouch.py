@@ -7,6 +7,7 @@ from gameplay.entities.visuals.cosmetics import PrayEffect
 class CrouchState(CompositeState):
     def __init__(self, entity):
         super().__init__(entity)
+        self.interaction_enabled = False
         self.phases = {'pre': CrouchPre(entity), 'main': CrouchMain(entity), 'post': CrouchPost(entity)}
 
 class CrouchPre(PhaseBase):

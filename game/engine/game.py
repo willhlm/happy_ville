@@ -15,7 +15,7 @@ class Game():
         self.scale = self.scale_size()#get the scale according to your display size
         self.display_size = [int(self.window_size[0] * self.scale), int(self.window_size[1] * self.scale)]
         
-        self.display = RenderEngine(self.display_size[0] - self.scale, self.display_size[1] - self.scale, fullscreen = display_settings['fullscreen'], vsync = display_settings['vsync']) #vsync -1 may be good for mac        
+        self.display = RenderEngine(self.display_size[0] - self.scale, self.display_size[1] - self.scale, fullscreen = display_settings['fullscreen'], vsync = 0*display_settings['vsync']) #vsync -1 may be good for mac        
 
         #initiate game related values
         self.game_loop = GameLoop(self)
@@ -27,6 +27,7 @@ class Game():
         self.DEBUG_MODE = True
         self.RENDER_FPS_FLAG = True
         self.RENDER_HITBOX_FLAG = True
+        self.DEBUG_PLAYER_COLLISIONS = False
         pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.KEYUP, pygame.JOYAXISMOTION, pygame.JOYHATMOTION, pygame.JOYBUTTONUP, pygame.JOYBUTTONDOWN])
         pygame.event.set_blocked([pygame.TEXTINPUT])#for some reason, there is a text input here and there. So, blocking it
 
@@ -106,5 +107,4 @@ class GameLoop():
 
             # Update display and limit FPS
             pygame.display.flip()
-            self.clock.tick(self.game.fps)
-            #print(self.clock.get_fps()
+            self.clock.tick()#self.game.fps

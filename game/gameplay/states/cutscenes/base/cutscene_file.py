@@ -22,6 +22,3 @@ class CutsceneFile():#cutscneens that will run based on file. The name of the fi
 
     def on_exit(self):
         pass
-
-    def fade_update(self, dt):
-        pass

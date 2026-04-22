@@ -1,5 +1,6 @@
 import pygame 
 from gameplay.entities.enemies.base.boss import Boss
+from gameplay.entities.shared.boss_rewards import ProgressionUnlockReward
 from engine.utils import read_files
 from . import reindeer_states
 from gameplay.entities.enemies.bosses.shared import task_manager
@@ -15,7 +16,10 @@ class Reindeer(Boss):
         self.health = 2
         self.currentstate = task_manager.TaskManager(self, reindeer_states.STATE_REGISTRY, reindeer_states.PATTERNS)
 
-        self.ability = 'dash_ground_main'#the stae of image that will be blitted to show which ability that was gained
+        self.reward = ProgressionUnlockReward(
+            preview_sprite='dash_ground_main',
+            progress_key='dash',
+        )
         self.attack_distance = [100, 50]
         #self.chase_distance = [200, 50]
         self.jump_distance = [240, 50]
@@ -30,15 +34,12 @@ class Reindeer(Boss):
     def release_texture(self):
         pass
 
-    def give_abillity(self):#called when reindeer dies
-        self.game_objects.player.currentstate.unlock_state('dash')#append dash abillity to available states
-
     def slam_attack(self):#called from states, attack main
         self.game_objects.cosmetics.add(ChainProjectile(self.rect.center, self.game_objects, SlamAttack, direction = self.dir, distance = 50, number = 5, frequency = 20))
 
     def dead(self):#called when death animation is finished
         super().dead()
-        self.game_objects.world_state.narrative.mark_cutscene_complete('boss_deer_encounter')#so not to trigger the cutscene again
+        self.game_objects.world_state.narrative.mark_flow_complete('boss_deer_encounter')#so not to trigger the flow again
 
     def kill(self):
         super().kill()

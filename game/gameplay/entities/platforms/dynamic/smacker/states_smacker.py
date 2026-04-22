@@ -15,20 +15,12 @@ class Basic_states():
     def handle_input(self,input,**kwarg):
         pass
 
-    def collide_entity_y(self,entity):                      
-        if self.entity.velocity[1] < 0:#going up              
-            entity.down_collision(self.entity)
-        else:#going down
-            entity.top_collision(self.entity)
-        entity.update_rect_y()    
-
-    def collide_y(self,entity):                    
+    def handle_vertical_contact(self, entity):
         if entity.velocity[1] > self.entity.velocity[1]:#going down               
-            entity.down_collision(self.entity)
-            entity.limit_y()
+            entity.platform_collider.push_vertical(self.entity, 'bottom')
+            entity.platform_collider.clamp_vertical_velocity()
         else:#going up
-            entity.top_collision(self.entity)
-        entity.update_rect_y()        
+            entity.platform_collider.push_vertical(self.entity, 'top')
 
     def update(self, dt):
         pass
@@ -38,8 +30,8 @@ class Idle(Basic_states):
         super().__init__(entity)
         self.time = 0
 
-    def update(self):
-        self.time += self.entity.game_objects.game.dt
+    def update(self, dt):
+        self.time += dt
         self.entity.velocity = [0,0]
         if self.time > self.entity.frequency:
             self.enter_state('Go_down')
@@ -49,27 +41,19 @@ class Go_down(Basic_states):
         super().__init__(entity)
         self.time = 0
 
-    def update(self):
-        self.entity.velocity[1] += self.entity.game_objects.game.dt 
+    def update(self, dt):
+        self.entity.velocity[1] += dt
         if abs(self.entity.hitbox.topleft[1] - self.entity.original_pos[1]) > self.entity.distance:
             self.entity.velocity[1] = 0
             self.enter_state('Down')
-
-    def collide_entity_y(self,entity):     
-        if self.entity.velocity[1] < 0:#going up              
-            entity.down_collision(self.entity)
-        else:#going down            
-            entity.take_dmg(1)#returns true if damae was taken         
-            self.entity.hole.player_transport(entity)                
-        entity.update_rect_y()    
 
 class Down(Basic_states):
     def __init__(self,entity,**kwarg):
         super().__init__(entity)
         self.time = 0
 
-    def update(self):
-        self.time += self.entity.game_objects.game.dt
+    def update(self, dt):
+        self.time += dt
         self.entity.velocity = [0,0]
         if self.time > self.entity.frequency:
             self.enter_state('Go_up')
@@ -78,7 +62,7 @@ class Go_up(Basic_states):
     def __init__(self,entity,**kwarg):
         super().__init__(entity)
 
-    def update(self):
-        self.entity.velocity[1] -= self.entity.game_objects.game.dt 
+    def update(self, dt):
+        self.entity.velocity[1] -= dt
         if abs(self.entity.hitbox.topleft[1] - self.entity.original_pos[1]) < 10:
             self.enter_state('Idle')          

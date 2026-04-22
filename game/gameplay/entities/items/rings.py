@@ -1,49 +1,34 @@
 import pygame
 from engine.utils import read_files
-from gameplay.entities.items.base.interactable_item import InteractableItem
+from gameplay.entities.items.base.components import ItemInteractComponent, pool_interactable_sprite, InteractionPickupComponent
+from gameplay.entities.items.base.item_definition import ItemDefinition
+from gameplay.entities.items.base.world_item import WorldItem
 
-class Rings(InteractableItem):#ring in which to attach radnas
+class Rings(WorldItem):#ring in which to attach radnas
+    item_definition = ItemDefinition(
+        description='A ring',
+    )
+    pickup_component_cls = InteractionPickupComponent
+
     def __init__(self,pos, game_objects, **kwarg):
-        super().__init__(pos, game_objects, **kwarg)
-        self.sprites = Rings.sprites
-        self.image = self.sprites[kwarg.get('state', 'idle')][0]
+        super().__init__(pos, game_objects)
+        self.interact_component = ItemInteractComponent(self, **kwarg)
+        self.sprites = Rings.sprites  
+        self.interact_component.apply_visual_spawn_mode()
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
 
-        self.level = 1
-        self.description = 'A ring'
-        self.radna = None
-
-    def set_finger(self, finger):
-        self.finger = finger
-        self.animation.play(self.finger + '_' + str(self.level))
-
-    def update_equipped(self):#caleld from neckalce
-        self.radna.equipped()
-
-    def handle_press_input(input):#called from neckalce
-        self.radna.handle_press_input(input)
-
-    def upgrade(self):
-        self.level += 1
-        self.animation.play(self.finger + '_' + str(self.level))
-
     def pickup(self, player):
-        super().pickup(player)
-        player.backpack.radna.add_ring(self)
-        self.set_owner(player)
+        if not player.backpack.radna.unlock_next_ring(type(self), owner=player):
+            return
+        self.mark_picked_up()
+        self.kill()
 
-    def attach_radna(self, radna):
-        self.radna = radna
-        self.radna.set_owner(self.entity)
-        self.radna.attach()
-
-    def detach_radna(self, radna):
-        self.radna.detach()
-        self.radna.set_owner(None)
-        self.radna = None
+    def interact(self, player):
+        self.interact_component.interact_with_pickup_text(player)
 
     @classmethod
-    def pool(cls, game_objects):
-        cls.sprites = read_files.load_sprites_dict('assets/sprites/entities/radna/rings/',game_objects)
-        super().pool(game_objects)
+    def pool(cls, game_objects):                
+        cls.sprites = read_files.load_sprites_dict('assets/sprites/entities/items/radna/rings/',game_objects)
+        pool_interactable_sprite(cls, game_objects)
+        

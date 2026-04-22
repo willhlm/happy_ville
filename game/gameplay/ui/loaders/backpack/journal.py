@@ -4,6 +4,9 @@ from ..base_loader import BaseLoader
 
 
 class JournalLoader(BaseLoader):
+    PAGE_OBJECT_LAYER = "objects"
+    PAGE_TILESET = "journal_UI"
+
     def __init__(self, game_objects):
         super().__init__(game_objects)
         self.BG = game_objects.game.display.surface_to_texture(
@@ -15,11 +18,14 @@ class JournalLoader(BaseLoader):
 
     def load_data(self):
         self.name_pos = []
-        for obj in self.map_data["elements"]:
-            topleft_object_position = [int(obj["x"]), int(obj["y"]) - int(obj["height"])]
-            id = obj["gid"] - self.map_data["UI_firstgid"]
+        for obj in self.map_data.get(self.PAGE_OBJECT_LAYER, []):
+            local_id = self.get_object_local_id(obj, self.PAGE_TILESET)
+            if local_id is None:
+                continue
 
-            if id == 0:
+            topleft_object_position = self.get_object_topleft(obj)
+
+            if local_id == 0:
                 self.image_pos = topleft_object_position
-            elif id == 1:
+            elif local_id == 1:
                 self.name_pos.append(topleft_object_position)

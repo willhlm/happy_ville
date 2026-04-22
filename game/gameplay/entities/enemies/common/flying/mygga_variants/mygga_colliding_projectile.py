@@ -9,4 +9,4 @@ class MyggaCollidingProjectile(MyggaColliding):#bounce around and eject projecti
         dirs = [[1,1],[-1,1],[1,-1],[-1,-1]]
         for direction in dirs:
             obj = Projectile_1(self.hitbox.center, self.game_objects, dir = direction, amp = [3,3])
-            self.game_objects.eprojectiles.add(obj)
+            self.game_objects.projectiles.add_enemy(obj)

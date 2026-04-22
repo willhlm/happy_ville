@@ -1,4 +1,4 @@
-from gameplay.entities.interactables.collisions.event_triggers import *
+from gameplay.entities.areas.event_triggers import *
 
 REGISTER_EVENT_TRIGGERS = {
     'default': EventTrigger,
@@ -7,4 +7,5 @@ REGISTER_EVENT_TRIGGERS = {
     'start_larv_party': StartLarvParty,
     'butterfly_encounter': ButterflyEncounter,    
     'narration': Narration,    
+    'boss_encounter': BossEncounter,
 }

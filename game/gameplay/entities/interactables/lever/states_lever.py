@@ -29,12 +29,20 @@ class Transform_on(Basic_states):
     def __init__(self,entity, **kwarg):
         super().__init__(entity, **kwarg)        
 
+    def handle_input(self,input):
+        if input == 'Transform':
+            self.enter_state('Transform_off')
+
     def increase_phase(self):
         self.enter_state('On')
 
 class Transform_off(Basic_states):
     def __init__(self,entity, **kwarg):
         super().__init__(entity, **kwarg)        
+
+    def handle_input(self,input):
+        if input == 'Transform':
+            self.enter_state('Transform_on')
 
     def increase_phase(self):
         self.enter_state('Off')        

@@ -2,8 +2,8 @@ import pygame, random
 from engine.utils import read_files
 from engine import constants as C
 from gameplay.entities.interactables.base.interactables import Interactables
+from gameplay.entities.shared.components.loot.item_loot_emitter import ItemLootEmitterComponent
 from . import loot_container_states
-from gameplay.entities.items import AmberDroplet
 
 class LootContainers(Interactables):
     def __init__(self, pos, game_objects, state, ID_key):
@@ -16,10 +16,11 @@ class LootContainers(Interactables):
 
         self.health = 3
         self.ID_key = ID_key#an ID key to identify which item that the player is intracting within the world
+        self.loot_emitter = ItemLootEmitterComponent(self, spawn_velocity=[0, -2], spawn_velocity_range=[2, 0])
 
         if state:
             self.currentstate = loot_container_states.Interacted(self)
-            self.hit_component.set_invinsibility(True)
+            #self.hit_component.set_invinsibility(True)
         else:
             self.currentstate = loot_container_states.Idle(self)
 
@@ -27,12 +28,7 @@ class LootContainers(Interactables):
         self.shader_state.update_render(dt)
 
     def loots(self):#this is called when the opening animation is finished
-        for key in self.inventory.keys():#go through all loot
-            for i in range(0,self.inventory[key]):#make that many object for that specific loot and add to gorup
-                obj = self.game_objects.registry.fetch('items', key)(self.hitbox.midtop, self.game_objects)
-                obj.spawn_position()
-                self.game_objects.loot.add(obj)
-            self.inventory[key]=0
+        self.loot_emitter.emit_inventory(self.inventory)
    
     def take_dmg(self, effect):
         """Called by hit_component after modifiers run. Apply damage and effects."""
@@ -46,10 +42,9 @@ class LootContainers(Interactables):
             pass
         else:  # dead
             self.currentstate.handle_input('open')        
-            self.game_objects.world_state.objects.get_bucket(self.game_objects.map.level_name, 'loot_container')[self.ID_key] = True#write in the state dict that this has been picked up
+            self.game_objects.world_state.objects.set_bool(self.game_objects.map.biome_room_name,'loot_container',self.ID_key,True)
+
         return effect
 
     def hit_loot(self):#sput out amvers when hit
-        for i in range(0, random.randint(1,3)):
-            obj = AmberDroplet(self.hitbox.midtop, self.game_objects)
-            self.game_objects.loot.add(obj)
+        self.loot_emitter.emit_item('amber_droplet', quantity=random.randint(1,3))

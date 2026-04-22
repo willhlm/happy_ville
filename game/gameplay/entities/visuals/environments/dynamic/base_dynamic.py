@@ -6,9 +6,7 @@ class BaseDynamic(LayeredObjects):
         self.velocity = [0,0]
         self.friction = [0.5,0]
         self.true_pos = pos
-
-    def group_distance(self):
-        pass
+        self.always_active = True
 
     def update(self, dt):
         super().update(dt)

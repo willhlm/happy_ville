@@ -1,7 +1,7 @@
 import pygame
 from engine.utils import read_files
 from .bg_block import BgBlock
-from gameplay.entities.shared.states import states_shader
+from gameplay.entities.shared.render.entity_shader_manager import EntityShaderManager
 
 '''costume properties accepted from tiled:
 ID: str
@@ -11,7 +11,7 @@ sfx: bool
 class BgFade(BgBlock):
     def __init__(self, pos, game_objects, img, parallax, positions, tiled_id, **properties):
         super().__init__(pos, game_objects, img, parallax)
-        self.shader_state = states_shader.Idle(self)
+        self.shader_state = EntityShaderManager(self)
         self.make_hitbox(positions, pos)
         self.interacted = False
         self.sounds = read_files.load_sounds_list('assets/audio/sfx/entities/visuals/environments/bg_fade/')
@@ -27,7 +27,7 @@ class BgFade(BgBlock):
         else:
             self.trigger = 'collision'
         
-        if self.game_objects.world_state.objects.load_bool(self.game_objects.map.level_name, 'bg_fade', self.id, initial = False):#if it has been interacted with already
+        if self.game_objects.world_state.objects.load_bool(self.game_objects.map.biome_room_name, 'bg_fade', self.id, initial = False):#if it has been interacted with already
             self.interact()
 
     def make_hitbox(self, positions, offset_position):#the rect is the whole screen, need to make it correctly cover the surface part, some how
@@ -46,16 +46,15 @@ class BgFade(BgBlock):
         if self.interacted: return            
         self.shader_state.handle_input('alpha')
         self.interacted = True
-        self.game_objects.world_state.objects.set_bool(self.game_objects.map.level_name, 'bg_fade', self.id,  True)
+        self.game_objects.world_state.objects.set_bool(self.game_objects.map.biome_room_name, 'bg_fade', self.id,  True)
 
     def add_child(self, child):
         self.children.append(child)
         if self.interacted: child.interact()
 
     def draw(self, target):#called before draw in group
-        self.shader_state.draw()    
         pos = (int(self.true_pos[0] - self.parallax[0] * self.game_objects.camera_manager.camera.interp_scroll[0]),int(self.true_pos[1] - self.parallax[0] * self.game_objects.camera_manager.camera.interp_scroll[1]))
-        self.game_objects.game.display.render(self.image, target, position = pos, shader = self.shader)  # Shader render
+        self.shader_state.draw(self.image, target, pos, flip = self.dir[0] > 0)
 
     def _play_sound(self):
         if self.sound_on and self.sounds:

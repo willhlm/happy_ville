@@ -10,7 +10,8 @@ class RhouttaEncounter(Boss):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],40,50)
-        self.health = 2
+        self.vitals.set_max_health(2)
+        self.vitals.set_health(self.vitals.max_health)
         self.attack_distance = [100,10]
         self.attack = HurtBox
         self.dmg = 0

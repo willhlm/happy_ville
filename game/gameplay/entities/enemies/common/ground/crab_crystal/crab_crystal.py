@@ -28,4 +28,4 @@ class CrabCrystal(Enemy):
         for i in range(0, 3):
             vel = random.randint(-3,3)
             new_projectile = Poisonblobb(self.rect.midtop, self.game_objects, dir = [1, -1], amp = [vel, 4])
-            self.game_objects.eprojectiles.add(new_projectile)
+            self.game_objects.projectiles.add_enemy(new_projectile)

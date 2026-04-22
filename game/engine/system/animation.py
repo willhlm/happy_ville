@@ -15,9 +15,9 @@ class Animation():
 
     def update(self, dt):
         frame = int(self.frame)
-        self.entity.image = self.entity.sprites[self.animation_name][frame]
-        self.image_frame = 0#frame#save the current frame. Used for normal maps
-        self.frame += self.framerate * dt * self.direction
+        self.entity.image = self.entity.sprites[self.animation_name][frame]        
+        self.image_frame = frame#save the current frame. Used for normal maps
+        self.frame += self.framerate * dt * self.direction        
 
         if self.frame * self.direction >= len(self.entity.sprites[self.animation_name]):
             self.entity.reset_timer()

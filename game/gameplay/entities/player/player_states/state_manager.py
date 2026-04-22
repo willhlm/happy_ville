@@ -1,65 +1,96 @@
 from .states import *
 
+
 class StateManager():
+    BASE_STATE_KEYS = (
+        'idle',
+        'invisible',
+        'run',
+        'walk',
+        'fall',
+        'land',
+        'jump',
+        'sword_stand1',
+        'sword_stand2',
+        'sword_air1',
+        'sword_air2',
+        'sword_down',
+        'sword_up',
+        'smash_side',
+        'smash_up',
+        'death',
+        'respawn',
+        'heal',
+        'crouch',
+        'plat_bone',
+    )
+
     def __init__(self, entity):
         self.entity = entity
-        self.states = {
-            'idle': IdleState(entity),
-            'invisible': InvisibleState(entity),
-            'run': RunState(entity),
-            'walk': WalkState(entity),
-            'sprint': SprintState(entity),
-            'fall': FallState(entity),
-            'land': LandState(entity),
-            'jump': JumpState(entity),
-            'jump_sprint': JumpSprintState(entity),
-            'dash_ground': DashGroundState(entity),
-            'dash_jump': DashJumpState(entity),
-            'wall_glide': WallGlideState(entity),
-            'belt_glide': BeltGlideState(entity),
-            'wall_jump': WallJumpState(entity),
-            'sword_stand1': SwordStand1State(entity),
-            'sword_stand2': SwordStand2State(entity),
-            'sword_air1': SwordAir1State(entity),
-            'sword_air2': SwordAir2State(entity),
-            'sword_down': SwordDownState(entity),
-            'sword_up': SwordUpState(entity),
-            'smash_side': SmashSideState(entity),
-            'smash_up': SmashUpState(entity),
-            'dash_air': DashAirState(entity),
-            'death': DeathState(entity),
-            'respawn': ReSpawnState(entity),#used when respawning after death
-            'heal': HealState(entity),
-            'crouch': CrouchState(entity),
-            'plat_bone': PlantBoneState(entity),
-            'thunder': ThunderState(entity),
-            'shield': ShieldState(entity),
-            'wind': WindState(entity),
-            'slow_motion': SlowMotionState(entity),
-            'bow': BowState(entity),
+        self._state_factories = {
+            'idle': IdleState,
+            'invisible': InvisibleState,
+            'run': RunState,
+            'walk': WalkState,
+            'sprint': SprintState,
+            'fall': FallState,
+            'land': LandState,
+            'jump': JumpState,
+            'jump_sprint': JumpSprintState,
+            'dash_ground': DashGroundState,
+            'dash_jump': DashJumpState,
+            'wall_glide': WallGlideState,
+            'belt_glide': BeltGlideState,
+            'wall_jump': WallJumpState,
+            'sword_stand1': SwordStand1State,
+            'sword_stand2': SwordStand2State,
+            'sword_air1': SwordAir1State,
+            'sword_air2': SwordAir2State,
+            'sword_down': SwordDownState,
+            'sword_up': SwordUpState,
+            'smash_side': SmashSideState,
+            'smash_up': SmashUpState,
+            'dash_air': DashAirState,
+            'death': DeathState,
+            'respawn': ReSpawnState,
+            'heal': HealState,
+            'crouch': CrouchState,
+            'plat_bone': PlantBoneState,
+            'thunder': ThunderState,
+            'shield': ShieldState,
+            'wind': WindState,
+            'slow_motion': SlowMotionState,
+            'bow': BowState,
         }
+        self.states = {}
+        self.install_states(self.BASE_STATE_KEYS)
 
         self.composite_state = self.states['idle']
         self.composite_state.enter_phase('main')
-        self._state_factories = {'dash_air': [('dash_air', DashAirState)],
-                                'smash_up': [('smash_up', SmashUpState)],
-                                'wall': [('wall_jump', WallJumpState), ('wall_glide', WallGlideState), ('belt_glide', BeltGlideState)],
-                                'dash': [('dash_ground', DashGroundState), ('dash_jump', DashJumpState)],
-                                'bow': [('bow', BowState)],
-                                'thunder': [('thunder', ThunderState)],
-                                'shield': [('shield', ShieldState)],
-                                'wind': [('wind', WindState)],
-                                'slow_motion': [('slow_motion', SlowMotionState)]}#should contain all the states that can be created, so that they can be be appended to self.stataes when needed
 
-    def enter_state(self, state_name, phase = None, **kwargs):
+    def install_state(self, state_name):
+        if state_name not in self.states:
+            self.states[state_name] = self._state_factories[state_name](self.entity)
+
+    def install_states(self, state_names):
+        for state_name in state_names:
+            self.install_state(state_name)
+
+    def has_state(self, state_name):
+        return state_name in self.states
+
+    def enter_state(self, state_name, phase=None, **kwargs):
         state = self.states.get(state_name)
-        if state and state.allowed():#if the requested state is unlocked
-            self.composite_state.exit()#exit the old one before entering/setting a new state
+        if state and state.allowed():
+            self.composite_state.exit()
             state.enter_state(phase, **kwargs)
             self.composite_state = state
 
-    def update(self, dt):#called from player
-        self.composite_state.update(dt)#main state
+    def update(self, dt):
+        self.composite_state.update(dt)
+
+    def consume_contact_state(self):
+        self.composite_state.consume_contact_state()
 
     def handle_input(self, input, **kwargs):
         self.composite_state.handle_input(input, **kwargs)
@@ -70,12 +101,11 @@ class StateManager():
     def handle_release_input(self, input):
         self.composite_state.handle_release_input(input)
 
-    def handle_movement(self, event):#called from gameplay loop state
+    def handle_movement(self, event):
         self.composite_state.handle_movement(event)
 
-    def increase_phase(self):#called when an animation is finished for that state
-        self.composite_state.increase_phase()
+    def can_interact(self):
+        return self.composite_state.can_interact()
 
-    def unlock_state(self, name):#should be called when unlocking a new state
-        for state_name, cls in self._state_factories[name]:
-            self.states[state_name] = cls(self.entity)
+    def increase_phase(self):
+        self.composite_state.increase_phase()

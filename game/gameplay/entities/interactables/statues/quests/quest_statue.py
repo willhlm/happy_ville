@@ -2,7 +2,6 @@ import pygame
 from engine.utils import read_files
 from gameplay.entities.interactables.statues.quests.base.statues import Statues
 from gameplay.narrative import dialogue
-from gameplay.entities.shared.states import states_shader
 
 class QuestStatue(Statues):#the status spawning a portal, balls etc - challange rooms
     def __init__(self, pos, game_objects, ID):
@@ -21,11 +20,10 @@ class QuestStatue(Statues):#the status spawning a portal, balls etc - challange 
             allow_comments = False,
         )#handles dialoage and what to say
 
-        if self.interacted:
-            self.shader_state = states_shader.Tint(self, colour = [0,0,0,100])
-        else:
+        if not self.interacted:
             game_objects.lights.add_light(self)
-            self.shader_state = states_shader.Idle(self)
+        else:
+            self.shader_state.enter_state('tint', colour = [0,0,0,100])
 
     def on_conversation_complete(self):
         self.game_objects.quests_events.initiate_quest(self.ID, monument = self)

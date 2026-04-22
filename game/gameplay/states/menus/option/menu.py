@@ -26,14 +26,14 @@ class OptionMenu(BaseUI):
         self.game.game_objects.sound.play_ui_sound('on_select')
 
     def update_render(self, dt):
-        self.game.game_objects.ui.uis['menu'].update_time(dt)
+        self.game.game_objects.ui.menu.update_time(dt)
         self.menu_ui.buttons[self.current_button].active()
         for arrow in self.menu_ui.arrows:
             arrow.update(dt)#make them move back and forth
 
     def render(self):
         self.game.screen_manager.screen.clear(0,0,0,0)
-        self.game.game_objects.ui.uis['menu'].render_background(self.game.screen_manager.screen)
+        self.game.game_objects.ui.menu.render_background(self.game.screen_manager.screen)
 
         #blit buttons
         for b in self.menu_ui.buttons:

@@ -3,7 +3,7 @@ import math, numpy as np
 
 class Shaders():
     def __init__(self, post_process):
-        self.post_process = post_process#TODO change this to game_objects
+        self.post_process = post_process
 
     def update_render(self, dt):
         pass
@@ -24,7 +24,7 @@ class Vignette(Shaders):
         super().__init__(post_process)
         self.colour = kwargs.get('colour', [0.0, 0.0, 0.0, 1.0])
         self.vignette_intensity = kwargs.get('vignette_intensity', 1.0)
-        self.vignette_opacity = kwargs.get('vignette_opacity', 0.1)  # More visible
+        self.vignette_opacity = kwargs.get('vignette_opacity', 0.7)
 
     def set_uniforms(self, **kwargs):
         shader = self.post_process.game_objects.shaders['vignette']
@@ -33,17 +33,20 @@ class Vignette(Shaders):
         shader['vignette_intensity'] = self.vignette_intensity
         shader['vignette_opacity'] = self.vignette_opacity
 
-    def draw(self, temp_layer, composite_screen):
-        """For intermediate rendering in pipeline"""
+    def _apply(self, source_layer, target_layer):
         self.set_uniforms()
-        #print(temp_layer.size, composite_screen.size)
-        self.post_process.game_objects.game.display.render(temp_layer.texture, composite_screen, shader=self.post_process.game_objects.shaders['vignette'])
-        return composite_screen
+        self.post_process.game_objects.game.display.render(
+            source_layer.texture,
+            target_layer,
+            shader=self.post_process.game_objects.shaders['vignette'],
+        )
+        return target_layer
 
-    def draw_to_composite(self, temp_layer, composite_screen):
-        """Final render back to composite_screen"""
-        self.set_uniforms()
-        self.post_process.game_objects.game.display.render(temp_layer.texture, composite_screen, shader=self.post_process.game_objects.shaders['vignette'])
+    def draw(self, temp_layer, input_layer):
+        return self._apply(input_layer, temp_layer)
+
+    def draw_to_composite(self, temp_layer, final_layer):
+        self._apply(temp_layer, final_layer)
 
 class Chromatic_aberration(Shaders):
     def __init__(self, post_process, **kwarg):
@@ -55,16 +58,22 @@ class Chromatic_aberration(Shaders):
         if self.duration < 0:
             self.post_process.remove_shader('chromatic_aberration')
 
-    def draw(self, temp_layer, composite_screen):#needs the screen
-        self.post_process.game_objects.game.display.render(composite_screen.texture, temp_layer, shader = self.post_process.game_objects.shaders['chromatic_aberration'])#shader render
+    def _apply(self, source_layer, target_layer):
+        self.post_process.game_objects.game.display.render(
+            source_layer.texture,
+            target_layer,
+            shader=self.post_process.game_objects.shaders['chromatic_aberration'],
+        )
+        return target_layer
+
+    def draw(self, temp_layer, input_layer):#needs the screen
+        self._apply(input_layer, temp_layer)
         return temp_layer
 
-    def draw_to_composite(self, temp_layer, composite_screen):
-        self.post_process.game_objects.game.display.render(composite_screen.texture, temp_layer)#copy the screen
-        #composite_screen.clear(0,0,0,0)        
-        self.post_process.game_objects.game.display.render(temp_layer.texture, composite_screen, shader=self.post_process.game_objects.shaders['chromatic_aberration'])
+    def draw_to_composite(self, temp_layer, final_layer):
+        self._apply(temp_layer, final_layer)
 
-class Blur(Shaders):
+class Blur(Shaders):#only on composite
     def __init__(self, post_process, **kwarg):
         super().__init__(post_process)
         self.radius = kwarg.get('radius',1)
@@ -72,19 +81,23 @@ class Blur(Shaders):
     def set_radius(self, radius):
         self.radius = radius
 
-    def draw(self, temp_layer, composite_screen):#needs the screen
+    def _apply(self, source_layer, target_layer):
         self.post_process.game_objects.shaders['blur']['blurRadius'] = self.radius
         self.post_process.game_objects.game.display.use_premultiplied_alpha_mode()
-        #self.post_process.game_objects.game.display.use_alpha_blending(False)#remove thr black outline
-        self.post_process.game_objects.game.display.render(composite_screen.texture, temp_layer, shader = self.post_process.game_objects.shaders['blur'])#shader render
+        self.post_process.game_objects.game.display.render(
+            source_layer.texture,
+            target_layer,
+            shader=self.post_process.game_objects.shaders['blur'],
+        )
         self.post_process.game_objects.game.display.use_standard_alpha_mode()
-        #self.post_process.game_objects.game.display.use_alpha_blending(True)#remove thr black outline
+        return target_layer
+
+    def draw(self, temp_layer, input_layer):#needs the screen
+        self._apply(input_layer, temp_layer)
         return temp_layer
 
-    def draw_to_composite(self, temp_layer, composite_screen):
-        self.post_process.game_objects.shaders['blur']['blurRadius'] = self.radius
-        self.post_process.game_objects.game.display.render(composite_screen.texture, temp_layer)#copy the screen
-        self.post_process.game_objects.game.display.render(temp_layer.texture, composite_screen, shader=self.post_process.game_objects.shaders['blur'])    
+    def draw_to_composite(self, temp_layer, final_layer):
+        self._apply(temp_layer, final_layer)
 
 class Blur_fast(Shaders):
     def __init__(self, post_process, **kwarg):
@@ -122,16 +135,22 @@ class Blur_fast(Shaders):
         self.radius = float(radius)
         self._rebuild_kernel()
 
-    def draw(self, temp_layer, composite_screen):
+    def _apply(self, source_layer, target_layer):
         blur = self.post_process.game_objects.shaders["blur_fast"]
         display = self.post_process.game_objects.game.display
 
         blur["r"] = self._r_int
         blur["weights"] = self._weights
-        blur["imageTexture"] = composite_screen.texture
+        blur["imageTexture"] = source_layer.texture
 
-        display.render(composite_screen.texture, temp_layer, shader=blur)
-        return temp_layer
+        display.render(source_layer.texture, target_layer, shader=blur)
+        return target_layer
+
+    def draw(self, temp_layer, input_layer):
+        return self._apply(input_layer, temp_layer)
+
+    def draw_to_composite(self, temp_layer, final_layer):
+        self._apply(temp_layer, final_layer)
 
 class Bloom(Shaders):
     def __init__(self, post_process, **kwarg):
@@ -145,16 +164,20 @@ class Bloom(Shaders):
         self.post_process.game_objects.shaders['bloom']['bloomIntensity'] = self.bloomIntensity
         self.post_process.game_objects.shaders['bloom']['bloomThreshold'] = self.bloomThreshold
 
-    def draw(self, temp_layer, composite_screen):
+    def _apply(self, source_layer, target_layer):
         self.set_uniforms()
-        self.post_process.game_objects.game.display.render(composite_screen.texture, temp_layer, shader = self.post_process.game_objects.shaders['bloom'])
-        self.post_process.game_objects.game.display.render(temp_layer.texture, composite_screen)
-        return composite_screen
+        self.post_process.game_objects.game.display.render(
+            source_layer.texture,
+            target_layer,
+            shader=self.post_process.game_objects.shaders['bloom'],
+        )
+        return target_layer
 
-    def draw_to_composite(self, temp_layer, composite_screen):#the final drawing onto the screen
-        self.set_uniforms()
-        self.post_process.game_objects.game.display.render(composite_screen.texture, temp_layer, shader = self.post_process.game_objects.shaders['bloom'])
-        self.post_process.game_objects.game.display.render(temp_layer.texture, composite_screen)
+    def draw(self, temp_layer, input_layer):
+        return self._apply(input_layer, temp_layer)
+
+    def draw_to_composite(self, temp_layer, final_layer):#the final drawing onto the screen
+        self._apply(temp_layer, final_layer)
 
 class Glow(Shaders):
     def __init__(self, post_process, **kwarg):
@@ -162,9 +185,9 @@ class Glow(Shaders):
         self.glowRadius = kwarg.get('radius',5)
         self.glowThreshold = kwarg.get('threshould',0.4)
         self.glowIntensity = kwarg.get('intensity',10)
-        self.targetColor = kwarg.get('target_colour',(1,0,0))
+        self.targetColor = kwarg.get('target_colour',(1,1,1))
         self.glowColor = kwarg.get('colour',(1,0,0))
-        self.colorTolerance = kwarg.get('tolerance',0)
+        self.colorTolerance = kwarg.get('tolerance',0.2)
 
     def set_uniforms(self):
         self.post_process.game_objects.shaders['glow']['glowRadius'] = self.glowRadius
@@ -174,39 +197,74 @@ class Glow(Shaders):
         self.post_process.game_objects.shaders['glow']['glowColor'] = self.glowColor
         self.post_process.game_objects.shaders['glow']['colorTolerance'] = self.colorTolerance
 
-    def draw(self, temp_layer, composite_screen):
+    def _apply(self, source_layer, target_layer):
         self.set_uniforms()
-        self.post_process.game_objects.game.display.render(composite_screen.texture, temp_layer, shader = self.post_process.game_objects.shaders['glow'])
-        self.post_process.game_objects.game.display.render(temp_layer.texture, composite_screen)
-        return composite_screen
+        self.post_process.game_objects.game.display.render(
+            source_layer.texture,
+            target_layer,
+            shader=self.post_process.game_objects.shaders['glow'],
+        )
+        return target_layer
 
-    def draw_to_composite(self, temp_layer, composite_screen):#the final drawing onto the screen
-        self.set_uniforms()
-        self.post_process.game_objects.game.display.render(composite_screen.texture, temp_layer, shader = self.post_process.game_objects.shaders['glow'])
-        self.post_process.game_objects.game.display.render(temp_layer.texture, composite_screen)
+    def draw(self, temp_layer, input_layer):
+        return self._apply(input_layer, temp_layer)
 
-class White_balance(Shaders):
+    def draw_to_composite(self, temp_layer, final_layer):#the final drawing onto the screen
+        self._apply(temp_layer, final_layer)
+
+class White_balance(Shaders):#only on composite
     def __init__(self, post_process, **kwarg):
         super().__init__(post_process)
-        self.temperature = kwarg.get('temperature', 0.2)
+        self.temperature = kwarg.get('temperature', 1)
         self.init_temperature = 0
 
     def update_render(self, dt):
         self.init_temperature += dt * 0.01
         self.init_temperature = min(self.init_temperature, self.temperature)
 
-    def draw(self, temp_layer, composite_screen):
-        self.post_process.game_objects.shaders['white_balance']['temperature'] = self.init_temperature
-        self.post_process.game_objects.game.display.render(composite_screen.texture, temp_layer, shader = self.post_process.game_objects.shaders['white_balance'])
-        self.post_process.game_objects.game.display.render(temp_layer.texture, composite_screen)
-        return composite_screen
+    def _apply(self, source_layer, target_layer):
+        shader = self.post_process.game_objects.shaders['white_balance']
+        shader['temperature'] = self.init_temperature
+        self.post_process.game_objects.game.display.render(
+            source_layer.texture,
+            target_layer,
+            shader=shader,
+        )
+        return target_layer
 
-    def draw_to_composite(self, temp_layer, composite_screen):#the final drawing onto the screen
-        self.post_process.game_objects.shaders['white_balance']['temperature'] = self.init_temperature
-        self.post_process.game_objects.game.display.render(composite_screen.texture, temp_layer, shader = self.post_process.game_objects.shaders['white_balance'])
-        self.post_process.game_objects.game.display.render(temp_layer.texture, composite_screen)
+    def draw(self, temp_layer, input_layer):
+        return self._apply(input_layer, temp_layer)
 
-class Zoom(Shaders):#only zoom in?
+    def draw_to_composite(self, temp_layer, final_layer):#the final drawing onto the screen
+        self._apply(temp_layer, final_layer)
+
+class Depth_darken(Shaders):
+    def __init__(self, post_process, **kwarg):
+        super().__init__(post_process)
+        self.colour = kwarg.get('colour', (0.0, 0.0, 0.0, 0.0))
+
+    def set_uniforms(self):
+        self.post_process.game_objects.shaders['depth_darken']['colour'] = self.colour
+
+    def _apply(self, source_layer, target_layer):
+        self.set_uniforms()
+        display = self.post_process.game_objects.game.display
+        #display.use_alpha_blending(False)
+        display.render(
+            source_layer.texture,
+            target_layer,
+            shader=self.post_process.game_objects.shaders['depth_darken'],
+        )
+        #display.use_alpha_blending(True)
+        return target_layer
+
+    def draw(self, temp_layer, input_layer):
+        return self._apply(input_layer, temp_layer)
+
+    def draw_to_composite(self, temp_layer, final_layer):
+        self._apply(temp_layer, final_layer)
+
+class Zoom(Shaders):#only on composite
     def __init__(self, post_process, **kwarg):
         super().__init__(post_process)
         self.zoom = 1#zoom scale
@@ -214,6 +272,8 @@ class Zoom(Shaders):#only zoom in?
         self.rate = kwarg.get('rate', 1)
         self.scale = kwarg.get('scale', 0.5)
         self.target = -1#remove shader when zoom reaches this value. Negatuve so it never reaches this on zoom in.
+        self.work_layer = None
+        self.work_size = None
 
     def zoom_out(self, **kwarg):
         self.scale = kwarg.get('scale', 1)
@@ -232,30 +292,59 @@ class Zoom(Shaders):#only zoom in?
         self.post_process.game_objects.shaders['zoom']['zoom_amount'] = self.zoom
         self.post_process.game_objects.shaders['zoom']['zoom_center'] = self.center
 
-    def draw(self, temp_layer, composite_screen):
-        self.set_uniforms()
-        self.post_process.game_objects.game.display.render(composite_screen.texture, self.post_process.temp_layer, shader = self.post_process.game_objects.shaders['zoom'])#makes a zoomed copy of the screen
-        self.post_process.game_objects.game.display.render(self.post_process.temp_layer.texture, composite_screen, flip = [False, True])#shader render
-        return composite_screen.texture
+    def _ensure_work_layer(self, size):
+        if self.work_size != tuple(size):
+            if self.work_layer:
+                self.work_layer.release()
+            self.work_size = tuple(size)
+            self.work_layer = self.post_process.make_layer(size)
 
-    def draw_to_composite(self, temp_layer, composite_screen):
-        self.draw( temp_layer, composite_screen)
+    def _apply(self, source_layer, target_layer):
+        self.set_uniforms()
+        self._ensure_work_layer(source_layer.size)
+        self.post_process.game_objects.game.display.render(
+            source_layer.texture,
+            self.work_layer,
+            shader=self.post_process.game_objects.shaders['zoom'],
+        )
+        self.post_process.game_objects.game.display.render(
+            self.work_layer.texture,
+            target_layer,
+            flip=[False, True],
+        )
+        return target_layer
+
+    def draw(self, temp_layer, input_layer):
+        return self._apply(input_layer, temp_layer)
+
+    def draw_to_composite(self, temp_layer, final_layer):
+        self._apply(temp_layer, final_layer)
 
 class Speed_lines(Shaders):
     def __init__(self, post_process, **kwarg):
         super().__init__(post_process)
-        self.noise_layer = post_process.game_objects.game.display.make_layer(post_process.game_objects.game.window_size)#TODO
-        self.empty = post_process.game_objects.game.display.make_layer(post_process.game_objects.game.window_size)#TODO
-
         self.colour = kwarg.get('colour', (1,1,1,1))
-        size = post_process.game_objects.game.window_size
-        center = kwarg.get('center', (size[0] * 0.5, size[1] * 0.5))
-        self.center = [center[0]/size[0], center[1]/size[1]]
+        window_size = self.post_process.game_objects.game.window_size
+        center = kwarg.get('center', (window_size[0] * 0.5, window_size[1] * 0.5))
+        self.center = [center[0] / window_size[0], center[1] / window_size[1]]
         self.number = kwarg.get('number', 1)
         self.time = 0
+        self.noise_layer = None
+        self.empty = None
+        self.layer_size = None
 
     def update_render(self, dt):
         self.time += dt * 0.1
+
+    def _ensure_layers(self, size):
+        if self.layer_size != tuple(size):
+            if self.noise_layer:
+                self.noise_layer.release()
+            if self.empty:
+                self.empty.release()
+            self.layer_size = tuple(size)
+            self.noise_layer = self.post_process.make_layer(size)
+            self.empty = self.post_process.make_layer(size)
 
     def set_uniforms(self):
         self.post_process.game_objects.shaders['speed_lines']['TIME'] = self.time
@@ -264,56 +353,24 @@ class Speed_lines(Shaders):
         self.post_process.game_objects.shaders['speed_lines']['center'] = self.center
         self.post_process.game_objects.shaders['speed_lines']['line_count'] = self.number
 
-    def draw(self, temp_layer, composite_screen):
-        """For intermediate rendering in pipeline"""
-        self.post_process.game_objects.shaders['noise_perlin']['u_resolution'] = self.post_process.game_objects.game.window_size
+    def _apply(self, source_layer, target_layer):
+        self._ensure_layers(source_layer.size)
+        self.post_process.game_objects.shaders['noise_perlin']['u_resolution'] = source_layer.size
         self.post_process.game_objects.shaders['noise_perlin']['u_time'] = self.time
         self.post_process.game_objects.shaders['noise_perlin']['scroll'] = [0,0]
         self.post_process.game_objects.shaders['noise_perlin']['scale'] = [70,70]
         self.post_process.game_objects.game.display.render(self.empty.texture, self.noise_layer, shader=self.post_process.game_objects.shaders['noise_perlin'])#make perlin noise texture
 
         self.set_uniforms()
-        self.post_process.game_objects.game.display.render(temp_layer.texture, composite_screen, shader = self.post_process.game_objects.shaders['speed_lines'])#shader render
-        return composite_screen
+        self.post_process.game_objects.game.display.render(
+            source_layer.texture,
+            target_layer,
+            shader=self.post_process.game_objects.shaders['speed_lines'],
+        )
+        return target_layer
 
-    def draw_to_composite(self, temp_layer, composite_screen):
-        """Final render back to composite_screen"""
-        self.draw(temp_layer, composite_screen)
+    def draw(self, temp_layer, input_layer):
+        return self._apply(input_layer, temp_layer)
 
-class Slowmotion(Shaders):
-    def __init__(self, post_process, **kwarg):
-        super().__init__(post_process)
-        self.screen_copy = post_process.game_objects.game.display.make_layer(post_process.game_objects.game.display_size)#TODO
-        self.empty = post_process.game_objects.game.display.make_layer(post_process.game_objects.game.display_size)#TODO
-        self.empty2 = post_process.game_objects.game.display.make_layer(post_process.game_objects.game.display_size)#TODO
-
-        self.noise_layer = post_process.game_objects.game.display.make_layer(post_process.game_objects.game.display_size)#TODO
-        self.time = 0
-        self.duration = kwarg.get('duration', 20)
-
-    def update_render(self, dt):
-        self.time += dt * 0.01
-        self.duration -= dt
-        if self.duration <= 0:
-            self.post_process.game_objects.post_process.remove_shader('slowmotion')
-
-    def draw(self, temp_layer, composite_screen):
-        self.post_process.game_objects.shaders['noise_perlin']['u_resolution'] = self.post_process.game_objects.game.display_size
-        self.post_process.game_objects.shaders['noise_perlin']['u_time'] = self.time
-        self.post_process.game_objects.shaders['noise_perlin']['scroll'] = [self.post_process.game_objects.camera_manager.camera.scroll[0], -self.post_process.game_objects.camera_manager.camera.scroll[1]]
-        self.post_process.game_objects.shaders['noise_perlin']['scale'] = [3, 3]
-        self.post_process.game_objects.game.display.render(temp_layer.texture, self.noise_layer, shader=self.post_process.game_objects.shaders['noise_perlin'])#make perlin noise texture
-
-        self.post_process.game_objects.game.display.render(composite_screen.texture, self.screen_copy)#big
-
-        self.post_process.game_objects.shaders['slowmotion']['TIME'] = self.time
-        self.post_process.game_objects.shaders['slowmotion']['NOISE_TEXTURE'] = self.noise_layer.texture
-        self.post_process.game_objects.shaders['slowmotion']['SCREEN_TEXTURE'] = self.screen_copy.texture
-
-        self.post_process.game_objects.game.display.render(temp_layer.texture, composite_screen, shader = self.post_process.game_objects.shaders['slowmotion'])#shader render
-        return composite_screen
-
-    def draw_to_composite(self, temp_layer, composite_screen):
-        """Final render back to composite_screen"""
-        self.draw(temp_layer, composite_screen)
-
+    def draw_to_composite(self, temp_layer, final_layer):
+        self._apply(temp_layer, final_layer)

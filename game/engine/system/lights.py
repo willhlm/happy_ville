@@ -3,7 +3,7 @@ import pygame, math, random
 class Lights():
     def __init__(self, game_objects):
         self.game_objects = game_objects
-        self.set_ambiance([0,0,0,0])        
+        self.set_ambient_light([0,0,0,0])
         self.lights_sources = []#append lights
         self.shaders = {'light':game_objects.shaders['light'],'blur':game_objects.shaders['blur'],'blend':game_objects.shaders['blend']}
 
@@ -19,12 +19,12 @@ class Lights():
         self.max_occluder_rectangles = 20#a value hard coded in light shader
         self.update_render(0)
 
-    def set_ambiance(self, colour):        
-        self.ambient = colour#ambient colour
+    def set_ambient_light(self, colour):
+        self.ambient = colour
 
     def new_map(self):#called when loading a new map from map loader
         self.clear_lights()
-        self.set_ambiance([0,0,0,0])    
+        self.set_ambient_light([0,0,0,0])
 
     def clear_normal_map(self):#called at the begning of draw in game objects
         self.normal_map.clear(0, 0, 0, 0)
@@ -62,7 +62,7 @@ class Lights():
             self.occluder_start_index[index] = rectangle_cursor
             return rectangle_cursor
         else:
-            platforms = self.game_objects.collisions.sprite_collide(light, self.game_objects.platforms)  # Collision -> collision occurs at coordinates as per tiled position
+            platforms = self.game_objects.physics.collision_queries.sprite_collide(light, self.game_objects.platforms)  # Collision -> collision occurs at coordinates as per tiled position
             available = max(self.max_occluder_rectangles - rectangle_cursor, 0)
             platforms = platforms[:available]
             self.occluder_start_index[index] = rectangle_cursor
@@ -111,7 +111,7 @@ class Lights():
 
         self.game_objects.game.display.render(target.texture, self.screen_copy)#copy the screen, the display sized one
         self.shaders['blend']['background'] = self.screen_copy.texture
-        self.shaders['blur']['blurRadius'] = 5
+        self.shaders['blur']['blurRadius'] = 2
 
         self.game_objects.game.display.use_alpha_blending(False)#need to turn of blending to remove black outline in places with no ambient dark. It looks beter if it is always True for dark areas
         self.game_objects.game.display.render(self.layer1.texture, self.layer2, shader = self.shaders['light'])

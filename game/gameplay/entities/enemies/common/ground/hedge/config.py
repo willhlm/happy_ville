@@ -16,6 +16,11 @@ ENEMY_CONFIG = {
         'initial_state': 'sleep',   
         
         'states': {
+            'wait': {},
+            'hurt': {},
+            'death': {},
+            'dead': {},
+                        
             'sleep': {
                 'deciders': {
                     'check_player': {

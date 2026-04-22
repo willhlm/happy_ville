@@ -36,4 +36,3 @@ class Opening(Basic_states):
 class Interacted(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)      
-        print('re')  

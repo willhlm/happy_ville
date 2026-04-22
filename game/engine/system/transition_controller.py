@@ -6,6 +6,7 @@ class TransitionController:
         self._busy = False
 
         self._action: Optional[Callable[[], Any]] = None
+        self._on_covered: Optional[Callable[[], Any]] = None
         self._after: Optional[Callable[[], Any]] = None
 
         self._fade_in_started = False
@@ -17,13 +18,14 @@ class TransitionController:
     def is_busy(self):
         return self._busy
 
-    def run(self,previous_state,*,style: str = "fade_black", action: Optional[Callable[[], Any]] = None, after: Optional[Callable[[], Any]] = None, **fade_kwargs):
+    def run(self,previous_state,*,style: str = "fade_black", action: Optional[Callable[[], Any]] = None, on_covered: Optional[Callable[[], Any]] = None, after: Optional[Callable[[], Any]] = None, **fade_kwargs):
         if self._busy:
             return  # or queue
 
         self._busy = True
         self._fade_in_started = False
         self._action = action
+        self._on_covered = on_covered
         self._after = after
 
         # Optional: freeze here (input/ai/physics) if you have such a mechanism
@@ -40,6 +42,9 @@ class TransitionController:
         if self._action:
             self._action()
 
+        if self._on_covered:
+            self._on_covered()
+
         # Start fade in
         self._fade_in_started = True
         self.game_objects.game.state_manager.enter_state("fade_in")
@@ -54,6 +59,7 @@ class TransitionController:
                 self._after()
         finally:
             self._action = None
+            self._on_covered = None
             self._after = None
             self._busy = False
             self._fade_in_started = False

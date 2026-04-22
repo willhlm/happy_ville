@@ -1,9 +1,9 @@
 import pygame, math
-from gameplay.entities.projectiles.base.projectiles import Projectiles
+from gameplay.entities.projectiles.base.platform_projectile import PlatformProjectile
 from engine.utils import read_files
 from . import seed_spawner
 
-class Arrow(Projectiles):#should it be called seed?
+class Arrow(PlatformProjectile):#should it be called seed?
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects)
         self.image = Arrow.sprites['idle'][0]
@@ -62,19 +62,15 @@ class Arrow(Projectiles):#should it be called seed?
     def collision_enemy(self,collision_enemy):
         self.kill()
 
-    def right_collision(self, block, type = 'Wall'):
-        self.collision_platform([1, 0], block)
+    def handle_platform_collision(self, collision):
+        if collision.axis == 'x':
+            hit_direction = [1, 0] if collision.side == 'right' else [-1, 0]
+        else:
+            hit_direction = [0, -1] if collision.side == 'bottom' else [0, 1]
 
-    def left_collision(self, block, type = 'Wall'):
-        self.collision_platform([-1, 0], block)
+        self._collide_with_platform(hit_direction, collision.collider)
 
-    def down_collision(self, block):
-        self.collision_platform([0, -1], block)
-
-    def top_collision(self, block):
-        self.collision_platform([0, 1], block)
-
-    def collision_platform(self, dir, block):
+    def _collide_with_platform(self, dir, block):
         self.velocity = [0,0]
         if self.once: return
         self.once = True

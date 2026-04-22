@@ -16,7 +16,6 @@ class Vines_2(LayeredObjects):#light forest cave
 
     def update(self, dt):
         self.time += dt
-        self.group_distance()
 
     def draw(self,target):
         self.shader['TIME'] = self.time

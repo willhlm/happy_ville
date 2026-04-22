@@ -17,12 +17,41 @@
         {
          "draworder":"topdown",
          "id":2,
-         "name":"elements",
+         "name":"shared",
          "objects":[
                 {
                  "gid":762,
+                 "height":64,
+                 "id":25,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"direction",
+                         "type":"string",
+                         "value":"left"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":64,
+                 "x":1024,
+                 "y":256
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":3,
+         "name":"markers",
+         "objects":[
+                {
+                 "gid":761,
                  "height":32,
-                 "id":16,
+                 "id":21,
                  "name":"",
                  "properties":[
                         {
@@ -33,14 +62,14 @@
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":112,
-                 "x":672,
+                 "width":128,
+                 "x":640,
                  "y":320
                 }, 
                 {
-                 "gid":762,
+                 "gid":761,
                  "height":32,
-                 "id":17,
+                 "id":22,
                  "name":"",
                  "properties":[
                         {
@@ -51,14 +80,32 @@
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":112,
+                 "width":128,
+                 "x":448,
+                 "y":352
+                }, 
+                {
+                 "gid":761,
+                 "height":32,
+                 "id":23,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"text",
+                         "type":"string",
+                         "value":"nordveden"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":128,
                  "x":480,
-                 "y":320
+                 "y":256
                 }, 
                 {
-                 "gid":762,
+                 "gid":761,
                  "height":32,
-                 "id":18,
+                 "id":24,
                  "name":"",
                  "properties":[
                         {
@@ -69,45 +116,9 @@
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":112,
+                 "width":128,
                  "x":288,
-                 "y":288
-                }, 
-                {
-                 "gid":762,
-                 "height":32,
-                 "id":19,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"text",
-                         "type":"string",
-                         "value":"nordveden"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":112,
-                 "x":544,
-                 "y":224
-                }, 
-                {
-                 "gid":762,
-                 "height":32,
-                 "id":20,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"text",
-                         "type":"string",
-                         "value":"dark_forest"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":112,
-                 "x":672,
-                 "y":224
+                 "y":352
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -115,8 +126,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":3,
- "nextobjectid":21,
+ "nextlayerid":4,
+ "nextobjectid":26,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -137,7 +148,11 @@
         }, 
         {
          "firstgid":761,
-         "source":"worldmap_UI.tsx"
+         "source":"map_markers.tsx"
+        }, 
+        {
+         "firstgid":762,
+         "source":"..\/..\/..\/shared.tsx"
         }],
  "tilewidth":32,
  "type":"map",

@@ -2,11 +2,12 @@ import random, math
 from engine.utils import read_files
 from engine.system import animation
 from gameplay.entities.shared.states import states_basic
-from .base_dynamic import BaseDynamic
+from gameplay.entities.platforms.base.dynamic_platform import DynamicPlatform
 
-class Bubble(BaseDynamic):#dynamic one: #shoudl be added to platforms and dynamic_platforms groups
+class Bubble(DynamicPlatform):#dynamic one: #shoudl be added to platforms and dynamic_platforms groups
     def __init__(self, pos, game_objects, **prop):
         super().__init__(pos, game_objects)
+        self.crushes_entities = False
         self.sprites = Bubble.sprites
         self.image = self.sprites['idle'][0]
         self.rect[2], self.rect[3] = self.image.width, self.image.height
@@ -60,24 +61,19 @@ class Bubble(BaseDynamic):#dynamic one: #shoudl be added to platforms and dynami
             self.velocity[0] += dt*(0 - 0.06*self.velocity[0])
         #self.velocity[0] += dt*(0 - 0.1*self.velocity[0])
 
-    def collide_x(self, entity):  # Handles horizontal collision
-        if entity.hitbox.right >= self.hitbox.left and entity.old_hitbox.right <= self.old_hitbox.left:
-            entity.right_collision(self)
-            self.collided_right = True
-        if entity.hitbox.left <= self.hitbox.right and entity.old_hitbox.left >= self.old_hitbox.right:
-            entity.left_collision(self)
-            self.collided_left = True
-        entity.update_rect_x()
+    def on_platform_collision(self, entity, side, axis, collision_kind='block'):
+        if axis == 'x':
+            if side == 'right':
+                self.collided_right = True
+            elif side == 'left':
+                self.collided_left = True
+            return
 
-    def collide_y(self, entity):  # Handles vertical collision
-        if entity.hitbox.bottom >= self.hitbox.top and entity.old_hitbox.bottom <= self.old_hitbox.top:
-            entity.down_collision(self)
-            entity.limit_y()
-            self.collided_y = True
-        if entity.hitbox.top <= self.hitbox.bottom and entity.old_hitbox.top >= self.old_hitbox.bottom:
-            entity.top_collision(self)
-            self.deactivate()
-        entity.update_rect_y()  # Update player’s vertical position
+        if axis == 'y':
+            if side == 'bottom':
+                self.collided_y = True
+            elif side == 'top':
+                self.deactivate()
 
     def release_texture(self):
         pass
@@ -91,6 +87,9 @@ class Bubble(BaseDynamic):#dynamic one: #shoudl be added to platforms and dynami
     def deactivate(self):#called when first timer runs out
         self.kill()
 
+    def on_crush(self, entity, side=None):
+        self.deactivate()
+
     def update(self, dt):
         super().update(dt)
         self.collided_y = False
@@ -99,10 +98,9 @@ class Bubble(BaseDynamic):#dynamic one: #shoudl be added to platforms and dynami
         self.collisions()
 
     def collisions(self):#check collisions with static and dynamic platforms
-        for platform in self.game_objects.platforms:
+        for platform in self.game_objects.physics.platform_spatial_index.query_rect(self.hitbox):
             if platform is self: continue#skip self
-            if self.hitbox.colliderect(platform.hitbox):
-                self.platform_collision(platform)
+            self.platform_collision(platform)
 
         for interactable in self.game_objects.interactables_fg:#check for upstream collisions
             if type(interactable).__name__ == 'Up_stream':

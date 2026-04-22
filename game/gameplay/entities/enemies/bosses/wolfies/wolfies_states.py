@@ -12,6 +12,9 @@ class Base_states():
     def handle_input(self, input):
         pass
 
+    def consume_contact_state(self):
+        pass
+
     def increase_phase(self):
         pass
 
@@ -67,8 +70,13 @@ class Run_pre(Base_states):
         self.speed_multiplier = kwarg.get('speed_multiplier', 1)
 
     def update(self, dt):
-        self.entity.move(self.speed_multiplier) 
+        self.move(dt) 
         
+    def move(self, dt):
+        """Standard movement in current direction"""
+        base_speed = 3
+        self.entity.velocity[0] = dt * self.entity.dir[0] * base_speed * self.speed_multiplier    
+
     def increase_phase(self):
        self.entity.currentstate.start_next_task() 
 
@@ -79,8 +87,13 @@ class Run_main(Base_states):
         self.entity.animation.play('run_main')
         self.speed_multiplier = kwarg.get('speed_multiplier', 1)
 
+    def move(self, dt):
+        """Standard movement in current direction"""
+        base_speed = 3
+        self.entity.velocity[0] = dt * self.entity.dir[0] * base_speed * self.speed_multiplier    
+
     def update(self, dt):
-        self.entity.move(self.speed_multiplier)
+        self.move(dt)
         
         dist_x, dist_y = self.entity.currentstate.player_distance
 
@@ -90,7 +103,10 @@ class Run_main(Base_states):
             return        
 
     def handle_input(self, input):
-        if input == 'Wall':
+        pass
+
+    def consume_contact_state(self):
+        if self.entity.has_collision_kind('Wall'):
             self.entity.currentstate.start_next_task()
 
 @register_state(STATE_REGISTRY)
@@ -100,8 +116,13 @@ class Run_attack_pre(Base_states):
         self.entity.animation.play('run_attack_pre')
         self.speed_multiplier = kwarg.get('speed_multiplier', 1)
 
+    def move(self, dt):
+        """Standard movement in current direction"""
+        base_speed = 3
+        self.entity.velocity[0] = dt * self.entity.dir[0] * base_speed * self.speed_multiplier    
+
     def update(self, dt):
-        self.entity.move(self.speed_multiplier)
+        self.move(dt)
 
     def increase_phase(self):
         self.entity.currentstate.start_next_task()
@@ -114,9 +135,14 @@ class Run_attack_main(Base_states):
         self.entity.attack(lifetime=10)
         self.speed_multiplier = kwarg.get('speed_multiplier', 1)
 
+    def move(self, dt):
+        """Standard movement in current direction"""
+        base_speed = 3
+        self.entity.velocity[0] = dt * self.entity.dir[0] * base_speed * self.speed_multiplier    
+
     def update(self, dt):
         # Continue moving during attack
-        self.entity.move(self.speed_multiplier)
+        self.move(dt)
 
     def increase_phase(self):
         self.entity.currentstate.start_next_task()
@@ -319,10 +345,13 @@ class Fall_main(Base_states):
         self.entity.animation.play('fall_main') 
 
     def handle_input(self, input):
-        if input == 'Ground':
-            self.entity.game_objects.camera_manager.camera_shake(amplitude = 15, duration = 15, scale = 0.9)     
+        pass
+
+    def consume_contact_state(self):
+        if self.entity.is_on_floor():
+            self.entity.game_objects.camera_manager.camera_shake(amplitude = 15, duration = 15, scale = 0.9)
             self.entity.acceleration[0] = 0
-            self.entity.currentstate.start_next_task()   
+            self.entity.currentstate.start_next_task()
 
 @register_state(STATE_REGISTRY)
 class Land(Base_states):

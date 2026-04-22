@@ -63,7 +63,7 @@ class Smith(BaseUI):#called from mr smith
             self.game.state_manager.exit_state()
 
     def upgrade(self):
-        if self.game.game_objects.player.inventory['Tungsten'] >= self.game.game_objects.player.sword.tungsten_cost:
+        if self.game.game_objects.player.inventory['Tungsten'] >= self.game.game_objects.player.sword.get_upgrade_cost():
             self.game.game_objects.player.sword.level_up()
             self.set_response('Now it is better')
         else:#not enough tungsten

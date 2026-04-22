@@ -1,6 +1,7 @@
 from engine import constants as C
 from gameplay.entities.enemies.base.enemy import Enemy
 from gameplay.entities.enemies.common.flying import states_enemy_flying
+from gameplay.entities.shared.components.body.entity_body import EntityBody
 
 class FlyingEnemy(Enemy):
     def __init__(self,pos,game_objects):
@@ -10,21 +11,8 @@ class FlyingEnemy(Enemy):
 
         self.max_vel = [C.max_vel[0], C.max_vel[0]]
         self.dir[1] = 1
+        self.body = EntityBody(self, anchor='center')
         self.currentstate = states_enemy_flying.Patrol(self)
 
-    def update_hitbox(self):
-        self.hitbox.center = self.rect.center
-
-    def update_rect_y(self):
-        self.rect.center = self.hitbox.center
-        self.true_pos[1] = self.rect.top
-
-    def update_rect_x(self):
-        self.rect.center = self.hitbox.center
-        self.true_pos[0] = self.rect.left
-
-    def killed(self):#called when death animation starts playing
-        pass
-
-    def limit_y(self):
+    def apply_ground_snap_velocity(self):
         pass

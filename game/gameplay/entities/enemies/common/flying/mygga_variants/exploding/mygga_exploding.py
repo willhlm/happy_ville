@@ -11,12 +11,13 @@ class MyggaExploding(FlyingEnemy):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
-        self.health = 4
+        self.vitals.set_max_health(4)
+        self.vitals.set_health(self.vitals.max_health)
         self.attack_distance = [70,70]
         self.aggro_distance = [150,100]
         self.currentstate = states_exploding_mygga.Patrol(self)
 
     def killed(self):
         self.game_objects.sound.play_sfx(self.sounds['explosion'][0], vol = 0.2)
-        self.projectiles.add(Hurt_box(self, size = [64,64], lifetime = 30, dir = [0,0]))
+        self.game_objects.projectiles.add_enemy(Hurt_box(self, size = [64,64], lifetime = 30, dir = [0,0]))
         self.game_objects.camera_manager.camera_shake(amp = 2, duration = 30)#amplitude and duration

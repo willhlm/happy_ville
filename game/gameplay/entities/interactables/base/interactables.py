@@ -1,5 +1,5 @@
 from gameplay.entities.shared.render.entity_shader_manager import EntityShaderManager
-from gameplay.entities.shared.components.hit_component import HitComponent
+from gameplay.entities.shared.components.hit.hit_component import HitComponent
 from gameplay.entities.base.animated_entity import AnimatedEntity
 
 class Interactables(AnimatedEntity):#interactables
@@ -14,7 +14,6 @@ class Interactables(AnimatedEntity):#interactables
 
     def update(self, dt):
         super().update(dt)
-        self.group_distance()        
 
     def update_render(self, dt):        
         self.shader_state.update_render(dt)

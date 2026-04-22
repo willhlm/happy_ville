@@ -1,9 +1,9 @@
 import pygame, random
-from gameplay.entities.projectiles.base.projectiles import Projectiles
+from gameplay.entities.projectiles.base.projectile_base import ProjectileBase
 from engine.utils import read_files
-from gameplay.entities.shared.components import hit_effects
+from gameplay.entities.shared.components.hit import hit_effects
 
-class SlamAttack(Projectiles):
+class SlamAttack(ProjectileBase):
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
         self.sprites = SlamAttack.sprites
@@ -21,5 +21,22 @@ class SlamAttack(Projectiles):
         pass
 
     def create_effect(self):
-        return hit_effects.create_projectile_effect(damage = self.dmg, hit_type = 'stone', knockback = [25, 0], hitstop = 10, projectile = self, meta = {'attacker_dir': self.dir})#save direction)
+        attacker_particles= {
+            "preset": "sword_clash",
+            "n": 5,  
+            "args": {
+                "angle": random.randint(-180, 180),  # old clash random angle
+                "colour": [255, 255, 255, 255],            
+            },
+        }
 
+        return hit_effects.create_projectile_effect(
+            self.game_objects,
+            damage=self.dmg,
+            hit_type='stone',
+            knockback=[25, 0],
+            hitstop=10,
+            projectile=self,
+            attacker_dir=self.dir,
+            attacker_particles=attacker_particles,
+        )

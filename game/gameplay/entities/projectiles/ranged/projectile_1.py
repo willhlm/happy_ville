@@ -1,8 +1,8 @@
 import pygame
-from gameplay.entities.projectiles.base.projectiles import Projectiles
+from gameplay.entities.projectiles.base.platform_projectile import PlatformProjectile
 from engine.utils import read_files
 
-class Projectile_1(Projectiles):
+class Projectile_1(PlatformProjectile):
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects)
         self.sprites = Projectile_1.sprites
@@ -30,11 +30,8 @@ class Projectile_1(Projectiles):
         self.velocity = [0,0]
         self.currentstate.handle_input('Death')
 
-    def ramp_top_collision(self, ramp):#called from collusion in clollision_ramp
+    def handle_platform_collision(self, collision):
         self.collision_platform(None)
 
-    def ramp_down_collision(self, ramp):#called from collusion in clollision_ramp
-        self.collision_platform(None)
-
-    def take_dmg(self, dmg):#called when fprojicle collides
+    def on_projectile_clash_lost(self, other):
         self.collision_platform(None)

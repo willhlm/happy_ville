@@ -31,5 +31,5 @@ class ChainSpawner(StaticEntity):
             self.kill()
             return
         pos = [self.pos[0] + self.direction[0] * self.distance * self.spawn_number, self.pos[1]+ self.direction[1] * self.distance * self.spawn_number]
-        self.game_objects.eprojectiles.add(self.projecticle(pos, self.game_objects, dir = self.direction))
+        self.game_objects.projectiles.add_enemy(self.projecticle(pos, self.game_objects, dir = self.direction))
         self.spawn_number += 1   

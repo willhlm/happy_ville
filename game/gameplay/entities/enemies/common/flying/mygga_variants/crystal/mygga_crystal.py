@@ -11,7 +11,8 @@ class MyggaCrystal(FlyingEnemy):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
-        self.health = 3
+        self.vitals.set_max_health(3)
+        self.vitals.set_health(self.vitals.max_health)
 
         self.currentstate = states_mygga_crystal.Patrol(self)
 
@@ -23,7 +24,7 @@ class MyggaCrystal(FlyingEnemy):
         dirs = [[1,1], [-1,1], [1,-1], [-1,-1]]
         for direction in dirs:
             obj = Poisonblobb(self.hitbox.topleft, self.game_objects, dir = direction, amp = [3,3])
-            self.game_objects.eprojectiles.add(obj)
+            self.game_objects.projectiles.add_enemy(obj)
 
     def chase(self, direction):#called from state: when chaising
         self.velocity[0] += direction[0]*0.5

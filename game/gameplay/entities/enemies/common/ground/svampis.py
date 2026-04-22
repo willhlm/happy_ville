@@ -12,9 +12,10 @@ class Svampis(Enemy):
 
         self.currentstate = states_kusa.Idle(self)
         self.attack_distance = [30, 30]
-        self.health = 1
+        self.vitals.set_max_health(1)
+        self.vitals.set_health(self.vitals.max_health)
         self.dmg = 2
 
     def suicide(self):
-        self.projectiles.add(Explosion(self))
+        self.game_objects.projectiles.add_enemy(Explosion(self))
         self.game_objects.camera_manager.camera_shake(amp=2,duration=30)#amplitude and duration

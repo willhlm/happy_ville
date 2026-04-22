@@ -13,7 +13,9 @@ class WrappingManager():
         
         # Wrap all entities
         for group in [self.game_objects.players, self.game_objects.enemies, self.game_objects.npcs,
-                      self.game_objects.fprojectiles, self.game_objects.eprojectiles, self.game_objects.loot]:
+                      self.game_objects.projectiles.friendly, self.game_objects.projectiles.friendly_platform,
+                      self.game_objects.projectiles.enemy, self.game_objects.projectiles.enemy_platform,
+                      self.game_objects.loot]:
             for entity in group:
                 entity.true_pos[0] = entity.true_pos[0] % self.world_width
                 entity.hitbox.x = entity.true_pos[0]

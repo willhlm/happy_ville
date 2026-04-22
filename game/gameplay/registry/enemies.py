@@ -14,7 +14,6 @@ REGISTER_ENEMIES = {
     'mygga_crystal': MyggaCrystal,
     'mygga_exploding': MyggaExploding,
     'mygga_suicide': MyggaSuicide,
-    'mygga_torpedo': MyggaTorpedo,
     'mygga': Mygga,
     'crab_crystal': CrabCrystal,
     'egg': Egg,
@@ -37,8 +36,10 @@ REGISTER_ENEMIES = {
     'shadow_warrior': ShadowWarrior,
     'hedge': Hedge,
     'tagg_mus': TaggMus,
-    'bee': Bee,
+    'big_bee': BigBee,
+    'small_bee': SmallBee,
     'bjorn': Bjorn,
     'vertical_mygga_torpedo': VerticalMyggaTorpedo,
+    'krakan': Krakan,
 
 }

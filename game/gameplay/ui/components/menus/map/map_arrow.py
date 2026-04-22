@@ -8,6 +8,9 @@ class MapArrow(AnimatedEntity):#for invenotry, the pointer
         self.sprites = read_files.load_sprites_dict('assets/sprites/ui/menus/map/arrow/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.world_pos = [pos[0], pos[1]]
+        self.scroll = [0, 0]
+        self.float_offset = [0, 0]
         self.time = 0
         self.map_text = map_text
         self.original_pos = pos
@@ -28,18 +31,38 @@ class MapArrow(AnimatedEntity):#for invenotry, the pointer
     def activate(self):
         return self.map_text
 
+    def update_scroll(self, scroll):
+        self.scroll = [scroll[0], scroll[1]]
+        self.sync_rect()
+
     def update(self, dt):
         super().update(dt)
         self.time += dt * 0.1
         self.update_pos()
 
     def update_pos(self):
-        self.rect.center = [self.rect.center[0] + 2 * self.move_direction[0] * math.sin(self.time), self.rect.center[1] + 2 * self.move_direction[1] * math.sin(self.time)]
+        self.float_offset = [
+            2 * self.move_direction[0] * math.sin(self.time),
+            2 * self.move_direction[1] * math.sin(self.time),
+        ]
+        self.sync_rect()
+
+    def sync_rect(self):
+        self.rect.topleft = [
+            self.world_pos[0] + self.scroll[0] + self.float_offset[0],
+            self.world_pos[1] + self.scroll[1] + self.float_offset[1],
+        ]
 
     def draw(self, target):
         self.game_objects.game.display.render(self.image, target, angle = self.angle, position = self.rect.topleft)#shader render
 
     def reset(self):
-        self.rect.topleft = self.original_pos
         self.time = 0
+        self.float_offset = [0, 0]
+        self.sync_rect()
 
+    def get_world_center(self):
+        return (
+            self.world_pos[0] + self.image.width * 0.5,
+            self.world_pos[1] + self.image.height * 0.5,
+        )

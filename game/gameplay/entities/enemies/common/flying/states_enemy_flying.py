@@ -67,7 +67,7 @@ class Patrol(Enemy_states):#patrol in a circle aorund the original position
             self.enter_state('Wait', time = 15)
 
             self.calculate_postion()            
-        elif self.entity.collision_types['left'] or self.entity.collision_types['right'] or self.entity.collision_types['bottom'] or self.entity.collision_types['top']:
+        elif self.entity.contact_state.had_collision:
             self.calculate_postion()
 
     def calculate_postion(self):

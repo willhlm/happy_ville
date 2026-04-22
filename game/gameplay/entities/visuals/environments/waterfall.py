@@ -17,19 +17,15 @@ class Waterfall(StaticEntity):
 
         sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/visuals/environments/waterfall/')
 
-        px, py = self.parallax
-        p_factor = 0.5 * (px + py)
+        p_factor = 0.5 * (self.parallax[0] + self.parallax[1])
         self.spatial_emitter_id = game_objects.sound.register_spatial_rect(
             sound=sounds['idle'][0],
-            get_rect=lambda: self.rect,       
+            get_rect=lambda: self.rect,
             base_volume=1 * p_factor,
             loops=-1,
             min_dist=96 * p_factor,
             max_dist=700 * p_factor,
-            listener_transform=lambda p: (
-                p[0] - px * self.game_objects.camera_manager.camera.interp_scroll[0],
-                p[1] - py * self.game_objects.camera_manager.camera.interp_scroll[1],
-            ),
+            parallax=self.parallax,
         )
 
     def release_texture(self):
@@ -58,7 +54,7 @@ class Waterfall(StaticEntity):
         self.game_objects.shaders['waterfall']['TIME'] = self.time * 0.5
         self.game_objects.shaders['waterfall']['texture_size'] = self.size
 
-        blit_pos = (int(self.true_pos[0]-self.parallax[0]*self.game_objects.camera_manager.camera.interp_scroll[0]),int(self.true_pos[1]-self.parallax[0]*self.game_objects.camera_manager.camera.interp_scroll[1]))
+        blit_pos = self._get_render_pos()
         self.game_objects.shaders['waterfall']['section'] = [blit_pos[0],blit_pos[1],self.size[0],self.size[1]]
 
         if self.parallax[0] == 1:#TODO, blue state #don't blur if there is no parallax
@@ -68,3 +64,9 @@ class Waterfall(StaticEntity):
             self.game_objects.shaders['blur']['blurRadius'] = 1/self.parallax[0]#set the blur redius
             self.game_objects.game.display.render(self.empty.texture, self.blur_layer, shader = self.game_objects.shaders['waterfall'])
             self.game_objects.game.display.render(self.blur_layer.texture, target, position = blit_pos, shader = self.game_objects.shaders['blur'])
+
+    def _get_render_pos(self):
+        return (
+            int(self.true_pos[0] - self.parallax[0] * self.game_objects.camera_manager.camera.interp_scroll[0]),
+            int(self.true_pos[1] - self.parallax[1] * self.game_objects.camera_manager.camera.interp_scroll[1]),
+        )

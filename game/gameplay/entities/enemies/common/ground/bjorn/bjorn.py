@@ -3,7 +3,7 @@ from gameplay.entities.enemies.base.enemy import Enemy
 from engine.utils import read_files
 from gameplay.entities.projectiles import HurtBox
 
-from gameplay.entities.enemies.common.shared.states.state_manager import StateManager
+from gameplay.entities.enemies.common.shared.state_machine import StateManager
 from .config import ENEMY_CONFIG as BJORN_CONFIG
 
 from .states import RollAttackPre, RollAttackMain, RollAttackPost, AttackPre, AttackMain, AttackPost, SlamPre, SlamMain, SlamPost, SleepMain, SleepPost, RoarPre, RoarMain, RoarPost
@@ -43,14 +43,15 @@ class Bjorn(Enemy):
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 20, 30)
 
-        self.health = self.config['health']    
+        self.vitals.set_max_health(self.config['health'])
+        self.vitals.set_health(self.vitals.max_health)
         self.currentstate = StateManager(self, type = 'ground', custom_states = BJORN_STATES, custom_deciders = BJORN_DECIDERS)
 
         self.flags["hurt_state_able"] = False        
 
     def attack(self):#called from states, attack main
         attack = HurtBox(self, lifetime = 10, dir = self.dir, size = [64, 32])#make the object
-        self.projectiles.add(attack)#add to group but in main phase         
+        self.game_objects.projectiles.add_enemy(attack)#add to group but in main phase         
 
     def slam(self):#called from states, attack main
         self.game_objects.signals.emit('fall_projectiles', attack_id='bjorn_slam', source=self)

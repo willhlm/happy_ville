@@ -24,7 +24,7 @@ class Shroompoline(Enemy):#an enemy or interactable?
                 self.game_objects.timer_manager.start_timer(C.shroomjump_timer_player, player.on_shroomjump_timout)#adds a timer to timer_manager and sets self.invincible to false after a while
 
     def update_hitbox(self):
-        super().update_hitbox()
+        self.body.update_hitbox()
         self.jump_box.midtop = self.rect.midtop
 
     def chase(self):#called from AI: when chaising

@@ -10,12 +10,13 @@ class Froggy(Enemy):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
-        self.health = 1
+        self.vitals.set_max_health(1)
+        self.vitals.set_health(self.vitals.max_health)
         self.flags['aggro'] = False
         self.attack_distance = [150,50]
 
         self.currentstate = states_froggy.Idle(self)
-        self.inventory = {'Amber_droplet':random.randint(5,15)}#thigs to drop wgen killed
+        self.inventory = {'amber_droplet':random.randint(5,15)}#thigs to drop wgen killed
 
     def knock_back(self,dir):
         pass

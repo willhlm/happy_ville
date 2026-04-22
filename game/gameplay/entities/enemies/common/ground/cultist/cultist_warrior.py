@@ -10,7 +10,8 @@ class CultistWarrior(Enemy):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],40,40)
-        self.health = 3
+        self.vitals.set_max_health(3)
+        self.vitals.set_health(self.vitals.max_health)
         self.attack_distance = [80,10]
 
     def pool(game_objects):
@@ -20,7 +21,7 @@ class CultistWarrior(Enemy):
         pass
 
     def attack(self):#called from states, attack main
-        self.projectiles.add(HurtBox(self))#add to group
+        self.game_objects.projectiles.add_enemy(HurtBox(self))#add to group
 
     def dead(self):#called when death animation is finished
         super().dead()

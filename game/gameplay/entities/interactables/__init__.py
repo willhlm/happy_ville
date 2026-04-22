@@ -1,17 +1,10 @@
-from .ability_ball.ability_ball import AbilityBall
+from .ability_ball.boss_reward_ball import BossRewardBall
 
 from .chests.chest_3 import Chest_3 as Chest
 from .chests.amber_rock import AmberRock
 from .chests.amber_tree import AmberTree
 
 from .cocoon import InteractableCocoon
-from .collisions.hole import Hole
-from .collisions.path_collision import PathCollision
-from .collisions.path_interact import PathInteract
-from .collisions.safe_spawn import SafeSpawn
-from .collisions.layer_trigger import LayerTrigger
-from .collisions.zoom_collision import ZoomCollision
-from .collisions.event_triggers import ButterflyEncounter, StartLarvParty, StopLarvParty, MiniBoss
 
 from .doors.door_interact import DoorInteract
 from .doors.door import Door
@@ -20,10 +13,12 @@ from .fast_travel import FastTravel
 from .fireplace.fireplace import Fireplace
 
 from .grass.cave_grass import InteractableCaveGrass
+from .vines.interactable_vines import InteractableVines
 
 from .inorinoki import Inorinoki
 from .verve_tree import VerveTree
 from .lever.lever import Lever
+from .larv_web.larv_web import LarvWeb
 from .light_crystal import LightCrystal
 from .place_holder_interacatble import PlaceHolderInteracatble
 from .rhoutta_altar import RhouttaAltar
@@ -37,8 +32,8 @@ from .sources.crystal_source import CrystalSource
 from .sources.falling_rock.falling_rock_source import FallingRockSource
 from .sources.droplet.droplet_source import DropletSource 
 
-from .statues.abilities.air_dash_statue import AirDashStatue
-from .statues.abilities.thunder_dive_statue import ThunderDiveStatue
+from .statues.abilities.air_dash_upgrade_statue import AirDashUpgradeStatue
+from .statues.abilities.ability_upgrade_statue import ThunderAbilityUpgradeStatue
 from .statues.quests.quest_statue import QuestStatue
 from .statues.quests.stone_wood import StoneWood
 from .statues.rhoutta.rhoutta import RhouttaStatue

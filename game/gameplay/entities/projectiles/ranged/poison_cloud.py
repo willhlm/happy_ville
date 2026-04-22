@@ -1,8 +1,8 @@
 import pygame
-from gameplay.entities.projectiles.base.projectiles import Projectiles
+from gameplay.entities.projectiles.base.projectile_base import ProjectileBase
 from engine.utils import read_files
 
-class PoisonCloud(Projectiles):
+class PoisonCloud(ProjectileBase):
     def __init__(self,pos, game_objects):
         super().__init__(pos, game_objects)
         self.sprites = PoisonCloud.sprites

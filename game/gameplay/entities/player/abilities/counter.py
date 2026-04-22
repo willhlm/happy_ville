@@ -12,7 +12,7 @@ class Counter(Ability):#just a counter abilty
         self.channels = []
 
     def initiate(self):#called when using the ability from player states
-        self.entity.game_objects.fprojectiles.add(Counter(self.entity, dir = (0,0), lifetime = self.duration))
+        self.entity.game_objects.projectiles.add_friendly(Counter(self.entity, dir = (0,0), lifetime = self.duration))
 
     def counter(self):#called from counter if sucsesfully countered
         self.channels.append(self.entity.game_objects.sound.play_sfx(self.sounds['counter'][0], loop = -1, vol = 0.5))

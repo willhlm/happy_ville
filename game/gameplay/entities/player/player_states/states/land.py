@@ -50,9 +50,8 @@ class LandSoftMain(PhaseBase):
         elif self.entity.dir[1] < C.down_angle * -1:
             self.enter_state('sword_down')
         else:
-            state = 'sword_stand' + str(int(self.entity.sword.swing) + 1)
+            state = 'sword_stand' + str(self.entity.combat_tracker.next_swing_index())
             self.enter_state(state)
-            self.entity.sword.swing = not self.entity.sword.swing
 
 class LandHardMain(PhaseBase):
     def __init__(self, entity):

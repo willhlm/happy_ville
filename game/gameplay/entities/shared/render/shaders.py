@@ -42,10 +42,10 @@ class Aura(Shaders):
         self.game_objects.game.display.render(source_texture.texture, composite_screen, shader=self.game_objects.shaders['aura'])
         return composite_screen
 
-    def draw_to_composite(self, source_texture, target, position, flip):
+    def draw_to_composite(self, source_texture, target, position, flip, angle):
         """Final render back to composite_screen"""
         self.set_uniforms()
-        self.game_objects.game.display.render(source_texture.texture, target, position, flip = flip, shader=self.game_objects.shaders['aura'])
+        self.game_objects.game.display.render(source_texture.texture, target, position, flip = flip, angle = angle, shader=self.game_objects.shaders['aura'])
 
 class Outline(Shaders):
     def __init__(self,game_objects, **kwarg):
@@ -69,7 +69,7 @@ class Outline(Shaders):
         self.game_objects.game.display.render(source_texture.texture, composite_screen, shader = self.game_objects.shaders['outline'])
         return composite_screen
 
-    def draw_to_composite(self, source_texture, target, position, flip):
+    def draw_to_composite(self, source_texture, target, position, flip, angle):
         """Final render back to composite_screen"""
         self.set_uniforms()
-        self.game_objects.game.display.render(source_texture.texture, target, position, flip = flip, shader = self.game_objects.shaders['outline']) 
+        self.game_objects.game.display.render(source_texture.texture, target, position, flip = flip, angle = angle, shader = self.game_objects.shaders['outline']) 

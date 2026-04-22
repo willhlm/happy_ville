@@ -1,4 +1,5 @@
 from gameplay.entities.platforms.base.platform import Platform
+from gameplay.entities.platforms.components.surface_collision import RightAngleSurfaceCollisionComponent
 
 class CollisionRightAngle(Platform):#ramp
     def __init__(self, pos, points, go_through = True):
@@ -7,6 +8,7 @@ class CollisionRightAngle(Platform):#ramp
         self.ratio = self.size[1]/self.size[0]
         self.go_through = go_through#a flag that determines if aila can go through when pressing down
         self.target = 0
+        self.surface_collision = RightAngleSurfaceCollisionComponent(self)
     #function calculates size, real bottomleft position and orientation of right angle triangle
     #the value in orientatiion represents the following:
     #0 = tilting to the right, flatside down
@@ -82,37 +84,8 @@ class CollisionRightAngle(Platform):#ramp
         return -rel_x*self.ratio + self.hitbox.bottom
 
     def collide(self, entity):#called in collisions
-        if self.orientation == 0:
-            rel_x = self.hitbox.right - entity.hitbox.left
-            other_side = self.hitbox.left - entity.hitbox.left
-            benethe = entity.hitbox.bottom - self.hitbox.bottom
-            self.target = -rel_x*self.ratio + self.hitbox.bottom
-            self.shift_up(other_side, entity, benethe)
-        elif self.orientation == 1:
-            rel_x = entity.hitbox.right - self.hitbox.left
-            other_side = entity.hitbox.right - self.hitbox.right
-            benethe = entity.hitbox.bottom - self.hitbox.bottom
-            self.target = -rel_x*self.ratio + self.hitbox.bottom
-            self.shift_up(other_side, entity, benethe)
-        elif self.orientation == 2:
-            rel_x = self.hitbox.right - entity.hitbox.left
-            self.target = rel_x*self.ratio + self.hitbox.top
-            self.shift_down(entity)
-        else:#orientation 3
-            rel_x = entity.hitbox.right - self.hitbox.left
-            self.target = rel_x*self.ratio + self.hitbox.top
-            self.shift_down(entity)
+        entity.platform_collider.resolve_right_angle_ramp(self)
 
-    def shift_down(self,entity):
-        if entity.hitbox.top < self.target:
-            entity.ramp_top_collision(self)
-            entity.update_rect_y()
-
-    def shift_up(self, other_side, entity, benethe):
-        if self.target > entity.hitbox.bottom:
-            entity.go_through['ramp'] = False
-        elif other_side > 0 or benethe > 0:
-            entity.go_through['ramp'] = True
-        elif not entity.go_through['ramp']: #need to be elif
-            entity.ramp_down_collision(self)
-            entity.update_rect_y()
+    @staticmethod
+    def entity_is_dropping(entity):
+        return entity.go_through.get('drop_through', False)

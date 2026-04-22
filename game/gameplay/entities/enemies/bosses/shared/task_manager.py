@@ -31,6 +31,11 @@ class TaskManager():#manager
 
     def handle_input(self, input):
         self.state.handle_input(input)
+
+    def consume_contact_state(self):
+        current_state = getattr(self, 'state', None)
+        if current_state and hasattr(current_state, 'consume_contact_state'):
+            current_state.consume_contact_state()
     
     def increase_phase(self):
         self.state.increase_phase()
@@ -38,8 +43,18 @@ class TaskManager():#manager
     def enter_state(self, newstate):
         self.clear_tasks()
         self.queue_task(task = newstate)
-        self.start_next_task()        
+        self.start_next_task()    
 
+    def die(self):
+        self.entity.flags['aggro'] = False
+        death_cls = self.state_registry['death']
+        dead_cls = self.state_registry['dead']
+        if isinstance(self.state, death_cls) or isinstance(self.state, dead_cls):
+            return
+
+        self.clear_tasks()
+        self.state = death_cls(self.entity)
+   
 class PatternSelector():
     def __init__(self, entity, patterns):
         self.entity = entity

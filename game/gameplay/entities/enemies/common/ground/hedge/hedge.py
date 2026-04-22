@@ -1,7 +1,7 @@
 import pygame, random
 from gameplay.entities.enemies.base.enemy import Enemy
 from engine.utils import read_files
-from gameplay.entities.enemies.common.shared.states.state_manager import StateManager
+from gameplay.entities.enemies.common.shared.state_machine import StateManager
 from .config import ENEMY_CONFIG as HEDGE_CONFIG
 
 from .states import Sleep, WakeUp
@@ -20,7 +20,8 @@ class Hedge(Enemy):
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1], 32, 32)        
 
-        self.health = self.config['health']
+        self.vitals.set_max_health(self.config['health'])
+        self.vitals.set_health(self.vitals.max_health)
         self.chase_speed = self.config['speeds']['chase']       
         self.aggro_distance = self.config['distances']['aggro']
 

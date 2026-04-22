@@ -7,6 +7,9 @@ ENEMY_CONFIG = {
         'timers': {'hurt_recovery': [150, 200]},
         'cooldowns': {'melee_attack': [150, 250]},#min max        
         'states': {
+            'wait': {},
+            'death': {},
+            'dead': {},
             'patrol': {
                 'deciders': {
                     'patrol_position_end': {
@@ -30,7 +33,9 @@ ENEMY_CONFIG = {
                     'torpedo_attack': {'next_state': 'attack_pre','score': 70, 'priority': 1, 'cooldown': 'melee_attack'}, 
                     'chase_give_up': {'next_state':'wait','score':50,'priority':1,'give_up_time':400, 'kwargs': {'next_state':'patrol', 'time': 30}}, 
                     },
-            },                     
+            },
+            'attack_pre': {},
+            'attack_main': {},
         }
     }
 }

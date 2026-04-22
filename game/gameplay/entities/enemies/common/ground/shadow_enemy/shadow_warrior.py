@@ -9,7 +9,8 @@ class ShadowWarrior(ShadowEnemy):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],40,40)
-        self.health = 3
+        self.vitals.set_max_health(3)
+        self.vitals.set_health(self.vitals.max_health)
         self.attack_distance = [80,10]
 
     def update(self, dt):
@@ -17,4 +18,4 @@ class ShadowWarrior(ShadowEnemy):
         self.check_light()
 
     def attack(self):#called from states, attack main
-        self.projectiles.add(Sword(self))#add to group
+        self.game_objects.projectiles.add_enemy(Sword(self))#add to group

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pygame
+import random
 from typing import Callable, Dict
 
 from .sound_library import SFXLibrary, MusicLibrary
@@ -11,10 +12,10 @@ from .spatial_emitter import SpatialAudioSystem
 
 class GameAudio:
     """High-level game audio interface + simple spatial emitters."""
-    def __init__(self):
+    def __init__(self, camera_scroll_getter=None):
         self.audio_manager = AudioManager(AUDIO_CONFIG)
         self.sound_player = SoundPlayer(self.audio_manager)
-        self.spatial = SpatialAudioSystem(self.sound_player.play_sfx)
+        self.spatial = SpatialAudioSystem(self.sound_player.play_sfx, camera_scroll_getter=camera_scroll_getter)
 
         # Sound libraries
         self.sfx_library = SFXLibrary()
@@ -29,6 +30,16 @@ class GameAudio:
 
     def play_ui_sound(self, ui_event, volume=0.4):
         sound = self.sfx_library.get_ui_sound(ui_event)
+        return self.sound_player.play_sfx(sound, volume)
+
+    def play_enemy_sound(self, enemy, event, volume=0.4):
+        sounds = getattr(enemy, 'sounds', {})
+        sound_list = sounds.get(event)
+
+        if sound_list:
+            return self.sound_player.play_sfx(random.choice(sound_list), volume)
+
+        sound = self.sfx_library.get_enemy_death_sound(event)
         return self.sound_player.play_sfx(sound, volume)
 
     def play_background_sound(self, track, volume=0.7, index=0, loop=-1, fade=300):
@@ -65,6 +76,9 @@ class GameAudio:
 
     def unregister_emitter(self, emitter_id, fade_ms = 1000):
         return self.spatial.unregister(emitter_id, fade_ms=fade_ms)
+
+    def clear_spatial_sounds(self, fade_ms=0):
+        return self.spatial.clear(fade_ms=fade_ms)
 
     def update_render(self, listener_pos):
         return self.spatial.update(listener_pos)

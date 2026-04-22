@@ -7,7 +7,7 @@ class PauseMenu(BaseUI):#when pressing ESC duing gameplay
         super().__init__(game)
         self.menu_ui = PauseMenuLoader(game.game_objects)
 
-        self.image = self.game.display.make_layer(self.game.display_size)#TODO
+        self.image = self.game.display.make_layer(self.game.display_size)
         self.game.game_objects.shaders['blur']['blurRadius'] = 1
         self.game.display.render(self.game.screen_manager.composite_screen.texture, self.image, shader = self.game.game_objects.shaders['blur'])
 
@@ -92,7 +92,10 @@ class PauseMenu(BaseUI):#when pressing ESC duing gameplay
             self.game.state_manager.enter_state('option_menu')
 
         elif self.current_button == 2:#exit to main menu
-            for state in self.game.state_manager.state_stack[1:]:#except the first one
-                state.release_texture()            
-            self.game.state_manager.state_stack = [self.game.state_manager.state_stack[0]]
-            self.game.state_manager.state_stack[-1]._play_music()
+            self.game.state_manager.exit_to_state('title_menu')
+
+    def on_pop(self):
+        self.release_texture()
+
+    def release_texture(self):
+        self.image.release()

@@ -1,5 +1,5 @@
 import random
-from gameplay.entities.enemies.common.shared.states.base_state import BaseState
+from gameplay.entities.enemies.common.shared.state_machine.states.base_state import BaseState
 
 class RollAttackPre(BaseState):
     def __init__(self, entity, deciders, config_key, **kwargs):
@@ -26,17 +26,22 @@ class RollAttackMain(BaseState):
             self.entity.velocity[1] = -8# bounce
             self.request_bounce = False
 
-    def handle_input(self, input):   
-        if input == 'Ground':
-            self.request_bounce = True            
+    def handle_input(self, input):
+        pass
+
+    def consume_contact_state(self):
+        if self.entity.is_on_floor():
+            self.request_bounce = True
             self.number_bounce -= 1
             if self.number_bounce <= 0:
                 self.enter_state("roll_attack_post")
-        elif input == 'ceiling':
+
+        if self.entity.is_on_ceiling():
             self.dir[1] = 1
-        elif input == 'Wall':
-            if self.entity.collision_types['left']:
-                self.dir[0] = 1            
+
+        if self.entity.has_collision_kind('Wall'):
+            if self.entity.is_on_wall_side('left'):
+                self.dir[0] = 1
             else:
                 self.dir[0] = -1
 

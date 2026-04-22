@@ -1,6 +1,6 @@
 # orthogonal_torpedo/states/chase_torpedo.py
 import random
-from gameplay.entities.enemies.common.shared.states.base_state import BaseState
+from gameplay.entities.enemies.common.shared.state_machine.states.base_state import BaseState
 from engine.utils import functions
 
 class Chase(BaseState):

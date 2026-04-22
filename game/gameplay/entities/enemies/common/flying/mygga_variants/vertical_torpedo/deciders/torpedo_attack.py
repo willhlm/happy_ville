@@ -1,5 +1,5 @@
 # orthogonal_torpedo/deciders/torpedo_attack.py
-from gameplay.entities.enemies.common.shared.deciders.decision import Decision
+from gameplay.entities.enemies.common.shared.state_machine.deciders.decision import Decision
 
 class TorpedoAttackDecider:
     def __init__(self, entity, **kwargs):

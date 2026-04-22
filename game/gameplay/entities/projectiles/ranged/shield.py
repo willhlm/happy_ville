@@ -1,10 +1,11 @@
 import pygame
-from gameplay.entities.projectiles.base.projectiles import Projectiles
+from gameplay.entities.projectiles.base.projectile_base import ProjectileBase
 
-class Shield(Projectiles):#a protection shield
+class Shield(ProjectileBase):#a protection shield
     def __init__(self, entity, **kwarg):
         super().__init__(entity.hitbox.topleft, entity.game_objects)
         self.entity = entity
+        self.ability = kwarg['ability']
 
         self.size = Shield.size
         self.empty = Shield.empty
@@ -84,7 +85,7 @@ class Shield(Projectiles):#a protection shield
 
     def kill(self):
         super().kill()
-        self.entity.abilities.spirit_abilities['Shield'].shield_expire()
+        self.ability.clear_active_shield()
 
     def collision_enemy(self, collision_enemy):#projecticle enemy collision (including player)
         pass

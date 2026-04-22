@@ -1,9 +1,9 @@
 import pygame
-from gameplay.entities.projectiles.base.projectiles import Projectiles
+from gameplay.entities.projectiles.base.platform_projectile import PlatformProjectile
 from engine.utils import read_files
 from . import states_droplet
 
-class FallingRock(Projectiles):#things that can be placed in cave, the source makes this and can hurt player
+class FallingRock(PlatformProjectile):#things that can be placed in cave, the source makes this and can hurt player
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
         self.sprites = FallingRock.sprites
@@ -23,3 +23,6 @@ class FallingRock(Projectiles):#things that can be placed in cave, the source ma
     def collision_platform(self, collision_plat):#collision platform, called from collusoin_block
         super().collision_platform(collision_plat)
         self.currentstate.handle_input('death')
+
+    def handle_platform_collision(self, collision):
+        self.collision_platform(collision.collider)

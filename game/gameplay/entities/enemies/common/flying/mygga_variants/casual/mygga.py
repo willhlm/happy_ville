@@ -1,7 +1,7 @@
 import pygame 
 from gameplay.entities.enemies.base.flying_enemy import FlyingEnemy
 from engine.utils import read_files
-from gameplay.entities.enemies.common.shared.states.state_manager import StateManager
+from gameplay.entities.enemies.common.shared.state_machine import StateManager
 from .config import ENEMY_CONFIG 
 
 class Mygga(FlyingEnemy):#a non aggro mygga that roams around
@@ -14,5 +14,6 @@ class Mygga(FlyingEnemy):#a non aggro mygga that roams around
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
         
-        self.health = self.config['health']  
-        self.currentstate = StateManager(self, type = 'flying', universal_states = ['death', 'wait'])
+        self.vitals.set_max_health(self.config['health'])
+        self.vitals.set_health(self.vitals.max_health)
+        self.currentstate = StateManager(self, type = 'flying', universal_states = ['death', 'dead', 'wait'])

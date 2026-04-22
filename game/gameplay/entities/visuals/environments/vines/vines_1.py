@@ -14,9 +14,8 @@ class Vines_1(LayeredObjects):#light forest
         self.offset = random.uniform(0,10)
         self.upsidedown = 1
 
-    def update(self):
-        self.time += self.game_objects.game.dt
-        self.group_distance()
+    def update(self, dt):
+        self.time += dt
 
     def draw(self,target):
         self.shader['TIME'] = self.time

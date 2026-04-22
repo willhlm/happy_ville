@@ -1,8 +1,8 @@
 import pygame
-from gameplay.entities.projectiles.base.projectiles import Projectiles
+from gameplay.entities.projectiles.base.platform_projectile import PlatformProjectile
 from engine.utils import read_files
 
-class PoisonBlob(Projectiles):
+class PoisonBlob(PlatformProjectile):
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects)
         self.sprites = PoisonBlob.sprites
@@ -22,13 +22,16 @@ class PoisonBlob(Projectiles):
     def update_vel(self, dt):
         self.velocity[1] += 0.1 * dt#graivity
 
-    def take_dmg(self, dmg):#aila sword without purple stone
+    def on_projectile_clash_lost(self, other):
         self.velocity = [0,0]
         self.currentstate.handle_input('Death')
 
     def collision_platform(self,platform):
         self.velocity = [0,0]
         self.currentstate.handle_input('Death')
+
+    def handle_platform_collision(self, collision):
+        self.collision_platform(collision.collider)
 
     def pool(game_objects):
         PoisonBlob.sprites = read_files.load_sprites_dict('assets/sprites/entities/projectiles/poisonblobb/', game_objects)

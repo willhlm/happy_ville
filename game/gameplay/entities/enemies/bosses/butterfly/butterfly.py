@@ -11,26 +11,12 @@ class Butterfly(FlyingEnemy):
         self.rect = pygame.Rect(pos,self.image.size)
         self.hitbox = self.rect.copy()
         self.currentstate = states_butterfly.Idle(self)
-        self.health =20
+        self.vitals.set_max_health(20)
+        self.vitals.set_health(self.vitals.max_health)
 
     def knock_back(self,dir):
-        pass
-
-    def group_distance(self):
         pass
 
     def dead(self):#called when death animation is finished
         super().dead()
         self.game_objects.signals.emit('butterfly_killed')
-
-    def right_collision(self,block, type = 'Wall'):
-        pass
-
-    def left_collision(self,block, type = 'Wall'):
-        pass
-
-    def down_collision(self,block):
-        pass
-
-    def top_collision(self,block):
-        pass

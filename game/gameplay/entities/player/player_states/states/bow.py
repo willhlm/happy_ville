@@ -48,8 +48,7 @@ class BowMain(PhaseBase):
 
     def enter(self, **kwarg):
         self.entity.animation.play('bow_main')
-        self.entity.consume_spirit()
-        self.entity.abilities.spirit_abilities['Bow'].initiate(dir = kwarg['dir'], time = kwarg['time'])
+        self.entity.abilities.activate('bow', dir = kwarg['dir'], time = kwarg['time'])
 
     def increase_phase(self):
         self.enter_state('idle')

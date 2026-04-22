@@ -23,7 +23,7 @@ class DashAirPre(PhaseBase):
         self.dash_length = C.dash_length
         self.entity.shader_state.handle_input('motion_blur')
         self.entity.game_objects.cosmetics.add(Dusts(self.entity.hitbox.center, self.entity.game_objects, dir = self.entity.dir, state = 'one'))
-        self.entity.game_objects.timer_manager.remove_ID_timer('cayote')
+        self.entity.end_coyote_time()
         self.jump_dash_timer = C.jump_dash_timer
         self.entity.movement_manager.add_modifier('dash', entity = self.entity, authoritative = True)
         self.entity.velocity[1] *= 0
@@ -47,14 +47,7 @@ class DashAirPre(PhaseBase):
             self.increase_phase()
 
     def handle_input(self, input, **kwarg):
-        if input == 'Wall' or input == 'belt':
-            self.entity.shader_state.handle_input('idle')
-            if self.entity.acceleration[0] != 0:
-                state = input.lower() + '_glide'
-                self.enter_state(state, **kwarg)
-            else:
-                self.enter_state('idle')
-        elif input == 'interrupt':
+        if input == 'interrupt':
             self.entity.shader_state.handle_input('idle')
             self.enter_state('idle')
 
@@ -64,9 +57,37 @@ class DashAirPre(PhaseBase):
     def handle_press_input(self, input):
         pass
 
+    def handle_release_input(self, input):
+        if input.name == 'lb':
+            self.entity.flags['sprint_chain_active'] = False
+        input.processed()
+
     def exit(self):
         self.entity.shader_state.handle_input('idle')
         self.entity.movement_manager.remove_modifier('dash')
+
+    def land_from_dash(self):
+        should_sprint = self.entity.game_objects.controller.is_held('lb') and self.entity.flags['sprint_chain_active']
+        self.entity.flags['sprint_chain_active'] = False
+        if should_sprint:
+            self.enter_state('sprint')
+        else:
+            self.enter_state('land', phase = 'soft')
+
+    def consume_contact_state(self):
+        if self.entity.is_on_floor():
+            self.land_from_dash()
+            return
+
+        if self.entity.has_collision_kind('belt') or self.entity.has_collision_kind('Wall'):
+            self.entity.shader_state.handle_input('idle')
+            if self.entity.acceleration[0] != 0:
+                if self.entity.has_collision_kind('belt'):
+                    self.enter_state('belt_glide')
+                else:
+                    self.enter_state('wall_glide')
+            else:
+                self.enter_state('idle')
 
 
 class DashAirMain(DashGroundPre):
@@ -82,10 +103,16 @@ class DashAirMain(DashGroundPre):
     def handle_press_input(self, input):
         input.processed()
 
+    def handle_release_input(self, input):
+        if input.name == 'lb':
+            self.entity.flags['sprint_chain_active'] = False
+        input.processed()
+
     def exit_state(self):
         if self.dash_length < 0:
+            self.entity.flags['sprint_chain_active'] = self.entity.game_objects.controller.is_held('lb')
             self.entity.movement_manager.add_modifier('air_boost', friction_x = 0.18, entity = self.entity)
-            self.enter_state('fall', allow_sprint = True)
+            self.enter_state('fall')
 
     def increase_phase(self):
         self.entity.shader_state.handle_input('idle')
@@ -113,14 +140,20 @@ class DashAirPost(DashGroundPre):
             self.entity.dir[0] = sign(value[0])
 
     def increase_phase(self):
+        self.entity.flags['sprint_chain_active'] = self.entity.game_objects.controller.is_held('lb')
         self.entity.movement_manager.add_modifier('air_boost', entity = self.entity)
         if self.entity.acceleration[0] == 0:
             self.enter_state('idle')
         else:
-            self.enter_state('fall', allow_sprint = True)
+            self.enter_state('fall')
 
     def handle_press_input(self, input):
         pass
+
+    def handle_release_input(self, input):
+        if input.name == 'lb':
+            self.entity.flags['sprint_chain_active'] = False
+        input.processed()
 
     def enter_state(self, state, **kwarg):
         self.entity.shader_state.handle_input('idle')

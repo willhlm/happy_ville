@@ -4,8 +4,9 @@ from gameplay.states import Gameplay
 class AbilitySelect(Gameplay):#when pressing tab
     def __init__(self, game):
         super().__init__(game)
-        self.abilities = list(self.game.game_objects.player.abilities.spirit_abilities.keys())
-        self.index = self.abilities.index(self.game.game_objects.player.abilities.equip)
+        self.ability_manager = self.game.game_objects.player.abilities
+        self.abilities = self.ability_manager.get_equippable_keys()
+        self.index = self.abilities.index(self.ability_manager.equip)
 
         self.sprites = read_files.load_sprites_list('assets/sprites/ui/overlay/ability_hud/', game.game_objects)#TODO
         self.coordinates=[(40,0),(60,50),(30,60),(0,40),(20,0),(0,0)]
@@ -22,7 +23,7 @@ class AbilitySelect(Gameplay):#when pressing tab
         hud = self.sprites[self.index]
         for index, ability in enumerate(self.abilities):
             pos = [self.coordinates[index][0] + 250, self.coordinates[index][1] + 100]
-            self.game.display.render(self.game.game_objects.player.abilities.spirit_abilities[ability].sprites['active_1'][0], self.surface,position =pos)
+            self.game.display.render(self.ability_manager.get(ability).sprites['active_1'][0], self.surface,position =pos)
 
         self.game.display.render(hud, self.surface,position = (250,100))
         self.game.render_display(self.surface.texture)
@@ -39,5 +40,5 @@ class AbilitySelect(Gameplay):#when pressing tab
                 self.index=len(self.abilities)-1
         elif input.released:#release
             if input.name == 'rb':
-                self.game.game_objects.player.abilities.equip=self.abilities[self.index]
+                self.ability_manager.equip = self.abilities[self.index]
                 self.game.state_manager.exit_state()

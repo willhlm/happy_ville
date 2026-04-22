@@ -19,14 +19,16 @@ class SprintMain(PhaseBase):
 
     def update(self, dt):
         self.sprint_time += dt
-        if not self.entity.collision_types['bottom']:
-            self.enter_state('fall', allow_sprint = True)
-            self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
+        if not self.entity.has_ground_grace():
+            self.entity.flags['sprint_chain_active'] = True
+            self.enter_state('fall')
+            self.entity.begin_coyote_time()
 
     def handle_press_input(self, input):
         if input.name == 'a' and self.sprint_time > self.sprint_time_threshold:
             input.processed()
             self.entity.flags['grounddash'] = True
+            self.entity.flags['sprint_chain_active'] = True
             self.enter_state('dash_jump')
 
     def handle_release_input(self, input):
@@ -49,9 +51,10 @@ class SprintPost(PhaseBase):
         self.entity.animation.play('sprint_post')
 
     def update(self, dt):
-        if not self.entity.collision_types['bottom']:
-            self.enter_state('fall', allow_sprint = True)
-            self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
+        if not self.entity.has_ground_grace():
+            self.entity.flags['sprint_chain_active'] = True
+            self.enter_state('fall')
+            self.entity.begin_coyote_time()
 
     def handle_press_input(self, input):
         if input.name == 'a':

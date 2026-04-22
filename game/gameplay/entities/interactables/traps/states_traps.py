@@ -39,7 +39,7 @@ class Once_main(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)#spawn a sword
         self.atatck = self.entity.hurt_box(self.entity)
-        self.entity.game_objects.eprojectiles.add(self.atatck)
+        self.entity.game_objects.projectiles.add_enemy(self.atatck)
 
     def increase_phase(self):
         self.enter_state('Idle')
@@ -56,7 +56,7 @@ class Death_main(Basic_states):#spawn a sword
     def __init__(self,entity):
         super().__init__(entity)
         self.atatck = self.entity.hurt_box(self.entity)
-        self.entity.game_objects.eprojectiles.add(self.atatck)
+        self.entity.game_objects.projectiles.add_enemy(self.atatck)
 
     def increase_phase(self):
         self.entity.kill()

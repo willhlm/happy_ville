@@ -14,7 +14,8 @@ class Bird(Enemy):
         self.hitbox = self.rect.copy()
         self.currentstate = states_bird.Idle(self)
         self.flags['aggro'] = False
-        self.health = 1
+        self.vitals.set_max_health(1)
+        self.vitals.set_health(self.vitals.max_health)
         self.aggro_distance = [100,50]#at which distance is should fly away
 
     def knock_back(self, amp, dir):

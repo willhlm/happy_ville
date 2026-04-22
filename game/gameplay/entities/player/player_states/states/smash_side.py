@@ -72,11 +72,11 @@ class SmashSideMain(Sword):
         self.entity.animation.play(self.animation_name)
         self.entity.flags['attack_able'] = False
         self.entity.game_objects.timer_manager.start_timer(C.sword_time_player, self.entity.on_attack_timeout)
-        self.entity.abilities.spirit_abilities['Shield'].sword()
+        self.entity.abilities.notify_sword_attack()
         self.entity.sword.dir = self.entity.dir.copy()
         self.entity.sword.currentstate.enter_state('Slash_1')
         self.entity.sword.use_sword()
-        self.entity.projectiles.add(self.entity.sword)
+        self.entity.game_objects.projectiles.add_friendly(self.entity.sword)
 
     def update(self, dt):
         super().update(dt)

@@ -1,7 +1,7 @@
 #version 330 core
 
 in vec2 fragmentTexCoord;
-in vec2 worldPosition;
+uniform vec2 worldPosition;
 
 // Texture
 uniform sampler2D imageTexture;
@@ -96,6 +96,7 @@ void main()
     // Noise fields (advected with wind)
     // ---------------------------------------
     // Large-scale gust field (slow, smooth)
+    vec2 worldPosition = fragmentTexCoord;
     vec2 gust_p = worldPosition * (noise_scale * 0.6) + dir * (time * wind_speed * 0.03);
     float gust = fbm(gust_p);              // ~[0,1]
     float gust_signed = gust - 0.5;        // ~[-0.5,0.5]

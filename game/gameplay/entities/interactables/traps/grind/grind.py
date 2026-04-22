@@ -3,7 +3,7 @@ from engine.utils import read_files
 from engine import constants as C
 from gameplay.entities.interactables.base.interactables import Interactables
 from . import states_grind
-from gameplay.entities.shared.components import hit_effects
+from gameplay.entities.shared.components.hit import hit_effects
 
 class Grind(Interactables):#trap
     def __init__(self, pos, game_objects, **kwarg):
@@ -25,7 +25,14 @@ class Grind(Interactables):#trap
         self.time = 0
 
         self.flags['invincibility'] = False
-        self.base_effect = hit_effects.create_contact_effect(damage = 1, hit_type = 'metal', hitstop = 10, attacker = self)
+        self.base_effect = hit_effects.create_contact_effect(
+            self.game_objects,
+            damage=1,
+            hit_type='metal',
+            hitstop=10,
+            attacker=self,
+            attacker_dir=[0, 0],
+        )
 
     def update_vel(self):
         self.velocity[0] = self.direction[0] * self.distance * math.cos(self.speed * self.time)
@@ -43,12 +50,8 @@ class Grind(Interactables):#trap
         self.rect.topleft = self.true_pos
         self.hitbox.center = self.rect.center
 
-    def group_distance(self):
-        pass
-
     def on_collision(self, entity):#entity collision
         effect = self.base_effect.copy()
-        effect.meta['attacker_dir'] = [0,0]#save the direction
         #effect.particles['dir'] = self.dir
 
         damage_applied, modified_effect = entity.take_hit(effect)

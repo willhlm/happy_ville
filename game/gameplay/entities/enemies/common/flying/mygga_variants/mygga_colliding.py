@@ -10,7 +10,8 @@ class MyggaColliding(FlyingEnemy):#bounce around
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
-        self.health = 3
+        self.vitals.set_max_health(3)
+        self.vitals.set_health(self.vitals.max_health)
         self.velocity = [random.randint(-2,2),random.randint(-2,2)]
         self.dir[0] = sign(self.velocity[0])
         self.aggro_distance = [0, 0]
@@ -24,33 +25,10 @@ class MyggaColliding(FlyingEnemy):#bounce around
     def update_vel(self):
         pass
 
-    #ramp collisions
-    def ramp_top_collision(self, ramp):#called from collusion in clollision_ramp
-        self.hitbox.top = ramp.target
-        self.collision_types['top'] = True
-        self.velocity[1] *= -1
+    def handle_platform_collision(self, collision):
+        if collision.axis == 'x':
+            self.velocity[0] *= -1
+            self.dir[0] = -1 if collision.side == 'right' else 1
+            return
 
-    def ramp_down_collision(self, ramp):#called from collusion in clollision_ramp
-        self.hitbox.bottom = ramp.target
-        self.collision_types['bottom'] = True
-        self.velocity[1] *= -1
-
-    #platform collision
-    def right_collision(self, block, type = 'Wall'):
-        super().right_collision(block)
-        self.velocity[0] *= -1
-        self.dir[0] = -1
-
-    def left_collision(self, block, type = 'Wall'):
-        super().left_collision(block)
-        self.velocity[0] *= -1
-        self.dir[0] = 1
-
-    def down_collision(self, block):
-        super().down_collision(block)
-        self.velocity[1] *= -1
-
-    def top_collision(self, block):
-        self.hitbox.top = block.hitbox.bottom
-        self.collision_types['top'] = True
         self.velocity[1] *= -1

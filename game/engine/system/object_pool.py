@@ -3,15 +3,15 @@ from gameplay.ui.components import MenuArrow, LogoLoadingOverlay
 from gameplay.entities.visuals.particles import screen_particles
 from gameplay.world.weather import weather
 from gameplay.states import Bank, OptionMenu, OptionDisplay, OptionSounds
+from gameplay.entities.areas import SlowmotionField
 from gameplay.entities.enemies import Reindeer, CultistWarrior, CultistRogue
 from gameplay.entities.platforms import Bubble, SeedPlatform
 from gameplay.entities.items import *
 from gameplay.entities.projectiles import *
 from gameplay.entities.visuals.cosmetics import *
 from gameplay.entities.visuals.effects import FadeEffect
-from gameplay.entities.effects import SlowmotionField
 from gameplay.ui.components.overlay import point_arrow
-from gameplay.entities.interactables import AbilityBall
+from gameplay.entities.interactables import BossRewardBall
 from gameplay.entities.visuals.particles.particles import Circle, Spark, Goop, FloatyParticles
 
 class Object_pool():#a class that contains the objecte one may one to spawn duirng the game: it preloads stiff that needs to be loaded from file
@@ -28,7 +28,7 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         PurpleInfinityStone.pool(game_objects)
 
         #interactbales
-        AbilityBall.pool(game_objects)
+        BossRewardBall.pool(game_objects)
 
         #radna
         BossHP.pool(game_objects)
@@ -72,6 +72,7 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         Shield.pool(game_objects)
         ProjectileDroplet.pool(game_objects)
         SlamAttack.pool(game_objects)        
+        Tagg.pool(game_objects)        
 
         #UI
         MenuArrow.pool(game_objects)

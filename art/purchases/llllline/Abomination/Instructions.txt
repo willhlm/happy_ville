@@ -1,0 +1,17 @@
+
+Thank you for downloading this asset. 
+The following information is useful when importing the sprite sheets:
+----------------
+
+Abomination.png
+36 frames, frame resolution: 180x180px
+
+EnvironmentTiles.png
+4 frames, frame resolution: 32x32px
+
+----------------
+Check out the Preview files for more info.
+I want to thank you for supporting my work and for making it possible for me to continue doing what I love. 
+
+Best regards,
+ Sven

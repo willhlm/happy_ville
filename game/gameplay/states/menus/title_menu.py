@@ -17,16 +17,13 @@ class TitleMenu(BaseUI):
     def update_render(self, dt):
         self.menu_ui.buttons[self.current_button].active()# Always call active on the current button (for continuous hover effects)
 
-        self.game.game_objects.ui.uis['menu'].update_time(dt)
+        self.game.game_objects.ui.menu.update_time(dt)
         for arrow in self.menu_ui.arrows:
             arrow.update(dt)#make them move back and forth
 
-    def fade_update(self, dt):#called from fade out: update that should be played when fading: it is needed becayse depending on state, only part of the update loop should be called
-        self.update_render(dt)
-
     def render(self):
         self.game.screen_manager.screen.clear(0,0,0,0)
-        self.game.game_objects.ui.uis['menu'].render_background(self.game.screen_manager.screen)
+        self.game.game_objects.ui.menu.render_background(self.game.screen_manager.screen)
         self.game.display.render(self.game_title, self.game.screen_manager.screen)
 
         # Blit buttons
@@ -93,6 +90,9 @@ class TitleMenu(BaseUI):
         self.channel1 = self.game.game_objects.sound.play_background_sound(self.menu_ui.sounds['main'][0], index = 0, loop = -1, fade = 700, volume = 0.3)
         self.channel2 = self.game.game_objects.sound.play_background_sound(self.menu_ui.sounds['whisper'][0], index = 1, loop = -1, fade = 700, volume = 0.1)
 
+    def on_resume(self):
+        self._play_music()
+
     def change_state(self):
         if self.current_button == 0:#new game
             self.game.game_objects.sound.play_ui_sound('confirm', volume = 0.2)
@@ -105,15 +105,15 @@ class TitleMenu(BaseUI):
             #self.game.game_objects.map.load_map(self,'village_1','1')
             self.game.game_objects.map.load_map(self,'wakeup_forest_002','1')
             #self.game.game_objects.map.load_map(self,'spirit_world_1','1')
-            #self.game.game_objects.map.load_map(self,'crystal_mines_1','1')
-            #self.game.game_objects.map.load_map(self,'village_1','1')
+            #self.game.game_objects.map.load_map(self,'crystal_mines_3','1')
+            #self.game.game_objects.map.load_map(self,'village_5','1')
             #self.game.game_objects.map.load_map(self,'nordveden_windtest','1')
             #self.game.game_objects.map.load_map(self,'nordveden_1','1')
             #self.game.game_objects.map.load_map(self,'tall_trees_1','1')
             #self.game.game_objects.map.load_map(self,'dark_forest_1','5')
             #self.game.game_objects.map.load_map(self,'hlifblom_1','1')
             #self.game.game_objects.map.load_map(self,'rhoutta_encounter_3','1')
-            #self.game.game_objects.map.load_map(self,'golden_fields_1','1')
+            #self.game.game_objects.map.load_map(self,'golden_fields_1','2')
             #self.game.game_objects.map.load_map(self,'collision_map_4','1')
 
         elif self.current_button == 1:

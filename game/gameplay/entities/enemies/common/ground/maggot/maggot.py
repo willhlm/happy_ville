@@ -13,7 +13,8 @@ class Maggot(Enemy):
         self.hitbox = pygame.Rect(pos[0],pos[1],20,30)
         self.currentstate = states_maggot.Idle(self)
         self.animation.play('fall_stand')
-        self.health = 1
+        self.vitals.set_max_health(1)
+        self.vitals.set_health(self.vitals.max_health)
 
         self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
         self.friction[0] = C.friction[0]*2

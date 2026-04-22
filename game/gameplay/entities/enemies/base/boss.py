@@ -1,18 +1,45 @@
 from gameplay.entities.enemies.base.enemy import Enemy
-from gameplay.entities.enemies.bosses.shared.defeated_boss import DefeatedBoss
-from gameplay.entities.interactables import AbilityBall
+from gameplay.entities.interactables import BossRewardBall
+from gameplay.entities.shared.boss_rewards import ProgressionUnlockReward
 
 class Boss(Enemy):
-    def __init__(self,pos,game_objects):
+    def __init__(self,pos,game_objects, ID = None):
         super().__init__(pos,game_objects)
-        self.health = 10        
+        self.vitals.set_max_health(10)
+        self.vitals.set_health(self.vitals.max_health)
+        self.always_active = True
+        self.ID = ID
+        self.reward = None
 
-    def group_distance(self):
-        pass
+    def start_aggro(self, delay = 0):
+        self.currentstate.clear_tasks()
+        if delay and 'wait' in self.currentstate.state_registry:
+            self.currentstate.queue_task(task = 'wait', duration = delay)
+        self.currentstate.queue_task(task = 'think')
+        self.currentstate.start_next_task()
 
     def dead(self):#called when death animation is finished
-        position = [self.hitbox.centerx, self.hitbox.centery - 50]
-        self.game_objects.interactables.add(AbilityBall(position, self.game_objects, self.ability))
+        self.flags['aggro'] = False
+        self.hit_component.set_invinsibility(True) 
+        self.game_objects.world_state.narrative.mark_boss_defeated(self.ID)
 
-        self.game_objects.cosmetics.add(DefeatedBoss(self.game_objects, self))
+        reward = self.build_reward()
+        if reward is not None:
+            position = [self.hitbox.centerx, self.hitbox.centery - 50]
+            self.game_objects.interactables.add(BossRewardBall(position, self.game_objects, reward))
 
+        self.game_objects.sequence_manager.start_sequence('defeated_boss', boss=self)
+
+    def build_reward(self):
+        if self.reward is not None:
+            return self.reward
+
+        progress_key = self.game_objects.player.progression.get_progress_key_for_boss(self.ID)
+        if progress_key is None:
+            return None
+
+        return ProgressionUnlockReward(
+            progress_key=progress_key,
+            preview_sprite=self.game_objects.player.progression.get_preview_sprite(progress_key),
+        )
+        

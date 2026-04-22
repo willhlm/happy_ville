@@ -22,6 +22,7 @@
  </tile>
  <tile id="3">
   <properties>
+   <property name="ID" value=""/>
    <property name="class" value=""/>
   </properties>
  </tile>
@@ -96,7 +97,6 @@
  <tile id="19">
   <properties>
    <property name="event" value=""/>
-   <property name="new_state" type="bool" value="false"/>
   </properties>
  </tile>
  <tile id="20">

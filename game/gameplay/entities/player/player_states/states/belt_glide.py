@@ -15,30 +15,30 @@ class BeltGlide(PhaseBase):
 
     def enter(self, **kwarg):
         self.entity.animation.play(self.animation_name)
-        self.entity.game_objects.timer_manager.remove_ID_timer('cayote')
+        self.entity.end_coyote_time()
         self.entity.movement_manager.add_modifier('wall_glide', authoritative = True)
-        if self.entity.collision_types['right']:
+        if self.entity.is_on_wall_side('right'):
             self.dir = [1, 0]
         else:
             self.dir = [-1, 0]
 
     def update(self, dt):
-        if not self.entity.collision_types['right'] and not self.entity.collision_types['left']:
+        if not self.entity.is_on_wall():
             self.enter_state('fall')
-            if self.entity.currentstate.states.get('wall_glide'):
-                self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
+            if self.entity.has_collision_kind('Wall'):
+                self.entity.begin_coyote_time()
 
     def handle_press_input(self, input):
         if input.name == 'a':
             input.processed()
-            if self.entity.currentstate.states.get('wall_glide'):
+            if self.entity.has_collision_kind('Wall'):
                 self.entity.velocity[0] = -self.dir[0] * 10
                 self.entity.velocity[1] = -7
                 self.enter_state('jump')
             else:
                 self.entity.velocity[0] = -self.entity.dir[0] * 10
                 self.enter_state('fall')
-        elif input.name == 'lb' and self.entity.currentstate.states.get('wall_glide'):
+        elif input.name == 'lb' and self.entity.has_collision_kind('Wall'):
             input.processed()
             self.enter_state('dash_ground')
 
@@ -54,16 +54,16 @@ class BeltGlide(PhaseBase):
         if value[0] * curr_dir < 0:
             self.entity.velocity[0] = self.entity.dir[0] * 2
             self.enter_state('fall')
-            if self.entity.currentstate.states.get('wall_glide'):
-                self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
+            if self.entity.has_collision_kind('Wall'):
+                self.entity.begin_coyote_time()
         elif value[0] == 0:
             self.entity.velocity[0] = -self.entity.dir[0] * 2
             self.enter_state('fall')
-            if self.entity.currentstate.states.get('wall_glide'):
-                self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
+            if self.entity.has_collision_kind('Wall'):
+                self.entity.begin_coyote_time()
 
-    def handle_input(self, input, **kwarg):
-        if input == 'Ground':
+    def consume_contact_state(self):
+        if self.entity.is_on_floor():
             self.enter_state('run')
 
     def enter_state(self, input):

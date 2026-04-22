@@ -8,14 +8,15 @@ class Wet(Status):#"a wet status". activates when player baths, and spawns parti
         self.time = 0
 
     def activate(self, water_tint):#called when aila bathes (2D water)
-        self.lifetime = self.duration#reset the duration
+        super().activate()
         self.water_tint = water_tint
+        self.time = 0
         self.drop()
-        if self in self.entity.timers: return#do not append if the timer is already inside
-        self.entity.timers.append(self)
 
     def update(self, dt):
         super().update(dt)
+        if not self.active:
+            return
         self.time += dt
         if self.time > self.spawn_frequency:
             self.time = 0

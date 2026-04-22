@@ -15,7 +15,7 @@ class LoadMenu(BaseUI):
     def update_render(self, dt):        
         self.menu_ui.buttons[self.current_button].active()# Always call active on the current button (for continuous hover effects)
 
-        self.game.game_objects.ui.uis['menu'].update_time(dt)
+        self.game.game_objects.ui.menu.update_time(dt)
         for arrow in self.menu_ui.arrows:
             arrow.update(dt)#make them move back and forth
 
@@ -47,7 +47,7 @@ class LoadMenu(BaseUI):
 
     def render(self):
         self.game.screen_manager.screen.clear(0,0,0,0)
-        self.game.game_objects.ui.uis['menu'].render_background(self.game.screen_manager.screen)
+        self.game.game_objects.ui.menu.render_background(self.game.screen_manager.screen)
 
         #blit buttons
         for b in self.menu_ui.buttons:

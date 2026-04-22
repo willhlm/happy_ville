@@ -1,8 +1,8 @@
 import pygame
+import sys
 from engine.utils import read_files
 from gameplay.entities.interactables.statues.quests.base.statues import Statues
 from gameplay.narrative import dialogue
-from gameplay.entities.shared.states import states_shader
 
 class StoneWood(Statues):#the stone "statue" to initiate the lumberjacl quest
     def __init__(self, pos, game_objects, quest, item):
@@ -22,7 +22,8 @@ class StoneWood(Statues):#the stone "statue" to initiate the lumberjacl quest
             speaker_id = "interactable:" + quest,
             allow_comments = False,
         )#handles dialoage and what to say
-        self.shader_state = {False : states_shader.Idle, True: states_shader.Tint}[self.interacted](self)
+        if self.interacted:
+            self.shader_state.enter_state('tint')
 
     def on_interact(self, item, player):#called when the signal is emitted
         if type(item).__name__.lower() == self.item:
@@ -30,5 +31,5 @@ class StoneWood(Statues):#the stone "statue" to initiate the lumberjacl quest
 
     def on_conversation_complete(self):
         self.game_objects.signals.subscribe('item_interacted', self.on_interact)
-        item = getattr(sys.modules[__name__], self.item.capitalize())(self.rect.center, self.game_objects, state = 'wild')#make a class based on the name of the newstate: need to import sys
+        item = getattr(sys.modules[__name__], self.item.capitalize())(self.rect.center, self.game_objects, spawn_mode='wild')#make a class based on the name of the newstate: need to import sys
         self.game_objects.loot.add(item)

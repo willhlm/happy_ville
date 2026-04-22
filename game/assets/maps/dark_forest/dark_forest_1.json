@@ -1247,9 +1247,14 @@
                          "name":"",
                          "properties":[
                                 {
-                                 "name":"event",
+                                 "name":"ID",
                                  "type":"string",
                                  "value":"tutorial_boss_encounter"
+                                }, 
+                                {
+                                 "name":"event",
+                                 "type":"string",
+                                 "value":"boss_encounter"
                                 }, 
                                 {
                                  "name":"new_state",
@@ -1262,6 +1267,29 @@
                          "width":16,
                          "x":5360,
                          "y":544
+                        }, 
+                        {
+                         "gid":4,
+                         "height":16,
+                         "id":310,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"ID",
+                                 "type":"string",
+                                 "value":"tutorial_boss_encounter"
+                                }, 
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"wolfies"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":5936,
+                         "y":592
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -1300,7 +1328,7 @@
          "y":0
         }],
  "nextlayerid":99,
- "nextobjectid":309,
+ "nextobjectid":311,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

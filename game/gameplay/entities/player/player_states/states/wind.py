@@ -12,10 +12,7 @@ class WindMain(PhaseBase):
 
     def enter(self):
         self.entity.animation.play('wind_main')
-        self.entity.consume_spirit()
-        self.entity.abilities.spirit_abilities['Wind'].initiate()
+        self.entity.abilities.activate('wind')
 
     def increase_phase(self):
         self.enter_state('idle')
-
-

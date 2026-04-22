@@ -29,7 +29,7 @@ class SlowMotionMain(PhaseBase):
 
     def enter(self):
         self.entity.animation.play('slow_motion_main')
-        self.entity.abilities.spirit_abilities['Slow_motion'].initiate()
+        self.entity.abilities.activate('slow_motion')
 
     def increase_phase(self):
         self.enter_state('idle')

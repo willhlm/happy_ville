@@ -41,6 +41,6 @@ class HealMain(PhaseBase):
         pass
 
     def increase_phase(self):
-        self.entity.heal()
+        self.entity.heal_vitals()
         self.entity.backpack.inventory.remove('amber_droplet', self.heal_cost)
         self.enter_state('Heal_main')

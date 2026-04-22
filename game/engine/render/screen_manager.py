@@ -1,4 +1,4 @@
-from engine.render.post_process import PostProcessLayer
+from engine.render.post_process import LayerPipeline
 
 class ScreenManager():
     def __init__(self, game):
@@ -29,7 +29,8 @@ class ScreenManager():
             self.activate_screen('player_fg')   
         
     def activate_screen(self, key):
-        self.active_screens.append(key)
+        if key not in self.active_screens:
+            self.active_screens.append(key)
         
     def deactivate_screen(self, key):
         self.active_screens.remove(key)
@@ -95,7 +96,7 @@ class ScreenLayer():
         self.layer = self.game.display.make_layer(self.game.window_size)
         self.offset = [0, 0]
 
-        self.post_process = PostProcessLayer(game.game_objects, self)
+        self.post_process = LayerPipeline(game.game_objects, self)
 
     def calculate_offset(self):      
         camera_scroll_x = self.game.game_objects.camera_manager.camera.interp_scroll[0] * self.parallax[0]
@@ -119,7 +120,10 @@ class ScreenLayer():
         self.game.display.render(input.texture, target, scale = self.game.scale, shader = self.game.game_objects.shaders['pp'])      
 
     def render(self, composite_target):
-        self.post_process.apply(source_layer=self.layer,final_target=composite_target)
+        if self.post_process.has_shaders():
+            self.post_process.apply(source_layer=self.layer, final_target=composite_target)
+        else:
+            self.apply_pp(self.layer, composite_target)
 
     def reset(self, parallax):  
         self.parallax = parallax

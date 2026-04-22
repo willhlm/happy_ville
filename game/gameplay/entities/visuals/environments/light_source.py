@@ -9,7 +9,7 @@ class LightSource(LayeredObjects):#should we decrease alpha for large parallax?
         self.hitbox = self.rect.copy()
 
     def update(self, dt):
-        self.group_distance()
+        pass
 
     def draw(self, target):
         pass

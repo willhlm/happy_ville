@@ -17,7 +17,6 @@ class SmallTree_1(LayeredObjects):
 
     def update(self):
         self.time += self.game_objects.game.dt
-        self.group_distance()
 
     def draw(self,target):
         self.shader['TIME'] = self.time

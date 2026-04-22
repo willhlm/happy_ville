@@ -13,13 +13,10 @@ class CrystalSource(Interactables):#the thng that spits out crystals in crystal 
         self.frequency = kwarg.get('frequency', 15)
         self.kwarg = kwarg
 
-    def group_distance(self):
-        pass
-
     def update(self, dt):
         super().update(dt)
         self.time += dt
         if self.time > self.frequency:
             crystal = Projectile_1(self.rect.center, self.game_objects, **self.kwarg)
-            self.game_objects.eprojectiles.add(crystal)
+            self.game_objects.projectiles.add_enemy(crystal)
             self.time = 0

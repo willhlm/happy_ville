@@ -5,6 +5,7 @@ from .enemies import REGISTER_ENEMIES
 from .event_triggers import REGISTER_EVENT_TRIGGERS
 from .events import REGISTER_EVENTS
 from .quests import REGISTER_QUESTS
+from .sequences import REGISTER_SEQUENCES
 
 class RegistryManager():
     def __init__(self):
@@ -20,6 +21,7 @@ class RegistryManager():
             "event_triggers": REGISTER_EVENT_TRIGGERS,
             "events": REGISTER_EVENTS,
             "quests": REGISTER_QUESTS,
+            "sequences": REGISTER_SEQUENCES,
             #"interactables": REGISTER_INTERACTABLES,
         }
 

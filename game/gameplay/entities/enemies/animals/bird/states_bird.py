@@ -20,8 +20,8 @@ class Enemy_states():
         if abs(self.player_distance[0]) < self.entity.aggro_distance[0] and abs(self.player_distance[1]) < self.entity.aggro_distance[1]:
             self.enter_state('Fly')
 
-    def modify_hit(self, effect):
-        return effect
+    def consume_contact_state(self):
+        pass
 
 class Idle(Enemy_states):
     def __init__(self,entity):

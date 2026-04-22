@@ -20,9 +20,9 @@ class Enemy_states():
 
     def take_dmg(self, dmg):
         if self.entity.invincibile: return
-        self.entity.health -= dmg
+        self.entity.vitals.damage(dmg)
 
-        if self.entity.health > 0:#check if dead¨
+        if self.entity.vitals.health > 0:#check if dead¨
             self.entity.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period (minimum time needed to that the swrod doesn't hit every frame)
             self.entity.shader_state.handle_input('Hurt')#turn white
             self.entity.AI.handle_input('Hurt')

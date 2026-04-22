@@ -1,8 +1,8 @@
 import pygame
-from gameplay.entities.platforms.texture.base_texture import BaseTexture
-from gameplay.entities.platforms.collisions.collision_block import CollisionBlock
+from gameplay.entities.platforms.texture.textured_platform import TexturedPlatform
+from gameplay.entities.platforms.base.solid_platform import SolidPlatform
 
-class BaseShadowLight(BaseTexture):#parent class: add the subclasses to cosmetics group
+class BaseShadowLight(TexturedPlatform):#parent class: add the subclasses to cosmetics group
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
         self.platforms = []#keep diffeernt collision blocks to dynamically change the size
@@ -19,7 +19,7 @@ class BaseShadowLight(BaseTexture):#parent class: add the subclasses to cosmetic
                 platform.hitbox = overlap_rect
                 platform.rect = overlap_rect
             else:
-                platform = CollisionBlock(overlap_rect.topleft, size=[overlap_rect.width, overlap_rect.height])
+                platform = SolidPlatform(overlap_rect.topleft, size=[overlap_rect.width, overlap_rect.height])
                 self.game_objects.platforms.add(platform)
 
             new_platforms.append(platform)

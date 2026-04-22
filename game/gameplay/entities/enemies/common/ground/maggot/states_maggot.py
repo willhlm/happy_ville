@@ -26,7 +26,7 @@ class Idle(BasicStates):#initialised here
         super().__init__(entity)
 
     def update(self):
-        if self.entity.collision_types['bottom']:
+        if self.entity.is_on_floor():
             self.enter_state('Run_away')
 
 class Run_away(BasicStates):

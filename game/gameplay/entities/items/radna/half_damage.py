@@ -3,22 +3,24 @@ from engine.utils import read_files
 from gameplay.entities.items.radna.base_radna import Radna
 
 class HalfDamage(Radna):
+    inventory_level = 1
+    inventory_description = 'Take half dmg [1]'
+
     def __init__(self,pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
         self.sprites = HalfDamage.sprites
-        self.image = self.sprites[kwarg.get('state', 'idle')][0]
+        self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
-        self.level = 1
-        self.description = 'Take half dmg ' + '[' + str(self.level) + ']'
+        self.interact_component.apply_spawn()
 
-    def attach(self):
-        super().attach()
-        self.entity.damage_manager.add_modifier('Half_dmg')
+    @classmethod
+    def entry_on_attach(cls, entry):
+        entry.owner.damage_manager.add_modifier('Half_dmg')
 
-    def detach(self):
-        super().detach()
-        self.entity.damage_manager.remove_modifier('Half_dmg')
+    @classmethod
+    def entry_on_detach(cls, entry):
+        entry.owner.damage_manager.remove_modifier('Half_dmg')
 
     @classmethod
     def pool(cls, game_objects):

@@ -21,14 +21,18 @@ class SwordAirMain(SwordAir):
         self.entity.sword.use_sword()
         self.entity.sword.dir = self.entity.dir.copy()
         self.entity.sword.currentstate.enter_state('Slash_1')
-        self.entity.projectiles.add(self.entity.sword)
+        self.entity.game_objects.projectiles.add_friendly(self.entity.sword)
 
     def increase_phase(self):
         self.enter_state('fall')
 
     def handle_input(self, input, **kwarg):
-        if input == 'Ground':
-            if self.entity.acceleration[0] != 0:
-                self.enter_state('run')
-            else:
-                self.enter_state('idle')
+        pass
+
+    def consume_contact_state(self):
+        if not self.entity.is_on_floor():
+            return
+        if self.entity.acceleration[0] != 0:
+            self.enter_state('run')
+        else:
+            self.enter_state('idle')
