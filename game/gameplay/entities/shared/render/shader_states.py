@@ -35,7 +35,7 @@ class Idle(BaseState):
         self.shader = self.entity.game_objects.shaders['idle']
 
     def handle_input(self, input, **kwarg):
-        if input == 'Hurt':
+        if input == 'hurt':
             self.enter_state('Hurt', **kwarg)
         elif input == 'outline':
             self.enter_state('Outline',  **kwarg)            
@@ -82,7 +82,7 @@ class Hurt(BaseState):#turn white and shake it a bit -> enteties use it
             self.enter_state(self.next_animation)
 
     def handle_input(self,input,**kwarg):
-        if input == 'Invincibile':
+        if input == 'invincibile':
             self.next_animation = 'Invincibile'
 
 class Invincibile(BaseState):#blink white -> enteyties use it
@@ -287,7 +287,7 @@ class Mb(BaseState):#TODO #move to shadders for the entities
     def handle_input(self, input, **kwarg):
         if input == 'idle':
             self.enter_state('Idle')
-        elif input == 'Hurt':
+        elif input == 'hurt':
             self.enter_state('Hurt')
 
 class Noise_border(BaseState):#TODO #move to shadders for the entities

@@ -1,10 +1,11 @@
 from gameplay.entities.enemies.common.shared.state_machine.deciders.decision import Decision
+from gameplay.entities.enemies.common.shared.state_machine.deciders.config_utils import resolve_distance
 
 class SlamAttackDecider():
     def __init__(self, entity, **kwargs):
         self.entity = entity
         self.dec_cfg = kwargs
-        self.attack_distance = self.entity.config['distances']['slam']
+        self.attack_distance = resolve_distance(entity, kwargs, 'slam')
 
     def choose(self, player_distance, dt):
         results = []

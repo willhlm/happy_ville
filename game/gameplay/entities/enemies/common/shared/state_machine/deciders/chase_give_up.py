@@ -1,11 +1,12 @@
 from .decision import Decision
+from .config_utils import resolve_distance
 
 class ChaseGiveUpDecider:
     def __init__(self, entity, **kwargs):
         self.entity = entity
         self.cfg = kwargs
         self.giveup_timer = self.cfg['give_up_time']
-        self.aggro_distance = entity.config['distances']['aggro']
+        self.aggro_distance = resolve_distance(entity, kwargs, 'aggro')
 
     def choose(self, player_distance, dt):
         results = []
@@ -16,7 +17,7 @@ class ChaseGiveUpDecider:
                     next_state=self.cfg['next_state'],
                     score=self.cfg['score'],
                     priority=self.cfg['priority'],
-                    kwargs=self.cfg['kwargs']
+                    kwargs=self.cfg.get('kwargs', {})
                 ))
         else:
             self.giveup_timer = self.cfg['give_up_time']

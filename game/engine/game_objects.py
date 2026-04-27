@@ -232,6 +232,9 @@ class GameObjects():
             for cos in self.interactables.sprites():#go through the group
                 pygame.draw.rect(image, (0,0,255), (int(cos.hitbox[0]-self.camera_manager.camera.scroll[0]),int(cos.hitbox[1]-self.camera_manager.camera.scroll[1]),cos.hitbox[2],cos.hitbox[3]),1)#draw hitbox
                 pygame.draw.rect(image, (255,0,255), (int(cos.rect[0]-self.camera_manager.camera.scroll[0]),int(cos.rect[1]-self.camera_manager.camera.scroll[1]),cos.rect[2],cos.rect[3]),1)#draw hitbox
+            for cos in self.interactables_fg.sprites():#go through the group
+                pygame.draw.rect(image, (0,0,255), (int(cos.hitbox[0]-self.camera_manager.camera.scroll[0]),int(cos.hitbox[1]-self.camera_manager.camera.scroll[1]),cos.hitbox[2],cos.hitbox[3]),1)#draw hitbox
+                pygame.draw.rect(image, (255,0,255), (int(cos.rect[0]-self.camera_manager.camera.scroll[0]),int(cos.rect[1]-self.camera_manager.camera.scroll[1]),cos.rect[2],cos.rect[3]),1)#draw hitbox                
             for cos in self.loot.sprites():#go through the group
                 pygame.draw.rect(image, (0,0,255), (int(cos.hitbox[0]-self.camera_manager.camera.scroll[0]),int(cos.hitbox[1]-self.camera_manager.camera.scroll[1]),cos.hitbox[2],cos.hitbox[3]),1)#draw hitbox
                 pygame.draw.rect(image, (255,0,255), (int(cos.rect[0]-self.camera_manager.camera.scroll[0]),int(cos.rect[1]-self.camera_manager.camera.scroll[1]),cos.rect[2],cos.rect[3]),1)#draw hitbox

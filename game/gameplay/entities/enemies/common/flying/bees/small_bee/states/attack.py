@@ -4,7 +4,6 @@ import random
 from engine.utils.functions import sign
 from gameplay.entities.enemies.common.shared.state_machine.states.base_state import BaseState
 
-
 class AttackPre(BaseState):
     def __init__(self, entity, deciders, config_key, **kwargs):
         super().__init__(entity, deciders, config_key)
@@ -20,7 +19,6 @@ class AttackPre(BaseState):
 
     def increase_phase(self):
         self.enter_state('attack_main')
-
 
 class AttackMain(BaseState):
     def __init__(self, entity, deciders, config_key, **kwargs):
@@ -39,13 +37,18 @@ class AttackMain(BaseState):
 
         cooldown = self.entity.config['cooldowns']['melee_attack']
         self.entity.currentstate.cooldowns.set('melee_attack', random.randint(cooldown[0], cooldown[1]))
+        self.entity.game_objects.sound.play_sfx(random.choice(self.entity.sounds['attack']))
 
     def update(self, dt):
         self.entity.dir[0] = sign(self.velocity[0]) if self.velocity[0] != 0 else self.entity.dir[0]
         self.entity.velocity = self.velocity.copy()
         self.duration -= dt
         if self.duration < 0:
-            self.enter_state('wait', time=random.randint(*self.entity.config['behavior']['post_attack_delay']), next_state='chase')
+            self.enter_state(
+                'wait',
+                time=random.randint(*self.entity.config['behavior']['post_attack_delay']),
+                next_state='chase',
+            )
 
     def handle_input(self, input_type):
         if input_type == 'collision':

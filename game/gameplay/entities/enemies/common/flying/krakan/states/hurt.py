@@ -20,7 +20,7 @@ class Hurt(BaseState):
             self.entity.velocity[0] *= 0.8
             self.entity.velocity[1] = 0
         else:
-            self.entity.velocity[1] += dt * self.entity.config['speeds']['landing']
+            self.entity.velocity[1] += dt * self.entity.config['speeds']['fall']
 
     def increase_phase(self):
         aggro = self.entity.config['distances']['aggro']

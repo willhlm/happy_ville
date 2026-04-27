@@ -66,6 +66,9 @@ class Platform(pygame.sprite.Sprite):
     def get_contact_metadata(self, entity, side, axis, collision_kind):
         return self.surface_collision.get_contact_metadata(entity, side, axis, collision_kind)
 
+    def supports_surface_stick(self, entity, side):
+        return self.surface_collision.supports_surface_stick(entity, side)
+
     def draw(self, target):
         pass
 

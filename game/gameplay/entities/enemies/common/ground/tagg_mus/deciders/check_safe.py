@@ -1,10 +1,11 @@
 from gameplay.entities.enemies.common.shared.state_machine.deciders.decision import Decision
+from gameplay.entities.enemies.common.shared.state_machine.deciders.config_utils import resolve_distance
 
 class CheckSafeDecider:
     def __init__(self, entity, **kwargs):
         self.entity = entity
         self.cfg = kwargs
-        self.aggro_distance = entity.config['distances']['aggro']
+        self.aggro_distance = resolve_distance(entity, kwargs, 'aggro')
 
     def choose(self, player_distance, dt):
         results = []
@@ -13,7 +14,7 @@ class CheckSafeDecider:
                 next_state=self.cfg['next_state'],
                 score=self.cfg['score'],
                 priority=self.cfg['priority'],
-                kwargs=self.cfg['kwargs']
+                kwargs=self.cfg.get('kwargs', {})
             ))
 
         return results

@@ -933,6 +933,24 @@
                          "width":16,
                          "x":2800,
                          "y":912
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":397,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"ghoul"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":2336,
+                         "y":832
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -946,7 +964,7 @@
                  "name":"back",
                  "objects":[
                         {
-                         "gid":17487,
+                         "gid":17488,
                          "height":160,
                          "id":396,
                          "name":"",
@@ -994,7 +1012,7 @@
          "y":0
         }],
  "nextlayerid":96,
- "nextobjectid":397,
+ "nextobjectid":398,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -1074,7 +1092,7 @@
          "source":"..\/_objects\/interactables.tsx"
         }, 
         {
-         "firstgid":17486,
+         "firstgid":17487,
          "source":"objects\/objects.tsx"
         }],
  "tilewidth":16,

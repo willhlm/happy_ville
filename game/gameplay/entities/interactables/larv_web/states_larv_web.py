@@ -29,7 +29,7 @@ class Idle(Basic_states):
         dx = player.centerx - self.entity.anchor_pos[0]
         dy = player.centery - (self.entity.anchor_pos[1] )
         if abs(dx) < self.entity.trigger_distance[0] and abs(dy) < self.entity.trigger_distance[1]:
-            self.entity.larv.trigger_drop()
+            self.entity.larv.hanging_component.trigger_drop()
             self.enter_state('Dropped')        
 
 class Dropped(Basic_states):

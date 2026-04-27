@@ -66,7 +66,7 @@
    <property name="interactable_item" value=""/>
    <property name="spawn_mode" value="wild"/>
   </properties>
-  <image width="16" height="16" source="../../sprites/entities/items/interactable_item/idle/Sprite-0002.png"/>
+  <image width="16" height="16" source="../../sprites/entities/items/interactable_items/idle/Sprite-0002.png"/>
  </tile>
  <tile id="15">
   <properties>

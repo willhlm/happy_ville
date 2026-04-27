@@ -51,6 +51,19 @@ class GameAudio:
     def play_sfx(self, sfx, loop=0, vol=1, fade=0):
         return self.sound_player.play_sfx(sfx, loops=loop, volume=vol, fade_ms=fade)
 
+    def play_spatial_sfx(self, sfx, point, vol=1, loop=0, fade=0, min_dist=48, max_dist=300, listener_pos=None, parallax=None):
+        return self.spatial.play_point(
+            sfx,
+            point,
+            volume=vol,
+            loops=loop,
+            fade_ms=fade,
+            min_dist=min_dist,
+            max_dist=max_dist,
+            listener_pos=listener_pos,
+            parallax=parallax,
+        )
+
     def get_sfx(self, weapon_type, material):
         return self.sfx_library.get_impact_sound(weapon_type, material)
 

@@ -8,16 +8,17 @@ from gameplay.entities.projectiles.ranged.poison_blob import PoisonBlob
 from .config import ENEMY_CONFIG
 from .hanging_component import HangingComponent
 from .surface_larv import SurfaceLarv
-from .states import AttackMain, AttackPre, Crawl, Dropping, Hanging, Land, Wait
+from .states import AttackMain, AttackPre, Chase, Fall, Hanging, Land, Wait, Hurt
 
 LARV_POISON_STATES = {
     'attack_pre': AttackPre,
     'attack_main': AttackMain,
-    'crawl': Crawl,
+    'chase': Chase,
+    'fall': Fall,
     'hanging': Hanging,
-    'dropping': Dropping,
     'land': Land,
     'wait': Wait,
+    'hurt': Hurt,    
 }
 
 class LarvPoison(SurfaceLarv):
@@ -30,34 +31,18 @@ class LarvPoison(SurfaceLarv):
         self.hitbox = pygame.Rect(pos[0], pos[1], 20, 30)
         self.vitals.set_max_health(self.config['health'])
         self.vitals.set_health(self.vitals.max_health)
-        self.surface_ai_turn_delay = 0
         movement_config = self.config['movement']
         if initial_state == 'hanging' or anchor_pos is not None:
-            self.attach_hanging_component(HangingComponent(self, initial_state = initial_state, anchor_pos = anchor_pos))
+            self.hanging_component = HangingComponent(self, initial_state = initial_state, anchor_pos = anchor_pos)
             self.hanging_component.init_motion()
         self.init_surface_stick_motion(
-            speed = movement_config.get('crawl_speed', self.config['speeds']['crawl']),
-            stick_speed = movement_config['stick_speed'],
             probe_distance = movement_config['probe_distance'],
             corner_inset = movement_config['corner_inset'],
             enabled = initial_state != 'hanging',
         )
 
         self.currentstate = StateManager(self, type = 'ground', custom_states = LARV_POISON_STATES, universal_states = ['dead', 'death', 'hurt', 'wait'])
-        self.enter_initial_hanging_state()
-
-    def update_surface_crawl_state(self, dt, player_distance):
-        self.surface_ai_turn_delay = max(0, self.surface_ai_turn_delay - dt)
-        if abs(player_distance[0]) > self.config['distances']['aggro'][0] or abs(player_distance[1]) > self.config['distances']['aggro'][1]:
-            return
-
-        if self.surface_ai_turn_delay <= 0:
-            self.set_surface_direction_towards(self.game_objects.player.hitbox.center)
-            self.surface_ai_turn_delay = 15
-
-        if abs(player_distance[0]) <= self.config['distances']['attack'][0] and abs(player_distance[1]) <= self.config['distances']['attack'][1]:
-            if self.currentstate.cooldowns.get('surface_attack') <= 0:
-                self.currentstate.enter_state('attack_pre')
+        self.hanging_component.enter_initial_state()
 
     def attack(self):
         player = self.game_objects.player.hitbox.center

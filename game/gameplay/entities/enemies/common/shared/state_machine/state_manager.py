@@ -33,6 +33,9 @@ class StateManager:
     def enter_state(self, state_name, **kwargs):
         normalized_state = state_name.lower()
         if self.states.get(normalized_state, False):
+            state_config = self.entity.config.get('states', {}).get(normalized_state, {})
+            default_kwargs = state_config.get('kwargs', {})
+            kwargs = {**default_kwargs, **kwargs}
             self.state = self.states[normalized_state](self.entity, self.deciders, config_key=normalized_state, **kwargs)
 
     def update(self, dt):

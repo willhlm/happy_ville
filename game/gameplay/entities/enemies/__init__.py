@@ -36,6 +36,8 @@ from .common.ground.hedge.hedge import Hedge
 from .common.ground.tagg_mus.tagg_mus import TaggMus
 from .common.ground.bjorn.bjorn import Bjorn
 
+from .common.ground.ghoul.ghoul import Ghoul
+
 from .common.ground.cultist.rogue.cultist_rogue import CultistRogue
 from .common.ground.cultist.cultist_warrior import CultistWarrior
 

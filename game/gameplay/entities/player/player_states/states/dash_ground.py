@@ -15,6 +15,11 @@ class DashGroundState(CompositeState):
 
     def allowed(self):
         return self.entity.flags['grounddash']
+    
+    def exit(self):#called when exiting the composite state
+        super().exit()
+        self.entity.movement_manager.remove_modifier('dash')
+        self.entity.shader_state.handle_input('idle')
 
 class DashGroundPre(PhaseBase):
     def __init__(self, entity, **kwarg):

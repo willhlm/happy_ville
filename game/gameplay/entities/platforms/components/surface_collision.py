@@ -2,6 +2,8 @@ from gameplay.entities.platforms.components.geometry import CollisionSample
 
 
 class SurfaceCollisionComponent:
+    STICKABLE_SIDES = ("bottom", "top", "left", "right")
+
     def __init__(self, platform, **props):
         self.p = platform
         self.props = props
@@ -41,6 +43,9 @@ class SurfaceCollisionComponent:
     def get_contact_metadata(self, entity, side, axis, collision_kind):
         return {}
 
+    def supports_surface_stick(self, entity, side):
+        return side in self.STICKABLE_SIDES
+
     def _build_floor_sample(self, entity, clamp_floor=False, collision_kind='block'):
         if not self._overlaps_horizontally(entity):
             return None
@@ -71,6 +76,8 @@ class SolidSurfaceCollisionComponent(SurfaceCollisionComponent):
 
 
 class OneWayUpSurfaceCollisionComponent(SurfaceCollisionComponent):
+    STICKABLE_SIDES = ("bottom",)
+
     def get_ceiling_samples(self, entity):
         return ()
 
@@ -131,6 +138,13 @@ class RightAngleSurfaceCollisionComponent(SurfaceCollisionComponent):
         if target is None or target > probe_hitbox.bottom:
             return None
         return target
+
+    def supports_surface_stick(self, entity, side):
+        if self.p.orientation in (0, 1):
+            return side == "bottom"
+        if self.p.orientation in (2, 3):
+            return side == "top"
+        return False
 
     def _get_floor_target(self, hitbox):
         if self.p.orientation == 0:

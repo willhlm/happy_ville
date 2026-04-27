@@ -26,7 +26,7 @@ class LarvWeb(Interactables):
         self.larv = larv_cls(larv_pos, game_objects, initial_state = 'hanging', anchor_pos = self.anchor_pos)
         self.game_objects.enemies.add(self.larv)
 
-        self.hit_component.set_invinsibility(True)          
+        self.hit_component.set_invincibility(True)          
 
     def on_collision(self, entity):#one time collision
         pass

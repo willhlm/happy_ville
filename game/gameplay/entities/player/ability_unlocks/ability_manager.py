@@ -1,4 +1,4 @@
-from gameplay.entities.player.abilities import horagalles_rage, tjasolmais_embrace, juksakkas_blessing, bieggs_breath, beaivis_time
+from .abilities import horagalles_rage, tjasolmais_embrace, juksakkas_blessing, bieggs_breath, beaivis_time
 
 class AbilityManager():#Player movement abilities, handles them. Contains also spirit abilities
     ABILITY_TYPES = (

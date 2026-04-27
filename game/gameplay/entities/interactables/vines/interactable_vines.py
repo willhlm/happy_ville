@@ -37,7 +37,7 @@ class InteractableVines(Interactables):#issue when player lands on a bent vine, 
         self._init_chain()
         self._init_sections()
 
-        self.hit_component.set_invinsibility(True)    
+        self.hit_component.set_invincibility(True)    
 
     def _init_chain(self):
         self.points.clear()

@@ -17,6 +17,23 @@ def _move_towards(entity, target, dt, speed):
     return distance
 
 
+def _update_flying_buzz(state, dt):
+    state.flying_buzz_timer -= dt
+    if state.flying_buzz_timer > 0:
+        return
+
+    speed = abs(state.entity.velocity[0]) + abs(state.entity.velocity[1])
+    vol_min, vol_max = state.entity.flying_buzz_volume
+    volume = min(vol_max, vol_min + speed * 0.015)
+    state.entity.game_objects.sound.play_spatial_sfx(
+        random.choice(state.entity.sounds['flying']),
+        point=state.entity.hitbox.center,
+        vol=volume,
+        min_dist=48,
+        max_dist=600,
+    )
+    state.flying_buzz_timer = random.randint(*state.entity.flying_buzz_interval)
+
 class Patrol(BaseState):
     def __init__(self, entity, deciders, config_key, **kwargs):
         super().__init__(entity, deciders, config_key)
@@ -25,6 +42,7 @@ class Patrol(BaseState):
         self.patrol_speed = entity.config['speeds']['patrol']
         self.behavior = entity.config['behavior']
         self.phase = entity.swarm_seed
+        self.flying_buzz_timer = random.randint(8, 28)
         self._choose_target()
 
     def update_logic(self, dt):
@@ -35,6 +53,7 @@ class Patrol(BaseState):
         distance = _move_towards(self.entity, self.target_position, dt, self.patrol_speed)
         self.phase += self.behavior['swarm_weave_speed'] * 0.7 * dt
         self.entity.velocity[1] += math.sin(self.phase) * 0.003 * dt
+        _update_flying_buzz(self, dt)
         if distance < 12:
             self._choose_target()
 
@@ -65,6 +84,7 @@ class Chase(BaseState):
         self.give_up_timer = self.behavior['give_up_time']
         self.attack_commit_timer = entity.swarm_attack_commit
         self.phase = entity.swarm_seed
+        self.flying_buzz_timer = random.randint(8, 28)
 
     def update_logic(self, dt):
         if not self._player_in_range():
@@ -78,6 +98,7 @@ class Chase(BaseState):
         self.phase += self.behavior['swarm_weave_speed'] * dt
         target_position = self._swarm_target()
         distance = _move_towards(self.entity, target_position, dt, self.swarm_speed)
+        _update_flying_buzz(self, dt)
 
         horizontal_travel = target_position[0] - self.entity.hitbox.centerx
         if abs(horizontal_travel) > 2:

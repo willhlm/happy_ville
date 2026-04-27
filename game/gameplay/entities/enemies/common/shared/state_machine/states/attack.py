@@ -17,6 +17,7 @@ class AttackMain(BaseState):
 
         cooldown = self.entity.config["cooldowns"]["melee_attack"]
         self.entity.currentstate.cooldowns.set("melee_attack",  random.randint(cooldown[0], cooldown[1]))
+        self.next_state = kwargs.get("next_state", "chase")
 
     def increase_phase(self):
-        self.enter_state("wait", time=10, next_state="chase")
+        self.enter_state("wait", time=10, next_state=self.next_state)

@@ -81,6 +81,7 @@ class SpatialAudioSystem:
         self._emitters = {}
         self._next_id = 1
         self._camera_scroll_getter = camera_scroll_getter
+        self._listener_pos = None
 
     def _resolve_space(self, parallax, listener_transform, source_transform, source_kind):
         if parallax is None:
@@ -155,7 +156,27 @@ class SpatialAudioSystem:
         for emitter_id in list(self._emitters.keys()):
             self.unregister(emitter_id, fade_ms=fade_ms)
 
+    def play_point(self, sound, point, *, volume=1.0, loops=0, fade_ms=0, min_dist=48, max_dist=300, listener_pos=None, listener_transform=None, source_transform=None, parallax=None):
+        listener_pos = listener_pos or self._listener_pos
+        if listener_pos is None:
+            return self._play_sfx(sound, loops=loops, volume=volume, fade_ms=fade_ms)
+
+        listener_transform, source_transform = self._resolve_space(parallax, listener_transform, source_transform, source_kind='point')
+        if listener_transform is None:
+            listener_transform = lambda p: p
+        if source_transform is None:
+            source_transform = lambda value: value
+
+        effective_listener = listener_transform(listener_pos)
+        source_point = source_transform(point)
+        amp = track_distance(effective_listener, source_point, r0=max_dist, r1=min_dist)
+        if amp <= 0:
+            return None
+
+        return self._play_sfx(sound, loops=loops, volume=volume * amp, fade_ms=fade_ms)
+
     def update(self, listener_pos: Vec2) -> None:
+        self._listener_pos = listener_pos
         if not self._emitters:
             return
 

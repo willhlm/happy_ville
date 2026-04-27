@@ -12,15 +12,15 @@ class DeathPre(PhaseBase):
     def __init__(self, entity):
         super().__init__(entity)
         self.timeout = 50
-
+        
     def enter(self, **kwarg):
         self.entity.animation.play('death_pre')
         self.entity.game_objects.cosmetics.add(PlayerSoul([self.entity.rect[0], self.entity.rect[1]], self.entity.game_objects))
+        self.entity.hit_component.set_invincibility(True)
 
     def update(self, dt):
         self.timeout -= dt
-        self.entity.acceleration[0] = 0
-        self.entity.invincibile = True
+        self.entity.acceleration[0] = 0        
         if self.timeout < 0:
             self.enter_phase('main')
 

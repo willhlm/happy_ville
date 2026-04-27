@@ -27,6 +27,7 @@ class Sword(Melee):
     def use_sword(self, swing = 'light'):#called from player stetas whenswing sword
         self.entity.animation.framerate = self.modifier_manager.modify_slash_speed(self.entity.animation.framerate)
         self.entity.game_objects.sound.play_sfx(self.entity.sword.sounds['swing'][0])
+        self.body.update_hitbox()
 
     def collision_projectile(self, eprojectile):#fprojecticle proectile collision with projectile
         self.modifier_manager.on_projectile_collision(eprojectile)

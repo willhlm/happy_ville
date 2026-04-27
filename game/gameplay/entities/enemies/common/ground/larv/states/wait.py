@@ -7,19 +7,16 @@ class Wait(BaseState):
         self.next_state = kwargs.get('next_state', 'crawl')
         self.turn = kwargs.get('turn', False)
         super().__init__(entity, deciders, config_key)
-        self.entity.set_surface_motion_paused(True)
+        self.entity.velocity = [0, 0]
         self.entity.animation.play("idle", 0.2)
 
     def update(self, dt):
+        self.entity.velocity = [0, 0]
         self.wait_time -= dt
         if self.wait_time <= 0:
             if self.turn:
-                self.entity.reverse_surface_direction()
+                self.entity.surface_stick_physics.reverse_direction()
             self.enter_state(self.next_state)
 
     def update_logic(self, dt):
         pass
-
-    def handle_input(self, input_type):
-        if input_type == "Hurt":
-            self.enter_state('hurt')

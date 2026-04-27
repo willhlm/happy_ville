@@ -41,5 +41,6 @@ REGISTER_ENEMIES = {
     'bjorn': Bjorn,
     'vertical_mygga_torpedo': VerticalMyggaTorpedo,
     'krakan': Krakan,
+    'ghoul': Ghoul,
 
 }

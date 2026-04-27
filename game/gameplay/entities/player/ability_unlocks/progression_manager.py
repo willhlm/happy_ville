@@ -1,5 +1,5 @@
-from gameplay.entities.player.abilities.ability_manager import AbilityManager
-from gameplay.entities.player.traversal_unlock_manager import TraversalUnlockManager
+from .ability_manager import AbilityManager
+from .traversal_unlock_manager import TraversalUnlockManager
 
 
 class PlayerProgressionManager:

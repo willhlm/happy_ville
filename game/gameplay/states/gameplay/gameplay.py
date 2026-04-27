@@ -73,8 +73,8 @@ class Gameplay(GameState):
                 pass
 
             else:
-                interpreted = self.game.game_objects.input_interpreter.interpret(input)
-                self.game.game_objects.player.currentstate.handle_press_input(interpreted)
+                #interpreted = self.game.game_objects.input_interpreter.interpret(input)
+                self.game.game_objects.player.currentstate.handle_press_input(input)
                 #self.game.game_objects.player.omamoris.handle_press_input(input)
         elif input.released:#release
             self.game.game_objects.player.currentstate.handle_release_input(input)
