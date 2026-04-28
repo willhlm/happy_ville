@@ -1,9 +1,15 @@
 import pygame
 from engine.utils import read_files
+from gameplay.entities.items.base.item_definition import ItemDefinition
 from gameplay.entities.items.radna.base_radna import Radna
 
 class LootMagnet(Radna):
-    inventory_description = 'Loot magnet [1]'
+    item_definition = ItemDefinition(
+        item_id='loot_magnet',
+        description='Loot magnet [1]',
+        pickup_text='Loot magnet [1]',
+        pickup_ui_image_path='assets/sprites/ui/pickups/journal/abilityHUD2.png',
+    )
     magnet_radius = 120
     magnet_strength = 0.08
     magnet_delay = 150
@@ -21,7 +27,7 @@ class LootMagnet(Radna):
         player_center = player.hitbox.center
         radius_sq = cls.magnet_radius * cls.magnet_radius
         for item in player.game_objects.loot.sprites():
-            if not item.pickup_component.supports_magnet:
+            if not getattr(item, 'supports_magnet', False):
                 continue
             item_delay = getattr(item, 'magnet_delay', 0)
             delay = item_delay if item_delay > 0 else cls.magnet_delay

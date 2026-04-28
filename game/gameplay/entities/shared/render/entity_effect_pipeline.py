@@ -4,6 +4,8 @@ from . import shaders
 
 
 class EntityEffectPipeline:
+    _layer_cache = {}
+
     def __init__(self, entity, state_controller):
         self.entity = entity
         self.state_controller = state_controller
@@ -33,23 +35,14 @@ class EntityEffectPipeline:
         self.shader_chain.update_render(dt)
 
     def clear_textures(self):
-        if self.base_layer:
-            self.base_layer.release()
-            self.base_layer = None
-        if self.temp_layer_a:
-            self.temp_layer_a.release()
-            self.temp_layer_a = None
-        if self.temp_layer_b:
-            self.temp_layer_b.release()
-            self.temp_layer_b = None
+        self.base_layer = None
+        self.temp_layer_a = None
+        self.temp_layer_b = None
         self.size = None
 
     def _define_size(self, size):
         self.size = tuple(size)
-        display = self.entity.game_objects.game.display
-        self.base_layer = display.make_layer(size)
-        self.temp_layer_a = display.make_layer(size)
-        self.temp_layer_b = display.make_layer(size)
+        self.base_layer, self.temp_layer_a, self.temp_layer_b = self._get_cached_layers(self.size)
 
     def _ensure_size(self, size):
         if self.size is None or self.size != tuple(size):
@@ -85,3 +78,24 @@ class EntityEffectPipeline:
     def _create_shader(self, shader_name, **kwargs):
         shader_class = getattr(shaders, shader_name.capitalize())
         return shader_class(self.entity.game_objects, **kwargs)
+
+    def _get_cached_layers(self, size):
+        cached_layers = EntityEffectPipeline._layer_cache.get(size)
+        if cached_layers is not None:
+            return cached_layers
+
+        display = self.entity.game_objects.game.display
+        cached_layers = (
+            display.make_layer(size),
+            display.make_layer(size),
+            display.make_layer(size),
+        )
+        EntityEffectPipeline._layer_cache[size] = cached_layers
+        return cached_layers
+
+    @classmethod
+    def flush_layer_cache(cls):
+        for layers in cls._layer_cache.values():
+            for layer in layers:
+                layer.release()
+        cls._layer_cache.clear()

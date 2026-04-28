@@ -1,6 +1,6 @@
 import pygame
 from engine.utils import read_files
-from engine.system import activation_manager, time_field_manager, save_load, object_pool, controller, lights, timer, signals, time_manager, alphabet, input_interpreter, transition_controller, sequence_manager
+from engine.system import activation_manager, time_field_manager, save_load, asset_preloader, controller, lights, timer, signals, time_manager, alphabet, input_interpreter, transition_controller, sequence_manager, deferred_texture_manager
 from engine import groups
 from engine.sound import game_audio
 from gameplay.entities.player import player
@@ -29,9 +29,10 @@ class GameObjects():
         self.shaders = read_files.load_shaders_dict(self)#load all shaders aavilable into a dict
         self.normal_map_generator = NormalMapGenerator(self)
         self.controller = controller.Controller()
-        self.object_pool = object_pool.Object_pool(self)
+        self.asset_preloader = asset_preloader.AssetPreloader(self)
         self.lights = lights.Lights(self)
         self.timer_manager = timer.Timer_manager(self)
+        self.deferred_textures = deferred_texture_manager.DeferredTextureManager()
         self._create_groups()
         self.activation_manager = activation_manager.ActivationManager(self)
         self.weather = weather.Weather(self)
@@ -79,6 +80,7 @@ class GameObjects():
         self.players.add(self.player)
 
     def clean_groups(self):#called wgen changing map
+        self.deferred_textures.release_all()
         self.npcs.empty()
         self.enemies.empty()
         self.interactables.empty()

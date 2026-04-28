@@ -1,15 +1,14 @@
 import pygame
 from engine.utils import read_files
 from gameplay.entities.items.base.item_definition import ItemDefinition
-from gameplay.entities.items.base.components import ItemLifetimeComponent, CollisionPickupComponent
-from gameplay.entities.items.base.world_item import WorldItem
+from gameplay.entities.items.base.components import ItemLifetimeComponent
+from gameplay.entities.items.base.collision_world_item import CollisionWorldItem
 
-class Bone(WorldItem):
+class Bone(CollisionWorldItem):
     item_definition = ItemDefinition(
+        item_id='bone',
         description='Ribs from my daugther. You can respawn and stuff',
     )
-    pickup_component_cls = CollisionPickupComponent
-
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.lifetime_component = ItemLifetimeComponent(self, lifetime=500)
@@ -23,7 +22,7 @@ class Bone(WorldItem):
         self.true_pos = list(self.rect.topleft)
 
     def pickup(self, player):
-        self.pickup_component.collect_to_inventory(self, player)
+        self.add_to_inventory(player)
 
     @staticmethod
     def use_from_inventory(record):

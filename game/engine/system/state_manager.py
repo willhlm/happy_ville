@@ -63,10 +63,11 @@ REGISTERY = {
     "title_menu": TitleMenu,
 
     #overlays
-    "instructions": Instructions,
+    "static_overlay": StaticOverlay,
+    "dynamic_overlay": DynamicOverlay,
 
     # Gameplay
-    "gameplay": Gameplay,
+    "gameplay": WorldGameplay,
     "ability_select": AbilitySelect,
     "blit_image_text": BlitImageText,
     "conversation": Conversation,

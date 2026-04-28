@@ -1,6 +1,4 @@
 import random
-import pygame
-from engine.utils import read_files
 
 
 class ItemInteractComponent:
@@ -12,9 +10,9 @@ class ItemInteractComponent:
         self.spawn_velocity = kwarg.get('spawn_velocity', None)
         self.spawn_velocity_range = kwarg.get('spawn_velocity_range', [0, 0])
         self.light_radius = kwarg.get('light_radius', 0)
-        self._apply_spawn()
+        self.apply_spawn()
 
-    def _apply_spawn(self):
+    def apply_spawn(self):
         if self.spawn_velocity is not None:
             self.item.velocity = [
                 random.uniform(
@@ -37,21 +35,44 @@ class ItemInteractComponent:
 
     def interact_with_pickup_text(self, player):
         self._interacting_player = player
-        self.item.pickup_component.interact(self.item, player)
+        self.start_pickup_feedback(player)
         self.item.game_objects.game.state_manager.enter_state(
-            state_name='blit_image_text',
-            image=self.item.sprites['idle'][0],
-            text=self.item.description,
+            state_name='dynamic_overlay',
+            loader_key='item_pickup',
+            image=self.item.get_pickup_image(),
+            text=self.item.get_pickup_text(),
             callback=self.on_pickup_text_exit,
         )
 
+    def start_pickup_feedback(self, player):
+        pickup_fx = self.item.get_pickup_fx()
+
+        fade_config = pickup_fx.get('fade')
+        if fade_config:
+            fade_kwargs = fade_config.copy()
+            fade_state = fade_kwargs.pop('state', 'Alpha')
+            fade_kwargs.setdefault('on_complete', lambda: None)
+            self.item.shader_state.enter_state(fade_state, **fade_kwargs)
+
+        sound_config = pickup_fx.get('sound')
+        if sound_config:
+            sound_key = sound_config.get('key', 'interact')
+            volume = sound_config.get('volume', 0.4)
+            self.item.game_objects.sound.play_item_sound(sound_key, volume=volume)
+
+        particle_config = pickup_fx.get('particles')
+        if particle_config:
+            self.item.game_objects.particles.emit(
+                particle_config.get('preset', 'burst'),
+                pos=self.item.hitbox.center,
+                n=particle_config.get('count', 18),
+                colour=particle_config.get('colour', [255, 255, 255, 255]),
+            )
+
     def on_pickup_text_exit(self):
+        self.item.on_pickup_interaction_complete(self._interacting_player)
         self._interacting_player.currentstate.handle_input('pray_post')
 
     def on_kill(self):
         if hasattr(self.item, 'light'):
             self.item.light.kill()
-
-
-def pool_interactable_sprite(cls, game_objects):
-    cls.sprites['wild'] = read_files.load_sprites_list('assets/sprites/entities/items/interactable_items/idle/', game_objects).textures

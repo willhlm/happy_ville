@@ -1,7 +1,6 @@
 from gameplay.entities.enemies.common.shared.state_machine.deciders.decision import Decision
 from gameplay.entities.enemies.common.shared.state_machine.deciders.config_utils import resolve_distance
 
-
 class CheckPlayerAttackReadyDecider:
     def __init__(self, entity, **kwargs):
         self.entity = entity
@@ -10,15 +9,13 @@ class CheckPlayerAttackReadyDecider:
 
     def choose(self, player_distance, dt):
         results = []
-        if not self.entity.attack_repeat_ready():
-            return results
-
         if abs(player_distance[0]) < self.aggro_distance[0] and abs(player_distance[1]) < self.aggro_distance[1]:
-            results.append(Decision(
-                next_state=self.cfg['next_state'],
-                score=self.cfg['score'],
-                priority=self.cfg['priority'],
-                kwargs=self.cfg.get('kwargs', {})
-            ))
+            if self.entity.currentstate.cooldowns.get(self.cfg['cooldown']) <= 0:                  
+                results.append(Decision(
+                    next_state=self.cfg['next_state'],
+                    score=self.cfg['score'],
+                    priority=self.cfg['priority'],
+                    kwargs=self.cfg.get('kwargs', {})
+                ))
 
         return results

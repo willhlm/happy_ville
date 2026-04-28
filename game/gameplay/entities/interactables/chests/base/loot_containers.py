@@ -35,7 +35,7 @@ class LootContainers(Interactables):
         self.health -= effect.damage
         
         # Play hurt sound
-        self.shader_state.handle_input('Hurt', colour = [1,1,1,1], direction = [1,0.5])
+        self.shader_state.handle_input('hurt', colour = [1,1,1,1], direction = [1,0.5])
         self.hit_loot()        
         
         if self.health > 0:  # Still alive

@@ -1,15 +1,24 @@
 from gameplay.states import Gameplay
 from gameplay.ui.loaders import DashInstructionLoader
 
-class Instructions(Gameplay):#when player obtaines a new ability, pick up inetractable item etc. It blits an image and text
-    def __init__(self, game):
+OVERLAY_LOADERS = {
+    'dash': DashInstructionLoader,
+}
+
+class StaticOverlay(Gameplay):#when player obtaines a new ability, pick up inetractable item etc. It blits an image and text
+    def __init__(self, game, overlay_key):
         super().__init__(game)
         self.page = 0
         self.render_fade = [self.render_in, self.render_out]
         self.fade = 0
+        self.overlay = game.display.make_layer(game.window_size)
 
-        self.ui_loader = DashInstructionLoader(game.game_objects)#TODO
+        loader_cls = OVERLAY_LOADERS[overlay_key]
+        self.ui_loader = loader_cls(game.game_objects)
         self.game.game_objects.player.reset_movement()        
+
+    def on_pop(self):
+        self.overlay.release()
 
     def handle_movement(self):#every frame
         pass
@@ -17,21 +26,28 @@ class Instructions(Gameplay):#when player obtaines a new ability, pick up inetra
     def render(self):
         super().render()
         self.render_fade[self.page]()
-                
+
+        self.overlay.clear(0, 0, 0, 0)
+        self.game.display.render(self.ui_loader.bg, self.overlay)
+        self.render_images()
+        self.render_text()
+        self.render_buttons()
         self.game.game_objects.shaders['alpha']['alpha'] = self.fade
-        self.game.display.render(self.ui_loader.bg, self.game.screen_manager.screen, shader = self.game.game_objects.shaders['alpha'])
-        self.render_text()   
-        self.render_buttons()     
+        self.game.display.render(self.overlay.texture, self.game.screen_manager.screen, shader=self.game.game_objects.shaders['alpha'])
 
         self.game.render_display(self.game.screen_manager.screen.texture)
 
+    def render_images(self):
+        for image in self.ui_loader.images:
+            image.render(self.overlay)
+
     def render_text(self):
-        for text in self.ui_loader.text:  
-            text.render(self.game.screen_manager.screen)          
+        for text in self.ui_loader.texts:
+            text.render(self.overlay)
 
     def render_buttons(self):
-        for button in self.ui_loader.buttons:  
-            button.render(self.game.screen_manager.screen)          
+        for button in self.ui_loader.buttons.values():
+            button.render(self.overlay)
 
     def render_in(self):
         self.fade += 2

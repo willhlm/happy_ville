@@ -5,7 +5,10 @@ from gameplay.entities.items.infinity_stones.base_infinity_stone import Infinity
 
 class PurpleInfinityStone(InfinityStones):#reflect projectile -> crystal caves
     item_definition = ItemDefinition(
+        item_id='purple_infinity_stone',
         description='reflects projectiels',
+        pickup_text='reflects projectiels',
+        pickup_ui_image_path='assets/sprites/ui/pickups/journal/abilityHUD2.png',
     )
 
     def __init__(self, pos, game_objects, **kwarg):

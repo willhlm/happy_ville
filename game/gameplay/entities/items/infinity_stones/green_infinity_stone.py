@@ -5,7 +5,10 @@ from gameplay.entities.items.infinity_stones.base_infinity_stone import Infinity
 
 class GreenInfinityStone(InfinityStones):#faster slash (changing framerate)
     item_definition = ItemDefinition(
+        item_id='green_infinity_stone',
         description='fast sword swings',
+        pickup_text='fast sword swings',
+        pickup_ui_image_path='assets/sprites/ui/pickups/journal/abilityHUD2.png',
     )
 
     def __init__(self, pos, game_objects, **kwarg):

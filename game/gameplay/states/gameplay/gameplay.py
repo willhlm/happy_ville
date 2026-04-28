@@ -8,7 +8,7 @@ class Gameplay(GameState):
         super().__init__(game)
 
     def on_pop(self):
-        self.game.game_objects.clear_world_state()
+        pass
 
     def update(self, dt):
         self.game.game_objects.time_manager.update(dt)#setäs the timescale
@@ -78,3 +78,7 @@ class Gameplay(GameState):
                 #self.game.game_objects.player.omamoris.handle_press_input(input)
         elif input.released:#release
             self.game.game_objects.player.currentstate.handle_release_input(input)
+
+class WorldGameplay(Gameplay):
+    def on_pop(self):
+        self.game.game_objects.clear_world_state()

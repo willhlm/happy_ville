@@ -5,7 +5,10 @@ from gameplay.entities.items.infinity_stones.base_infinity_stone import Infinity
 
 class BlueInfinityStone(InfinityStones):#get spirit at collision
     item_definition = ItemDefinition(
+        item_id='blue_infinity_stone',
         description='add spirit to the swinger',
+        pickup_text='add spirit to the swinger',
+        pickup_ui_image_path='assets/sprites/ui/pickups/journal/abilityHUD2.png',
     )
 
     def __init__(self, pos, game_objects, **kwarg):

@@ -5,7 +5,10 @@ from gameplay.entities.items.infinity_stones.base_infinity_stone import Infinity
 
 class OrangeInfinityStone(InfinityStones):#bigger hitbox
     item_definition = ItemDefinition(
+        item_id='orange_infinity_stone',
         description='larger hitbox',
+        pickup_text='larger hitbox',
+        pickup_ui_image_path='assets/sprites/ui/pickups/journal/abilityHUD2.png',
     )
 
     def __init__(self, pos, game_objects, **kwarg):

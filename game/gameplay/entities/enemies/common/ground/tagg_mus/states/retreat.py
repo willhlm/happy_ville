@@ -8,16 +8,13 @@ class Retreat(BaseState):
         self.entity.animation.play("walk", 0.17)
         self.retreat_time = get_retreat_time(entity)
         self.retreat_speed = entity.config['speeds']['retreat']
+        self.aggro_distance = entity.config['distances']['aggro']
 
         player_dx = self.player_distance[0]
         self.entity.dir[0] = -1 if player_dx >= 0 else 1
 
     def update_logic(self, dt):
-        if self.entity.should_hide_again():
-            self.enter_state("attack_pre")
-            return
-
-        if not self.entity.is_player_close():
+        if not self.is_player_close():
             self.enter_state("patrol", dir=self.entity.dir[0])
             return
 
@@ -28,3 +25,8 @@ class Retreat(BaseState):
             self.retreat_time -= dt
 
         self.entity.velocity[0] += dt * self.entity.dir[0] * self.retreat_speed
+
+    def is_player_close(self):
+        player_distance = self.player_distance
+        
+        return abs(player_distance[0]) < self.aggro_distance[0] and abs(player_distance[1]) < self.aggro_distance[1]

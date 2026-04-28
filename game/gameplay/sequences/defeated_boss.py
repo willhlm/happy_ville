@@ -11,6 +11,7 @@ class DefeatedBoss(Sequence):
         self.time = 0
         self.timescale = 1
         self.number_particles = 0
+        self.instruction_key = None
 
         self.game_objects.signals.subscribe('boss_reward_collected', self.on_reward_collected)
         self.game_objects.signals.subscribe('particles_absorbed', self.on_particles_absorbed)
@@ -35,6 +36,7 @@ class DefeatedBoss(Sequence):
 
     def on_reward_collected(self, **kwargs):        
         self.number_particles = 10
+        self.instruction_key = kwargs.get('instruction_key')
         self.game_objects.particles.emit(
             "converging_soul",
             pos=kwargs.get('position', self.game_objects.player.hitbox.center),
@@ -46,7 +48,10 @@ class DefeatedBoss(Sequence):
     def on_particles_absorbed(self):
         self.number_particles -= 1
         if self.number_particles <= 0:
-            self.game_objects.game.state_manager.enter_state(state_name='instructions')
+            self.game_objects.game.state_manager.enter_state(
+                state_name='static_overlay',
+                instruction_key=self.instruction_key,
+            )
             self.finish()
 
     def cleanup(self):

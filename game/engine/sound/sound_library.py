@@ -5,12 +5,13 @@ class SFXLibrary:
     """Manages game sound effects"""
     
     def __init__(self):
-        impact_sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/shared/')
+        impact_sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/shared/impact/')
         enemy_shared_sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/enemies/shared/')
         ui_sounds = read_files.load_sounds_dict('assets/audio/sfx/ui/')
-        self._build_sound_maps(impact_sounds, enemy_shared_sounds, ui_sounds)
+        item_sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/shared/items/')
+        self._build_sound_maps(impact_sounds, enemy_shared_sounds, ui_sounds, item_sounds)
     
-    def _build_sound_maps(self, impact_sounds, enemy_shared_sounds, ui_sounds):
+    def _build_sound_maps(self, impact_sounds, enemy_shared_sounds, ui_sounds, item_sounds):
         self.impact_sounds = {
             ("sword", "flesh"): impact_sounds.get('sword_flesh'),
             ("bow", "flesh"): impact_sounds.get('arrow_flesh'),
@@ -18,8 +19,11 @@ class SFXLibrary:
             ("sword", "wood"): impact_sounds.get('sword_wood'),
             ("stone", "flesh"): impact_sounds.get('stone_flesh'),
             ("sword", "stone"): impact_sounds.get('sword_stone'),
-            # Add more mappings as needed
         }
+
+        self.item_sounds = {
+            'interact': item_sounds.get('interact'),
+        }        
 
         self.enemy_death_sounds = {
             "killed": enemy_shared_sounds.get('killed'),
@@ -37,6 +41,9 @@ class SFXLibrary:
     def _pick_sound(self, sound_or_list):
         return random.choice(sound_or_list)
     
+    def get_item_sound(self, event):
+        return self._pick_sound(self.item_sounds.get(event))
+
     def get_impact_sound(self, weapon_type, material):
         return self._pick_sound(self.impact_sounds.get((weapon_type, material)))
 
@@ -53,6 +60,8 @@ class SFXLibrary:
             return self.get_enemy_death_sound(*args)
         elif sound_type == "ui":
             return self.get_ui_sound(*args)
+        elif sound_type == "item":
+            return self.get_item_sound(*args)            
         return None
 
 class MusicLibrary:

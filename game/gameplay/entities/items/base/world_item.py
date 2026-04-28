@@ -4,15 +4,11 @@ from gameplay.entities.shared.components.hit.hitstop_component import HitstopCom
 from gameplay.entities.shared.components.collision.contact_state import ContactState
 from gameplay.entities.shared.components.collision.platform_collider import PlatformCollider
 from gameplay.entities.shared.modifiers import modifier_movement
-from gameplay.entities.items.base.item_definition import ItemDefinition
-from gameplay.entities.items.base.components import PickupComponent
+from gameplay.entities.shared.render.entity_shader_manager import EntityShaderManager
 from engine import constants as C
-
 
 class WorldItem(AnimatedEntity):
     item_definition = None
-    pickup_component_cls = PickupComponent
-    magnet_delay = 0
 
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
@@ -23,7 +19,6 @@ class WorldItem(AnimatedEntity):
         self.movement_manager = modifier_movement.MovementManager(self)
         self.platform_collider = PlatformCollider(self)
         self.hitstop = HitstopComponent()
-        self._description_override = None
 
         self.bounce_coefficient = 0.6
         self.bounce_directions = set()
@@ -31,41 +26,26 @@ class WorldItem(AnimatedEntity):
         self.friction = C.friction_item.copy()
         self.max_vel = C.max_vel_item.copy()
         self._movement_context = modifier_movement.MovementContext(self)
-        self.pickup_component = self.pickup_component_cls()
-        self.interact_component = None
+        self.shader_state = EntityShaderManager(self)
         self.lifetime_component = None
         self.age = 0
+        self.picked_up = False
 
+    #item difnition methods
     @classmethod
     def get_item_id(cls):
-        return cls.get_item_definition().item_id
-
-    @classmethod
-    def _build_default_item_id(cls):
-        chars = []
-        for index, char in enumerate(cls.__name__):
-            if char.isupper() and index > 0:
-                chars.append("_")
-            chars.append(char.lower())
-        return "".join(chars)
+        item_id = cls.get_item_definition().item_id
+        if item_id == '':
+            raise ValueError(f"{cls.__name__}.item_definition.item_id must be set")
+        return item_id
 
     @classmethod
     def get_item_definition(cls):
-        if cls.item_definition is not None:
-            return cls.item_definition
+        if cls.item_definition is None:
+            raise ValueError(f"{cls.__name__}.item_definition must be set")
+        return cls.item_definition
 
-        return ItemDefinition(item_id=cls._build_default_item_id())
-
-    @property
-    def description(self):
-        if self._description_override is not None:
-            return self._description_override
-        return self.get_item_definition().description
-
-    @description.setter
-    def description(self, value):
-        self._description_override = value
-
+    #update merhods
     def update_vel(self, dt):
         context = self.movement_manager.resolve()
         self._movement_context = context
@@ -81,19 +61,29 @@ class WorldItem(AnimatedEntity):
         if self.lifetime_component:
             self.lifetime_component.update(dt)
 
-    def interact(self, player):
-        self.pickup_component.interact(self, player)
+    def update_render(self, dt):
+        self.shader_state.update_render(dt)
 
+    #pickup methods
+    def pickup(self, player):
+        pass
+
+    def try_pickup(self, player):
+        if self.picked_up:
+            return False
+        if self.pickup(player) is False:
+            return False
+        self.picked_up = True
+        return True
+
+    #collisiona and platform support
     def on_collision(self, entity):
-        self.pickup_component.on_collision(self, entity)
+        pass
 
     def collision(self, entity):
         pass
 
     def on_noncollision(self, entity):
-        pass
-
-    def release_texture(self):
         pass
 
     def apply_ground_snap_velocity(self):
@@ -109,26 +99,12 @@ class WorldItem(AnimatedEntity):
     def on_crush(self, block):
         self.kill()
 
-    @classmethod
-    def pool(cls, game_objects):
-        pass
-
-    def get_pickup_persistence_key(self):
-        definition = self.get_item_definition()
-        return definition.pickup_persistence_key or definition.item_id
-
-    def mark_picked_up(self):
-        self.game_objects.world_state.objects.set_bool(
-            self.game_objects.map.biome_room_name,
-            'interactable_items',
-            self.get_pickup_persistence_key(),
-            True,
-        )
-
-    def kill(self):
-        super().kill()
-        if self.interact_component:
-            self.interact_component.on_kill()
+    def draw(self, target):
+        blit_pos = [
+            int(self.rect[0] - self.game_objects.camera_manager.camera.scroll[0]),
+            int(self.rect[1] - self.game_objects.camera_manager.camera.scroll[1]),
+        ]
+        self.shader_state.draw(self.image, target, blit_pos, flip=self.dir[0] > 0)
 
     def post_physics_update(self, dt):
         self.consume_contact_effects()
@@ -162,3 +138,6 @@ class WorldItem(AnimatedEntity):
                 self.bounce_coefficient *= self.bounce_coefficient
             elif direction == 'left' or direction == 'right':
                 self.velocity[0] *= -1
+
+    def release_texture(self):
+        pass

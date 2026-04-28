@@ -28,6 +28,10 @@ class GameAudio:
         sound = self.sfx_library.get_impact_sound(weapon_type, material)
         return self.sound_player.play_sfx(sound, volume)
 
+    def play_item_sound(self, event, volume=0.4):
+        sound = self.sfx_library.get_item_sound(event)
+        return self.sound_player.play_sfx(sound, volume)
+
     def play_ui_sound(self, ui_event, volume=0.4):
         sound = self.sfx_library.get_ui_sound(ui_event)
         return self.sound_player.play_sfx(sound, volume)

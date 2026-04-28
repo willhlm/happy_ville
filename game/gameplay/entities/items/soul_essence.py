@@ -1,19 +1,20 @@
 import pygame
 from engine.utils import read_files
-from gameplay.entities.items.base.world_item import WorldItem
-from gameplay.entities.items.base.components import CollisionPickupComponent
+from gameplay.entities.items.base.collision_world_item import CollisionWorldItem
+from gameplay.entities.items.base.item_definition import ItemDefinition
 #from gameplay.entities.visuals.particles import particles
 
-class SoulEssence(WorldItem):#genkidama
-    pickup_component_cls = CollisionPickupComponent
-
+class SoulEssence(CollisionWorldItem):#genkidama
+    item_definition = ItemDefinition(
+        item_id='soul_essence',
+        description='An essence container',
+    )
     def __init__(self, pos, game_objects, ID_key = None):
         super().__init__(pos, game_objects)
         self.sprites = read_files.load_sprites_dict('assets/sprites/entities/items/soul_essence/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox=self.rect.copy()
-        self.description = 'An essence container'#for shops
         self.ID_key = ID_key#an ID key to identify which item that the player is intracting with in the world
 
     def pickup(self, player):

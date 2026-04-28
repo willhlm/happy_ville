@@ -191,5 +191,4 @@ class Character(AnimatedEntity):#enemy, NPC,player
         self.flags['hurt_state_able'] = True
 
     def release_texture(self):#called when .kill() and empty group
-        self.shader_state.clear_textures()   
         super().release_texture()        

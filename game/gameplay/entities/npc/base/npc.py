@@ -63,10 +63,9 @@ class NPC(Character):
     def on_conversation_cancelled(self):
         pass
 
-    def release_texture(self):#called when .kill() and empty group
+    def on_kill_cleanup(self):
         self.comment_timer = None
         self.game_objects.timer_manager.remove_ID_timer(self.comment_timer_id)
-        super().release_texture()
 
     def get_comment_scheduler_config(self):
         config = {

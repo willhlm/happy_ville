@@ -1,10 +1,16 @@
 import pygame
 from engine.utils import read_files
+from gameplay.entities.items.base.item_definition import ItemDefinition
 from gameplay.entities.items.radna.base_radna import Radna
 
 class HalfDamage(Radna):
+    item_definition = ItemDefinition(
+        item_id='half_damage',
+        description='Take half dmg [1]',
+        pickup_text='Take half dmg [1]',
+        pickup_ui_image_path='assets/sprites/ui/pickups/journal/abilityHUD2.png',
+    )
     inventory_level = 1
-    inventory_description = 'Take half dmg [1]'
 
     def __init__(self,pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)

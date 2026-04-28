@@ -22,5 +22,6 @@ from .elements.menu_box import MenuBox
 from .elements.button import Button
 from .elements.text import Text
 from .elements.slider import Slider
+from .elements.image import Image
 
 from .elements.controllers.controllers import Controllers

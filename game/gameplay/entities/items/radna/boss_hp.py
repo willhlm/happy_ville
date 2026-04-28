@@ -1,10 +1,16 @@
 import pygame
 from engine.utils import read_files
+from gameplay.entities.items.base.item_definition import ItemDefinition
 from gameplay.entities.items.radna.base_radna import Radna
 
 class BossHP(Radna):
+    item_definition = ItemDefinition(
+        item_id='boss_hp',
+        description='Visible boss HP [2]',
+        pickup_text='Visible boss HP [2]',
+        pickup_ui_image_path='assets/sprites/ui/pickups/journal/abilityHUD2.png',
+    )
     inventory_level = 2
-    inventory_description = 'Visible boss HP [2]'
 
     def __init__(self,pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)

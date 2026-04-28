@@ -11,7 +11,8 @@ class RadnaEntry(ItemEntry):
     @classmethod
     def from_item_class(cls, item_cls, game_objects):
         animation_name = cls._resolve_animation_name(item_cls)
-        description = getattr(item_cls, 'inventory_description', item_cls.get_item_definition().description)
+        definition = item_cls.get_item_definition()
+        description = definition.description
         level = getattr(item_cls, 'inventory_level', 1)
         return cls(item_cls, game_objects, description, animation_name, level)
 

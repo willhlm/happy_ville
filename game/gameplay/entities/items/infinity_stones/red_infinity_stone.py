@@ -5,7 +5,10 @@ from gameplay.entities.items.infinity_stones.base_infinity_stone import Infinity
 
 class RedInfinityStone(InfinityStones):#more dmg
     item_definition = ItemDefinition(
+        item_id='red_infinity_stone',
         description='10 procent more damage',
+        pickup_text='10 procent more damage',
+        pickup_ui_image_path='assets/sprites/ui/pickups/journal/abilityHUD2.png',
     )
 
     def __init__(self, pos, game_objects, **kwarg):

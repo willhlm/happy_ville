@@ -16,6 +16,7 @@ class BaseLoader():
     def __init__(self, game_objects):
         self.game_objects = game_objects
         self.base_resolution = game_objects.game.window_size.copy()
+        self.images = []
         self.buttons = {}
         self.shared_objects = []
         self.containers = []
@@ -104,7 +105,7 @@ class BaseLoader():
                 self.buttons['rb'] = button                    
 
             elif local_id == 7:#             
-                self.texts.append(Text(self.game_objects, text=properties['text'], position=topleft, size=object_size))
+                self.texts.append(Text(self.game_objects, text=properties.get('text', ''), position=topleft, size=object_size))
 
             elif local_id == 8:                
                 item = properties.get("item", str(obj["id"]))

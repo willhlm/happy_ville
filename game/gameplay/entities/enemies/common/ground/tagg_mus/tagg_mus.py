@@ -7,7 +7,7 @@ from gameplay.entities.projectiles import Tagg
 from gameplay.entities.enemies.common.shared.state_machine import StateManager
 
 from .states import AttackPre, AttackMain, AttackPost, Retreat, Hurt
-from .deciders import CheckSafeDecider, CheckPlayerAttackReadyDecider
+from .deciders import CheckPlayerAttackReadyDecider
 
 TAGGMUS_STATES = {
     'attack_pre': AttackPre,
@@ -18,7 +18,6 @@ TAGGMUS_STATES = {
 }
 
 TAGGMUS_DECIDERS = {
-    'check_safe': CheckSafeDecider,
     'check_player_attack_ready': CheckPlayerAttackReadyDecider,
 }
 
@@ -59,17 +58,3 @@ class TaggMus(Enemy):
             projectile = Tagg(spawn_pos, self.game_objects, lifetime=lifetime, velocity=velocity)
             projectile.body.set_pos(spawn_pos)
             self.game_objects.projectiles.add_enemy(projectile)
-
-    def start_attack_repeat_cooldown(self, duration):
-        self.currentstate.cooldowns.set('tagg_burst_repeat', duration)
-
-    def attack_repeat_ready(self):
-        return self.currentstate.cooldowns.get('tagg_burst_repeat') <= 0
-
-    def should_hide_again(self):
-        return self.attack_repeat_ready() and self.is_player_close()
-
-    def is_player_close(self):
-        player_distance = self.currentstate.player_distance
-        aggro_distance = self.config['distances']['aggro']
-        return abs(player_distance[0]) < aggro_distance[0] and abs(player_distance[1]) < aggro_distance[1]
