@@ -8,7 +8,7 @@ class Tungsten(InteractWorldItem):
         item_id='tungsten',
         description='A heavy rock',
         pickup_text='A heavy rock',
-        pickup_ui_image_path='assets/sprites/ui/pickups/journal/abilityHUD2.png',
+        pickup_ui_image_path='assets/sprites/ui/overlay/items/placeholder/placeholder.png',
     )
     def __init__(self,pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)

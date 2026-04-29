@@ -8,7 +8,7 @@ class OrangeInfinityStone(InfinityStones):#bigger hitbox
         item_id='orange_infinity_stone',
         description='larger hitbox',
         pickup_text='larger hitbox',
-        pickup_ui_image_path='assets/sprites/ui/pickups/journal/abilityHUD2.png',
+        pickup_ui_image_path='assets/sprites/ui/overlay/items/placeholder/placeholder.png',
     )
 
     def __init__(self, pos, game_objects, **kwarg):

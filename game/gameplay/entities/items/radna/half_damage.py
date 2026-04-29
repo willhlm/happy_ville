@@ -8,7 +8,7 @@ class HalfDamage(Radna):
         item_id='half_damage',
         description='Take half dmg [1]',
         pickup_text='Take half dmg [1]',
-        pickup_ui_image_path='assets/sprites/ui/pickups/journal/abilityHUD2.png',
+        pickup_ui_image_path='assets/sprites/ui/overlay/items/placeholder/placeholder.png',
     )
     inventory_level = 1
 

@@ -7,8 +7,9 @@ class LootMagnet(Radna):
     item_definition = ItemDefinition(
         item_id='loot_magnet',
         description='Loot magnet [1]',
+        title='Loot Magnet',
         pickup_text='Loot magnet [1]',
-        pickup_ui_image_path='assets/sprites/ui/pickups/journal/abilityHUD2.png',
+        pickup_ui_image_path='assets/sprites/ui/overlay/items/placeholder/placeholder.png',
     )
     magnet_radius = 120
     magnet_strength = 0.08

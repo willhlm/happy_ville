@@ -31,6 +31,10 @@ class InteractWorldItem(WorldItem):
         self.is_interacting = False
 
     @classmethod
+    def get_pickup_title(cls):
+        return cls.get_item_definition().title
+
+    @classmethod
     def get_pickup_text(cls):
         pickup_text = cls.get_item_definition().pickup_text
         if pickup_text == '':

@@ -65,13 +65,13 @@ class JournalUI(BaseUI):
     def blit_names(self):
         for index, enemy in enumerate(self.selected_enemies):
             name = enemy.__class__.__name__
-            text = self.game_objects.font.render((152, 80), name, 100)
-            self.game_objects.game.display.render(
-                text,
+            self.game_objects.font.render(
                 self.game_objects.ui.backpack.screen,
+                name,
                 position=self.journal_UI.name_pos[index],
+                width=152,
+                letter_frame=100,
             )
-            text.release()
 
     def blit_pointer(self):
         pos = [
@@ -97,13 +97,13 @@ class JournalUI(BaseUI):
 
     def blit_description(self):
         self.conv = self.selected_enemies[self.journal_index[0]].description
-        text = self.game_objects.font.render(
-            (152, 80), self.conv, int(self.letter_frame // 2)
+        self.game_objects.font.render(
+            self.game_objects.ui.backpack.screen,
+            self.conv,
+            position=(380, 120),
+            width=152,
+            letter_frame=int(self.letter_frame // 2),
         )
-        self.game_objects.game.display.render(
-            text, self.game_objects.ui.backpack.screen, position=(380, 120)
-        )
-        text.release()
 
     def handle_events(self, input):
         input.processed()

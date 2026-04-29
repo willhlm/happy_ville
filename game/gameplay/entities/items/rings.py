@@ -8,7 +8,8 @@ class Rings(InteractWorldItem):#ring in which to attach radnas
         item_id='rings',
         description='A ring',
         pickup_text='A ring',
-        pickup_ui_image_path='assets/sprites/ui/pickups/journal/abilityHUD2.png',
+        title = 'Ring',
+        pickup_ui_image_path='assets/sprites/ui/overlay/items/placeholder/placeholder.png',
     )
     def __init__(self,pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)

@@ -11,13 +11,8 @@ class Bank(BaseUI):#caled from mr banks
         self.bg = Bank.bg
 
     def pool(game_objects):
-        size = [120,64]
-        surf = []
-        Bank.bg = game_objects.font.fill_text_bg(size)
-        actions = ['withdraw','deposit','cancel']
-        for string in actions:
-            surf.append(game_objects.font.render(text = string))
-        Bank.surf = surf
+        Bank.bg_size = [120,64]
+        Bank.surf = ['withdraw','deposit','cancel']
 
     def render(self):
         super().render()
@@ -26,9 +21,17 @@ class Bank(BaseUI):#caled from mr banks
         self.game.render_display(self.game.screen_manager.screen.texture)  
 
     def blit_text(self):
-        self.game.game_objects.game.display.render(self.bg, self.game.screen_manager.screen, position = (190,150))#shader render        
-        for index, surf in enumerate(self.surf):
-            self.game.game_objects.game.display.render(surf, self.game.screen_manager.screen, position = (300,160+index*10))#shader render
+        self.game.game_objects.font.render_text_bg(
+            self.game.screen_manager.screen,
+            self.bg_size,
+            position=(190, 150),
+        )
+        for index, text in enumerate(self.surf):
+            self.game.game_objects.font.render(
+                self.game.screen_manager.screen,
+                text,
+                position=(300, 160 + index * 10),
+            )
 
     def blit_pointer(self):
         self.game.game_objects.game.display.render(self.pointer.image, self.game.screen_manager.screen, position =(300,130+10*self.pointer_index[1]))#shader render              

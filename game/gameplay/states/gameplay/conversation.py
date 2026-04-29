@@ -11,7 +11,6 @@ class Conversation(Gameplay):
         self.print_frame_rate = C.animation_framerate
         self.text_window_size = (352, 96)
         self.blit_pos = [int((self.game.window_size[0]-self.text_window_size[0])*0.5),50]
-        self.background = self.game.display.make_layer(self.text_window_size)#TODO
         self.conv_screen = self.game.display.make_layer(self.game.window_size)#TODO
 
         self.clean_slate()
@@ -23,8 +22,6 @@ class Conversation(Gameplay):
 
     def clean_slate(self):
         self.letter_frame = 0
-        self.text_window = self.game.game_objects.font.fill_text_bg(self.text_window_size)
-        self.game.display.render(self.text_window, self.background)#shader render
 
     def update(self, dt):
         super().update(dt)
@@ -38,9 +35,20 @@ class Conversation(Gameplay):
         super().render()
         self.conv_screen.clear(10,10,10,100)#needed to make the self.background semi trasnaprant
 
-        self.game.display.render(self.background.texture, self.conv_screen, position = self.blit_pos)
+        self.game.game_objects.font.render_text_bg(
+            self.conv_screen,
+            self.text_window_size,
+            position=self.blit_pos,
+        )
         if self.conv:
-            self.game.display.render_text(self.game.game_objects.font.font_atals, self.conv_screen, text = self.conv, letter_frame = int(self.letter_frame), color = (255,255,255,255), position = (180,self.blit_pos[1] + 20), width = 272)
+            self.game.game_objects.font.render(
+                self.conv_screen,
+                self.conv,
+                letter_frame=int(self.letter_frame),
+                color=(255,255,255,255),
+                position=(180, self.blit_pos[1] + 20),
+                width=272,
+            )
         self.speaker.render_potrait(self.conv_screen)#some conversation target may not have potraits
 
         self.game.game_objects.shaders['alpha']['alpha'] = self.alpha
@@ -74,7 +82,6 @@ class Conversation(Gameplay):
 
     def on_pop(self):
         self.conv_screen.release()
-        self.background.release()        
         if self.completed:            
             self.speaker.on_conversation_complete()
         else:

@@ -7,7 +7,7 @@ DYNAMIC_OVERLAY_LOADERS = {
 }
 
 class DynamicOverlay(Gameplay):
-    def __init__(self, game, loader_key, image, text='', callback=None):
+    def __init__(self, game, loader_key, image, title='', text='', callback=None):
         super().__init__(game)
         self.page = 0
         self.render_fade = [self.render_in, self.render_out]
@@ -17,7 +17,7 @@ class DynamicOverlay(Gameplay):
         self.overlay = game.display.make_layer(game.window_size)
 
         loader_cls = DYNAMIC_OVERLAY_LOADERS[loader_key]
-        self.ui_loader = loader_cls(game.game_objects, image = image, text = text)
+        self.ui_loader = loader_cls(game.game_objects, image=image, title=title, text=text)
         self.game.game_objects.player.reset_movement()
 
     def on_pop(self):

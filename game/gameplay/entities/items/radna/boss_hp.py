@@ -8,7 +8,7 @@ class BossHP(Radna):
         item_id='boss_hp',
         description='Visible boss HP [2]',
         pickup_text='Visible boss HP [2]',
-        pickup_ui_image_path='assets/sprites/ui/pickups/journal/abilityHUD2.png',
+        pickup_ui_image_path='assets/sprites/ui/overlay/items/placeholder/placeholder.png',
     )
     inventory_level = 2
 

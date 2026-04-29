@@ -10,7 +10,6 @@ class FastTravelUnlock(BaseUI):
         self.actions = ['yes','no']
         self.conv = 'Would you like to offer ' + str(self.fast_travel.cost) + ' ambers to this statue?'
         self.bg_size = [152,48]
-        self.bg = self.game.game_objects.font.fill_text_bg(self.bg_size)
         self.define_pos()
         self.pointer = MenuBox(self.game.game_objects)
 
@@ -21,16 +20,28 @@ class FastTravelUnlock(BaseUI):
 
     def blit_BG(self):
         pos = [self.game.window_size[0]*0.5-self.bg_size[0]*0.5,self.game.window_size[1]*0.25]
-        self.game.display.render(self.bg, self.game.screen_manager.screen, position = pos)#shader render
+        self.game.game_objects.font.render_text_bg(
+            self.game.screen_manager.screen,
+            self.bg_size,
+            position=pos,
+        )
 
     def blit_actions(self):
         for index, action in enumerate(self.actions):
-            response = self.game.game_objects.font.render(text = action)
-            self.game.display.render(response, self.game.screen_manager.screen, position = self.pos[index])#shader render
+            self.game.game_objects.font.render(
+                self.game.screen_manager.screen,
+                action,
+                position=self.pos[index],
+            )
 
     def blit_text(self):
-        text = self.game.game_objects.font.render((130,90), self.conv, int(self.letter_frame//2))
-        self.game.display.render(text, sself.game.screen_manager.screen, position =(220,90))#shader render        
+        self.game.game_objects.font.render(
+            self.game.screen_manager.screen,
+            self.conv,
+            position=(220, 90),
+            width=130,
+            letter_frame=int(self.letter_frame // 2),
+        )
 
     def blit_pointer(self):
         pos = self.pos[self.index[0]]

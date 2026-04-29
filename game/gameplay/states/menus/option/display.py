@@ -82,7 +82,13 @@ class OptionDisplay(BaseUI):
             # Render the current option value to the right of the button
             value_text = self._get_option_display_text(i)
                                             
-            self.game.display.render_text(self.game.game_objects.font.font_atals,self.game.screen_manager.screen,value_text,letter_frame=1000,color=[255, 255, 255, 255],position=self.menu_ui.results[i])
+            self.game.game_objects.font.render(
+                self.game.screen_manager.screen,
+                value_text,
+                letter_frame=None,
+                color=[255, 255, 255, 255],
+                position=self.menu_ui.results[i],
+            )
 
         # Render arrows
         for arrow in self.menu_ui.arrows:

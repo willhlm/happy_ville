@@ -8,7 +8,7 @@ class BlueInfinityStone(InfinityStones):#get spirit at collision
         item_id='blue_infinity_stone',
         description='add spirit to the swinger',
         pickup_text='add spirit to the swinger',
-        pickup_ui_image_path='assets/sprites/ui/pickups/journal/abilityHUD2.png',
+        pickup_ui_image_path='assets/sprites/ui/overlay/items/placeholder/placeholder.png',
     )
 
     def __init__(self, pos, game_objects, **kwarg):

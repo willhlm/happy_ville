@@ -15,10 +15,7 @@ class InventoryUI(BaseUI):
         self.define_botton_texts(game_objects)
 
     def define_botton_texts(self, game_objects):
-        convs = ['select', 'exit', 'Map', 'Omamori']
-        self.texts = []
-        for conv in convs:
-            self.texts.append(game_objects.font.render((32, 32), conv, len(conv)))
+        self.texts = ['select', 'exit', 'Map', 'Omamori']
 
     def update(self, dt):
         super().update(dt)
@@ -62,11 +59,10 @@ class InventoryUI(BaseUI):
             text = str(quantity)
             topleft = self.iventory_UI.items[key]
             position = [topleft[0] + 50, topleft[1]]
-            self.game_objects.game.display.render_text(
-                self.game_objects.font.font_atals,
+            self.game_objects.font.render(
                 self.game_objects.ui.backpack.screen,
                 text=text,
-                letter_frame=9999,
+                letter_frame=None,
                 color=(255, 255, 255, 255),
                 position=position,
             )
@@ -89,17 +85,14 @@ class InventoryUI(BaseUI):
         item = self.game_objects.player.backpack.inventory.get_item(item_name)
         if item:
             self.conv = item.description
-            text = self.game_objects.font.render(
-                (140, 80), self.conv, int(self.letter_frame // 2)
-            )
             self.game_objects.shaders['colour']['colour'] = (255, 255, 255, 255)
-            self.game_objects.game.display.render(
-                text,
+            self.game_objects.font.render(
                 self.game_objects.ui.backpack.screen,
                 position=(420, 150),
-                shader=self.game_objects.shaders['colour'],
+                text=self.conv,
+                width=140,
+                letter_frame=int(self.letter_frame // 2),
             )
-            text.release()
 
     def blit_bottons(self):
         for index, button in enumerate(self.iventory_UI.buttons.values()):
@@ -108,12 +101,10 @@ class InventoryUI(BaseUI):
                 self.game_objects.ui.backpack.screen,
                 position=button.rect.topleft,
             )
-            self.game_objects.shaders['colour']['colour'] = (255, 255, 255, 255)
-            self.game_objects.game.display.render(
-                self.texts[index],
+            self.game_objects.font.render(
                 self.game_objects.ui.backpack.screen,
+                self.texts[index],
                 position=button.rect.center,
-                shader=self.game_objects.shaders['colour'],
             )
 
     def handle_events(self, input):

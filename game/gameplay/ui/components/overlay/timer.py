@@ -15,10 +15,13 @@ class Timer(StaticEntity):#to display a timer on screen
     def draw(self, target):
         string = str(round(self.time / 60, 2))#seconds¨
         size = (50,12)
-        image = self.game_objects.font.render(size, string + ' seconds')
-        self.game_objects.shaders['colour']['colour'] = (255,255,255,255)
-        self.game_objects.game.display.render(image, target, position = [self.game_objects.game.window_size[0] * 0.5 - size[0], self.game_objects.game.window_size[1] * 0.2], scale = [3,3], shader = self.game_objects.shaders['colour'])#shader render
-        image.release()
+        self.game_objects.font.render(
+            target,
+            string + ' seconds',
+            position=[self.game_objects.game.window_size[0] * 0.5 - size[0], self.game_objects.game.window_size[1] * 0.2],
+            width=size[0],
+            scale=3,
+        )
 
     def release_texture(self):
         pass

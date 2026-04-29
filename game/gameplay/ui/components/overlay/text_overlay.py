@@ -89,8 +89,7 @@ class TextOverlay(BaseOverlay):
         font_scale = 0.5 * (sx + sy)
 
         for i, line in enumerate(self.lines):
-            self.go.game.display.render_text(
-                self.go.font.font_atals,
+            self.go.font.render(
                 target,
                 line,
                 position=(self.box_left * sx, (self.box_top + i * self.line_gap) * sy),

@@ -8,7 +8,7 @@ class RedInfinityStone(InfinityStones):#more dmg
         item_id='red_infinity_stone',
         description='10 procent more damage',
         pickup_text='10 procent more damage',
-        pickup_ui_image_path='assets/sprites/ui/pickups/journal/abilityHUD2.png',
+        pickup_ui_image_path='assets/sprites/ui/overlay/items/placeholder/placeholder.png',
     )
 
     def __init__(self, pos, game_objects, **kwarg):

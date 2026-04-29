@@ -42,4 +42,10 @@ class HUD():
         if self.game_objects.game.RENDER_FPS_FLAG:
             fps_string = str(int(self.game_objects.game.game_loop.clock.get_fps()))
             text = 'fps ' + fps_string
-            self.game_objects.game.display.render_text(self.game_objects.font.font_atals, self.screen, text, letter_frame = None, color = (255,255,255,255), position = (self.screen.width - 50, 10))
+            self.game_objects.font.render(
+                self.screen,
+                text,
+                letter_frame=None,
+                color=(255,255,255,255),
+                position=(self.screen.width - 50, 10),
+            )

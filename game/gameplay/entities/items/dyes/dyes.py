@@ -9,7 +9,7 @@ class Dyes(InteractWorldItem):#ring in which to attach radnas
         item_id='dyes',
         description='A dye',
         pickup_text='A dye',
-        pickup_ui_image_path='assets/sprites/ui/pickups/journal/abilityHUD2.png',
+        pickup_ui_image_path='assets/sprites/ui/overlay/items/placeholder/placeholder.png',
     )
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)

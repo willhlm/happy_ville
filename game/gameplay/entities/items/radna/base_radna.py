@@ -7,7 +7,8 @@ class Radna(InteractWorldItem):
         item_id='radna',
         description='Radna',
         pickup_text='Radna',
-        pickup_ui_image_path='assets/sprites/ui/pickups/journal/abilityHUD2.png',
+        title = 'Radna',
+        pickup_ui_image_path='assets/sprites/ui/overlay/items/placeholder/placeholder.png',
     )
     inventory_level = 1
     def __init__(self,pos, game_objects, **kwarg):

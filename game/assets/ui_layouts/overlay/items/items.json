@@ -29,7 +29,7 @@
                  "visible":true,
                  "width":192,
                  "x":224,
-                 "y":224
+                 "y":208
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -45,14 +45,48 @@
                 {
                  "gid":900,
                  "height":64,
-                 "id":72,
+                 "id":73,
                  "name":"",
+                 "properties":[
+                        {
+                         "name":"font_style",
+                         "type":"string",
+                         "value":"text"
+                        }, 
+                        {
+                         "name":"text_key",
+                         "type":"string",
+                         "value":"text"
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":368,
-                 "x":144,
-                 "y":320
+                 "width":320,
+                 "x":160,
+                 "y":336
+                }, 
+                {
+                 "gid":900,
+                 "height":32,
+                 "id":75,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"font_style",
+                         "type":"string",
+                         "value":"title"
+                        }, 
+                        {
+                         "name":"text_key",
+                         "type":"string",
+                         "value":"title"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":176,
+                 "x":224,
+                 "y":240
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -61,7 +95,7 @@
          "y":0
         }],
  "nextlayerid":8,
- "nextobjectid":73,
+ "nextobjectid":76,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

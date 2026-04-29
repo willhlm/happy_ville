@@ -9,6 +9,6 @@ from .menus import (
     PauseMenuLoader,
     TitleMenuLoader,
 )
-from .pickups.abilities.dash_instruction_loader import DashInstructionLoader
-from .pickups.item_pickup_loader import ItemPickupLoader
+from .overlay.abilities.dash_instruction_loader import DashInstructionLoader
+from .overlay.item_pickup_loader import ItemPickupLoader
 from .base_loader import BaseLoader

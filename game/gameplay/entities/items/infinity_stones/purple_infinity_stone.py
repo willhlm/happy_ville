@@ -8,7 +8,7 @@ class PurpleInfinityStone(InfinityStones):#reflect projectile -> crystal caves
         item_id='purple_infinity_stone',
         description='reflects projectiels',
         pickup_text='reflects projectiels',
-        pickup_ui_image_path='assets/sprites/ui/pickups/journal/abilityHUD2.png',
+        pickup_ui_image_path='assets/sprites/ui/overlay/items/placeholder/placeholder.png',
     )
 
     def __init__(self, pos, game_objects, **kwarg):

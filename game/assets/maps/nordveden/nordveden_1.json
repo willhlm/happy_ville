@@ -1045,7 +1045,7 @@
                                 {
                                  "name":"interactable_item",
                                  "type":"string",
-                                 "value":"rings"
+                                 "value":"journal"
                                 }, 
                                 {
                                  "name":"spawn_mode",

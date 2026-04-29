@@ -102,9 +102,20 @@
          "visible":true,
          "x":0,
          "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":3,
+         "name":"shared",
+         "objects":[],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
         }],
- "nextlayerid":3,
- "nextobjectid":27,
+ "nextlayerid":4,
+ "nextobjectid":29,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -123,9 +134,13 @@
          "margin":0,
          "name":"BG",
          "spacing":0,
-         "tilecount":880,
+         "tilecount":0,
          "tileheight":16,
          "tilewidth":16
+        }, 
+        {
+         "firstgid":886,
+         "source":"..\/..\/shared.tsx"
         }],
  "tilewidth":16,
  "type":"map",

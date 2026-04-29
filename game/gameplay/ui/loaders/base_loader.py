@@ -21,6 +21,7 @@ class BaseLoader():
         self.shared_objects = []
         self.containers = []
         self.texts = []
+        self.text_fields = {}
 
     def load_UI_data(self, path, name):
         map_data = read_files.read_json(path)
@@ -37,6 +38,19 @@ class BaseLoader():
 
     def load_data(self):
         pass
+
+    def register_text_field(self, text_obj, text_key=None):
+        if text_key is None:
+            return
+        self.text_fields.setdefault(text_key, []).append(text_obj)
+
+    def assign_text_field(self, text_key, text):
+        fields = self.text_fields.get(text_key, [])
+        if not fields:
+            return False
+        for field in fields:
+            field.text = text
+        return True
 
     def properties_to_dict(self, properties):
         return {prop["name"]: prop["value"] for prop in properties}
@@ -105,10 +119,20 @@ class BaseLoader():
                 self.buttons['rb'] = button                    
 
             elif local_id == 7:#             
-                self.texts.append(Text(self.game_objects, text=properties.get('text', ''), position=topleft, size=object_size))
+                font_style = properties.get("font_style", "text")
+                text_key = properties.get("text_key")
+                text_obj = Text(
+                    self.game_objects,
+                    text=properties.get('text', ''),
+                    position=topleft,
+                    size=object_size,
+                    font_style=font_style,
+                )
+                self.texts.append(text_obj)
+                self.register_text_field(text_obj, text_key=text_key)
 
-            elif local_id == 8:                
-                item = properties.get("item", str(obj["id"]))
+            elif local_id == 8:           
+                item = properties.get("item", str(obj["id"]))                
                 self.containers.append(InventoryContainer(topleft, self.game_objects, item))                
 
     def _scale_position(self, pos):

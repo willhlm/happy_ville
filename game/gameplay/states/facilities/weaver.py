@@ -75,8 +75,7 @@ class Weaver(GameState):
             dye = self._get_selected_dye(category)
 
             if dye is None:
-                self.game.display.render_text(
-                    self.game.game_objects.font.font_atals,
+                self.game.game_objects.font.render(
                     self.game.screen_manager.screen,
                     'default',
                     letter_frame=1000,

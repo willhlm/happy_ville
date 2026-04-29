@@ -1,6 +1,6 @@
 import pygame
 from engine.utils import read_files
-from engine.system import activation_manager, time_field_manager, save_load, asset_preloader, controller, lights, timer, signals, time_manager, alphabet, input_interpreter, transition_controller, sequence_manager, deferred_texture_manager
+from engine.system import activation_manager, time_field_manager, save_load, asset_preloader, controller, lights, timer, signals, time_manager, font_manager, input_interpreter, transition_controller, sequence_manager, deferred_texture_manager
 from engine import groups
 from engine.sound import game_audio
 from gameplay.entities.player import player
@@ -24,7 +24,7 @@ from gameplay.world.transforms.world_transform_controller import WorldTransformC
 class GameObjects():
     def __init__(self, game):
         self.game = game
-        self.font = alphabet.Alphabet(self)#intitilise the alphabet class, scale of alphabet          
+        self.font = font_manager.FontManager(self)#intitilise the font manager class
         self.signals = signals.Signals()        
         self.shaders = read_files.load_shaders_dict(self)#load all shaders aavilable into a dict
         self.normal_map_generator = NormalMapGenerator(self)

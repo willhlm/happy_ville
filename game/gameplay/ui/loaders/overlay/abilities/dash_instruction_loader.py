@@ -6,9 +6,9 @@ class DashInstructionLoader(BaseLoader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
         self.bg = game_objects.game.display.surface_to_texture(
-            pygame.image.load('assets/ui_layouts/pickups/abilities/dash/bg.png').convert_alpha()
+            pygame.image.load('assets/ui_layouts/overlay/abilities/dash/bg.png').convert_alpha()
         )
-        path = 'assets/ui_layouts/pickups/abilities/dash/dash.json'
+        path = 'assets/ui_layouts/overlay/abilities/dash/dash.json'
         self.load_UI_data(path, 'dash')
         self.load_data()
 
@@ -48,7 +48,7 @@ class DashInstructionLoader(BaseLoader):
                     self.game_objects.controller.controller_type[-1],
                 )
             elif local_id == 10:
-                self.texts.append(
+                self.register_text_field(
                     Text(
                         self.game_objects,
                         properties['text'],

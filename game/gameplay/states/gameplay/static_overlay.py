@@ -6,11 +6,13 @@ OVERLAY_LOADERS = {
 }
 
 class StaticOverlay(Gameplay):#when player obtaines a new ability, pick up inetractable item etc. It blits an image and text
-    def __init__(self, game, overlay_key):
+    def __init__(self, game, overlay_key, callback=None):
         super().__init__(game)
         self.page = 0
         self.render_fade = [self.render_in, self.render_out]
         self.fade = 0
+        self.should_exit = False
+        self.callback = callback
         self.overlay = game.display.make_layer(game.window_size)
 
         loader_cls = OVERLAY_LOADERS[overlay_key]
@@ -19,6 +21,13 @@ class StaticOverlay(Gameplay):#when player obtaines a new ability, pick up inetr
 
     def on_pop(self):
         self.overlay.release()
+
+    def update(self, dt):
+        super().update(dt)
+        if self.should_exit:
+            if self.callback:
+                self.callback()
+            self.game.state_manager.exit_state()
 
     def handle_movement(self):#every frame
         pass
@@ -58,7 +67,7 @@ class StaticOverlay(Gameplay):#when player obtaines a new ability, pick up inetr
         self.fade = max(self.fade, 0)
 
         if self.fade <= 0:
-            self.game.state_manager.exit_state()
+            self.should_exit = True
 
     def handle_events(self,input):
         input.processed()

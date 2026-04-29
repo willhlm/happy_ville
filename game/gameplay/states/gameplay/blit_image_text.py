@@ -8,7 +8,7 @@ class BlitImageText(Gameplay):#when player obtaines a new ability, pick up inetr
 
         self.image = game.display.make_layer(image.size)
         self.game.display.render(image, self.image)#make a copy of the image
-        self.text = self.game.game_objects.font.render((140,80), text)
+        self.text = text
 
         self.game.game_objects.player.reset_movement()
 
@@ -18,7 +18,6 @@ class BlitImageText(Gameplay):#when player obtaines a new ability, pick up inetr
 
     def on_pop(self):
         self.image.release()
-        self.text.release()
 
     def update(self, dt):
         super().update(dt)
@@ -40,7 +39,13 @@ class BlitImageText(Gameplay):#when player obtaines a new ability, pick up inetr
         self.game.screen_manager.screen.clear(40, 40, 40, self.fade[0])
 
         self.game.display.render(self.image.texture, self.game.screen_manager.screen, position = (320, 120), shader = self.game.game_objects.shaders['alpha'])
-        self.game.display.render(self.text, self.game.screen_manager.screen, position = (320,140), shader = self.game.game_objects.shaders['colour'])
+        self.game.game_objects.font.render(
+            self.game.screen_manager.screen,
+            self.text,
+            position=(320, 140),
+            width=140,
+            color=(255, 255, 255, self.fade[1]),
+        )
         self.game.render_display(self.game.screen_manager.screen.texture)
 
     def render_in(self):

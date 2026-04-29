@@ -105,17 +105,14 @@ class RadnaUI(BaseUI):
         if item:
             self.dark(item)
             self.conv = item.description
-            text = self.game_objects.font.render(
-                (140, 80), self.conv, int(self.letter_frame // 2)
-            )
             self.game_objects.shaders['colour']['colour'] = (255, 255, 255, 255)
-            self.game_objects.game.display.render(
-                text,
+            self.game_objects.font.render(
                 self.game_objects.ui.backpack.screen,
                 position=(320, 220),
-                shader=self.game_objects.shaders['colour'],
+                text=self.conv,
+                width=140,
+                letter_frame=int(self.letter_frame // 2),
             )
-            text.release()
 
     def dark(self, item):
         if item.equipped_ring is not None:

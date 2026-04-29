@@ -12,10 +12,13 @@ class Symbols(StaticEntity):#a part of sign, it blits the landsmarks in the appr
 
         dir = {'left':[self.image.texture.width*0.25,150],'up':[self.image.texture.width*0.5,50],'right':[self.image.texture.width*0.75,150],'down':[self.image.texture.width*0.5,300]}
         for key in entity.directions.keys():
-            text = self.game_objects.font.render((30,12), entity.directions[key])
-            self.game_objects.shaders['colour']['colour'] = (255,255,255,255)
-            self.game_objects.game.display.render(text, self.image, position = dir[key],shader = self.game_objects.shaders['colour'])#shader render
-            text.release()
+            self.game_objects.font.render(
+                self.image,
+                entity.directions[key],
+                color=(255,255,255,255),
+                position=dir[key],
+                width=30,
+            )
 
         self.render_fade = [self.render_in, self.render_out]
         self.init()

@@ -122,8 +122,7 @@ class HudMeters:
             alpha_255 = int(255 * money_alpha)
             self.game_objects.shaders['alpha']['alpha'] = alpha_255
             self.game_objects.game.display.render(self.money_frame.image, target, position=self.money_pos, shader = self.game_objects.shaders['alpha'])
-            self.game_objects.game.display.render_text(
-                self.game_objects.font.font_atals,
+            self.game_objects.font.render(
                 target,
                 str(self.money),
                 position=self.number_pos,

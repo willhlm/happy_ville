@@ -15,13 +15,11 @@ class Smith(BaseUI):#called from mr smith
         self.init_canvas([64,22*len(self.actions)])#specific for each facility
 
     def init_canvas(self,size=[64,64]):
-        self.surf=[]
-        self.bg = self.game.game_objects.font.fill_text_bg(size)
-        for string in self.actions:
-            self.surf.append(self.game.game_objects.font.render(text = string))
+        self.surf = list(self.actions)
+        self.bg_size = size
 
     def set_response(self,text):
-        self.respond = self.game.game_objects.font.render(text = text)
+        self.respond = text
 
     def render(self):
         super().render()
@@ -32,15 +30,27 @@ class Smith(BaseUI):#called from mr smith
         self.game.render_display(self.game.screen_manager.screen.texture)  
 
     def blit_text(self):
-        self.game.display.render(self.bg, self.game.screen_manager.screen, position =(280,120))#shader render                
-        for index, surf in enumerate(self.surf):
-            self.game.display.render(surf, self.game.screen_manager.screen, position =(310,135+index*10),shader = self.game.game_objects.shaders['colour'])#shader render                
+        self.game.game_objects.font.render_text_bg(
+            self.game.screen_manager.screen,
+            self.bg_size,
+            position=(280, 120),
+        )
+        for index, text in enumerate(self.surf):
+            self.game.game_objects.font.render(
+                self.game.screen_manager.screen,
+                text,
+                position=(310, 135 + index * 10),
+            )
 
     def blit_pointer(self):
         self.game.display.render(self.pointer.image, self.game.screen_manager.screen, position =(300,135+10*self.pointer_index[1]),shader = self.game.game_objects.shaders['colour'])#shader render                        
 
     def blit_response(self): 
-        self.game.display.render(self.respond, self.game.screen_manager.screen, position = (300,195),shader = self.game.game_objects.shaders['colour'])#shader render
+        self.game.game_objects.font.render(
+            self.game.screen_manager.screen,
+            self.respond,
+            position=(300, 195),
+        )
 
     def handle_events(self,input):
         input.processed()               

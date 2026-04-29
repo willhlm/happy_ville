@@ -9,7 +9,7 @@ class InfinityStones(InteractWorldItem):
         item_id='infinity_stone',
         description='Infinity stone',
         pickup_text='Infinity stone',
-        pickup_ui_image_path='assets/sprites/ui/pickups/journal/abilityHUD2.png',
+        pickup_ui_image_path='assets/sprites/ui/overlay/items/placeholder/placeholder.png',
     )
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)

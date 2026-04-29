@@ -12,8 +12,11 @@ class BankDeposite(Bank):#caled from mr banks
 
     def blit_text(self):
         self.game_objects.game.display.render(self.bg, self.game.screen_manager.screen, position = (280,120))#shader render         
-        self.amount_surf = self.game_objects.font.render(text = str(self.ammount))
-        self.game_objects.game.display.render(self.amount_surf, self.game.screen_manager.screen, position = (310,130))#shader render         
+        self.game_objects.font.render(
+            self.game.screen_manager.screen,
+            str(self.ammount),
+            position=(310, 130),
+        )
 
     def blit_pointer(self):
         pass
@@ -35,4 +38,3 @@ class BankDeposite(Bank):#caled from mr banks
                 self.ammount = max(self.ammount,0)
             elif input.name=='a' or input.name=='return':
                 self.select()
-

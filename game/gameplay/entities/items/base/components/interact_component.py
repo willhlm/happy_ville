@@ -40,6 +40,7 @@ class ItemInteractComponent:
             state_name='dynamic_overlay',
             loader_key='item_pickup',
             image=self.item.get_pickup_image(),
+            title=self.item.get_pickup_title(),
             text=self.item.get_pickup_text(),
             callback=self.on_pickup_text_exit,
         )

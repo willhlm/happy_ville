@@ -7,8 +7,9 @@ class Journal(InteractWorldItem):#journal with kills
     item_definition = ItemDefinition(
         item_id='journal',
         description='A journal',
-        pickup_text='A journal',
-        pickup_ui_image_path='assets/sprites/ui/pickups/journal/abilityHUD2.png',
+        title='Hunter\'s Journal',
+        pickup_text='Open the menu and navigate to the journal tab. Defeat enemies to add them to the journal.',
+        pickup_ui_image_path='assets/sprites/ui/overlay/items/journal/journal.png',
     )
     def __init__(self,pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
@@ -18,7 +19,7 @@ class Journal(InteractWorldItem):#journal with kills
         self.hitbox = self.rect.copy()
 
     def pickup(self, player):
-        player.backpack.add_backpack('journal')            
+        player.backpack.add_holding('journal')            
         self.mark_picked_up()
         self.kill()
 
