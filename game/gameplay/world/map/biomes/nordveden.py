@@ -14,7 +14,7 @@ class Nordveden(Biome):
 
     def post_process(self, layer_name, parallax):
         if self.live_blur:
-            if parallax[0] == 1: return                
+            if parallax[0] == 1: return
             radius = functions.blur_radius(parallax)
             self.level.game_objects.game.screen_manager.append_shader("Blur_fast", [layer_name], radius=radius)
 
