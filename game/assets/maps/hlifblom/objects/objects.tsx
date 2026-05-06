@@ -39,6 +39,6 @@
   <image width="32" height="32" source="../../../sprites/entities/platforms/bubble/idle/idle.png"/>
  </tile>
  <tile id="8">
-  <image width="80" height="64" source="../../../sprites/entities/interactables/grass/hlifblom/bloomer/idle/idle01.png"/>
+  <image width="32" height="32" source="../../../sprites/entities/interactables/grass/hlifblom/bloomer/idle/idle.png"/>
  </tile>
 </tileset>

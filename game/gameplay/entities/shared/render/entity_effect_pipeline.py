@@ -4,16 +4,16 @@ from . import effects
 
 
 class EntityEffectPipeline:
-    _layer_cache = {}
-
     def __init__(self, entity, state_controller):
         self.entity = entity
         self.state_controller = state_controller
+        self.resources = entity.game_objects.layer_resource_pool
         self.size = None
         self.base_layer = None
         self.temp_layer_a = None
         self.temp_layer_b = None
         self.shader_chain = ShaderChain(self._create_shader)
+        self.resources.register_pipeline(self)
 
     @property
     def shaders(self):
@@ -40,9 +40,12 @@ class EntityEffectPipeline:
         self.temp_layer_b = None
         self.size = None
 
+    def invalidate_resources(self):
+        self.clear_textures()
+
     def _define_size(self, size):
         self.size = tuple(size)
-        self.base_layer, self.temp_layer_a, self.temp_layer_b = self._get_cached_layers(self.size)
+        self.base_layer, self.temp_layer_a, self.temp_layer_b = self.resources.acquire_layers(self.size)
 
     def _ensure_size(self, size):
         if self.size is None or self.size != tuple(size):
@@ -78,32 +81,3 @@ class EntityEffectPipeline:
     def _create_shader(self, shader_name, **kwargs):
         shader_class = getattr(effects, shader_name.capitalize())
         return shader_class(self.entity.game_objects, **kwargs)
-
-    def _get_cached_layers(self, size):
-        cached_layers = EntityEffectPipeline._layer_cache.get(size)
-        if cached_layers is not None:
-            return cached_layers
-
-        display = self.entity.game_objects.game.display
-        cached_layers = (
-            display.make_layer(size),
-            display.make_layer(size),
-            display.make_layer(size),
-        )
-        EntityEffectPipeline._layer_cache[size] = cached_layers
-        return cached_layers
-
-    @classmethod
-    def flush_layer_cache(cls):
-        for layers in cls._layer_cache.values():
-            for layer in layers:
-                layer.release()
-        cls._layer_cache.clear()
-
-    @classmethod
-    def flush_shader_caches(cls):
-        for effect_name in getattr(effects, "__all__", []):
-            effect_class = getattr(effects, effect_name, None)
-            if effect_class is None:
-                continue
-            effect_class.flush_cache()

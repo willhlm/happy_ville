@@ -12,7 +12,7 @@ from .fast_travel import FastTravel
 from .fireplace.fireplace import Fireplace
 
 from .grass.cave_grass import InteractableCaveGrass
-from .grass.bloomer import Bloomer
+from .grass.bloomer.bloomer import Bloomer
 from .vines.interactable_vines import InteractableVines
 
 from .inorinoki import Inorinoki

@@ -239,8 +239,6 @@ class Palette_swap(Shaders):
 
 
 class Noise_border(Shaders):
-    _layer_cache = {}
-
     def __init__(self, game_objects, **kwarg):
         self.game_objects = game_objects
         self.time = 0
@@ -249,23 +247,14 @@ class Noise_border(Shaders):
         self.time += dt * 0.01
 
     def set_uniforms(self, size):
-        noise_layer, empty, color_lookup = self._get_cached_layers(
-            self.game_objects.game.display,
-            size,
-        )
-        empty.clear(0, 0, 0, 0)
+        noise_layer, empty_layer = self.game_objects.layer_resource_pool.acquire_named_layers("noise_border", size, 2)
+        empty_layer.clear(0, 0, 0, 0)
         noise = self.game_objects.shaders['noise_perlin']
         noise['u_resolution'] = size
         noise['u_time'] = self.time
         noise['scroll'] = [0, 0]
         noise['scale'] = [100, 100]
-        self.game_objects.game.display.render(empty.texture, noise_layer, shader=noise)
-
-        gradient = self.game_objects.shaders['gradient']
-        gradient['numStops'] = 3
-        gradient['colors'] = [[1.0, 1.0, 1.0], [0.0, 0.0, 0.0], [1.0, 1.0, 1.0]]
-        gradient['offsets'] = [0.2, 0.5, 0.52]
-        self.game_objects.game.display.render(empty.texture, color_lookup, shader=gradient)
+        self.game_objects.game.display.render(empty_layer.texture, noise_layer, shader=noise)
 
         shader = self.game_objects.shaders['noise_border']
         shader['TIME'] = self.time
@@ -281,26 +270,48 @@ class Noise_border(Shaders):
         self.game_objects.game.display.render(source_texture.texture, target, position=position, flip=flip, angle=angle, shader=self.game_objects.shaders['noise_border'])
 
     @classmethod
-    def _get_cached_layers(cls, display, size):
-        size = tuple(size)
-        cached_layers = cls._layer_cache.get(size)
-        if cached_layers is not None:
-            return cached_layers
-
-        cached_layers = (
-            display.make_layer(size),
-            display.make_layer(size),
-            display.make_layer(size),
-        )
-        cls._layer_cache[size] = cached_layers
-        return cached_layers
-
-    @classmethod
     def flush_cache(cls):
-        for layers in cls._layer_cache.values():
-            for layer in layers:
-                layer.release()
-        cls._layer_cache.clear()
+        pass
 
     def release(self):
         pass
+
+class Glow(Shaders):
+    def __init__(self, game_objects, **kwarg):
+        self.game_objects = game_objects
+        self.glowIntensity = kwarg.get('intensity', 1)
+        self.glowColor = kwarg.get('colour', (1, 1, 1))
+        self.radialCenter = kwarg.get('radial_center', (0.5, 0.5))
+        self.radialInner = kwarg.get('radial_inner', 0.0)
+        self.radialOuter = kwarg.get('radial_outer', 0.2)
+
+    def set_uniforms(self):
+        shader = self.game_objects.shaders['glow']
+        shader['glowIntensity'] = self.glowIntensity
+        shader['glowColor'] = self.glowColor
+        shader['radialCenter'] = self.radialCenter
+        shader['radialInner'] = self.radialInner
+        shader['radialOuter'] = self.radialOuter
+
+    def _apply(self, source_layer, target_layer):
+        self.set_uniforms()
+        self.game_objects.game.display.render(
+            source_layer.texture,
+            target_layer,
+            shader=self.game_objects.shaders['glow'],
+        )
+        return target_layer
+
+    def draw(self, source_texture, composite_screen):
+        return self._apply(source_texture, composite_screen)
+
+    def draw_to_composite(self, source_texture, target, position, flip, angle):
+        self.set_uniforms()
+        self.game_objects.game.display.render(
+            source_texture.texture,
+            target,
+            position=position,
+            flip=flip,
+            angle=angle,
+            shader=self.game_objects.shaders['glow'],
+        )

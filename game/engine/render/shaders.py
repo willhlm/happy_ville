@@ -161,20 +161,19 @@ class Bloom(Shaders):
 class Glow(Shaders):
     def __init__(self, post_process, **kwarg):
         super().__init__(post_process)
-        self.glowRadius = kwarg.get('radius',5)
-        self.glowThreshold = kwarg.get('threshould',0.4)
-        self.glowIntensity = kwarg.get('intensity',10)
-        self.targetColor = kwarg.get('target_colour',(1,1,1))
-        self.glowColor = kwarg.get('colour',(1,0,0))
-        self.colorTolerance = kwarg.get('tolerance',0.2)
+        self.glowIntensity = kwarg.get('intensity', 10)
+        self.glowColor = kwarg.get('colour', (1, 0, 0))
+        self.radialCenter = kwarg.get('radial_center', (0.5, 0.5))
+        self.radialInner = kwarg.get('radial_inner', 0.0)
+        self.radialOuter = kwarg.get('radial_outer', 0.2)
 
     def set_uniforms(self):
-        self.post_process.game_objects.shaders['glow']['glowRadius'] = self.glowRadius
-        self.post_process.game_objects.shaders['glow']['glowIntensity'] = self.glowIntensity
-        self.post_process.game_objects.shaders['glow']['glowThreshold'] = self.glowThreshold
-        self.post_process.game_objects.shaders['glow']['targetColor'] = self.targetColor
-        self.post_process.game_objects.shaders['glow']['glowColor'] = self.glowColor
-        self.post_process.game_objects.shaders['glow']['colorTolerance'] = self.colorTolerance
+        shader = self.post_process.game_objects.shaders['glow']
+        shader['glowIntensity'] = self.glowIntensity
+        shader['glowColor'] = self.glowColor
+        shader['radialCenter'] = self.radialCenter
+        shader['radialInner'] = self.radialInner
+        shader['radialOuter'] = self.radialOuter
 
     def _apply(self, source_layer, target_layer):
         self.set_uniforms()

@@ -35,6 +35,9 @@ class EntityShaderManager():
     def clear_textures(self):
         self.effects.clear_textures()
 
+    def release(self):
+        self.clear_textures()
+
     def draw_normal(self, position, flip=False, angle=0):
         normal_texture = self._current_normal_texture()
         if normal_texture is None:

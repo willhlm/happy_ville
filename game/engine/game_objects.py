@@ -19,7 +19,7 @@ from gameplay.narrative.quests_events.manager import QuestsEventsManager
 
 from gameplay.registry.registry_manager import RegistryManager
 from engine.particles.particle_system import ParticleSystem
-from gameplay.entities.shared.render.entity_effect_pipeline import EntityEffectPipeline
+from gameplay.entities.shared.render.layer_resource_pool import LayerResourcePool
 
 from gameplay.world.transforms.world_transform_controller import WorldTransformController
 
@@ -37,6 +37,7 @@ class GameObjects():
         self.stimuli = stimuli.StimulusManager(self)
         self.timer_manager = timer.Timer_manager(self)
         self.deferred_textures = deferred_texture_manager.DeferredTextureManager()
+        self.layer_resource_pool = LayerResourcePool(self)
         self._create_groups()
         self.activation_manager = activation_manager.ActivationManager(self)
         self.weather = weather.Weather(self)
@@ -86,8 +87,7 @@ class GameObjects():
     def clean_groups(self):#called wgen changing map
         self.deferred_textures.release_all()
         self.fade.release_all()
-        EntityEffectPipeline.flush_layer_cache()
-        EntityEffectPipeline.flush_shader_caches()
+        self.layer_resource_pool.flush()
         self.npcs.empty()
         self.enemies.empty()
         self.interactables.empty()
