@@ -21,7 +21,7 @@ class DashAirPre(PhaseBase):
             self.entity.movement_manager.remove_modifier('air_boost')
 
         self.dash_length = C.dash_length
-        self.entity.shader_state.handle_input('motion_blur')
+        self.entity.shader_state.add_shader('mb')
         self.entity.game_objects.cosmetics.add(Dusts(self.entity.hitbox.center, self.entity.game_objects, dir = self.entity.dir, state = 'one'))
         self.entity.end_coyote_time()
         self.jump_dash_timer = C.jump_dash_timer
@@ -48,7 +48,7 @@ class DashAirPre(PhaseBase):
 
     def handle_input(self, input, **kwarg):
         if input == 'interrupt':
-            self.entity.shader_state.handle_input('idle')
+            self.entity.shader_state.remove_shader('mb')
             self.enter_state('idle')
 
     def increase_phase(self):
@@ -63,7 +63,7 @@ class DashAirPre(PhaseBase):
         input.processed()
 
     def exit(self):
-        self.entity.shader_state.handle_input('idle')
+        self.entity.shader_state.remove_shader('mb')
         self.entity.movement_manager.remove_modifier('dash')
 
     def land_from_dash(self):
@@ -80,7 +80,7 @@ class DashAirPre(PhaseBase):
             return
 
         if self.entity.has_collision_kind('belt') or self.entity.has_collision_kind('Wall'):
-            self.entity.shader_state.handle_input('idle')
+            self.entity.shader_state.remove_shader('mb')
             if self.entity.acceleration[0] != 0:
                 if self.entity.has_collision_kind('belt'):
                     self.enter_state('belt_glide')
@@ -115,7 +115,7 @@ class DashAirMain(DashGroundPre):
             self.enter_state('fall')
 
     def increase_phase(self):
-        self.entity.shader_state.handle_input('idle')
+        self.entity.shader_state.remove_shader('mb')
         self.enter_phase('post')
 
 
@@ -156,5 +156,5 @@ class DashAirPost(DashGroundPre):
         input.processed()
 
     def enter_state(self, state, **kwarg):
-        self.entity.shader_state.handle_input('idle')
+        self.entity.shader_state.remove_shader('mb')
         self.entity.currentstate.enter_state(state, **kwarg)

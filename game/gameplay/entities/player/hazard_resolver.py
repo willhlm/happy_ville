@@ -36,7 +36,7 @@ class PlayerHazardResolver:
 
         self.player.game_objects.transition.run(
             previous_state=self.player.game_objects.game.state_manager.state_stack[-1],
-            style="fade_black",
+            style="alpha",
             action=self._move_to_safe_spawn,
             after=after,
             fade_length=60,

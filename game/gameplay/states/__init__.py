@@ -11,8 +11,7 @@ from .gameplay.ability_select import AbilitySelect
 from .gameplay.blit_image_text import BlitImageText
 from .gameplay.conversation import Conversation
 from .gameplay.dynamic_overlay import DynamicOverlay
-from .gameplay.fade_in import FadeIn
-from .gameplay.fade_out import FadeOut
+from .gameplay.screen_fade import ScreenFadeState
 from .gameplay.backpack_ui_state import BackpackUIState
 from .gameplay.static_overlay import StaticOverlay
 

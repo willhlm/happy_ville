@@ -11,9 +11,9 @@ class Statues(Interactables):#monuments you interact to get quests or challenges
         if self.interacted: return
         self.game_objects.game.state_manager.enter_state(state_name = 'conversation', speaker = self)
 
-        self.shader_state.handle_input('tint', colour = [0,0,0,100])
+        self.shader_state.add_shader('tint', colour = [0,0,0,100])
         self.interacted = True
 
     def reset(self):#called when challange is failed
-        self.shader_state.handle_input('idle')
+        self.shader_state.remove_shader('tint')
         self.interacted = False

@@ -42,12 +42,13 @@ class PhysicsManager:
             + self.game_objects.enemies.sprites()
             + self.game_objects.loot.sprites()
         )
+        interactables = self.game_objects.interactables.sprites() + self.game_objects.interactables_fg.sprites()
 
         self.overlap_dispatcher.dispatch_simple(self.game_objects.players, self.game_objects.enemies, callback_name='player_collision')
         self.overlap_dispatcher.dispatch_simple(self.game_objects.players, self.game_objects.bg_fade, callback_name='player_collision')
 
         self.overlap_dispatcher.dispatch_overlap_events(self.game_objects.players, self.game_objects.loot)
-        self.overlap_dispatcher.dispatch_overlap_events(self.game_objects.players, self.game_objects.interactables)
+        self.overlap_dispatcher.dispatch_overlap_events(self.game_objects.players, self.game_objects.interactables)#only players
         self.overlap_dispatcher.dispatch_overlap_events(players_enemies_loot, self.game_objects.interactables_fg)
         self.overlap_dispatcher.dispatch_overlap_events(self.game_objects.players, self.game_objects.npcs)
 
@@ -57,7 +58,5 @@ class PhysicsManager:
         self.overlap_dispatcher.dispatch_simple(self.game_objects.platforms, self.game_objects.projectiles.friendly, callback_name='collision_platform')
         self.overlap_dispatcher.dispatch_simple(self.game_objects.platforms, self.game_objects.projectiles.enemy, callback_name='collision_platform')
 
-        self.overlap_dispatcher.dispatch_simple(self.game_objects.interactables, friendly_projectiles, callback_name='collision_interactables')
-        self.overlap_dispatcher.dispatch_simple(self.game_objects.interactables_fg, friendly_projectiles, callback_name='collision_interactables_fg')
-        self.overlap_dispatcher.dispatch_simple(self.game_objects.interactables, enemy_projectiles, callback_name='collision_interactables')
-        self.overlap_dispatcher.dispatch_simple(self.game_objects.interactables_fg, enemy_projectiles, callback_name='collision_interactables_fg')
+        self.overlap_dispatcher.dispatch_simple(interactables, friendly_projectiles, callback_name='collision_interactables')
+        self.overlap_dispatcher.dispatch_simple(interactables, enemy_projectiles, callback_name='collision_interactables')

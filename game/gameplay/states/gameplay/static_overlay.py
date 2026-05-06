@@ -10,7 +10,7 @@ class StaticOverlay(Gameplay):#when player obtaines a new ability, pick up inetr
         super().__init__(game)
         self.page = 0
         self.render_fade = [self.render_in, self.render_out]
-        self.fade = 0
+        self.fade = self.game.game_objects.fade.create("alpha", 0, max_value=150)
         self.should_exit = False
         self.callback = callback
         self.overlay = game.display.make_layer(game.window_size)
@@ -41,8 +41,10 @@ class StaticOverlay(Gameplay):#when player obtaines a new ability, pick up inetr
         self.render_images()
         self.render_text()
         self.render_buttons()
-        self.game.game_objects.shaders['alpha']['alpha'] = self.fade
-        self.game.display.render(self.overlay.texture, self.game.screen_manager.screen, shader=self.game.game_objects.shaders['alpha'])
+        self.fade.render(
+            self.overlay.texture,
+            self.game.screen_manager.screen,
+        )
 
         self.game.render_display(self.game.screen_manager.screen.texture)
 
@@ -59,14 +61,12 @@ class StaticOverlay(Gameplay):#when player obtaines a new ability, pick up inetr
             button.render(self.overlay)
 
     def render_in(self):
-        self.fade += 2
-        self.fade = min(self.fade,150)
+        self.fade.step(2)
 
     def render_out(self):
-        self.fade -= 4
-        self.fade = max(self.fade, 0)
+        self.fade.step(-4)
 
-        if self.fade <= 0:
+        if self.fade.value <= 0:
             self.should_exit = True
 
     def handle_events(self,input):

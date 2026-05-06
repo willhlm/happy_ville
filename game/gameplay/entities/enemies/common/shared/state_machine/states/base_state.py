@@ -82,3 +82,7 @@ class BaseState():
     def player_distance(self):
         # Fetch from manager instead of storing locally
         return self.entity.currentstate.player_distance
+
+    @property
+    def target_distance(self):
+        return self.entity.currentstate.target_distance

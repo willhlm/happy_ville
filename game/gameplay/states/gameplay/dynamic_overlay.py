@@ -11,7 +11,7 @@ class DynamicOverlay(Gameplay):
         super().__init__(game)
         self.page = 0
         self.render_fade = [self.render_in, self.render_out]
-        self.fade = 0
+        self.fade = self.game.game_objects.fade.create("alpha", 0)
         self.callback = callback
         self.should_exit = False
         self.overlay = game.display.make_layer(game.window_size)
@@ -42,8 +42,10 @@ class DynamicOverlay(Gameplay):
         self.render_images()
         self.render_text()
         self.render_buttons()
-        self.game.game_objects.shaders['alpha']['alpha'] = self.fade
-        self.game.display.render(self.overlay.texture, self.game.screen_manager.screen, shader=self.game.game_objects.shaders['alpha'])
+        self.fade.render(
+            self.overlay.texture,
+            self.game.screen_manager.screen,
+        )
         self.game.render_display(self.game.screen_manager.screen.texture)
 
     def render_images(self):
@@ -59,14 +61,12 @@ class DynamicOverlay(Gameplay):
             button.render(self.overlay)
 
     def render_in(self):
-        self.fade += 4
-        self.fade = min(self.fade, 255)
+        self.fade.step(4)
 
     def render_out(self):
-        self.fade -= 6
-        self.fade = max(self.fade, 0)
+        self.fade.step(-6)
 
-        if self.fade == 0:
+        if self.fade.value == 0:
             self.should_exit = True
 
     def handle_events(self, input):

@@ -951,6 +951,24 @@
                          "width":16,
                          "x":2336,
                          "y":832
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":398,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"raven"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":2128,
+                         "y":832
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -1012,7 +1030,7 @@
          "y":0
         }],
  "nextlayerid":96,
- "nextobjectid":398,
+ "nextobjectid":399,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

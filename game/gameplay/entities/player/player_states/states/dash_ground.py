@@ -19,7 +19,7 @@ class DashGroundState(CompositeState):
     def exit(self):#called when exiting the composite state
         super().exit()
         self.entity.movement_manager.remove_modifier('dash')
-        self.entity.shader_state.handle_input('idle')
+        self.entity.shader_state.remove_shader('mb')
 
 class DashGroundPre(PhaseBase):
     def __init__(self, entity, **kwarg):
@@ -30,7 +30,7 @@ class DashGroundPre(PhaseBase):
         self.dash_length = C.dash_length
         if int(self.entity.velocity[0]) == 0:
             self.dash_length += 1
-        self.entity.shader_state.handle_input('motion_blur')
+        self.entity.shader_state.add_shader('mb')
         self.entity.game_objects.cosmetics.add(Dusts(self.entity.hitbox.center, self.entity.game_objects, dir = self.entity.dir, state = 'one'))
         self.entity.end_coyote_time()
         self.jump_dash_timer = C.jump_dash_timer
@@ -67,7 +67,7 @@ class DashGroundPre(PhaseBase):
                 self.enter_state('dash_jump', to_dash_jump = True)
 
     def enter_state(self, state, **kwarg):
-        self.entity.shader_state.handle_input('idle')
+        self.entity.shader_state.remove_shader('mb')
         self.entity.movement_manager.remove_modifier('dash')
         super().enter_state(state, **kwarg)
 
@@ -101,7 +101,7 @@ class DashGroundMain(DashGroundPre):
     def increase_phase(self):
         self.entity.flags['grounddash'] = False
         self.entity.game_objects.timer_manager.start_timer(C.ground_dash_timer, self.entity.on_grounddash_timout, 'dash_timeout')
-        self.entity.shader_state.handle_input('idle')
+        self.entity.shader_state.remove_shader('mb')
         if self.entity.game_objects.controller.is_held('lb'):
             self.enter_state('sprint')
         else:
@@ -139,5 +139,5 @@ class DashGroundPost(DashGroundPre):
             input.processed()
 
     def enter_state(self, state, **kwarg):
-        self.entity.shader_state.handle_input('idle')
+        self.entity.shader_state.remove_shader('mb')
         self.entity.currentstate.enter_state(state, **kwarg)

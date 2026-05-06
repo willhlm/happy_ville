@@ -24,26 +24,22 @@ class Symbols(StaticEntity):#a part of sign, it blits the landsmarks in the appr
         self.init()
 
     def init(self):
-        self.fade = 0
+        self.fade = self.game_objects.fade.create("alpha", 0, max_value=200)
         self.page = 0
 
     def update(self, dt):
         self.render_fade[self.page](dt)
 
     def draw(self, target):
-        self.game_objects.game.display.render(self.image.texture,target, shader = self.game_objects.shaders['alpha'])#shader render
+        self.fade.render(self.image.texture, target)
 
     def render_in(self, dt):
-        self.fade += dt
-        self.fade = min(self.fade,200)
-        self.game_objects.shaders['alpha']['alpha'] = self.fade
+        self.fade.step(dt)
 
     def render_out(self, dt):
-        self.fade -= dt
-        self.fade = max(self.fade,0)
-        self.game_objects.shaders['alpha']['alpha'] = self.fade
+        self.fade.step(-dt)
 
-        if self.fade < 10:
+        if self.fade.is_below(10):
             self.init()
             self.kill()
 

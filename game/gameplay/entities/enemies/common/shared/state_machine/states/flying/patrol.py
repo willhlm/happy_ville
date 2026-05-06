@@ -4,9 +4,10 @@ from engine.utils.functions import sign
 
 class FlyingPatrol(BaseState):
     def __init__(self, entity, deciders, config_key, **kwargs):
-        super().__init__(entity, deciders, config_key)       
+        super().__init__(entity, deciders, config_key)
         self.entity.animation.play("walk")
         self.patrol_speed = self.entity.config['speeds']['patrol']
+        self.behavior = self.entity.config.get('behavior', {})
                 
         self._calculate_position()# Calculate patrol target position
         self.time = 0
@@ -16,6 +17,8 @@ class FlyingPatrol(BaseState):
 
         distance = [self.target_position[0] - self.entity.rect.centerx,  self.target_position[1] - self.entity.rect.centery]
         total_distance = (distance[0]**2 + distance[1]**2)**0.5
+        if total_distance == 0:
+            return
         ratio = [distance[0]/total_distance, distance[1]/total_distance]
         self.entity.velocity[0] += dt * ratio[0] * self.patrol_speed 
         self.entity.velocity[1] += dt * ratio[1] * self.patrol_speed
@@ -24,9 +27,15 @@ class FlyingPatrol(BaseState):
     
     def _calculate_position(self):
         """Calculate new random patrol point around spawn"""
-        angle = random.randint(0, 180)
-        amp = random.randint(40, 80)
-        offset = [-20 - 10*self.entity.dir[0], 20 - 10*self.entity.dir[1]]
+        angle = random.randint(*self.behavior.get('patrol_angle_range', [0, 180]))
+        radius = self.behavior.get('patrol_radius', [40, 80])
+        amp = random.randint(radius[0], radius[1])
+        angle_offset = self.behavior.get('patrol_angle_offset', [-20, 20])
+        vertical_bias = self.behavior.get('patrol_vertical_bias', 10)
+        offset = [
+            angle_offset[0] - vertical_bias * self.entity.dir[0],
+            angle_offset[1] - vertical_bias * self.entity.dir[1],
+        ]
         angle = random.randint(angle + offset[0], angle + offset[1])
         
         self.target_position = [
@@ -39,5 +48,5 @@ class FlyingPatrol(BaseState):
         self.entity.dir[0] = sign(self.target_position[0] - self.entity.rect.centerx)
 
     def _sway(self, dt):
-        amp = min(abs(self.entity.velocity[0]),0.3)
-        self.entity.velocity[1] += dt * amp * math.sin(5*self.time)# - self.entity.dir[1]*0.1        
+        amp = min(abs(self.entity.velocity[0]), self.behavior.get('sway_cap', 0.3))
+        self.entity.velocity[1] += dt * amp * self.behavior.get('sway_factor', 1.0) * math.sin(self.behavior.get('sway_speed', 5) * self.time)

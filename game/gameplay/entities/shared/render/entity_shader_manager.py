@@ -1,7 +1,6 @@
 from .entity_effect_pipeline import EntityEffectPipeline
 from .entity_shader_state_controller import EntityShaderStateController
 
-
 class EntityShaderManager():
     def __init__(self, entity, default='idle', **kwargs):
         self.entity = entity

@@ -9,13 +9,13 @@ class FadeEffect(StaticEntity):#fade effect -> motion blue and fade
 
         self.rect = pygame.Rect(0, 0, self.image.width, self.image.height)
         self.rect.center = entity.rect.center
-        self.alpha = kwarg.get('alpha', 255)
+        self.alpha = self.game_objects.fade.create("alpha", kwarg.get('alpha', 255))
 
         self.dir = entity.dir.copy()
         self.blur_dir = kwarg.get('blur_dir', [0.05, 0])
 
     def update_render(self, dt):
-        self.alpha *= 0.9
+        self.alpha.decay(0.9)
         self.destroy()
 
     def draw(self, target):
@@ -24,16 +24,20 @@ class FadeEffect(StaticEntity):#fade effect -> motion blue and fade
         self.game_objects.shaders['motion_blur']['quality'] = 3
         self.game_objects.game.display.render(self.image, self.image_copy, shader = self.game_objects.shaders['motion_blur'])#shader render
 
-        self.game_objects.shaders['alpha']['alpha'] = self.alpha
         blit_pos = [int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1])]
-        self.game_objects.game.display.render(self.image_copy.texture, target, position = blit_pos, flip = self.dir[0] > 0, shader = self.game_objects.shaders['alpha'])#shader render
+        self.alpha.render(
+            self.image_copy.texture,
+            target,
+            position=blit_pos,
+            flip=self.dir[0] > 0,
+        )
 
     def pool(game_objects):
         size = (128, 80)#player canvas size
         FadeEffect.image_copy = game_objects.game.display.make_layer(size)
 
     def destroy(self):
-        if self.alpha < 10:
+        if self.alpha.is_below(10):
             self.kill()
 
     def release_texture(self):

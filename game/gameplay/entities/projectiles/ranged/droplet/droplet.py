@@ -19,7 +19,11 @@ class ProjectileDroplet(PlatformProjectile):#droplet that can be placed, the sou
             self.dmg = 1#acid
             self.original_colour = [[46, 74,132, 255]]#can append more to replace more
             self.replace_colour = [[70, 210, 33, 255]]#new oclour. can append more to replace more
-            self.shader_state.enter_state('palette_swap')
+            self.shader_state.add_shader(
+                'palette_swap',
+                original_colour=self.original_colour,
+                replace_colour=self.replace_colour,
+            )
         else:
             self.dmg = 0#water
 

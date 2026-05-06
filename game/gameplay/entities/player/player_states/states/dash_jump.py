@@ -23,7 +23,7 @@ class DashJumpPre(PhaseBase):
             self.dash_length += 1
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0])
         self.entity.movement_manager.add_modifier('dash_jump', entity = self.entity, authoritative = True)
-        self.entity.shader_state.handle_input('motion_blur')
+        self.entity.shader_state.add_shader('mb')
         self.entity.flags['ground'] = False
         self.buffer_time = C.jump_dash_wall_timer
 
@@ -39,7 +39,7 @@ class DashJumpPre(PhaseBase):
         self.entity.acceleration[1] = C.acceleration[1]
         self.entity.movement_manager.remove_modifier('dash_jump')
         super().enter_state(state, **kwarg)
-        self.entity.shader_state.handle_input('idle')
+        self.entity.shader_state.remove_shader('mb')
 
     def update(self, dt):
         self.entity.game_objects.particles.emit("spirit_aura", pos = self.entity.hitbox.center, n = 1, colour = C.spirit_colour)

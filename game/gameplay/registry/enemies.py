@@ -8,7 +8,7 @@ REGISTER_ENEMIES = {
     'butterfly': Butterfly,
     'bird': Bird,
     'flower_butterfly': FlowerButterfly,
-    'mygga_chase': MyggaChase,
+    'moth': Moth,
     'mygga_colliding_projectile': MyggaCollidingProjectile,
     'mygga_colliding': MyggaColliding,
     'mygga_crystal': MyggaCrystal,
@@ -42,5 +42,6 @@ REGISTER_ENEMIES = {
     'vertical_mygga_torpedo': VerticalMyggaTorpedo,
     'krakan': Krakan,
     'ghoul': Ghoul,
+    'raven': Raven,
 
 }

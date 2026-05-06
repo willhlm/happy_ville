@@ -19,7 +19,11 @@ class DropletSource(LayeredObjects):
         if game_objects.world_state.narrative.events.get('tjasolmai', False):#if water boss (golden fields) is dead            
             self.original_colour = [[46, 74,132, 255]]#can append more to replace more
             self.replace_colour = [[70, 210, 33, 255]]#new oclour. can append more to replace more       
-            self.shader_state.enter_state('palette_swap')
+            self.shader_state.add_shader(
+                'palette_swap',
+                original_colour=self.original_colour,
+                replace_colour=self.replace_colour,
+            )
 
     def drop(self):#called from states                
         if self.parallax == [1,1]:#TODO need to check for bg and fg etc if fg should not go into eprojectiles?

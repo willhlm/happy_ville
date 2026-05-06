@@ -24,6 +24,7 @@ class Arrow(PlatformProjectile):#should it be called seed?
         self.acceleration = [0, 0.1]
         self.friction = [0.01, 0.01]
         self.max_vel = [10, 10]
+        self.angle = 0
 
     def update_vel(self, dt):#called from hitsop_states
         self.velocity[1] += dt * (self.acceleration[1]-self.velocity[1]*self.friction[1])#gravity
@@ -50,14 +51,13 @@ class Arrow(PlatformProjectile):#should it be called seed?
         self.kill()
 
     def collision_interactables(self,interactable):#collusion interactables
-        pass
-
-    def collision_interactables_fg(self, interactable):#collusion interactables_fg: e.g. twoDliquid
         if self.once: return
         self.once = True
         interactable.seed_collision(self)
-        self.velocity = [0,0]
-        self.kill()
+        damage_applied, modified_effect = interactable.take_hit(self.create_effect())
+        if damage_applied:
+            self.velocity = [0,0]
+            self.kill()
 
     def collision_enemy(self,collision_enemy):
         self.kill()

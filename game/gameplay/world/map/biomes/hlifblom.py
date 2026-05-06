@@ -1,4 +1,4 @@
-from gameplay.entities.interactables import BubbleSource, DropletSource, FallingRockSource, InteractableCaveGrass, Spikes
+from gameplay.entities.interactables import BubbleSource, DropletSource, FallingRockSource, InteractableCaveGrass, Spikes, Bloomer
 from gameplay.entities.platforms import Bubble
 from gameplay.entities.visuals.environments import BackgroundCaveGrass, LjusMaskar, Vines_2
 
@@ -11,6 +11,9 @@ class Hlifblom(Biome):
     default_room_config = DEFAULT_ROOM_CONFIG
     room_configs = ROOM_CONFIGS
 
+    def post_process(self, layer_name, parallax):
+        pass
+        
     def load_objects(self, data, parallax, offset, ctx, map_def, layer_name: str, viewport_center):
         for obj in data["objects"]:
             object_position, object_size = calculate_object_position(obj, parallax, offset, viewport_center)
@@ -92,6 +95,11 @@ class Hlifblom(Biome):
                 self.level.game_objects.platforms.add(new_bubble)
 
             elif id == 8:
+                new = Bloomer(object_position, self.level.game_objects)
+                self.level.game_objects.interactables.add(new)
+
+
+            elif id == 9:
                 challenge_ball_cls = self.level.game_objects.registry.fetch("interactables", "challenge_ball")
                 if challenge_ball_cls is None:
                     raise LookupError("Missing registry entry for interactable 'challenge_ball'")

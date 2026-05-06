@@ -12,11 +12,14 @@ class Conversation(Gameplay):
         self.text_window_size = (352, 96)
         self.blit_pos = [int((self.game.window_size[0]-self.text_window_size[0])*0.5),50]
         self.conv_screen = self.game.display.make_layer(self.game.window_size)#TODO
+        self.background = self.game.display.make_layer(self.game.window_size)#TODO
 
         self.clean_slate()
         self.conv = self.speaker.dialogue.start_conversation()
-        self.alpha = 10#alpha of the conversation screen
+        self.fade_alpha = self.game.game_objects.fade.create("alpha", 10, min_value=0, max_value=230)
+        self.fade_mask = self.game.game_objects.fade.create("mask", 10, min_value=0, max_value=230, mask_kind="horizontal", feather=0.03)
         self.sign = 1#fade in and back
+
         if not self.conv:
             self.fade_back()
 
@@ -26,20 +29,22 @@ class Conversation(Gameplay):
     def update(self, dt):
         super().update(dt)
         self.letter_frame += self.print_frame_rate*dt
-        self.alpha += self.sign * dt * 5
-        self.alpha = min(self.alpha,230)
-        if self.alpha < 10:
+        self.fade_mask.step_linear(dt, self.sign * 5)
+        self.fade_alpha.step_linear(dt, self.sign * 5)
+        if self.fade_alpha.is_below(10):
             self.game.state_manager.exit_state()
 
     def render(self):
         super().render()
-        self.conv_screen.clear(10,10,10,100)#needed to make the self.background semi trasnaprant
+        self.conv_screen.clear(0, 0, 0, 0)#needed to make the self.background semi trasnaprant
+        self.background.clear(10,10,10,100)#needed to make the self.background semi trasnaprant
 
         self.game.game_objects.font.render_text_bg(
             self.conv_screen,
             self.text_window_size,
             position=self.blit_pos,
         )
+        
         if self.conv:
             self.game.game_objects.font.render(
                 self.conv_screen,
@@ -51,8 +56,17 @@ class Conversation(Gameplay):
             )
         self.speaker.render_potrait(self.conv_screen)#some conversation target may not have potraits
 
-        self.game.game_objects.shaders['alpha']['alpha'] = self.alpha
-        self.game.display.render(self.conv_screen.texture, self.game.screen_manager.screen, shader = self.game.game_objects.shaders['alpha'])#shader render
+
+        self.fade_alpha.render(
+            self.background.texture,
+            self.game.screen_manager.screen,
+        )
+
+        self.fade_mask.render(
+            self.conv_screen.texture,
+            self.game.screen_manager.screen,
+        )
+
         self.game.render_display(self.game.screen_manager.screen.texture)
 
     def handle_events(self, input):

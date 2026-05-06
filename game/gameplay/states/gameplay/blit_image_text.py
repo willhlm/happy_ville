@@ -13,6 +13,7 @@ class BlitImageText(Gameplay):#when player obtaines a new ability, pick up inetr
         self.game.game_objects.player.reset_movement()
 
         self.fade = [0,0]
+        self.image_fade = self.game.game_objects.fade.create("alpha", 0)
         self.callback = callback#a function to call when exiting
         self.should_exit = False
 
@@ -33,12 +34,16 @@ class BlitImageText(Gameplay):#when player obtaines a new ability, pick up inetr
         super().render()
         self.render_fade[self.page]()
 
-        self.game.game_objects.shaders['alpha']['alpha'] = self.fade[1]
         self.game.game_objects.shaders['colour']['colour'] = (255,255,255,self.fade[1])
 
         self.game.screen_manager.screen.clear(40, 40, 40, self.fade[0])
 
-        self.game.display.render(self.image.texture, self.game.screen_manager.screen, position = (320, 120), shader = self.game.game_objects.shaders['alpha'])
+        self.image_fade.set(self.fade[1])
+        self.image_fade.render(
+            self.image.texture,
+            self.game.screen_manager.screen,
+            position=(320, 120),
+        )
         self.game.game_objects.font.render(
             self.game.screen_manager.screen,
             self.text,

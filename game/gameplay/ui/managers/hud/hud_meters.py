@@ -23,8 +23,8 @@ class HudMeters:
         self.money = 0
         self.money_pos = (self.offset, 50)
         self.number_pos = (self.offset + 24, 55)
-        self.health_alpha = 1.0
-        self.money_alpha = 0.0
+        self.health_alpha = self.game_objects.fade.create("alpha", 1.0, min_value=0.0, max_value=1.0)
+        self.money_alpha = self.game_objects.fade.create("alpha", 0.0, min_value=0.0, max_value=1.0)
         self.health_visible_timer = self.HEALTH_VISIBLE_HOLD
         self.money_visible_timer = 0.0
 
@@ -73,11 +73,11 @@ class HudMeters:
 
         money_target = 1.0 if self.money_visible_timer > 0 else self.MONEY_IDLE_ALPHA
 
-        health_speed = self.HEALTH_APPEAR_SPEED if health_target > self.health_alpha else self.HEALTH_FADE_SPEED
-        money_speed = self.MONEY_APPEAR_SPEED if money_target > self.money_alpha else self.MONEY_FADE_SPEED
+        health_speed = self.HEALTH_APPEAR_SPEED if health_target > self.health_alpha.value else self.HEALTH_FADE_SPEED
+        money_speed = self.MONEY_APPEAR_SPEED if money_target > self.money_alpha.value else self.MONEY_FADE_SPEED
 
-        self.health_alpha = self._approach(self.health_alpha, health_target, health_speed, dt)
-        self.money_alpha = self._approach(self.money_alpha, money_target, money_speed, dt)
+        self.health_alpha.approach(health_target, health_speed, dt)
+        self.money_alpha.approach(money_target, money_speed, dt)
 
         for heart in self.hearts:
             heart.update(dt)
@@ -90,15 +90,19 @@ class HudMeters:
         h_pos = (14, 12)
         s_pos = (12, 12)
         frame_width = self.ability_hud[0].rect.width
-        health_alpha = self.health_alpha
-        money_alpha = self.money_alpha
+        health_alpha = self.health_alpha.value
+        money_alpha = self.money_alpha.value
         if health_alpha <= 0.01 and money_alpha <= 0.01:
             return
 
         for ability_hud in self.ability_hud:
             if health_alpha > 0.01:
-                self.game_objects.shaders['alpha']['alpha'] = health_alpha * 255
-                self.game_objects.game.display.render(ability_hud.image, target, position=(self.offset, self.offset), shader = self.game_objects.shaders['alpha'])
+                self.health_alpha.render(
+                    ability_hud.image,
+                    target,
+                    amount=health_alpha * 255,
+                    position=(self.offset, self.offset),
+                )
 
         for index, heart in enumerate(self.hearts):
             if health_alpha <= 0.01:
@@ -107,8 +111,12 @@ class HudMeters:
                 pos = (h_pos[0]*index + frame_width-3+self.offset, 7+self.offset)
             else:
                 pos = (h_pos[0]*index + frame_width-5+self.offset, h_pos[1]+self.offset)
-                self.game_objects.shaders['alpha']['alpha'] = health_alpha * 255
-            self.game_objects.game.display.render(heart.image, target, position=pos, shader = self.game_objects.shaders['alpha'])
+            self.health_alpha.render(
+                heart.image,
+                target,
+                amount=health_alpha * 255,
+                position=pos,
+            )
 
         for index, spirit in enumerate(self.spirits):
             continue
@@ -120,8 +128,12 @@ class HudMeters:
 
         if money_alpha > 0.01:
             alpha_255 = int(255 * money_alpha)
-            self.game_objects.shaders['alpha']['alpha'] = alpha_255
-            self.game_objects.game.display.render(self.money_frame.image, target, position=self.money_pos, shader = self.game_objects.shaders['alpha'])
+            self.money_alpha.render(
+                self.money_frame.image,
+                target,
+                amount=alpha_255,
+                position=self.money_pos,
+            )
             self.game_objects.font.render(
                 target,
                 str(self.money),

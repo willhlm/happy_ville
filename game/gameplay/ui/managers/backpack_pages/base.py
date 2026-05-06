@@ -1,6 +1,7 @@
 class BaseUI:
     def __init__(self, game_objects, **kwarg):
         self.game_objects = game_objects
+        self.screen_fade = self.game_objects.fade.create("alpha", 0)
 
     def update(self, dt):
         self.letter_frame += dt
@@ -30,11 +31,10 @@ class BaseUI:
         self.game_objects.ui.backpack.previous_page(**kwarg)
 
     def blit_screen(self):
-        self.game_objects.shaders['alpha']['alpha'] = self.screen_alpha
-        self.game_objects.game.display.render(
+        self.screen_fade.set(self.screen_alpha)
+        self.screen_fade.render(
             self.game_objects.ui.backpack.screen.texture,
             self.game_objects.game.screen_manager.screen,
-            shader=self.game_objects.shaders['alpha'],
         )
         self.game_objects.game.render_display(
             self.game_objects.game.screen_manager.screen.texture

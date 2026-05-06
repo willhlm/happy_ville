@@ -35,6 +35,7 @@ class MovementManager:
             'up_stream': UpStream,
             'shield_glide': ShieldGlide,
             'air_boost': AirBoost,
+            'contained': Contained,
         }
 
     def add_modifier(self, modifier, priority=0, authoritative=False, **kwarg):
@@ -289,3 +290,9 @@ class DashJump(MovementModifier):
         context.lock_support_axes[0] = True
         context.velocity[0] += self.dash_vel * self.entity.dir[0]
         context.velocity[1] += self.dash_jump_vel        
+
+class Contained(MovementModifier):
+    def apply(self, context):
+        context.gravity = 0
+        context.velocity = [0, 0]
+        context.max_vel = [0, 0]

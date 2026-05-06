@@ -491,6 +491,36 @@
                          "width":64,
                          "x":464,
                          "y":1184
+                        }, 
+                        {
+                         "gid":31004,
+                         "height":112,
+                         "id":918,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"enemy_type",
+                                 "type":"string",
+                                 "value":"larv"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":96,
+                         "x":1632,
+                         "y":1392
+                        }, 
+                        {
+                         "gid":31004,
+                         "height":112,
+                         "id":919,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":96,
+                         "x":1232,
+                         "y":1712
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -1304,7 +1334,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"tagg_mus"
+                                 "value":"rav"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -1824,24 +1854,6 @@
                          "y":1600
                         }, 
                         {
-                         "gid":3,
-                         "height":16,
-                         "id":910,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"class",
-                                 "type":"string",
-                                 "value":"rav"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":1600,
-                         "y":1520
-                        }, 
-                        {
                          "gid":8,
                          "height":64,
                          "id":911,
@@ -1910,7 +1922,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"vertical_mygga_torpedo"
+                                 "value":"mygga"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -1957,7 +1969,7 @@
          "y":0
         }],
  "nextlayerid":106,
- "nextobjectid":918,
+ "nextobjectid":920,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

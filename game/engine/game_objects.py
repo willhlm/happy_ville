@@ -1,10 +1,11 @@
 import pygame
 from engine.utils import read_files
-from engine.system import activation_manager, time_field_manager, save_load, asset_preloader, controller, lights, timer, signals, time_manager, font_manager, input_interpreter, transition_controller, sequence_manager, deferred_texture_manager
+from engine.system import activation_manager, time_field_manager, save_load, asset_preloader, controller, lights, timer, signals, time_manager, font_manager, input_interpreter, transition_controller, sequence_manager, deferred_texture_manager, stimuli
 from engine import groups
 from engine.sound import game_audio
 from gameplay.entities.player import player
 from engine.render import post_process
+from engine.render.fade import FadeService
 from engine.render.normal_map_generator import NormalMapGenerator
 from engine.camera import camera
 from engine.physics import PhysicsManager
@@ -18,6 +19,7 @@ from gameplay.narrative.quests_events.manager import QuestsEventsManager
 
 from gameplay.registry.registry_manager import RegistryManager
 from engine.particles.particle_system import ParticleSystem
+from gameplay.entities.shared.render.entity_effect_pipeline import EntityEffectPipeline
 
 from gameplay.world.transforms.world_transform_controller import WorldTransformController
 
@@ -27,10 +29,12 @@ class GameObjects():
         self.font = font_manager.FontManager(self)#intitilise the font manager class
         self.signals = signals.Signals()        
         self.shaders = read_files.load_shaders_dict(self)#load all shaders aavilable into a dict
+        self.fade = FadeService(self)
         self.normal_map_generator = NormalMapGenerator(self)
         self.controller = controller.Controller()
         self.asset_preloader = asset_preloader.AssetPreloader(self)
         self.lights = lights.Lights(self)
+        self.stimuli = stimuli.StimulusManager(self)
         self.timer_manager = timer.Timer_manager(self)
         self.deferred_textures = deferred_texture_manager.DeferredTextureManager()
         self._create_groups()
@@ -81,6 +85,9 @@ class GameObjects():
 
     def clean_groups(self):#called wgen changing map
         self.deferred_textures.release_all()
+        self.fade.release_all()
+        EntityEffectPipeline.flush_layer_cache()
+        EntityEffectPipeline.flush_shader_caches()
         self.npcs.empty()
         self.enemies.empty()
         self.interactables.empty()
@@ -97,6 +104,7 @@ class GameObjects():
         self.bg_fade.empty()
         self.projectiles.empty()
         self.interactables_fg.empty()
+        self.stimuli.clear_world()
         self.timer_manager.clear_timers()
         self.weather.empty()
         self.physics.clear_state()

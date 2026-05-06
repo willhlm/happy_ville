@@ -32,7 +32,7 @@ class OverlapDispatcher:
     def dispatch_simple(self, entities, target_group, callback_name="collision"):
         collided = self.game_objects.physics.collision_queries.collided
 
-        for entity in entities.sprites():
+        for entity in entities:
             collision_targets = pygame.sprite.spritecollide(entity, target_group, dokill=False, collided=collided)
             for target in collision_targets:
                 getattr(target, callback_name)(entity)

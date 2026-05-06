@@ -64,7 +64,7 @@ class ThunderMain(PhaseBase):
         self.dir = kwarg.get('dir', [0, 1])
         self.time = 30
         self.entity.flags['invincibility'] = True
-        self.entity.shader_state.enter_state('MB')
+        self.entity.shader_state.add_shader('mb')
 
     def update(self, dt):
         self.entity.game_objects.cosmetics.add(FadeEffect(self.entity, alpha = 100))
@@ -74,6 +74,7 @@ class ThunderMain(PhaseBase):
             self.exit_state()
 
     def exit_state(self):
+        self.entity.shader_state.remove_shader('mb')
         self.entity.shader_state.enter_state('Idle')
         self.enter_phase('post')
 

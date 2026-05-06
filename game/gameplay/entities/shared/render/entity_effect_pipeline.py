@@ -1,6 +1,6 @@
 from engine.render.shader_chain import ShaderChain
 
-from . import shaders
+from . import effects
 
 
 class EntityEffectPipeline:
@@ -76,7 +76,7 @@ class EntityEffectPipeline:
                 dst.clear(0, 0, 0, 0)
 
     def _create_shader(self, shader_name, **kwargs):
-        shader_class = getattr(shaders, shader_name.capitalize())
+        shader_class = getattr(effects, shader_name.capitalize())
         return shader_class(self.entity.game_objects, **kwargs)
 
     def _get_cached_layers(self, size):
@@ -99,3 +99,11 @@ class EntityEffectPipeline:
             for layer in layers:
                 layer.release()
         cls._layer_cache.clear()
+
+    @classmethod
+    def flush_shader_caches(cls):
+        for effect_name in getattr(effects, "__all__", []):
+            effect_class = getattr(effects, effect_name, None)
+            if effect_class is None:
+                continue
+            effect_class.flush_cache()

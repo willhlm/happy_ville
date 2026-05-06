@@ -29,7 +29,6 @@ class Interactables(AnimatedEntity):#interactables
         self.shader_state.remove_shader('outline')
 
     def take_hit(self, effect):
-        """Delegate to hit component"""      
         effect.defender_callbacks.pop('particles', None)
         effect.defender_callbacks.pop('hitstop', None)
         effect.attacker_callbacks.pop('sword_jump', None)
