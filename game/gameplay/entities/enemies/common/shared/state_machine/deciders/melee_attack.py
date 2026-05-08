@@ -1,10 +1,11 @@
 from .decision import Decision
+from .config_utils import resolve_distance
 
 class MeleeAttackDecider():
     def __init__(self, entity, **kwargs):
         self.entity = entity
         self.dec_cfg = kwargs
-        self.attack_distance = self.entity.config['distances']['attack']
+        self.attack_distance = resolve_distance(entity, kwargs, 'attack')
 
     def choose(self, player_distance, dt):
         results = []

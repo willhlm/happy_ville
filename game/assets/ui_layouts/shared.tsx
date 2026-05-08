@@ -21,7 +21,9 @@
  </tile>
  <tile id="7">
   <properties>
+   <property name="font_style" value="text"/>
    <property name="text" value=""/>
+   <property name="text_key" value=""/>
   </properties>
   <image width="32" height="16" source="../sprites/ui/utils/text.png"/>
  </tile>

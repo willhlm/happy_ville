@@ -14,4 +14,4 @@ class Hurt(BaseState):
         pass
 
     def increase_phase(self):
-        self.enter_state("attack_pre")
+        self.enter_state("retreat")

@@ -1,3 +1,2 @@
-from .interact_component import ItemInteractComponent, pool_interactable_sprite
+from .interact_component import ItemInteractComponent
 from .lifetime_component import ItemLifetimeComponent
-from .pickup_component import PickupComponent, CollisionPickupComponent, InteractionPickupComponent

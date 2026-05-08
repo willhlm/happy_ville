@@ -1,6 +1,6 @@
 from engine.utils import functions
 
-from gameplay.entities.interactables import Grind, InteractableCocoon, InteractableVines, StoneWood
+from gameplay.entities.interactables import EnemyCocoon, Grind, InteractableVines, StoneWood
 from gameplay.entities.visuals.environments import BackgroundCocoon, GeneralTree
 
 from ..helpers import calculate_object_position, resolve_tileset
@@ -72,7 +72,7 @@ class Nordveden(Biome):
 
             elif id == 7:
                 if parallax == [1, 1]:
-                    new_cocoon = InteractableCocoon(object_position, self.level.game_objects)
+                    new_cocoon = EnemyCocoon(object_position, self.level.game_objects)
                     self.level.game_objects.interactables.add(new_cocoon)
                 else:
                     new_cocoon = BackgroundCocoon(object_position, self.level.game_objects, parallax)

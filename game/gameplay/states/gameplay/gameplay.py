@@ -8,7 +8,7 @@ class Gameplay(GameState):
         super().__init__(game)
 
     def on_pop(self):
-        self.game.game_objects.clear_world_state()
+        pass
 
     def update(self, dt):
         self.game.game_objects.time_manager.update(dt)#setäs the timescale
@@ -25,11 +25,9 @@ class Gameplay(GameState):
 
     def render(self):
         self.game.game_objects.draw()#rendered on multiple layers on each parallax screen
-
         self.game.screen_manager.render()#renders each parllax to a composite screen with pp shader, which makes it display size
 
         self.game.game_objects.lights.draw(self.game.screen_manager.composite_screen)#before post procssing shader?
-
         self.game.game_objects.post_process.apply(self.game.screen_manager.composite_screen)#apply post process shaders to the composite screen, which is large
         self.game.game_objects.ui.hud.draw(self.game.screen_manager.composite_screen)#renders hud elements to the composite
         self.game.game_objects.sequence_manager.draw(self.game.screen_manager.composite_screen)
@@ -75,8 +73,12 @@ class Gameplay(GameState):
                 pass
 
             else:
-                interpreted = self.game.game_objects.input_interpreter.interpret(input)
-                self.game.game_objects.player.currentstate.handle_press_input(interpreted)
+                #interpreted = self.game.game_objects.input_interpreter.interpret(input)
+                self.game.game_objects.player.currentstate.handle_press_input(input)
                 #self.game.game_objects.player.omamoris.handle_press_input(input)
         elif input.released:#release
             self.game.game_objects.player.currentstate.handle_release_input(input)
+
+class WorldGameplay(Gameplay):
+    def on_pop(self):
+        self.game.game_objects.clear_world_state()

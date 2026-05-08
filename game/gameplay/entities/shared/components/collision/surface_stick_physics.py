@@ -1,3 +1,54 @@
+from engine.utils.functions import sign
+
+class NullSurfaceStickPhysics:
+    def __init__(self, entity):
+        self.entity = entity
+
+    def set_enabled(self, enabled=True):
+        return None
+
+    def is_enabled(self):
+        return False
+
+    def update_surface(self):
+        return None
+
+    def post_physics_update(self, dt=None):
+        return None
+
+    def handle_platform_collision(self, collision):
+        return None
+
+    def get_angle(self):
+        return 0
+
+    def get_tangent_vector(self):
+        return (self.entity.dir[0], 0)
+
+    def get_inward_vector(self):
+        return (0, 1)
+
+    def reverse_direction(self):
+        self.entity.dir[0] *= -1
+
+    def set_direction_towards(self, target_pos):
+        desired = sign(target_pos[0] - self.entity.hitbox.centerx)
+        if desired:
+            self.entity.dir[0] = desired
+
+    def detach(self):
+        return None
+
+    def attach_from_collision(self, collision, snap=False):
+        return False
+
+    def has_surface(self):
+        return False
+
+    def get_blocked_edge_ahead(self, lookahead=0):
+        return None
+
+
 class SurfaceStickPhysics:
     CLOCKWISE_SURFACE_ORDER = ("bottom", "left", "top", "right")
     COUNTERCLOCKWISE_SURFACE_ORDER = ("bottom", "right", "top", "left")
@@ -9,29 +60,55 @@ class SurfaceStickPhysics:
         "right": (1, 0),
     }
 
-    def __init__(self, entity, speed, stick_speed, probe_distance=2, corner_inset=3, clockwise=True, initial_side="bottom"):
+    def __init__(self, entity, probe_distance=2, corner_inset=3, clockwise=True, initial_side="bottom"):
         self.entity = entity
-        self.speed = speed
-        self.stick_speed = stick_speed
         self.probe_distance = probe_distance
         self.corner_inset = corner_inset
         self.clockwise = clockwise
+        self.enabled = True
+        self.freefall_gravity = entity.acceleration[1]
         self.surface_side = initial_side if initial_side in self.INWARD_VECTORS else "bottom"
         self.surface_body = None
 
-    def update_velocity(self, dt=None):
+    def set_enabled(self, enabled=True):
+        self.enabled = enabled
+        self.entity.acceleration[1] = 0 if enabled else self.freefall_gravity
+        if not enabled:
+            self.detach()
+
+    def is_enabled(self):
+        return self.enabled
+
+    def update_surface(self):
+        if not self.enabled:
+            return
         self._refresh_surface()
 
-        tangent = self._get_tangent_vector(self.surface_side)
-        inward = self.INWARD_VECTORS[self.surface_side]
+    def get_tangent_vector(self):
+        return self._get_tangent_vector(self.surface_side)
 
-        self.entity.velocity[0] = tangent[0] * self.speed + inward[0] * self.stick_speed
-        self.entity.velocity[1] = tangent[1] * self.speed + inward[1] * self.stick_speed
+    def get_inward_vector(self):
+        return self.INWARD_VECTORS[self.surface_side]
 
-        if tangent[0] != 0:
-            self.entity.dir[0] = 1 if tangent[0] > 0 else -1
+    def set_direction_towards(self, target_pos):
+        dx = target_pos[0] - self.entity.hitbox.centerx
+        dy = target_pos[1] - self.entity.hitbox.centery
+
+        if self.surface_side == "bottom" and dx != 0:
+            self.clockwise = dx > 0
+        elif self.surface_side == "top" and dx != 0:
+            self.clockwise = dx < 0
+        elif self.surface_side == "left" and dy != 0:
+            self.clockwise = dy > 0
+        elif self.surface_side == "right" and dy != 0:
+            self.clockwise = dy < 0
+
+    def reverse_direction(self):
+        self.clockwise = not self.clockwise
 
     def post_physics_update(self, dt=None):
+        if not self.enabled:
+            return
         if dt is not None and dt <= 0:
             return
 
@@ -54,11 +131,14 @@ class SurfaceStickPhysics:
         if self._try_wrap_current_surface():
             return
 
-        self._reverse_direction()
         self._restore_to_surface(self.surface_body, self.surface_side)
 
     def handle_platform_collision(self, collision):
+        if not self.enabled:
+            return
         if collision.side not in self.INWARD_VECTORS:
+            return
+        if not self._can_stick_to_platform(collision.collider, collision.side):
             return
 
         self.surface_side = collision.side
@@ -74,15 +154,57 @@ class SurfaceStickPhysics:
             "right": 90,
         }[self.surface_side]
 
+    def detach(self):
+        self.entity.acceleration[1] = self.freefall_gravity
+        self.surface_body = None
+
+    def attach_from_collision(self, collision, snap=False):
+        if collision.side not in self.INWARD_VECTORS:
+            return False
+        if not self._can_stick_to_platform(collision.collider, collision.side):
+            return False
+
+        self.surface_side = collision.side
+        self.surface_body = collision.collider
+        self.entity.acceleration[1] = 0
+        if snap:
+            return self._snap_to_surface(collision.collider, collision.side)
+        return True
+
+    def has_surface(self):
+        return self.surface_body is not None
+
+    def get_blocked_edge_ahead(self, lookahead=0):
+        if not self.enabled:
+            return None
+        if self.surface_body is None:
+            return None
+
+        next_side = self._get_next_side(self.surface_side)
+        if self._can_stick_to_platform(self.surface_body, next_side):
+            return None
+
+        distance = self._get_distance_to_corner(self.surface_body, self.surface_side)
+        if distance is None or distance > lookahead:
+            return None
+
+        return {
+            "platform": self.surface_body,
+            "from_side": self.surface_side,
+            "to_side": next_side,
+            "reason": "unsupported_surface",
+            "distance": distance,
+        }
+
     def _refresh_surface(self):
-        platform = self._find_platform_from_points(self._get_surface_probe_points(self.surface_side))
+        platform = self._find_platform_from_points(self._get_surface_probe_points(self.surface_side), self.surface_side)
         if platform:
             self.surface_body = platform
             self._snap_to_surface(platform, self.surface_side)
             return
 
         for side in self.INWARD_VECTORS:
-            platform = self._find_platform_from_points(self._get_surface_probe_points(side))
+            platform = self._find_platform_from_points(self._get_surface_probe_points(side), side)
             if platform:
                 self.surface_side = side
                 self.surface_body = platform
@@ -92,6 +214,8 @@ class SurfaceStickPhysics:
     def _try_wrap_current_surface(self):
         next_side = self._get_next_side(self.surface_side)
         if not self._has_reached_corner(self.surface_body, self.surface_side):
+            return False
+        if not self._can_stick_to_platform(self.surface_body, next_side):
             return False
 
         self._wrap_around_corner(self.surface_body, self.surface_side, next_side)
@@ -153,37 +277,49 @@ class SurfaceStickPhysics:
         if self._is_ramp(platform):
             return False
 
+        distance = self._get_distance_to_corner(platform, side)
+        return distance is not None and distance <= 0
+
+    def _get_distance_to_corner(self, platform, side):
+        if self._is_ramp(platform):
+            return None
+
         hitbox = self.entity.hitbox
         inset = min(self.corner_inset, max(1, min(hitbox.width, hitbox.height) // 2))
 
         if side == "bottom":
             if self.clockwise:
-                return hitbox.centerx >= platform.hitbox.right - inset
-            return hitbox.centerx <= platform.hitbox.left + inset
+                return platform.hitbox.right - inset - hitbox.centerx
+            return hitbox.centerx - (platform.hitbox.left + inset)
 
         if side == "top":
             if self.clockwise:
-                return hitbox.centerx <= platform.hitbox.left + inset
-            return hitbox.centerx >= platform.hitbox.right - inset
+                return hitbox.centerx - (platform.hitbox.left + inset)
+            return platform.hitbox.right - inset - hitbox.centerx
 
         if side == "left":
             if self.clockwise:
-                return hitbox.centery >= platform.hitbox.bottom - inset
-            return hitbox.centery <= platform.hitbox.top + inset
+                return platform.hitbox.bottom - inset - hitbox.centery
+            return hitbox.centery - (platform.hitbox.top + inset)
 
         if self.clockwise:
-            return hitbox.centery <= platform.hitbox.top + inset
-        return hitbox.centery >= platform.hitbox.bottom - inset
+            return hitbox.centery - (platform.hitbox.top + inset)
+        return platform.hitbox.bottom - inset - hitbox.centery
 
-    def _find_platform_from_points(self, points):
+    def _find_platform_from_points(self, points, side):
         for point in points:
-            platform = self._find_platform_at_point(point)
+            platform = self._find_platform_at_point(point, side)
             if platform:
                 return platform
         return None
 
-    def _find_platform_at_point(self, point):
-        return self.entity.game_objects.physics.platform_spatial_index.query_point(point)
+    def _find_platform_at_point(self, point, side):
+        platform = self.entity.game_objects.physics.platform_spatial_index.query_point(point)
+        if platform is None:
+            return None
+        if not self._can_stick_to_platform(platform, side):
+            return None
+        return platform
 
     def _wrap_around_corner(self, platform, from_side, to_side):
         hitbox = self.entity.hitbox
@@ -237,6 +373,9 @@ class SurfaceStickPhysics:
         self.clockwise = not self.clockwise
 
     def _snap_to_surface(self, platform, side):
+        if not self._can_stick_to_platform(platform, side):
+            return False
+
         if self._align_to_surface_target(platform, side):
             return True
 
@@ -291,3 +430,9 @@ class SurfaceStickPhysics:
     @staticmethod
     def _is_ramp(platform):
         return getattr(platform, "surface_collision", None).__class__.__name__ == "RightAngleSurfaceCollisionComponent"
+
+    def _can_stick_to_platform(self, platform, side):
+        supports_surface_stick = getattr(platform, "supports_surface_stick", None)
+        if supports_surface_stick is None:
+            return True
+        return supports_surface_stick(self.entity, side)

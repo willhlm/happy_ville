@@ -19,11 +19,14 @@ class Banner(AnimatedEntity):
 
     def blit_text(self,text):
         screen = self.game_objects.game.display.make_layer((self.image.width,self.image.height))#make a layer ("surface")
-        text_surface = self.game_objects.font.render(text = text)
         for state in self.sprites.keys():
             for frame, image in enumerate(self.sprites[state]):
                 self.game_objects.game.display.render(image, screen)
-                self.game_objects.game.display.render(text_surface, screen, position = (image.width*0.5,image.height*0.5))
+                self.game_objects.font.render(
+                    screen,
+                    text,
+                    position=(image.width * 0.5, image.height * 0.5),
+                )
                 self.sprites[state][frame] = screen
 
     def update_scroll(self, scroll):

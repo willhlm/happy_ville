@@ -12,7 +12,7 @@ class ReSpawnMain(PhaseBase):
 
     def enter(self, **kwarg):
         self.entity.animation.play('respawn')
-        self.entity.invincibile = False
+        self.entity.hit_component.set_invincibility(False)
 
     def handle_movement(self, event):
         pass

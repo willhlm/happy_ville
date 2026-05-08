@@ -1,4 +1,4 @@
-from engine.system.sequence_manager import Sequence
+from gameplay.sequences.base import Sequence
 
 
 class StartGame(Sequence):

@@ -8,7 +8,8 @@ from .animals.bird.bird import Bird
 
 from .common.flying.flower_butterfly import FlowerButterfly
 
-from .common.flying.mygga_variants.mygga_chase import MyggaChase
+from .common.flying.moth import Moth
+
 from .common.flying.mygga_variants.mygga_colliding_projectile import MyggaCollidingProjectile
 from .common.flying.mygga_variants.mygga_colliding import MyggaColliding
 from .common.flying.mygga_variants.crystal.mygga_crystal import MyggaCrystal
@@ -19,6 +20,7 @@ from .common.flying.mygga_variants.casual.mygga import Mygga
 from .common.flying.bees.big_bee import BigBee
 from .common.flying.bees.small_bee.small_bee import SmallBee
 from .common.flying.krakan.krakan import Krakan
+from .common.flying.raven.raven import Raven
 
 from .common.ground.crab_crystal.crab_crystal import CrabCrystal
 from .common.ground.egg import Egg
@@ -35,6 +37,8 @@ from .common.ground.maggot.maggot import Maggot
 from .common.ground.hedge.hedge import Hedge
 from .common.ground.tagg_mus.tagg_mus import TaggMus
 from .common.ground.bjorn.bjorn import Bjorn
+
+from .common.ground.ghoul.ghoul import Ghoul
 
 from .common.ground.cultist.rogue.cultist_rogue import CultistRogue
 from .common.ground.cultist.cultist_warrior import CultistWarrior

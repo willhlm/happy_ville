@@ -22,7 +22,6 @@ class MeleeBody(EntityBody):
         setattr(self.entity.hitbox, hitbox_attr, getattr(self.entity.entity.hitbox, entity_attr))
         self.entity.rect.center = self.entity.hitbox.center
 
-
 class SwordBody(MeleeBody):
     def update_hitbox(self):
         super().update_hitbox()

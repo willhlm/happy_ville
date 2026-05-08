@@ -1,17 +1,19 @@
 from engine.render.shader_chain import ShaderChain
 
-from . import shaders
+from . import effects
 
 
 class EntityEffectPipeline:
     def __init__(self, entity, state_controller):
         self.entity = entity
         self.state_controller = state_controller
+        self.resources = entity.game_objects.layer_resource_pool
         self.size = None
         self.base_layer = None
         self.temp_layer_a = None
         self.temp_layer_b = None
         self.shader_chain = ShaderChain(self._create_shader)
+        self.resources.register_pipeline(self)
 
     @property
     def shaders(self):
@@ -33,23 +35,17 @@ class EntityEffectPipeline:
         self.shader_chain.update_render(dt)
 
     def clear_textures(self):
-        if self.base_layer:
-            self.base_layer.release()
-            self.base_layer = None
-        if self.temp_layer_a:
-            self.temp_layer_a.release()
-            self.temp_layer_a = None
-        if self.temp_layer_b:
-            self.temp_layer_b.release()
-            self.temp_layer_b = None
+        self.base_layer = None
+        self.temp_layer_a = None
+        self.temp_layer_b = None
         self.size = None
+
+    def invalidate_resources(self):
+        self.clear_textures()
 
     def _define_size(self, size):
         self.size = tuple(size)
-        display = self.entity.game_objects.game.display
-        self.base_layer = display.make_layer(size)
-        self.temp_layer_a = display.make_layer(size)
-        self.temp_layer_b = display.make_layer(size)
+        self.base_layer, self.temp_layer_a, self.temp_layer_b = self.resources.acquire_layers(self.size)
 
     def _ensure_size(self, size):
         if self.size is None or self.size != tuple(size):
@@ -83,5 +79,5 @@ class EntityEffectPipeline:
                 dst.clear(0, 0, 0, 0)
 
     def _create_shader(self, shader_name, **kwargs):
-        shader_class = getattr(shaders, shader_name.capitalize())
+        shader_class = getattr(effects, shader_name.capitalize())
         return shader_class(self.entity.game_objects, **kwargs)

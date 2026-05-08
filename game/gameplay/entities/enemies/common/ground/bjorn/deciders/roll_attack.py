@@ -1,10 +1,11 @@
 from gameplay.entities.enemies.common.shared.state_machine.deciders.decision import Decision
+from gameplay.entities.enemies.common.shared.state_machine.deciders.config_utils import resolve_distance
 
 class RollAttackDecider:
     def __init__(self, entity, **kwargs):
         self.entity = entity
         self.dec_cfg = kwargs
-        self.roll_distance = self.entity.config['distances']['roll']
+        self.roll_distance = resolve_distance(entity, kwargs, 'roll')
 
     def choose(self, player_distance, dt):
         results = []

@@ -88,7 +88,7 @@ class InteractableSpawner(c.SpawnerCommon):
                 self.game_objects.interactables.add(c.AirDashUpgradeStatue(object_position, self.game_objects))
 
             elif local_id == 17:
-                self.game_objects.interactables.add(c.LarvWeb(object_position, self.game_objects, **c.props_list_to_dict(properties)))
+                self.game_objects.interactables.add(c.EnemyWeb(object_position, self.game_objects, **c.props_list_to_dict(properties)))
 
             elif local_id == 18:
                 state = self.game_objects.world_state.objects.get_bucket(biome_room_name, "loot_container").get(str(loot_container_index), False)

@@ -1,7 +1,6 @@
 from .entity_effect_pipeline import EntityEffectPipeline
 from .entity_shader_state_controller import EntityShaderStateController
 
-
 class EntityShaderManager():
     def __init__(self, entity, default='idle', **kwargs):
         self.entity = entity
@@ -35,6 +34,9 @@ class EntityShaderManager():
 
     def clear_textures(self):
         self.effects.clear_textures()
+
+    def release(self):
+        self.clear_textures()
 
     def draw_normal(self, position, flip=False, angle=0):
         normal_texture = self._current_normal_texture()

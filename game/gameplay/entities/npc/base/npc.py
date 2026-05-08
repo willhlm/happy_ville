@@ -41,10 +41,6 @@ class NPC(Character):
         img = pygame.image.load('assets/sprites/entities/npc/' + name +'/potrait.png').convert_alpha()
         self.portrait = self.game_objects.game.display.surface_to_texture(img)#need to save in memoery
 
-    def update(self, dt):
-        super().update(dt)
-        #self.group_distance()
-
     def render_potrait(self, terget):
         self.game_objects.game.display.render(self.portrait, terget, position = (32,32))#shader render
 
@@ -63,10 +59,9 @@ class NPC(Character):
     def on_conversation_cancelled(self):
         pass
 
-    def release_texture(self):#called when .kill() and empty group
+    def on_kill_cleanup(self):
         self.comment_timer = None
         self.game_objects.timer_manager.remove_ID_timer(self.comment_timer_id)
-        super().release_texture()
 
     def get_comment_scheduler_config(self):
         config = {

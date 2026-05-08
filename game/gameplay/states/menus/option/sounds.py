@@ -64,7 +64,13 @@ class OptionSounds(BaseUI):
         for i, b in enumerate(self.menu_ui.buttons):
             b.render(self.game.screen_manager.screen)
             value_text = self.game.game_objects.sound.audio_manager.volume_settings[self.sounds[i]]                                        
-            self.game.display.render_text(self.game.game_objects.font.font_atals,self.game.screen_manager.screen,str(value_text),letter_frame=1000,color=[255, 255, 255, 255],position=self.menu_ui.results[i])
+            self.game.game_objects.font.render(
+                self.game.screen_manager.screen,
+                str(value_text),
+                letter_frame=None,
+                color=[255, 255, 255, 255],
+                position=self.menu_ui.results[i],
+            )
 
 
         for b in self.menu_ui.slider:

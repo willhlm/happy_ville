@@ -61,6 +61,9 @@ class Enemy(Character):
         )
         damage_applied, modified = player.take_hit(effect)# Player takes hit
 
+    def get_state_machine_target(self):
+        return self.game_objects.player
+
     def killed(self):#called at killing blow
         if not self.death_effects.begin_cleanup(): return        
         self.flags['aggro'] = False

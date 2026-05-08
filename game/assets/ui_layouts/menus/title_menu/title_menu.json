@@ -120,9 +120,20 @@
          "visible":true,
          "x":0,
          "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":3,
+         "name":"shared",
+         "objects":[],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
         }],
- "nextlayerid":3,
- "nextobjectid":16,
+ "nextlayerid":4,
+ "nextobjectid":17,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -131,7 +142,7 @@
         {
          "columns":40,
          "firstgid":1,
-         "image":"..\/..\/..\/Sprites\/UI\/menus\/title_menu\/idle\/start_screen2.png",
+         "image":"..\/..\/..\/sprites\/ui\/menus\/title_menu\/start_screen\/start_screen.png",
          "imageheight":360,
          "imagewidth":640,
          "margin":0,
@@ -144,6 +155,10 @@
         {
          "firstgid":881,
          "source":"title_menu_UI.tsx"
+        }, 
+        {
+         "firstgid":886,
+         "source":"..\/..\/shared.tsx"
         }],
  "tilewidth":16,
  "type":"map",

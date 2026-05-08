@@ -4,21 +4,20 @@ from .chests.chest_3 import Chest_3 as Chest
 from .chests.amber_rock import AmberRock
 from .chests.amber_tree import AmberTree
 
-from .cocoon import InteractableCocoon
-
 from .doors.door_interact import DoorInteract
 from .doors.door import Door
+from .enemy_containers import EnemyCocoon, EnemyWeb
 
 from .fast_travel import FastTravel
 from .fireplace.fireplace import Fireplace
 
 from .grass.cave_grass import InteractableCaveGrass
+from .grass.bloomer.bloomer import Bloomer
 from .vines.interactable_vines import InteractableVines
 
 from .inorinoki import Inorinoki
 from .verve_tree import VerveTree
 from .lever.lever import Lever
-from .larv_web.larv_web import LarvWeb
 from .light_crystal import LightCrystal
 from .place_holder_interacatble import PlaceHolderInteracatble
 from .rhoutta_altar import RhouttaAltar

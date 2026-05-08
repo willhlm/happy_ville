@@ -10,7 +10,7 @@ from gameplay.entities.player.backpack import backpack
 from gameplay.entities.player.grounding import PlayerGrounding
 from gameplay.entities.visuals.cosmetics.slash import Slash
 from gameplay.entities.player.sword.sword import Sword
-from gameplay.entities.player.progression_manager import PlayerProgressionManager
+from gameplay.entities.player.ability_unlocks.progression_manager import PlayerProgressionManager
 from gameplay.entities.shared.status.status_component import StatusComponent
 from gameplay.entities.shared.status.wet import Wet
 from engine import constants as C
@@ -28,7 +28,7 @@ class Player(Character):
 
         self.vitals.set_max_health(20)
         self.vitals.set_max_spirit(4)
-        self.vitals.set_health(20)
+        self.vitals.set_health(2)
         self.vitals.set_spirit(2)
 
         self.combat_tracker = CombatTracker()
@@ -44,7 +44,7 @@ class Player(Character):
         self.backpack = backpack.Backpack(self)
         self.status_component = StatusComponent(self, registry={'wet': lambda entity: Wet(entity, 60)})
 
-        self.hit_component.set_invinsibility_time(C.invincibility_time_player)
+        self.hit_component.set_invincibility_time(C.invincibility_time_player)
         self.reset_movement()
 
     def update_vel(self, dt):#called from hitsop_states
@@ -67,8 +67,8 @@ class Player(Character):
         self.game_objects.ui.hud.meters.remove_hearts(effect.damage)# * self.dmg_scale)#update UI
 
         if self.vitals.health > 0:  # Still alive
-            self.shader_state.handle_input('Hurt')#turn white and shake
-            self.shader_state.handle_input('Invincibile')#blink a bit
+            self.shader_state.handle_input('hurt')#turn white and shake
+            self.shader_state.handle_input('invincibile')#blink a bit
             #self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state or interupt attacks?
             effect.defender_callbacks.pop('particles', None)#remove any partitlce effect set by the projectile
             self.game_objects.particles.emit("burst", pos = self.hitbox.center, n=60, colour = [0, 0, 0, 255])
@@ -88,7 +88,7 @@ class Player(Character):
         self.acceleration =  [0, C.acceleration[1]]
         self.friction = C.friction_player.copy()
         self._reset_flags()
-        #self.movement_manager.clear_modifiers()#TODO probably not all should be cleared
+        self.movement_manager.clear_modifiers()#maybe probably not all should be cleared?
 
     def heal_vitals(self, health=1):
         self.vitals.heal(health)

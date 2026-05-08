@@ -1,4 +1,4 @@
-from . import shader_states
+from . import states
 
 
 class EntityShaderStateController:
@@ -8,7 +8,7 @@ class EntityShaderStateController:
         self.enter_state(default, **kwargs)
 
     def enter_state(self, new_state, **kwargs):
-        state_class = getattr(shader_states, new_state.capitalize())
+        state_class = getattr(states, new_state.capitalize())
         self.current_state = state_class(self.entity, **kwargs)
 
     def handle_input(self, input_name, **kwargs):

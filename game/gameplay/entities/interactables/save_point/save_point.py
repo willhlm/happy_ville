@@ -13,7 +13,7 @@ class SavePoint(Interactables):
         self.map = map
         self.init_cord = [pos[0],pos[1]-100]
         self.currentstate = states_savepoint.Idle(self)    
-        self.hit_component.set_invinsibility(True)          
+        self.hit_component.set_invincibility(True)          
 
     def interact(self):#when player press t/y
         self.game_objects.player.currentstate.enter_state('crouch')

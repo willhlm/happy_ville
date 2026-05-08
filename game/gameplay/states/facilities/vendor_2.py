@@ -6,7 +6,7 @@ class Vendor_2(Vendor):#called from vendor when selecting an item
         self.item = item
 
     def init(self):
-        self.bg2 = self.game.game_objects.font.fill_text_bg([64,32])
+        self.bg2_size = [64,32]
         self.init_canvas()
 
     def render(self):
@@ -15,9 +15,21 @@ class Vendor_2(Vendor):#called from vendor when selecting an item
         super().render()
 
     def blit_BG2(self):
-        self.game.display.render(self.buy_sur, self.game.screen_manager.screen,(280+30,120+10))#shader render        
-        self.game.display.render(self.cancel_sur, self.game.screen_manager.screen,(280+30,120 + 20))#shader render        
-        self.game.display.render(self.bg2, self.game.screen_manager.screen,(280,120))#shader render
+        self.game.game_objects.font.render_text_bg(
+            self.game.screen_manager.screen,
+            self.bg2_size,
+            position=(280, 120),
+        )
+        self.game.game_objects.font.render(
+            self.game.screen_manager.screen,
+            'Buy',
+            position=(310, 130),
+        )
+        self.game.game_objects.font.render(
+            self.game.screen_manager.screen,
+            'Cancel',
+            position=(310, 140),
+        )
 
     def blit_pointer(self):
         self.game.display.render(self.pointer.image, self.game.screen_manager.screen, (300, 130 + 10 * self.pointer_index[1]))#shader render

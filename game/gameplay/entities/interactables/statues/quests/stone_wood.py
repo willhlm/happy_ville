@@ -23,7 +23,7 @@ class StoneWood(Statues):#the stone "statue" to initiate the lumberjacl quest
             allow_comments = False,
         )#handles dialoage and what to say
         if self.interacted:
-            self.shader_state.enter_state('tint')
+            self.shader_state.add_shader('tint')
 
     def on_interact(self, item, player):#called when the signal is emitted
         if type(item).__name__.lower() == self.item:

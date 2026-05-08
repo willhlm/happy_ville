@@ -4,7 +4,7 @@ in vec2 fragmentTexCoord;
 out vec4 color;
 
 uniform sampler2D imageTexture;
-uniform int r;                 // integer radius (<= 31 recommended)
+uniform int r;                 // integer radius (<= 10)
 uniform float weights[64];     // weights[0..r] used (1D gaussian, normalized)
 
 void main()
@@ -22,7 +22,7 @@ void main()
 
             vec4 s = texture(imageTexture, fragmentTexCoord + vec2(x, y) * texel);
 
-            // assumes PREMULTIPLIED input (recommended)
+            // assumes PREMULTIPLIED input
             accum += s * w;
             total += w;
         }

@@ -11,8 +11,10 @@ class MenuArrow():
         self.time = 0
         self.flip = flip  
 
-        if flip: self.phase = math.pi             
-        else: self.phase = 0        
+        if flip: 
+            self.phase = math.pi             
+        else: 
+            self.phase = 0        
 
     def pool(game_objects):
         img = pygame.image.load("assets/sprites/ui/elements/arrow/arrow_right.png").convert_alpha()
@@ -20,11 +22,11 @@ class MenuArrow():
 
     def update(self, dt):#note: sets pos to input, doesn't update with an increment of pos like other entities
         self.time += dt * 0.1
-        self.update_pos()
+        self.update_pos(dt)
 
-    def update_pos(self):                
-        shift = 0.5 * math.sin(self.time + self.phase)
-        self.true_pos = [self.true_pos[0] + shift, self.true_pos[1]]
+    def update_pos(self, dt):                
+        shift = 0.5 * math.sin(self.time + self.phase) * dt
+        self.true_pos = [(self.true_pos[0] + shift), self.true_pos[1]]
 
     def set_pos(self, pos):
         self.rect.topleft = pos

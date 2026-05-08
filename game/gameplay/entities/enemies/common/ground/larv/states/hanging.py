@@ -13,4 +13,4 @@ class Hanging(BaseState):
     def handle_input(self, input_type):
         if input_type == 'drop':
             self.entity.flags['aggro'] = True
-            self.entity.currentstate.enter_state('dropping')
+            self.entity.currentstate.enter_state('fall')

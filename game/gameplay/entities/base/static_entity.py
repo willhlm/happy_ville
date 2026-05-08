@@ -21,6 +21,13 @@ class StaticEntity(pygame.sprite.Sprite):#all enteties
         blit_pos = [int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1])]
         self.game_objects.game.display.render(self.image, target, position = blit_pos, flip = self.dir[0] > 0, shader = self.shader)#shader render
 
+    def release_texture(self):#called when emptying groups / deferred map cleanup
+        pass
+
+    def on_kill_cleanup(self):#called immediately when the entity is killed
+        pass
+
     def kill(self):
-        self.release_texture()#before killing, need to release the textures (but not the onces who has a pool)
+        self.on_kill_cleanup()
+        self.game_objects.deferred_textures.track(self)
         super().kill()

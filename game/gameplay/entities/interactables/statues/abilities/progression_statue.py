@@ -28,7 +28,7 @@ class ProgressionStatue(Interactables):
     def refresh_state(self):
         self.interacted = self.is_complete()
         if self.interacted:
-            self.shader_state.enter_state('tint', colour=[0, 0, 0, 100])
+            self.shader_state.add_shader('tint', colour=[0, 0, 0, 100])
         self.text = self.get_text()
 
     def interact(self):
@@ -39,7 +39,7 @@ class ProgressionStatue(Interactables):
         self.grant_progression()
         self.refresh_state()
         if self.interacted:
-            self.shader_state.handle_input('tint', colour=[0, 0, 0, 100])
+            self.shader_state.add_shader('tint', colour=[0, 0, 0, 100])
 
         self.game_objects.game.state_manager.enter_state(
             state_name='Blit_image_text',

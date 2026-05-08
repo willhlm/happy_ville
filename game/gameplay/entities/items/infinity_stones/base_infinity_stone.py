@@ -1,16 +1,18 @@
 import pygame
 
 from gameplay.entities.items.base.entries import InfinityStoneEntry
-from gameplay.entities.items.base.components import ItemInteractComponent, pool_interactable_sprite, InteractionPickupComponent
-from gameplay.entities.items.base.world_item import WorldItem
+from gameplay.entities.items.base.item_definition import ItemDefinition
+from gameplay.entities.items.base.interact_world_item import InteractWorldItem
 
-class InfinityStones(WorldItem):
-    pickup_component_cls = InteractionPickupComponent
-
+class InfinityStones(InteractWorldItem):
+    item_definition = ItemDefinition(
+        item_id='infinity_stone',
+        description='Infinity stone',
+        pickup_text='Infinity stone',
+        pickup_ui_image_path='assets/sprites/ui/overlay/items/placeholder/placeholder.png',
+    )
     def __init__(self, pos, game_objects, **kwarg):
-        super().__init__(pos, game_objects)
-        self.interact_component = ItemInteractComponent(self, **kwarg)
-        self.description = ''
+        super().__init__(pos, game_objects, **kwarg)
 
     def pickup(self, player):
         self.mark_picked_up()
@@ -18,13 +20,11 @@ class InfinityStones(WorldItem):
         player.backpack.inventory.add_infinity_stone(copy_item)
         copy_item.attach(player)
 
-    def interact(self, player):
-        self.interact_component.interact_with_pickup_text(player)
-
     @classmethod
     def entry_on_attach(cls, entry, player):
         pass
 
     @classmethod
     def pool(cls, game_objects):
-        pool_interactable_sprite(cls, game_objects)
+        cls.pool_interactable_sprite(game_objects)
+        cls.pool_pickup_ui_images(game_objects)

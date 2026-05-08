@@ -23,7 +23,7 @@ class QuestStatue(Statues):#the status spawning a portal, balls etc - challange 
         if not self.interacted:
             game_objects.lights.add_light(self)
         else:
-            self.shader_state.enter_state('tint', colour = [0,0,0,100])
+            self.shader_state.add_shader('tint', colour = [0,0,0,100])
 
     def on_conversation_complete(self):
         self.game_objects.quests_events.initiate_quest(self.ID, monument = self)

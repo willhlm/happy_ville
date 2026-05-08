@@ -30,7 +30,8 @@ class MapCoordinator:
 
     def load_map(self, previous_state, biome_room_name: str, spawn="1", fade=True):
         biome_room_name = biome_room_name.lower()
-        self.game_objects.transition.run(previous_state, style = "fade_black", action = lambda: self.load_now(biome_room_name, spawn))
+        self.game_objects.transition.run(previous_state, style = "alpha", action = lambda: self.load_now(biome_room_name, spawn))
+        #self.game_objects.transition.run(previous_state, style = "mask", mask_kind = 'horizontal', feather = 0.03, action = lambda: self.load_now(biome_room_name, spawn))
 
     def load_now(self, biome_room_name: str, spawn="1"):
         """Call this ONLY when screen is already black."""

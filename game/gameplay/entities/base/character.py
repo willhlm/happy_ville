@@ -67,8 +67,8 @@ class Character(AnimatedEntity):#enemy, NPC,player
         self.vitals.damage(effect.damage)
 
         if self.vitals.health > 0:  # Still alive
-            self.shader_state.handle_input('Hurt')
-            self.currentstate.handle_input('Hurt')
+            self.shader_state.handle_input('hurt')
+            self.currentstate.handle_input('hurt')
             self.game_objects.camera_manager.camera_shake(amplitude=4, duration=12, scale=0.9)
         else:  # dead
             self.game_objects.camera_manager.camera_shake(amplitude=4, duration=20, scale=0.95)
@@ -191,5 +191,4 @@ class Character(AnimatedEntity):#enemy, NPC,player
         self.flags['hurt_state_able'] = True
 
     def release_texture(self):#called when .kill() and empty group
-        self.shader_state.clear_textures()   
         super().release_texture()        

@@ -12,10 +12,8 @@ class SoulEssence(BaseUI):#called from inorinoki
         self.bg_pos = [280,120]
 
     def init_canvas(self,size=[64,64]):
-        self.surf=[]
-        self.bg = self.game.game_objects.font.fill_text_bg(size)
-        for string in self.actions:
-            self.surf.append(self.game.game_objects.font.render(text = string))
+        self.surf = list(self.actions)
+        self.bg_size = size
 
     def render(self):
         super().render()
@@ -27,9 +25,17 @@ class SoulEssence(BaseUI):#called from inorinoki
         self.game.display.render(self.pointer.image, self.game.screen_manager.screen, position =  (self.bg_pos[0] + 30,self.bg_pos[1] + 10+self.pointer_index[1]*10))#shader render 
 
     def blit_BG(self):
-        self.game.display.render(self.bg, self.game.screen_manager.screen, position = self.bg_pos)#shader render        
-        for index, surf in enumerate(self.surf):
-            self.game.display.render(surf, self.game.screen_manager.screen, position = (self.bg_pos[0] + 30,self.bg_pos[1] + 10+index*10))#shader render        
+        self.game.game_objects.font.render_text_bg(
+            self.game.screen_manager.screen,
+            self.bg_size,
+            position=self.bg_pos,
+        )
+        for index, text in enumerate(self.surf):
+            self.game.game_objects.font.render(
+                self.game.screen_manager.screen,
+                text,
+                position=(self.bg_pos[0] + 30, self.bg_pos[1] + 10 + index * 10),
+            )
 
     def handle_events(self,input):
         input.processed()           

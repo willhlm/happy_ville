@@ -15,7 +15,7 @@ class AnimatedEntity(StaticEntity):#animated stuff, i.e. cosmetics
     def reset_timer(self):#called from aniumation when the animation is finished
         self.currentstate.increase_phase()
 
-    def release_texture(self):#called when .kill() and empty group
+    def release_texture(self):#called when emptying groups / deferred map cleanup
         for state in self.sprites.keys():
             for frame in range(0,len(self.sprites[state])):
                 self.sprites[state][frame].release()

@@ -1,11 +1,18 @@
-import pygame, math, random
+import random
+
+import pygame
+from engine.render.blur_kernel import build_gaussian_kernel
 
 class Lights():
     def __init__(self, game_objects):
         self.game_objects = game_objects
         self.set_ambient_light([0,0,0,0])
         self.lights_sources = []#append lights
-        self.shaders = {'light':game_objects.shaders['light'],'blur':game_objects.shaders['blur'],'blend':game_objects.shaders['blend']}
+        self.shaders = {
+            'light': game_objects.shaders['light'],
+            'blur': game_objects.shaders['blur_fast'],
+            'blend': game_objects.shaders['blend'],
+        }
 
         self.shaders['light']['resolution'] = self.game_objects.game.window_size        
 
@@ -17,6 +24,10 @@ class Lights():
         self.normal_map = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.max_light_sources = 20#a valuehard coded in light shader
         self.max_occluder_rectangles = 20#a value hard coded in light shader
+        self.blur_radius = 2.0
+        self._blur_r_int = 0
+        self._blur_weights = None
+        self._rebuild_blur_kernel()
         self.update_render(0)
 
     def set_ambient_light(self, colour):
@@ -28,6 +39,9 @@ class Lights():
 
     def clear_normal_map(self):#called at the begning of draw in game objects
         self.normal_map.clear(0, 0, 0, 0)
+
+    def _rebuild_blur_kernel(self):
+        self._blur_r_int, self._blur_weights = build_gaussian_kernel(self.blur_radius)
 
     def update_render(self, dt):
         self.normal_interact = [0] * self.max_light_sources
@@ -41,20 +55,46 @@ class Lights():
         self.end_angle = [0] * self.max_light_sources
         self.min_radius = [0] * self.max_light_sources
         rectangle_cursor = 0
+        active_light_count = 0
 
-        for i, light in enumerate(self.lights_sources[:]):        # Process each light source and update the lists
+        for light in self.lights_sources[:]:        # Process each light source and update the lists
             light.update_render(dt)  # Update the light source            
-            
-            self.positions[i] = (light.position[0], self.game_objects.game.window_size[1] - light.position[1])  # Get the positions of the lights
-            self.radius[i] = light.radius
-            self.colour[i] = light.colour
-            self.start_angle[i] = light.start_angle
-            self.end_angle[i] = light.end_angle
-            self.min_radius[i] = light.min_radius
-            self.normal_interact[i] = light.normal_interact
-            rectangle_cursor = self.list_points(light, i, rectangle_cursor)  # Sort the collision points into a list
+
+            if not self._is_light_visible(light):
+                continue
+
+            self.positions[active_light_count] = (light.position[0], self.game_objects.game.window_size[1] - light.position[1])  # Get the positions of the lights
+            self.radius[active_light_count] = light.radius
+            self.colour[active_light_count] = light.colour
+            self.start_angle[active_light_count] = light.start_angle
+            self.end_angle[active_light_count] = light.end_angle
+            self.min_radius[active_light_count] = light.min_radius
+            self.normal_interact[active_light_count] = light.normal_interact
+            rectangle_cursor = self.list_points(light, active_light_count, rectangle_cursor)  # Sort the collision points into a list
+            active_light_count += 1
                 
         self.points.extend([(0, 0)] * (self.max_occluder_rectangles * 4 - len(self.points)))# Add (0, 0) to the list until it reaches the shader size
+        self.active_light_count = active_light_count
+        self.shaders['light']['num_lights'] = active_light_count
+
+    def _is_light_visible(self, light):
+        if light.radius <= 0:
+            return False
+        if light.colour[-1] <= 0.01:
+            return False
+
+        window_w, window_h = self.game_objects.game.window_size
+        left = light.position[0] - light.radius
+        right = light.position[0] + light.radius
+        top = light.position[1] - light.radius
+        bottom = light.position[1] + light.radius
+
+        return not (
+            right < 0
+            or left > window_w
+            or bottom < 0
+            or top > window_h
+        )
 
     def list_points(self, light, index, rectangle_cursor):
         if not light.platform_interact: 
@@ -62,7 +102,7 @@ class Lights():
             self.occluder_start_index[index] = rectangle_cursor
             return rectangle_cursor
         else:
-            platforms = self.game_objects.physics.collision_queries.sprite_collide(light, self.game_objects.platforms)  # Collision -> collision occurs at coordinates as per tiled position
+            platforms = self.game_objects.physics.platform_spatial_index.query_rect(light.hitbox)
             available = max(self.max_occluder_rectangles - rectangle_cursor, 0)
             platforms = platforms[:available]
             self.occluder_start_index[index] = rectangle_cursor
@@ -111,13 +151,16 @@ class Lights():
 
         self.game_objects.game.display.render(target.texture, self.screen_copy)#copy the screen, the display sized one
         self.shaders['blend']['background'] = self.screen_copy.texture
-        self.shaders['blur']['blurRadius'] = 2
+        self.shaders['blur']['r'] = self._blur_r_int
+        self.shaders['blur']['weights'] = self._blur_weights
+        self.layer2.clear(0, 0, 0, 0)
+        self.layer3.clear(0, 0, 0, 0)
 
         self.game_objects.game.display.use_alpha_blending(False)#need to turn of blending to remove black outline in places with no ambient dark. It looks beter if it is always True for dark areas
         self.game_objects.game.display.render(self.layer1.texture, self.layer2, shader = self.shaders['light'])
         self.game_objects.game.display.render(self.layer2.texture, self.layer3, shader = self.shaders['blur'])
-        self.game_objects.game.display.use_alpha_blending(True)#turn it back on for rendering on screen        
-        self.game_objects.game.display.render(self.layer3.texture, target, scale = self.game_objects.game.scale, shader = self.shaders['blend'])
+        self.game_objects.game.display.use_alpha_blending(True)#turn it back on for later rendering
+        self.game_objects.game.display.render(self.layer3.texture, target, scale = self.game_objects.game.scale, shader = self.shaders['blend'])     
 
 class Light():#light source
     def __init__(self, game_objects, target, **properties):

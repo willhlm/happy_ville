@@ -20,8 +20,13 @@ class FastTravelMenu(BaseUI):
 
     def blit_destinations(self):
         for index, name in enumerate(self.game.game_objects.world_state.travel_points.keys()):
-            text = self.game.game_objects.font.render((152,80), name, 100)
-            self.game.display.render(text, self.game.screen_manager.screen, position =self.travel_UI.name_pos[index])#shader render                
+            self.game.game_objects.font.render(
+                self.game.screen_manager.screen,
+                name,
+                position=self.travel_UI.name_pos[index],
+                width=152,
+                letter_frame=100,
+            )
 
     def blit_pointer(self):
         pos = self.travel_UI.name_pos[self.index[0]]

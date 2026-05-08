@@ -1,5 +1,5 @@
 from gameplay.data.boss_encounter_configs import get_boss_encounter_config
-from engine.system.sequence_manager import Sequence
+from gameplay.sequences.base import Sequence
 
 
 class BossEncounter(Sequence):

@@ -1,4 +1,4 @@
-from engine.system.sequence_manager import Sequence
+from gameplay.sequences.base import Sequence
 from gameplay.entities.visuals.cosmetics import SpawnEffect
 
 
@@ -28,7 +28,7 @@ class DeathSequence(Sequence):
         active_state = self.game_objects.game.state_manager.state_stack[-1]
         self.game_objects.transition.run(
             previous_state=active_state,
-            style="fade_black",
+            style="alpha",
             action=lambda: self.game_objects.map.load_now(map_name, point),
             on_covered=self._on_respawn_map_ready,
             after=self._on_respawn_map_loaded,

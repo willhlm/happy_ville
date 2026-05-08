@@ -6,8 +6,9 @@ from gameplay.entities.player.backpack.journal import Journal
 
 class Backpack():#Ailas back pack. Can append new things such as journal, if picked up
     def __init__(self, entity):
-        self.holdings = {'map': MapState(), 'inventory': Inventory(entity.game_objects), 'radna': RadnaLoadout(), 'journal': Journal()}
-        
+        self.holdings = {'map': MapState(), 'inventory': Inventory(entity.game_objects), 'radna': RadnaLoadout()}
+        self._registery = {'journal': Journal}
+
     @property
     def inventory(self):
         return self.holdings['inventory']
@@ -23,3 +24,6 @@ class Backpack():#Ailas back pack. Can append new things such as journal, if pic
     @property
     def journal(self):
         return self.holdings['journal']    
+
+    def add_holding(self, name):
+        self.holdings[name] = self._registery[name]()

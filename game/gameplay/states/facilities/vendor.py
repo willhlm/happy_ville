@@ -30,14 +30,15 @@ class Vendor(BaseUI):#called from Astrid
         self.display_number = min(len(self.vendor_UI.objects), len(self.items))#number of items to list
         self.sale_items = self.items[0:self.display_number]#gets udated when you press the up down keys
 
-        self.buy_sur = self.game.game_objects.font.render(text = 'Buy')
-        self.cancel_sur = self.game.game_objects.font.render(text = 'Cancel')
-
     def set_response(self,text):
-        self.respond = self.game.game_objects.font.render(text = text)
+        self.respond = text
 
     def blit_response(self):
-        self.game.display.render(self.respond, self.game.screen_manager.screen, position = (190,150))#shader render
+        self.game.game_objects.font.render(
+            self.game.screen_manager.screen,
+            self.respond,
+            position=(190, 150),
+        )
 
     def update(self):
         self.letter_frame += self.game.game_objects.game.dt
@@ -56,9 +57,12 @@ class Vendor(BaseUI):#called from Astrid
 
     def blit_money(self):#blit how much gold we have in inventory
         money = self.game.game_objects.player.backpack.inventory.get_quantity('amber_droplet')
-        count_text = self.game.game_objects.font.render(text = str(money))
         position = [self.bg_pos[0] + self.vendor_UI.amber.rect.bottomright[0], self.bg_pos[1] + self.vendor_UI.amber.rect.bottomright[1]]
-        self.game.display.render(count_text, self.game.screen_manager.screen, position = position, shader = self.game.game_objects.shaders['colour'])#shader render
+        self.game.game_objects.font.render(
+            self.game.screen_manager.screen,
+            str(money),
+            position=position,
+        )
 
         self.amber.animation.update()
         position = [self.bg_pos[0] + self.vendor_UI.amber.rect.topleft[0], self.bg_pos[1] + self.vendor_UI.amber.rect.topleft[1]]
@@ -66,9 +70,14 @@ class Vendor(BaseUI):#called from Astrid
 
     def blit_description(self):
         conv=self.items[self.item_index[1]].description        
-        text = self.game.game_objects.font.render(self.vendor_UI.description['size'], conv, int(self.letter_frame//2))
         position = [self.bg_pos[0] + self.vendor_UI.description['position'][0], self.bg_pos[1] + self.vendor_UI.description['position'][1]]
-        self.game.display.render(text, self.game.screen_manager.screen, position = position, shader = self.game.game_objects.shaders['colour'])#shader render
+        self.game.game_objects.font.render(
+            self.game.screen_manager.screen,
+            conv,
+            position=position,
+            width=self.vendor_UI.description['size'][0],
+            letter_frame=int(self.letter_frame // 2),
+        )
 
     def blit_items(self):
         for index, item in enumerate(self.sale_items):            
@@ -79,9 +88,12 @@ class Vendor(BaseUI):#called from Astrid
             #blit cost
             item_name=str(type(item).__name__)
             cost = self.npc.inventory[item_name]
-            cost_text = self.game.game_objects.font.render(text = str(cost))
             position = [self.bg_pos[0] + self.vendor_UI.objects[index].rect.bottomright[0], self.bg_pos[1] + self.vendor_UI.objects[index].rect.bottomright[1]]
-            self.game.display.render(cost_text, self.game.screen_manager.screen, position = position, shader = self.game.game_objects.shaders['colour'])#shader render                
+            self.game.game_objects.font.render(
+                self.game.screen_manager.screen,
+                str(cost),
+                position=position,
+            )
             
     def blit_pointer(self):
         position = [self.bg_pos[0] + self.vendor_UI.objects[self.pointer_index[1]].rect.topleft[0], self.bg_pos[1] + self.vendor_UI.objects[self.pointer_index[1]].rect.topleft[1]]
@@ -121,4 +133,3 @@ class Vendor(BaseUI):#called from Astrid
     def select(self):
         item = type(self.items[self.item_index[1]]).__name__
         self.game_state.state.append(Vendor2(self.game_state,self.npc,item))#go to next frame
-

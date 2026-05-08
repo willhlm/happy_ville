@@ -73,5 +73,9 @@ class BossRewardBall(Interactables):
     def collect_reward(self, entity):
         self.game_objects.camera_manager.camera_shake(amplitude = 15, duration = 15, scale = 0.9)
         self.currentstate.enter_state('death')#overrite any state and go to deat
-        self.game_objects.signals.emit('boss_reward_collected', position = self.hitbox.center)
+        self.game_objects.signals.emit(
+            'boss_reward_collected',
+            position=self.hitbox.center,
+            instruction_key=self.reward.get_instruction_key(),
+        )
         self.reward.apply(entity)

@@ -30,55 +30,55 @@ out vec4 color;
 
 const float epsilon = 1e-6;
 
-float calculateDistance(vec2 p1, vec2 p2) {
-    return sqrt(dot(p1 - p2, p1 - p2));
-}
-
-bool isOcluded(vec2 p, vec2 q, vec2 lightPos, float lightRadius) {
-    vec2 pixelCoord = fragmentTexCoord * resolution;
+bool isOcluded(vec2 p, vec2 q, vec2 pixelCoord, vec2 lightPos){
     vec2 v1 = q - p;
     vec2 v2 = lightPos - pixelCoord;
+
     float crossProduct = v1.x * v2.y - v1.y * v2.x;
-    float dotProduct = v1.x * v2.x + v1.y * v2.y;
-    float lengthV1 = length(v1);
-    float lengthV2 = length(v2);
-    float t = (v2.x * (p.y - pixelCoord.y) + v2.y * (pixelCoord.x - p.x)) / crossProduct;
-
-    vec2 intersection = p + t * v1;
-
     if (abs(crossProduct) < epsilon) {
         return false;
     }
-    if (distance(p, intersection) > lengthV1 + epsilon || distance(q, intersection) > lengthV1 + epsilon) {
+
+    float t = (v2.x * (p.y - pixelCoord.y) + v2.y * (pixelCoord.x - p.x)) / crossProduct;
+    if (t < 0.0 || t > 1.0) {
         return false; // The intersection point is not between p and q
     }
-    if (distance(pixelCoord, intersection) > lengthV2 + epsilon || distance(lightPos, intersection) > lengthV2 + epsilon) {
+
+    float u = (v1.x * (pixelCoord.y - p.y) + v1.y * (p.x - pixelCoord.x)) / -crossProduct;
+    if (u < 0.0 || u > 1.0) {
         return false; // The intersection point is not between pixelCoord and lightPos
     }
+
     return true;
 }
 
 void main() {
     vec4 backgroundColor = ambient;
-    vec3 normal = normalize(texture(normal_map, fragmentTexCoord).xyz * 2.0 - 1.0); // Transform normal map color to normal
+    vec4 normalTex = texture(normal_map, fragmentTexCoord);
+    vec2 pixelCoord = fragmentTexCoord * resolution;
+    vec3 normal = normalize(normalTex.xyz * 2.0 - 1.0); // Transform normal map color to normal
 
     for (int l = 0; l < num_lights; l++) { // number of light sources
         vec2 lightPos = lightPositions[l];
         float lightRadius = lightRadii[l];
-        
+        float lightRadius2 = lightRadius * lightRadius;
+        float minRadius2 = min_radius[l] * min_radius[l];
+        vec2 lightDelta = lightPos - pixelCoord;
+        float distanceToLight2 = dot(lightDelta, lightDelta);
+
+        if (distanceToLight2 >= lightRadius2 || distanceToLight2 < minRadius2) {
+            continue;
+        }
+
+        float invDistance = inversesqrt(max(distanceToLight2, epsilon));
+        vec2 toLight = lightDelta * invDistance;
+
         float start = radians(angleStart[l]); // Define your start angle
         float end = radians(angleEnd[l]); // Define your end angle
 
         // Skip if fragment is outside the cone region
-        vec2 toLight = normalize(lightPos - fragmentTexCoord * resolution);
         float angleToLight = atan(toLight.y, toLight.x)+3.141592;
         if (angleToLight < start || angleToLight > end) {
-            continue;
-        }
-        
-        // Skip if fragment is too far away from light source
-        float distanceToLight = calculateDistance(fragmentTexCoord * resolution, lightPos);
-        if (distanceToLight >= lightRadius || distanceToLight < min_radius[l]) {
             continue;
         }
 
@@ -98,7 +98,7 @@ void main() {
             for (int i = 0; i < n; i++) {
                 vec2 p = points[i];
                 vec2 q = points[(i + 1) % n];
-                if (isOcluded(p, q, lightPos, lightRadius)) {
+                if (isOcluded(p, q, pixelCoord, lightPos)) {
                     occluded = true;
                     break;
                 }
@@ -109,12 +109,12 @@ void main() {
         }
 
        if (!occluded) {
-            if (texture(normal_map, fragmentTexCoord).a == 0.0) {//if default. not a good solution. not sure how multiple light sources will affect this.
+            if (normalTex.a == 0.0) {//if default. not a good solution. not sure how multiple light sources will affect this.
                 normal = vec3(toLight, 0.0); // Default normal facing out of the screen
             }
 
             // Light intensity
-            float lightIntensity = max(1.0 - pow(distanceToLight / lightRadius, 2), 0);
+            float lightIntensity = max(1.0 - distanceToLight2 / lightRadius2, 0.0);
 
             lightDir = normalize(vec3(toLight, 0.0));// Calculate the direction from the fragment to the light
             diff = mix(1.0, dot(normal, lightDir), clamp(ambient.a, 0.3, 0.9)* normal_interact[l]);         //smoothstep(0.3, 0.9, ambient.a)   

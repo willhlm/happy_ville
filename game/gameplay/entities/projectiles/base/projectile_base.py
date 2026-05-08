@@ -43,9 +43,6 @@ class ProjectileBase(AnimatedEntity):
         effect = self.create_effect()
         damage_applied, modified_effect = inetractable.take_hit(effect)
 
-    def collision_interactables_fg(self, interactable):
-        pass
-
     def collision_projectile(self, eprojectile):
         self.projectile_clash.handle_collision(eprojectile)        
 

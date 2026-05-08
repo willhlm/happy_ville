@@ -1,11 +1,13 @@
 import pygame
 from engine.utils import read_files
-from gameplay.entities.items.base.world_item import WorldItem
-from gameplay.entities.items.base.components import CollisionPickupComponent
+from gameplay.entities.items.base.item_definition import ItemDefinition
+from gameplay.entities.items.base.collision_world_item import CollisionWorldItem
 
-class Spiritorb(WorldItem):#the thing that gives spirit
-    pickup_component_cls = CollisionPickupComponent
-
+class Spiritorb(CollisionWorldItem):#the thing that gives spirit
+    item_definition = ItemDefinition(
+        item_id='spiritorb',
+        description='A spirit orb',
+    )
     def __init__(self,pos,game_objects):
         super().__init__(pos, game_objects)
         self.sprites = read_files.load_sprites_dict('assets/sprites/entities/items/spiritorbs/',game_objects)

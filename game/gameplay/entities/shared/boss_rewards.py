@@ -8,6 +8,9 @@ class BossReward:
     def apply(self, player):
         raise NotImplementedError
 
+    def get_instruction_key(self):
+        raise NotImplementedError
+
 
 @dataclass(frozen=True)
 class ProgressionUnlockReward(BossReward):
@@ -15,3 +18,6 @@ class ProgressionUnlockReward(BossReward):
 
     def apply(self, player):
         player.progression.unlock(self.progress_key)
+
+    def get_instruction_key(self):
+        return self.progress_key

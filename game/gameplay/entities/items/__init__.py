@@ -13,6 +13,7 @@ from .radna.boss_hp import BossHP
 from .radna.loot_magnet import LootMagnet
 from .radna.half_damage import HalfDamage
 from .rings import Rings
+from .journal import Journal
 
 from .dyes.dyes import Dyes
 

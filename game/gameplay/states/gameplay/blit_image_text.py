@@ -6,14 +6,26 @@ class BlitImageText(Gameplay):#when player obtaines a new ability, pick up inetr
         self.page = 0
         self.render_fade = [self.render_in, self.render_out]
 
-        self.image = game.display.make_layer(image.size)#TODO
+        self.image = game.display.make_layer(image.size)
         self.game.display.render(image, self.image)#make a copy of the image
-        self.text = self.game.game_objects.font.render((140,80), text)
+        self.text = text
 
         self.game.game_objects.player.reset_movement()
 
         self.fade = [0,0]
+        self.image_fade = self.game.game_objects.fade.create("alpha", 0)
         self.callback = callback#a function to call when exiting
+        self.should_exit = False
+
+    def on_pop(self):
+        self.image.release()
+
+    def update(self, dt):
+        super().update(dt)
+        if self.should_exit:
+            if self.callback:
+                self.callback()
+            self.game.state_manager.exit_state()
 
     def handle_movement(self):#every frame
         pass
@@ -22,13 +34,23 @@ class BlitImageText(Gameplay):#when player obtaines a new ability, pick up inetr
         super().render()
         self.render_fade[self.page]()
 
-        self.game.game_objects.shaders['alpha']['alpha'] = self.fade[1]
         self.game.game_objects.shaders['colour']['colour'] = (255,255,255,self.fade[1])
 
         self.game.screen_manager.screen.clear(40, 40, 40, self.fade[0])
 
-        self.game.display.render(self.image.texture, self.game.screen_manager.screen, position = (320, 120), shader = self.game.game_objects.shaders['alpha'])
-        self.game.display.render(self.text, self.game.screen_manager.screen, position = (320,140), shader = self.game.game_objects.shaders['colour'])
+        self.image_fade.set(self.fade[1])
+        self.image_fade.render(
+            self.image.texture,
+            self.game.screen_manager.screen,
+            position=(320, 120),
+        )
+        self.game.game_objects.font.render(
+            self.game.screen_manager.screen,
+            self.text,
+            position=(320, 140),
+            width=140,
+            color=(255, 255, 255, self.fade[1]),
+        )
         self.game.render_display(self.game.screen_manager.screen.texture)
 
     def render_in(self):
@@ -44,8 +66,7 @@ class BlitImageText(Gameplay):#when player obtaines a new ability, pick up inetr
         self.fade[1] = max(self.fade[1], 0)
 
         if self.fade[0] == 0:
-            if self.callback: self.callback()
-            self.game.state_manager.exit_state()
+            self.should_exit = True
 
     def handle_events(self,input):
         input.processed()

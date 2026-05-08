@@ -63,15 +63,15 @@ REGISTERY = {
     "title_menu": TitleMenu,
 
     #overlays
-    "instructions": Instructions,
+    "static_overlay": StaticOverlay,
+    "dynamic_overlay": DynamicOverlay,
 
     # Gameplay
-    "gameplay": Gameplay,
+    "gameplay": WorldGameplay,
     "ability_select": AbilitySelect,
     "blit_image_text": BlitImageText,
     "conversation": Conversation,
-    "fade_in": FadeIn,
-    "fade_out": FadeOut,
+    "screen_fade": ScreenFadeState,
     "backpack_ui": BackpackUIState,
 
     # Facilities

@@ -2,6 +2,20 @@ import math
 import random
 
 
+class NullHangingComponent:
+    def init_motion(self):
+        return None
+
+    def enter_initial_state(self):
+        return None
+
+    def trigger_drop(self):
+        return None
+
+    def update_hanging_motion(self, dt):
+        return None
+
+
 class HangingComponent:
     def __init__(self, entity, initial_state = None, anchor_pos = None):
         self.entity = entity
@@ -23,13 +37,13 @@ class HangingComponent:
         if self.initial_state != 'hanging':
             return
 
-        self.entity.set_surface_stick_enabled(False)
+        self.entity.surface_stick_physics.set_enabled(False)
         self.entity.body.set_pos([self.anchor_pos[0], self.anchor_pos[1]])
         self.entity.flags['aggro'] = False
         self.entity.currentstate.enter_state('hanging')
 
     def trigger_drop(self):
-        self.entity.set_surface_stick_enabled(False)
+        self.entity.surface_stick_physics.set_enabled(False)
         self.entity.currentstate.handle_input('drop')
 
     def update_hanging_motion(self, dt):

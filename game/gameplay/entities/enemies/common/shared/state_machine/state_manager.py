@@ -8,6 +8,8 @@ class StateManager:
         self.entity = entity
         self.cooldowns = CooldownManager()
         self.player_distance = [0, 0]
+        self.target = None
+        self.target_distance = [0, 0]
 
         all_states = {**SHARED_STATES[type], **(custom_states or {})}
         self.deciders = {**SHARED_DECIDERS, **(custom_deciders or {})}
@@ -33,12 +35,15 @@ class StateManager:
     def enter_state(self, state_name, **kwargs):
         normalized_state = state_name.lower()
         if self.states.get(normalized_state, False):
+            state_config = self.entity.config.get('states', {}).get(normalized_state, {})
+            default_kwargs = state_config.get('kwargs', {})
+            kwargs = {**default_kwargs, **kwargs}
             self.state = self.states[normalized_state](self.entity, self.deciders, config_key=normalized_state, **kwargs)
 
     def update(self, dt):
         """Update cooldowns and current state"""
         self.cooldowns.update(dt)
-        self.check_player_distance()
+        self.check_distances()
         self.state.update(dt)
 
     def consume_contact_state(self):
@@ -52,9 +57,17 @@ class StateManager:
         """Progress to next phase of current state"""
         self.state.increase_phase()
 
-    def check_player_distance(self):
+    def check_distances(self):
         player = self.entity.game_objects.player
         self.player_distance = [player.hitbox.centerx - self.entity.hitbox.centerx, player.hitbox.centery - self.entity.hitbox.centery]
+        self.target = self._resolve_target()
+        self.target_distance = [
+            self.target.hitbox.centerx - self.entity.hitbox.centerx,
+            self.target.hitbox.centery - self.entity.hitbox.centery,
+        ]
+
+    def _resolve_target(self):
+        return self.entity.get_state_machine_target()
 
     def die(self):
         death_state = self.states.get('death')

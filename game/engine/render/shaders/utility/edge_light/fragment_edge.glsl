@@ -2,6 +2,7 @@
 
 in vec2 fragmentTexCoord; // Texture coordinates passed from vertex shader
 uniform sampler2D imageTexture; // Texture containing the entities
+
 uniform sampler2D textureNoise; // Noise texture
 uniform float TIME;
 uniform vec2 screenSize = vec2(640,360); // Screen dimensions

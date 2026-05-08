@@ -9,6 +9,7 @@ class Button():
         self.image = self.sprites['idle'][0]
                 
         self.text = kwarg.get('text', '')
+        self.font_style = kwarg.get('font_style', 'text')
 
         position = kwarg.get('position', (0,0))
         self.rect = pygame.Rect(position, [self.image.width, self.image.height])
@@ -21,8 +22,10 @@ class Button():
         self.scale_speed = 0.15  # How fast it returns to normal
 
     def _calculate_text_position(self):
-        font_atlas = self.game_objects.font.font_atals
-        text_width, text_height = font_atlas.font.size(self.text)                
+        text_width, text_height = self.game_objects.font.measure(
+            self.text,
+            style=self.font_style,
+        )
         self.position = [self.rect.centerx - text_width // 2, self.rect.centery - text_height // 2]
 
     def on_enter(self):
@@ -57,4 +60,11 @@ class Button():
         self.game_objects.game.display.render(self.image, target, position=render_pos,scale=(self.scale_x, 1.0))
         
         # Text stays in original position (doesn't stretch)
-        self.game_objects.game.display.render_text(self.game_objects.font.font_atals, target, self.text, letter_frame=1000, color=self.colour, position=self.position)
+        self.game_objects.font.render(
+            target,
+            self.text,
+            letter_frame=None,
+            color=self.colour,
+            position=self.position,
+            style=self.font_style,
+        )

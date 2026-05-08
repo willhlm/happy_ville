@@ -1,10 +1,11 @@
 import pygame
 from engine.utils import read_files
-from engine.system import activation_manager, time_field_manager, save_load, object_pool, controller, lights, timer, signals, time_manager, alphabet, input_interpreter, transition_controller, sequence_manager
+from engine.system import activation_manager, time_field_manager, save_load, asset_preloader, controller, lights, timer, signals, time_manager, font_manager, input_interpreter, transition_controller, sequence_manager, deferred_texture_manager, stimuli
 from engine import groups
 from engine.sound import game_audio
 from gameplay.entities.player import player
 from engine.render import post_process
+from engine.render.fade import FadeService
 from engine.render.normal_map_generator import NormalMapGenerator
 from engine.camera import camera
 from engine.physics import PhysicsManager
@@ -18,20 +19,25 @@ from gameplay.narrative.quests_events.manager import QuestsEventsManager
 
 from gameplay.registry.registry_manager import RegistryManager
 from engine.particles.particle_system import ParticleSystem
+from gameplay.entities.shared.render.layer_resource_pool import LayerResourcePool
 
 from gameplay.world.transforms.world_transform_controller import WorldTransformController
 
 class GameObjects():
     def __init__(self, game):
         self.game = game
-        self.font = alphabet.Alphabet(self)#intitilise the alphabet class, scale of alphabet          
+        self.font = font_manager.FontManager(self)#intitilise the font manager class
         self.signals = signals.Signals()        
         self.shaders = read_files.load_shaders_dict(self)#load all shaders aavilable into a dict
+        self.fade = FadeService(self)
         self.normal_map_generator = NormalMapGenerator(self)
         self.controller = controller.Controller()
-        self.object_pool = object_pool.Object_pool(self)
+        self.asset_preloader = asset_preloader.AssetPreloader(self)
         self.lights = lights.Lights(self)
+        self.stimuli = stimuli.StimulusManager(self)
         self.timer_manager = timer.Timer_manager(self)
+        self.deferred_textures = deferred_texture_manager.DeferredTextureManager()
+        self.layer_resource_pool = LayerResourcePool(self)
         self._create_groups()
         self.activation_manager = activation_manager.ActivationManager(self)
         self.weather = weather.Weather(self)
@@ -79,6 +85,9 @@ class GameObjects():
         self.players.add(self.player)
 
     def clean_groups(self):#called wgen changing map
+        self.deferred_textures.release_all()
+        self.fade.release_all()
+        self.layer_resource_pool.flush()
         self.npcs.empty()
         self.enemies.empty()
         self.interactables.empty()
@@ -95,6 +104,7 @@ class GameObjects():
         self.bg_fade.empty()
         self.projectiles.empty()
         self.interactables_fg.empty()
+        self.stimuli.clear_world()
         self.timer_manager.clear_timers()
         self.weather.empty()
         self.physics.clear_state()
@@ -145,11 +155,11 @@ class GameObjects():
         self.weather.update(dt)
         self.interactables_fg.update(dt)#twoD water use it
         self.sequence_manager.update(dt)
-        self.lights.update_render(dt)
 
     def update_render(self, dt):#called after update_physics
         #self.camera_blocks.update(dt)#need to be before camera: caemras stop needs to be calculated before the scroll
         self.camera_manager.update_render(dt)#should be first
+        self.lights.update_render(dt)
 
         self.platforms.update_render(dt)
         self.all_bgs.update_render(dt)
@@ -232,6 +242,9 @@ class GameObjects():
             for cos in self.interactables.sprites():#go through the group
                 pygame.draw.rect(image, (0,0,255), (int(cos.hitbox[0]-self.camera_manager.camera.scroll[0]),int(cos.hitbox[1]-self.camera_manager.camera.scroll[1]),cos.hitbox[2],cos.hitbox[3]),1)#draw hitbox
                 pygame.draw.rect(image, (255,0,255), (int(cos.rect[0]-self.camera_manager.camera.scroll[0]),int(cos.rect[1]-self.camera_manager.camera.scroll[1]),cos.rect[2],cos.rect[3]),1)#draw hitbox
+            for cos in self.interactables_fg.sprites():#go through the group
+                pygame.draw.rect(image, (0,0,255), (int(cos.hitbox[0]-self.camera_manager.camera.scroll[0]),int(cos.hitbox[1]-self.camera_manager.camera.scroll[1]),cos.hitbox[2],cos.hitbox[3]),1)#draw hitbox
+                pygame.draw.rect(image, (255,0,255), (int(cos.rect[0]-self.camera_manager.camera.scroll[0]),int(cos.rect[1]-self.camera_manager.camera.scroll[1]),cos.rect[2],cos.rect[3]),1)#draw hitbox                
             for cos in self.loot.sprites():#go through the group
                 pygame.draw.rect(image, (0,0,255), (int(cos.hitbox[0]-self.camera_manager.camera.scroll[0]),int(cos.hitbox[1]-self.camera_manager.camera.scroll[1]),cos.hitbox[2],cos.hitbox[3]),1)#draw hitbox
                 pygame.draw.rect(image, (255,0,255), (int(cos.rect[0]-self.camera_manager.camera.scroll[0]),int(cos.rect[1]-self.camera_manager.camera.scroll[1]),cos.rect[2],cos.rect[3]),1)#draw hitbox

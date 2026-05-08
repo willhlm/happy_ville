@@ -33,6 +33,7 @@ class AnimatedImageOverlay(BaseOverlay):
         self.scale = float(scale)
         self.frame_time = max(float(frame_time), 0.001)
         self.anchor = anchor
+        self.fade = self.go.fade.create("alpha", 0)
 
         self.t = 0.0
         self.done = False
@@ -80,15 +81,13 @@ class AnimatedImageOverlay(BaseOverlay):
         if self.t < self.delay:
             return
 
-        self.go.shaders['alpha']['alpha'] = self._alpha() 
-
         frame = self._frame()
-        self.go.game.display.render(
+        self.fade.set(self._alpha())
+        self.fade.render(
             frame,
             target,
             position=self._draw_position(frame),
             scale=self.scale,
-            shader = self.go.shaders['alpha'],
         )
 
 

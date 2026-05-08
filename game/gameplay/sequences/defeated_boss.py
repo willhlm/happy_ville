@@ -1,7 +1,7 @@
 import random
 
 from engine import constants as C
-from engine.system.sequence_manager import Sequence
+from gameplay.sequences.base import Sequence
 
 
 class DefeatedBoss(Sequence):
@@ -11,6 +11,7 @@ class DefeatedBoss(Sequence):
         self.time = 0
         self.timescale = 1
         self.number_particles = 0
+        self.instruction_key = None
 
         self.game_objects.signals.subscribe('boss_reward_collected', self.on_reward_collected)
         self.game_objects.signals.subscribe('particles_absorbed', self.on_particles_absorbed)
@@ -35,6 +36,7 @@ class DefeatedBoss(Sequence):
 
     def on_reward_collected(self, **kwargs):        
         self.number_particles = 10
+        self.instruction_key = kwargs.get('instruction_key')
         self.game_objects.particles.emit(
             "converging_soul",
             pos=kwargs.get('position', self.game_objects.player.hitbox.center),
@@ -42,13 +44,20 @@ class DefeatedBoss(Sequence):
             player=self.game_objects.player,
         )
         self.timescale = 0
+        self.blocks_gameplay_input = True
+        self.blocks_gameplay_movement = True
 
     def on_particles_absorbed(self):
         self.number_particles -= 1
         if self.number_particles <= 0:
-            self.game_objects.game.state_manager.enter_state(state_name='instructions')
-            self.finish()
+            self.game_objects.game.state_manager.enter_state(
+                state_name='static_overlay',
+                overlay_key=self.instruction_key,
+                callback=self.finish,
+            )
 
     def cleanup(self):
         self.game_objects.signals.unsubscribe('boss_reward_collected', self.on_reward_collected)
         self.game_objects.signals.unsubscribe('particles_absorbed', self.on_particles_absorbed)
+        self.blocks_gameplay_input = False
+        self.blocks_gameplay_movement = False

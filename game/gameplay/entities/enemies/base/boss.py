@@ -20,7 +20,7 @@ class Boss(Enemy):
 
     def dead(self):#called when death animation is finished
         self.flags['aggro'] = False
-        self.hit_component.set_invinsibility(True) 
+        self.hit_component.set_invincibility(True) 
         self.game_objects.world_state.narrative.mark_boss_defeated(self.ID)
 
         reward = self.build_reward()
