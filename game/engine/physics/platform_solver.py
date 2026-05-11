@@ -16,10 +16,11 @@ class PlatformCollisionSolver:
         self.game_objects = game_objects
 
     def solve(self, entity, dt):
+        entity_dt = entity.hitstop.get_sim_dt(dt)
         if not self._is_collidable(entity):
+            self._move_without_collisions(entity, entity_dt)
             return
 
-        entity_dt = entity.hitstop.get_sim_dt(dt)
         support_motion = self._begin_step(entity, entity_dt)
         motion = MotionContext(
             entity=entity,
@@ -40,6 +41,12 @@ class PlatformCollisionSolver:
 
         self._resolve_passive_platform_overlaps(entity)
         self._update_drop_through_state(entity)
+        self._finalize_step(entity)
+
+    def _move_without_collisions(self, entity, entity_dt):
+        support_motion = self._begin_step(entity, entity_dt)
+        entity.body.move_x(entity.velocity[0] * entity_dt + support_motion[0])
+        entity.body.move_y(entity.velocity[1] * entity_dt + support_motion[1])
         self._finalize_step(entity)
 
     def _is_collidable(self, entity):

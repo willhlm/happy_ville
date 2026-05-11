@@ -48,8 +48,10 @@ class StaticSpawner(c.SpawnerCommon):
                 self.game_objects.npcs.add(self.game_objects.registry.fetch("npcs", npc_name)(object_position, self.game_objects))
 
             elif local_id == 2:
-                enemy_name = next(property["value"] for property in properties if property["name"] == "class")
-                self.game_objects.enemies.add(self.game_objects.registry.fetch("enemies", enemy_name)(object_position, self.game_objects))
+                enemy_props = c.props_list_to_dict(properties)
+                enemy_name = enemy_props.pop("class")
+                enemy_cls = self.game_objects.registry.fetch("enemies", enemy_name)
+                self.game_objects.enemies.add(enemy_cls(object_position, self.game_objects, **enemy_props))
 
             elif local_id == 3:
                 path_props = c.props_list_to_dict(obj.get("properties", []))

@@ -1810,13 +1810,49 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"moth"
+                                 "value":"spore_puff"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":3856,
+                         "y":1616
+                        }, 
+                        {
+                         "gid":4099,
+                         "height":16,
+                         "id":1951,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"trap_flower"
                                 }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":16,
                          "x":4016,
+                         "y":1648
+                        }, 
+                        {
+                         "gid":4099,
+                         "height":16,
+                         "id":1952,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"flow_copter"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":4096,
                          "y":1600
                         }],
                  "opacity":1,
@@ -1870,7 +1906,7 @@
          "y":0
         }],
  "nextlayerid":57,
- "nextobjectid":1950,
+ "nextobjectid":1953,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

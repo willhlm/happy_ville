@@ -5,7 +5,8 @@ class Aura(Shaders):
     def __init__(self, game_objects, **kwarg):
         self.game_objects = game_objects
         self.time = 0
-        self.colour = kwarg.get('colour', [0.3, 0.7, 1.0])
+        colour = kwarg.get('colour', [77, 179, 255])
+        self.colour = [channel / 255 for channel in colour[:3]]
         self.size = kwarg.get('size', 0.2)
         self.fall_off = kwarg.get('fall_off', 2)
         self.noise_intensity = kwarg.get('noise_intensity', 5)
@@ -68,7 +69,6 @@ class Sway(Shaders):
         self.strength_scale = kwarg.get('strength_scale', 13.0)
         self.interval = kwarg.get('interval', 3.5)
         self.detail = kwarg.get('detail', 1.0)
-        self.distortion = kwarg.get('distortion', 0.5)
         self.height_offset = kwarg.get('height_offset', 0.1)
         self.upsidedown = kwarg.get('upsidedown', 0.0)
 
@@ -85,7 +85,6 @@ class Sway(Shaders):
         shader['strengthScale'] = self.strength_scale
         shader['interval'] = self.interval
         shader['detail'] = self.detail
-        shader['distortion'] = self.distortion
         shader['heightOffset'] = self.height_offset
         shader['upsidedown'] = self.upsidedown
 

@@ -13,7 +13,6 @@ uniform float maxStrength = 0.05;
 uniform float strengthScale = 13.0;
 uniform float interval = 3.5;
 uniform float detail = 1.0;
-uniform float distortion = 0.5;
 uniform float heightOffset = 0.1;
 uniform float offset = 0; //offset in time
 uniform float upsidedown = 1;//one is upsidedown, 0 is no
