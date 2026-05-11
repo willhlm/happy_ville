@@ -42,6 +42,7 @@ from .common.ground.tagg_mus.tagg_mus import TaggMus
 from .common.ground.bjorn.bjorn import Bjorn
 from .common.ground.lyktgubbe.lyktgubbe import Lyktgubbe
 from .common.ground.trap_flower.trap_flower import TrapFlower
+from .common.ground.moss.moss import Moss
 
 from .common.ground.ghoul.ghoul import Ghoul
 

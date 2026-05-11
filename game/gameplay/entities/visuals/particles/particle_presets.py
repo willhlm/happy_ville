@@ -47,9 +47,10 @@ def converging_soul(pos, game_objects, player):#when exploding an abilty ball, g
         t.game_objects.signals.emit("particles_absorbed")
 
         # trigger light burst instead of instantly deleting light
-        p.light.updates.append(p.light.expand)
-        p.light.updates.append(p.light.fade)
-        p.light.updates.append(p.light.lifetime)
+        p.light.detach()
+        p.light.add_component("expand")
+        p.light.add_component("fade", rate=0.99)
+        p.light.add_component("lifetime", time=70)
 
         # now kill the particle AFTER the burst starts
         p.kill()
@@ -67,9 +68,9 @@ def converging_soul(pos, game_objects, player):#when exploding an abilty ball, g
     )
 
     # Attach light
-    light = game_objects.lights.add_light(
+    light = game_objects.lights.create(
         particle,
-        colour=[100/255, 200/255, 255/255, 255/255],
+        colour=[100, 200, 255, 255],
         radius=20
     )
     particle.light = light

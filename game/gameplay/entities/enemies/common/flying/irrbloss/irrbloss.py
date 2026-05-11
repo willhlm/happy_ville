@@ -22,7 +22,7 @@ class Irrbloss(FlyingEnemy):#is controlled by lyktgubbe
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
-        self.controller_id = kwargs.get('id')
+        self.controller_id = kwargs.get('controller_id')
         self.is_controlled = False
         self.torpedo_velocity = [0, 0]
         self.platform_collider.enabled = False
@@ -35,7 +35,7 @@ class Irrbloss(FlyingEnemy):#is controlled by lyktgubbe
         self.game_objects.signals.subscribe('irrbloss_transform', self._on_transform_signal)
         self.game_objects.signals.subscribe('release_irrbloss', self._on_release_signal)
 
-        self.light = self.game_objects.lights.add_light(self, colour = normlaised, radius = 100)
+        self.light = self.game_objects.lights.create(self, colour=[*C.spirit_colour, 255], radius=100)
         self.shader_state.add_shader('aura', colour=C.spirit_colour[:3], size=0.3, fall_off=4, noise_intensity=3)
 
     def on_kill_cleanup(self):
@@ -47,7 +47,7 @@ class Irrbloss(FlyingEnemy):#is controlled by lyktgubbe
             self.stimulus = None
 
         if self.light is not None:
-            self.game_objects.lights.remove_light(self.light)
+            self.game_objects.lights.remove(self.light)
             self.light = None        
 
     def _on_transform_signal(self, source=None, controller_id=None):

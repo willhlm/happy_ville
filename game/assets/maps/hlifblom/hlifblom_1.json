@@ -1854,6 +1854,24 @@
                          "width":16,
                          "x":4096,
                          "y":1600
+                        }, 
+                        {
+                         "gid":4099,
+                         "height":16,
+                         "id":1953,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"moss"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":4192,
+                         "y":1600
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -1906,7 +1924,7 @@
          "y":0
         }],
  "nextlayerid":57,
- "nextobjectid":1953,
+ "nextobjectid":1954,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

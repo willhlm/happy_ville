@@ -27,7 +27,7 @@ class TrapFlower(Enemy):
         self.currentstate = StateManager(self, type='ground', custom_states=TRAP_FLOWER_STATES)
         self.flags['aggro'] = False
 
-        self.bloom_light = self.game_objects.lights.add_light(self, radius=70, colour=[255 / 255, 255 / 255, 255 / 255, 1.0])
+        self.bloom_light = self.game_objects.lights.create(self, radius=70, colour=[255, 255, 255, 255])
         self.shader_state.add_shader('glow', colour=(132 / 255, 255 / 255, 246 / 255), intensity=0.9, radial_center=(30/64, (48-37)/48), radial_inner=0.03, radial_outer=0.1)
 
     def player_collision(self, player):

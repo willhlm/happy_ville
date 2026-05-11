@@ -22,7 +22,7 @@ DEFAULT_ROOM_CONFIG = RoomConfig(
     ambient_light=[30 / 255, 30 / 255, 30 / 255, 170 / 255],
     player_lights=[
         {
-            "colour": [255 / 255, 255 / 255, 255 / 255, 255 / 255],
+            "colour": [255, 255, 255, 255],
             "shadow_interact": True,
             "platform_interact": True,
             "normal_interact": False,

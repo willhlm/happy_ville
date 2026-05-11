@@ -28,11 +28,11 @@ class Wolfies(Boss):
         self.vitals.set_max_health(WOLFIES_CONFIG['health'])
         self.vitals.set_health(self.vitals.max_health)
 
-        self.light = self.game_objects.lights.add_light(self, radius = 150)
+        self.light = self.game_objects.lights.create(self, radius=150)
 
     def kill(self):
         super().kill()
-        self.game_objects.lights.remove_light(self.light)
+        self.game_objects.lights.remove(self.light)
 
     def attack(self, lifetime = 10):#called from states, attack main
         attack = HurtBox(self, lifetime = 10, dir = self.dir, size = [64, 64])#make the object

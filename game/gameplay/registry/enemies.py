@@ -48,4 +48,5 @@ REGISTER_ENEMIES = {
     'trap_flower': TrapFlower,
     'flow_copter': FlowCopter,
     'spore_puff': SporePuff,    
+    'moss': Moss,    
 }

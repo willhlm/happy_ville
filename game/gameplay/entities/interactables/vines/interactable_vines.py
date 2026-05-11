@@ -187,8 +187,8 @@ class InteractableVines(Interactables):#issue when player lands on a bent vine, 
     def on_collision(self, entity):
         pass
 
-    def take_dmg(self, damage):
-        pass
+    def take_dmg(self, effect):
+        return effect
 
     def on_noncollision(self, entity):
         self.colliders.pop(entity, None)

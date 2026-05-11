@@ -33,7 +33,7 @@ class Bloomer(Interactables):
         self.bloomed = True
         self.currentstate.handle_input('bloom')
         self.bloom_stimulus = self.game_objects.stimuli.register_source(self, channel='light', radius=300, strength=1.6, falloff=0.0015, tags={'flower'})
-        self.bloom_light = self.game_objects.lights.add_light(self, radius=300, colour=[255 / 255, 255 / 255, 255 / 255, 1.0])
+        self.bloom_light = self.game_objects.lights.create(self, radius=300, colour=[255, 255, 255, 255])
         self.shader_state.add_shader(
             'glow',
             colour=(132 / 255, 255 / 255, 246 / 255),
@@ -52,5 +52,5 @@ class Bloomer(Interactables):
             self.bloom_stimulus = None
 
         if self.bloom_light is not None:
-            self.game_objects.lights.remove_light(self.bloom_light)
+            self.game_objects.lights.remove(self.bloom_light)
             self.bloom_light = None

@@ -221,23 +221,27 @@ class StaticSpawner(c.SpawnerCommon):
 
             elif local_id == 25:
                 kwargs = {"parallax": parallax}
+                behaviours = []
                 for property in properties:
                     if property["name"] == "radius":
                         kwargs["radius"] = float(property["value"])
                     elif property["name"] == "interact":
-                        kwargs["interact"] = property["value"]
+                        kwargs["normal_interact"] = property["value"]
                     elif property["name"] == "colour":
                         colour = list(c.pygame.Color(property["value"]))
-                        kwargs["colour"] = [colour[1] / 255, colour[2] / 255, colour[3] / 255, colour[0] / 255]
+                        kwargs["colour"] = [colour[1], colour[2], colour[3], colour[0]]
                     elif property["name"] == "flicker":
-                        kwargs["flicker"] = property["value"]
+                        if property["value"]:
+                            behaviours.append("flicker")
                     elif property["name"] == "fade":
-                        kwargs["fade"] = property["value"]
+                        if property["value"]:
+                            behaviours.append({"type": "fade", "rate": 0.99})
                     elif property["name"] == "pulsting":
-                        kwargs["pulsting"] = property["value"]
+                        if property["value"]:
+                            behaviours.append("pulsating")
 
                 light_source = c.LightSource(object_position, self.game_objects, parallax, layer_name)
-                self.game_objects.lights.add_light(light_source, **kwargs)
+                self.game_objects.lights.create(light_source, components=behaviours, **kwargs)
                 target_groups = self.game_objects.all_fgs if layer_name.startswith("fg") else self.game_objects.all_bgs
                 target_groups.add(layer_name, light_source)
 

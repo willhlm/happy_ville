@@ -14,7 +14,7 @@ class Guide(NPC):
         self.game_objects.particles.emit('converging_soul', pos = self.hitbox.center, n = 10, player = self.game_objects.player)
 
     def give_light(self):#called when teleport shader is finished
-        self.game_objects.lights.add_light(self.game_objects.player, colour = [200/255,200/255,200/255,200/255])
+        self.game_objects.lights.create(self.game_objects.player, colour=[200, 200, 200, 200])
         self.game_objects.world_state.narrative.update_event('guide')
 
     def draw(self, target):#called in group

@@ -56,9 +56,10 @@ class Grind(Interactables):#trap
 
         damage_applied, modified_effect = entity.take_hit(effect)
 
-    def take_dmg(self, damage):
+    def take_dmg(self, effect):
         """Called by hit_component after modifiers run. Apply damage and effects."""
 
         self.flags['invincibility'] = True
         self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)
         self.game_objects.camera_manager.camera_shake(amplitude=2, duration=15, scale=0.90)
+        return effect

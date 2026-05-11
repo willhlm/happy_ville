@@ -7,6 +7,12 @@ ENEMY_CONFIG = {
     'spore_puff': {
         'health': 4,
         'speeds': {'patrol': 0.5},
+        'seed': {
+            'count': [1, 3],
+            'horizontal_speed': [3, 5],
+            'vertical_speed': [-10, -5],
+            'horizontal_drag': 0.02,
+        },
 
         'initial_state': 'patrol',
         'distances': {'aggro': [50, 150]},#x, y
@@ -30,6 +36,10 @@ ENEMY_CONFIG = {
             'attack_pre': {},
             'attack_main': {},
             'attack_post': {},
+            'seed': {},
+            'grow': {},
+            'plant': {'kwargs': {'time': 140}},
+            'spawn': {},
         }
     }
 }

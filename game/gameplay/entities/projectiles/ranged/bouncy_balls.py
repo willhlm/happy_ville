@@ -10,7 +10,7 @@ class BouncyBalls(PlatformProjectile):#for ball challange room
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = self.rect.copy()
 
-        self.light = game_objects.lights.add_light(self)
+        self.light = game_objects.lights.create(self)
         self.velocity = [random.uniform(-2,2),random.uniform(-2,-1)]
 
     def pool(game_objects):
@@ -21,7 +21,7 @@ class BouncyBalls(PlatformProjectile):#for ball challange room
 
     def kill(self):#when lifeitme runs out or hit by aila sword
         super().kill()
-        self.game_objects.lights.remove_light(self.light)
+        self.game_objects.lights.remove(self.light)
 
     def on_projectile_clash_lost(self, other):#when hit by aila sword without purple stone
         self.velocity = [0,0]

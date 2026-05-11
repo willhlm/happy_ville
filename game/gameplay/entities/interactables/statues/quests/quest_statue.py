@@ -21,7 +21,7 @@ class QuestStatue(Statues):#the status spawning a portal, balls etc - challange 
         )#handles dialoage and what to say
 
         if not self.interacted:
-            game_objects.lights.add_light(self)
+            game_objects.lights.create(self)
         else:
             self.shader_state.add_shader('tint', colour = [0,0,0,100])
 

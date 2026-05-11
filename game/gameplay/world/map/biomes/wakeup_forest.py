@@ -34,7 +34,7 @@ class Wakeup_forest(Biome):
         if room_id == "99" and self.level.game_objects.world_state.narrative.events.get("guide", False):
             config = merge_room_configs(
                 config,
-                RoomConfig(player_lights=[{"colour": [200 / 255, 200 / 255, 200 / 255, 255 / 255], "interact": False}]),
+                RoomConfig(player_lights=[{"colour": [200, 200, 200, 255], "normal_interact": False}]),
             )
         return config
 

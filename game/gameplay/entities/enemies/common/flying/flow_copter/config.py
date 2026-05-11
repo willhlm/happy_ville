@@ -16,8 +16,8 @@ ENEMY_CONFIG = {
             'radius': 90,
             'min_radius': 24,
             'colour': [255, 245, 200],
-            'alpha': 0.9,
-            'fade_floor': 0.12,
+            'alpha': 230,
+            'fade_floor': 30,
         },
         'timers': {'hurt_recovery': [150, 200]},
         

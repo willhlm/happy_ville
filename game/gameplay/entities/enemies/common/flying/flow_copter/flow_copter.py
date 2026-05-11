@@ -24,15 +24,10 @@ class FlowCopter(FlyingEnemy):#is controlled by lyktgubbe
         self.vitals.set_health(self.vitals.max_health)
 
         light_cfg = self.config['light']
-        self.light = self.game_objects.lights.add_light(
+        self.light = self.game_objects.lights.create(
             self,
             radius=light_cfg['min_radius'],
-            colour=[
-                light_cfg['colour'][0] / 255,
-                light_cfg['colour'][1] / 255,
-                light_cfg['colour'][2] / 255,
-                0.0,
-            ],
+            colour=[*light_cfg['colour'], 0],
         )
         self.currentstate = StateManager(
             self,
@@ -43,16 +38,16 @@ class FlowCopter(FlyingEnemy):#is controlled by lyktgubbe
 
     def on_kill_cleanup(self):
         if self.light is not None:
-            self.game_objects.lights.remove_light(self.light)
+            self.game_objects.lights.remove(self.light)
             self.light = None
 
     def set_accend_light(self):
         light_cfg = self.config['light']
-        self.light.radius = light_cfg['radius']
-        self.light.colour[-1] = light_cfg['alpha']
+        self.light.set_radius(light_cfg['radius'])
+        self.light.set_alpha(light_cfg['alpha'])
 
     def update_deccend_light(self, progress):
         light_cfg = self.config['light']
         progress = max(0.0, min(1.0, progress))
-        self.light.radius = light_cfg['radius'] - (light_cfg['radius'] - light_cfg['min_radius']) * progress
-        self.light.colour[-1] = light_cfg['alpha'] - (light_cfg['alpha'] - light_cfg['fade_floor']) * progress
+        self.light.set_radius(light_cfg['radius'] - (light_cfg['radius'] - light_cfg['min_radius']) * progress)
+        self.light.set_alpha(light_cfg['alpha'] - (light_cfg['alpha'] - light_cfg['fade_floor']) * progress)

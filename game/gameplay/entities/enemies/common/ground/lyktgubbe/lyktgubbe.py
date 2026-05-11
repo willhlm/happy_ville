@@ -23,13 +23,13 @@ class Lyktgubbe(Enemy):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1], 32, 32)        
-        self.controller_id = kwargs.get('id')
+        self.controller_id = kwargs.get('controller_id')
 
         self.vitals.set_max_health(self.config['health'])
         self.vitals.set_health(self.vitals.max_health)
         self.currentstate = StateManager(self, type = 'ground', custom_states = LYKTGUBBE_STATES)
 
-        self.light = self.game_objects.lights.add_light(self, colour = normlaised, radius = 100)
+        self.light = self.game_objects.lights.create(self, colour=[*C.spirit_colour, 255], radius=100)
         self.shader_state.add_shader('aura', colour = C.spirit_colour[:3], size=0.3, fall_off=4, noise_intensity=3)
 
     def control(self):#called from attack

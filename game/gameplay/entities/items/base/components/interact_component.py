@@ -26,7 +26,7 @@ class ItemInteractComponent:
             ]
 
         if self.light_radius > 0:
-            self.item.light = self.item.game_objects.lights.add_light(self.item, radius=self.light_radius)
+            self.item.light = self.item.game_objects.lights.create(self.item, radius=self.light_radius)
 
     def apply_visual_spawn_mode(self):
         animation_name = self.spawn_mode if self.spawn_mode in self.item.sprites else 'idle'

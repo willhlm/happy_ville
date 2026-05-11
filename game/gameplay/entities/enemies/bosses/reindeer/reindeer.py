@@ -25,7 +25,7 @@ class Reindeer(Boss):
         self.jump_distance = [240, 50]
         self.attack = HurtBox
 
-        self.light = self.game_objects.lights.add_light(self, radius = 150)
+        self.light = self.game_objects.lights.create(self, radius=150)
         self.animation.framerate = 1/6
 
     def pool(game_objects):
@@ -43,4 +43,4 @@ class Reindeer(Boss):
 
     def kill(self):
         super().kill()
-        self.game_objects.lights.remove_light(self.light)#should be removed when reindeer is removed from the game
+        self.game_objects.lights.remove(self.light)#should be removed when reindeer is removed from the game

@@ -232,14 +232,21 @@ class FlashFX(WeatherFX):#white colour fades out and then in
         self.update_image()
         if self.time > self.fade_length:
             self.kill()
-            self.game_objects.lights.remove_light(self.light)         
+            self.game_objects.lights.remove(self.light)         
 
     def add_light_source(self):
         radius = self.game_objects.game.window_size[0] * 0.5
         position = [self.game_objects.camera_manager.camera.scroll[0] + self.game_objects.game.window_size[0] * 0.5, self.game_objects.camera_manager.camera.scroll[1] + self.game_objects.game.window_size[1]*0.5]#put a bg light in center
         self.hitbox = pygame.Rect(0, 0, self.game_objects.game.window_size[0], self.game_objects.game.window_size[1])#for the light source
         self.hitbox.center = position
-        self.light = self.game_objects.lights.add_light(target = self ,radius = radius, fade = True, lifetime = True)#put a bg light in center        
+        self.light = self.game_objects.lights.create(
+            target=self,
+            radius=radius,
+            components=[
+                {"type": "fade", "rate": 0.99},
+                {"type": "lifetime", "time": self.fade_length},
+            ],
+        )#put a bg light in center
 
     def update_image(self):
         alpha = int((self.fade_length - self.time)*(255/self.fade_length))
