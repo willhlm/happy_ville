@@ -11,6 +11,9 @@ class MotionContext:
     remaining_motion: list
 
 
+DEBUG_RIGHT_ANGLE_SOLVER = False
+
+
 class PlatformCollisionSolver:
     def __init__(self, game_objects):
         self.game_objects = game_objects
@@ -167,6 +170,16 @@ class PlatformCollisionSolver:
 
         if best_sample is None:
             return None
+
+        if DEBUG_RIGHT_ANGLE_SOLVER and type(best_sample.source).__name__ == 'RightAngleSurfaceCollisionComponent':
+            print(
+                "[RIGHT_ANGLE_SOLVER]",
+                f"picked={type(best_sample.collider).__name__}",
+                f"side={best_sample.side}",
+                f"position={best_sample.position:.3f}",
+                f"requested_motion=({motion.requested_motion[0]:.3f},{motion.requested_motion[1]:.3f})",
+                f"hitbox_before_push=({entity.hitbox.left},{entity.hitbox.top},{entity.hitbox.right},{entity.hitbox.bottom})",
+            )
 
         entity.platform_collider.push_vertical_sample(best_sample)
         if best_sample.clamp_floor:

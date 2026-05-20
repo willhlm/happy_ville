@@ -38,7 +38,7 @@ class Chase(BaseState):
     def update_logic(self, dt):
         self._play_sounds(dt)
 
-        if not self._player_in_range() or not self._player_in_home_zone():
+        if not self._player_in_range():
             self.give_up_timer -= dt
             if self.give_up_timer <= 0:
                 self.enter_state('patrol')
@@ -49,7 +49,7 @@ class Chase(BaseState):
         self._update_hover_phase(dt)
         orbit_anchor = self._get_orbit_anchor()
 
-        if self._ready_to_dive() and self._player_in_home_zone() and self._completed_turns() >= self.turns_before_attack:
+        if self._ready_to_dive() and self._completed_turns() >= self.turns_before_attack:
             self.enter_state('attack_pre', target_y = orbit_anchor[1])
             return
 

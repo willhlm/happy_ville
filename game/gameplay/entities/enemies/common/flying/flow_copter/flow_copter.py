@@ -33,7 +33,7 @@ class FlowCopter(FlyingEnemy):#is controlled by lyktgubbe
             self,
             type='flying',
             custom_states=FLOW_COPTER_STATES,
-            universal_states=['death', 'dead', 'hurt', 'wait'],
+            universal_states=['death', 'dead', 'wait'],
         )
 
     def on_kill_cleanup(self):

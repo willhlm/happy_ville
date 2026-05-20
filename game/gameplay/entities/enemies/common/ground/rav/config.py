@@ -5,9 +5,9 @@ All enemy stats defined here for easy balancing.
 
 ENEMY_CONFIG = {
     'rav': {
-        'health': 4,
+        'health': 3,
         'speeds': {'chase': 1.6, 'patrol': 0.5},
-        'distances': {'aggro': [200, 20], 'attack': [50, 150], 'jump': [100, -10]},#x, y
+        'distances': {'aggro': [200, 20], 'attack': [50, 80], 'jump': [100, -10]},#x, y
         'cooldowns': {
             'melee_attack': [50, 80],#min max
             'jump_attack': [200, 250]#min max
@@ -31,6 +31,7 @@ ENEMY_CONFIG = {
                     'melee_attack': {'next_state':'attack_pre', 'distance': 'attack', 'score': 70, 'priority': 1, 'cooldown': 'melee_attack'}, 
                     'jump_attack': {'next_state':'jump_attack_pre', 'distance': 'jump', 'score': 40, 'priority': 1, 'cooldown': 'jump_attack'}, 
                     'chase_give_up': {'next_state':'wait', 'distance': 'aggro', 'score':50, 'priority':1, 'give_up_time':400, 'kwargs': {'next_state':'patrol', 'time': 30}}, 
+                    'chase_stuck': {'next_state':'wait', 'score': 75, 'priority': 2, 'stuck_time': 45, 'min_progress': 2, 'min_player_distance': 24, 'kwargs': {'next_state':'patrol', 'time': 30}},
                     'check_edge': {'next_state':'wait', 'score':90, 'priority':2, 'kwargs': {'time':60, 'next_state':'patrol', 'dir':-1}}
                     },
             },

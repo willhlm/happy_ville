@@ -43,3 +43,6 @@ class TrapFlower(Enemy):
     def attack(self):#called from states, attack main
         attack = HurtBox(self, lifetime = 10, dir = [0,0], size = [32, 32])#make the object
         self.game_objects.projectiles.add_enemy(attack)#add to group but in main phase
+
+    def knock_back(self, amp, dir):
+        pass

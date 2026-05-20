@@ -12,7 +12,7 @@ ENEMY_CONFIG = {
         "timers": {"hurt_recovery": [200, 250]},
         "states": {
             "idle": {},
-            "hurt": {},
+            "hurt": {'next_state': 'patrol'},
             'patrol': {
                 'deciders':{
                     'melee_attack': {'next_state':'attack_pre', 'distance': 'attack', 'score': 70, 'priority': 1, 'cooldown': 'melee_attack'}, 
