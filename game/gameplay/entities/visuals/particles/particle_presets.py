@@ -11,7 +11,7 @@ def spirit_aura(pos, game_objects, colour):#player dashing use this
         .fade(speed=7)
         .lifetime(frames=40)
         .build()
-    )    
+    )
 
 def burst(pos, game_objects, colour):#player getting hurt
     return (
@@ -131,6 +131,22 @@ def spark_scatter(pos, game_objects, *, distance=100, colour=(255,255,255,255)):
         .build()
     )
 
+def pick_up_spark(pos, game_objects, *, colour):#used for pick up, mainly amber droplet
+    # Old:
+    # type='Spark', lifetime=10, vel={'linear':[5,7]}, dir=angle (random),
+    # scale=0.8, fade_scale=7
+    return (
+        ParticleBuilder(pos, game_objects)
+        .spark(scale=0.8, colour=colour)
+        .velocity_random(
+            min_speed=8, max_speed=8,
+        )
+        # no .ejac() because old was linear motion
+        .fade(speed=15)
+        .lifetime(frames=4)
+        .build()
+    )
+
 def circle_wave(pos, game_objects, *, distance=30, colour=(255,255,255,255)):#cavegrass
     # spawn around the center (uniform disk)
     a = random.uniform(0, 2 * math.pi)
@@ -207,7 +223,7 @@ def drop(pos, game_objects, *, colour, gravity_scale=0.2):#wet status
         .velocity_directional(
             min_speed=0,
             max_speed=1,
-            direction=-90,         
+            direction=-90,
             angle_spread=[10, 10],
             angle_dist="normal"
         )
@@ -277,8 +293,8 @@ PRESETS = {
     'burst': burst,
     "spirit_wisp": spirit_wisp,
     "sword_hit": sword_hit,
-    "sword_clash": sword_clash,  
-    'spark_scatter': spark_scatter,  
+    "sword_clash": sword_clash,
+    'spark_scatter': spark_scatter,
     'circle_wave':circle_wave,
     'tiny_trail': tiny_trail,
     'liquid_splash': liquid_splash,
@@ -286,6 +302,7 @@ PRESETS = {
     'floaty_ambient':floaty_ambient,
     'falling_debris_warning': falling_debris_warning,
     'enemy_death_burst': enemy_death_burst,
+    'pick_up_spark': pick_up_spark
 }
 
 

@@ -8,7 +8,7 @@ from .angle_generator import AngleGenerator
 from .particles import Circle, Spark, Goop, FloatyParticles
 from .motion_components import LinearMotion, GravityMotion, WaveMotion, EjacMotion, OrbitalMotion
 from .effect_components import (
-    FadeComponent, LifetimeComponent, HomingComponent, 
+    FadeComponent, LifetimeComponent, HomingComponent,
     CollisionComponent, TrailComponent, DecelerationComponent,
     TimedTransitionComponent, RotationComponent, SineWaveComponent
 )
@@ -33,7 +33,7 @@ COMPONENT_MAP = {
 class ParticleBuilder:
     """
     Fluent API for building particles.
-    
+
     Usage:
         ParticleBuilder(pos, game_objects)
             .circle(radius=5, colour=[255, 0, 0, 255])
@@ -43,7 +43,7 @@ class ParticleBuilder:
             .lifetime(120)
             .build()
     """
-    
+
     def __init__(self, pos, game_objects):
         self.pos = pos
         self.game_objects = game_objects
@@ -52,7 +52,7 @@ class ParticleBuilder:
         self.components = []
         self._velocity = [0, 0]
         self._angle_rad = 0.0
-    
+
     # Particle type selection
     def circle(self, radius=None, scale=3, gradient=0, colour=[255,255,255,255]):
         self.particle_type = Circle
@@ -63,13 +63,13 @@ class ParticleBuilder:
             'colour': colour
         }
         return self
-    
+
     def spark(self, scale=1, colour=None):
         """Create a spark particle."""
         self.particle_type = Spark
         self.particle_kwargs = {'scale': scale, 'colour': colour}
         return self
-    
+
     def goop(self, colour=None, gradient=0):
         """Create a goop particle."""
         self.particle_type = Goop
@@ -79,8 +79,8 @@ class ParticleBuilder:
     def floaty_particles(self, colour = None):
         self.particle_type = FloatyParticles
         self.particle_kwargs = {'colour': colour}
-        return self        
-    
+        return self
+
     # Velocity setup
     def velocity(self, speed, angle_degrees):
         angle_rad = -(2 * math.pi * angle_degrees) / 360
@@ -90,28 +90,28 @@ class ParticleBuilder:
             -speed * math.sin(angle_rad)
         ]
         return self
-    
+
     def velocity_random(self, min_speed, max_speed, angle_degrees=None):
         """Set random velocity."""
         speed = random.uniform(min_speed, max_speed)
         if angle_degrees is None:
             angle_degrees = random.uniform(0, 360)
         return self.velocity(speed, angle_degrees)
-    
+
     def velocity_directional(self, min_speed, max_speed, direction='isotropic', angle_spread=[30, 30], angle_dist=None):
         """
         Set velocity using angle generator (like original system).
-        
+
         Args:
             direction: 'isotropic', angle number, or [x, y] direction vector
             angle_spread: [lower, upper] angle variance
             angle_dist: 'normal' for normal distribution
-        """        
-        
+        """
+
         angle_degrees = AngleGenerator.generate(direction, angle_spread, angle_dist)
         speed = random.uniform(min_speed, max_speed)
         return self.velocity(speed, angle_degrees)
-    
+
     def velocity_towards(self, target_pos, speed):
         """Set velocity towards a target."""
         dx = target_pos[0] - self.pos[0]
@@ -120,17 +120,17 @@ class ParticleBuilder:
         if dist > 0:
             self._velocity = [(dx/dist) * speed, (dy/dist) * speed]
         return self
-    
+
     def velocity_xy(self, vx, vy):
         """Set velocity directly."""
         self._velocity = [vx, vy]
         return self
-    
+
     def spawn_distance(self, distance, angle_degrees=None):
         """
         Offset spawn position by distance at an angle.
         If angle not specified, uses the velocity angle.
-        
+
         Args:
             distance: Distance to offset from spawn point
             angle_degrees: Angle to offset at (uses velocity angle if None)
@@ -143,24 +143,24 @@ class ParticleBuilder:
                 angle_rad = 0
         else:
             angle_rad = -(2 * math.pi * angle_degrees) / 360
-        
+
         self.pos = [
             self.pos[0] + distance * math.cos(angle_rad),
             self.pos[1] + distance * math.sin(angle_rad)
         ]
         return self
-    
+
     # Motion components
     def linear(self, deceleration=0.01):
         """Add linear motion with deceleration."""
         self.components.append(('linear', {'deceleration': deceleration}))
         return self
-    
+
     def gravity(self, scale=1):
         """Add gravity."""
         self.components.append(('gravity', {'gravity_scale': scale}))
         return self
-    
+
     def wave(self, frequency=0.1, amplitude=0.5, gravity_scale=1):
         """Add wave motion."""
         self.components.append(('wave', {
@@ -169,7 +169,7 @@ class ParticleBuilder:
             'gravity_scale': gravity_scale,
         }))
         return self
-    
+
     def ejac(self, end_y_vel=-0.9, damping=0.065):
         """Add ejac motion."""
         self.components.append(('ejac', {
@@ -177,7 +177,7 @@ class ParticleBuilder:
             'damping': damping
         }))
         return self
-    
+
     def orbital(self, center=None, radius=50, speed=0.1):
         """Add orbital motion."""
         self.components.append(('orbital', {
@@ -185,18 +185,18 @@ class ParticleBuilder:
             'speed': speed
         }))
         return self
-    
+
     # Effect components
     def fade(self, speed=1):
         """Add fade effect."""
         self.components.append(('fade', {'fade_scale': speed}))
         return self
-    
+
     def lifetime(self, frames):
         """Add lifetime management."""
         self.components.append(('lifetime', {'frames': frames}))
         return self
-    
+
     def homing(self, target, delay=0, speed_min=2, speed_max=20):
         """Add homing behavior."""
         self.components.append(('homing', {
@@ -206,7 +206,7 @@ class ParticleBuilder:
             'speed_max': speed_max
         }))
         return self
-    
+
     def collision(self, target, distance=5, callback=None):
         """Add collision detection."""
         self.components.append(('collision', {
@@ -215,7 +215,7 @@ class ParticleBuilder:
             'on_collision': callback
         }))
         return self
-    
+
     def trail(self, interval=5, trail_type=None, **trail_kwargs):
         """Add trail effect."""
         if trail_type is None:
@@ -226,7 +226,7 @@ class ParticleBuilder:
             'trail_kwargs': trail_kwargs
         }))
         return self
-    
+
     def deceleration(self, factor=0.001, min_vel=0.03):
         """Add distance-based deceleration."""
         self.components.append(('deceleration', {
@@ -234,7 +234,7 @@ class ParticleBuilder:
             'min_velocity': min_vel
         }))
         return self
-    
+
     def transition(self, delay, callback):
         """Add timed transition."""
         self.components.append(('transition', {
@@ -242,12 +242,12 @@ class ParticleBuilder:
             'on_transition': callback
         }))
         return self
-    
+
     def rotation(self, speed=1):
         """Add rotation."""
         self.components.append(('rotation', {'rotation_speed': speed}))
         return self
-    
+
     def sine_wave(self, amplitude=1, frequency=0.1):
         """Add sine wave motion."""
         self.components.append(('sine_wave', {
@@ -255,24 +255,23 @@ class ParticleBuilder:
             'frequency': frequency
         }))
         return self
-    
+
     def build(self):
-        """Build and return the particle."""        
+        """Build and return the particle."""
         # Create particle
         particle = self.particle_type(self.pos, self.game_objects, **self.particle_kwargs)
-        
+
         # Set velocity
         particle.velocity = self._velocity
-        
+
         # Add components
         for component_type, kwargs in self.components:
-            component = self._create_component(component_type, particle, kwargs)            
+            component = self._create_component(component_type, particle, kwargs)
             particle.add_component(component)
-        
-        return particle
-    
-    def _create_component(self, comp_type, particle, kwargs):
-        """Create a component instance."""        
-        factory = COMPONENT_MAP.get(comp_type)            
-        return factory(particle, kwargs)
 
+        return particle
+
+    def _create_component(self, comp_type, particle, kwargs):
+        """Create a component instance."""
+        factory = COMPONENT_MAP.get(comp_type)
+        return factory(particle, kwargs)
