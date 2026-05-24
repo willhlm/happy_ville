@@ -32,7 +32,7 @@ class Vatt(Enemy):
 
         self.currentstate = StateManager(self, custom_states = VATT_STATES, custom_deciders = VATT_DECIDERS)        
         
-        self.shader_state.add_shader('aura', colour = [1, 1, 1], size = 0.8, fall_off = 2, noise_intensity = 3)
+        self.shader_state.add_shader('aura', colour=[255, 255, 255], size=0.8, fall_off=2, noise_intensity=3)
         self.time = 0
 
     def update_render(self, dt):

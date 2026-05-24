@@ -738,7 +738,7 @@
                          "type":"",
                          "visible":true,
                          "width":32,
-                         "x":4176,
+                         "x":3952,
                          "y":1680
                         }],
                  "opacity":1,
@@ -1810,13 +1810,67 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"moth"
+                                 "value":"spore_puff"
                                 }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":4016,
+                         "x":3792,
+                         "y":1616
+                        }, 
+                        {
+                         "gid":4099,
+                         "height":16,
+                         "id":1951,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"trap_flower"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":4192,
+                         "y":1664
+                        }, 
+                        {
+                         "gid":4099,
+                         "height":16,
+                         "id":1952,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"flow_copter"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":3104,
+                         "y":1632
+                        }, 
+                        {
+                         "gid":4099,
+                         "height":16,
+                         "id":1953,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"moss"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":3472,
                          "y":1600
                         }],
                  "opacity":1,
@@ -1870,7 +1924,7 @@
          "y":0
         }],
  "nextlayerid":57,
- "nextobjectid":1950,
+ "nextobjectid":1954,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

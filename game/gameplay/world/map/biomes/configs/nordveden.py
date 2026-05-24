@@ -33,7 +33,7 @@ DEFAULT_ROOM_CONFIG = RoomConfig(
 ROOM_CONFIGS = {
     room: RoomConfig(
         ambient_light=[100 / 255, 100 / 255, 100 / 255, 255 / 255],
-        player_lights=[{"colour": [200 / 255, 200 / 255, 200 / 255, 200 / 255], "normal_interact": False}],
+        player_lights=[{"colour": [200, 200, 200, 200], "normal_interact": False}],
     )
     for room in ("11", "8", "7", "6", "5")
 }

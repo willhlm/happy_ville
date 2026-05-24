@@ -25,12 +25,10 @@ class PlayerHazardResolver:
         if self.player.vitals.health <= 1:
             return
 
-        self.player.platform_collider.enabled = False
         self.player.currentstate.enter_state('invisible')
 
         def after():
             self.player.currentstate.handle_input('pray_post')
-            self.player.platform_collider.enabled = True
             if after_transport:
                 after_transport()
 

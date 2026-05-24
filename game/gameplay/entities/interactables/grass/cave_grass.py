@@ -15,9 +15,10 @@ class InteractableCaveGrass(Interactables):
         self.currentstate.handle_input('Once',animation_name ='hurt', next_state = 'Idle')
         self.release_particles()
 
-    def take_dmg(self, damage):
-        self.currentstate.handle_input('Death')
+    def take_dmg(self, effect):
+        self.currentstate.handle_input('death')
         self.release_particles(3)
+        return effect
 
     def release_particles(self, number_particles = 12):#should release particles when hurt and death
         self.game_objects.particles.emit('circle_wave', self.hitbox.center, n = 12, distance = 30, colour = [180,220,255,255])    

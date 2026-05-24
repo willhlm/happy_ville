@@ -1,0 +1,11 @@
+from engine.utils import read_files
+from gameplay.entities.interactables.chests.base.loot_containers import LootContainers
+from . import amber_bush_states
+
+class AmberBush(LootContainers):#amber source
+    def __init__(self, pos, game_objects, state, ID_key):
+        super().__init__(pos, game_objects, state, ID_key)
+        self.sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/interactables/amber_tree/')
+        self.inventory = {'amber_droplet':20}
+        self.currentstate = amber_bush_states.Idle(self)
+        self.health = 1

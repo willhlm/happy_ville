@@ -6,7 +6,7 @@ class GroundChase(BaseState):
     def __init__(self, entity, deciders, config_key, **kwargs):
         super().__init__(entity, deciders, config_key)
         self.entity.animation.play("walk")
-        self.stop_distance = kwargs.get('stop_distance', 30)
+        self.stop_distance = kwargs.get('stop_distance', 10)
         self.chase_speed = entity.config['speeds']['chase']
         
     def update_logic(self, dt):       

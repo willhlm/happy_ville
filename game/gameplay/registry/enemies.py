@@ -43,5 +43,10 @@ REGISTER_ENEMIES = {
     'krakan': Krakan,
     'ghoul': Ghoul,
     'raven': Raven,
-
+    'irrbloss': Irrbloss,
+    'lyktgubbe': Lyktgubbe,
+    'trap_flower': TrapFlower,
+    'flow_copter': FlowCopter,
+    'spore_puff': SporePuff,    
+    'moss': Moss,    
 }

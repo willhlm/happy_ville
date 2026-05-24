@@ -10,7 +10,7 @@ class MeleeAttackDecider():
     def choose(self, player_distance, dt):
         results = []
 
-        if abs(player_distance[0]) < self.attack_distance[0]:
+        if abs(player_distance[0]) < self.attack_distance[0] and abs(player_distance[1]) < self.attack_distance[1]:
             if self.entity.currentstate.cooldowns.get(self.dec_cfg['cooldown']) <= 0:                
                 results.append(Decision(
                     next_state=self.dec_cfg['next_state'],

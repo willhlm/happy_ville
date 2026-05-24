@@ -124,9 +124,19 @@ class RightAngleSurfaceCollisionComponent(SurfaceCollisionComponent):
         return ()
 
     def accepts_floor_contact(self, entity, old_hitbox, current_hitbox, target_y, max_step_up):
+        if self.p.go_through and self._should_latch_drop_through(
+            old_hitbox,
+            current_hitbox,
+            target_y,
+            max_step_up,
+        ):
+            entity.go_through['drop_through'] = True
+            return False
         if self.p.go_through and self.p.entity_is_dropping(entity):
             return False
         if current_hitbox.bottom < target_y:
+            if target_y - old_hitbox.bottom > 1:
+                return False
             return target_y - current_hitbox.bottom <= max_step_up
         return super().accepts_floor_contact(entity, old_hitbox, current_hitbox, target_y, max_step_up)
 
@@ -179,3 +189,24 @@ class RightAngleSurfaceCollisionComponent(SurfaceCollisionComponent):
             return rel_x * self.p.ratio + self.p.hitbox.top
 
         return None
+
+    def _should_latch_drop_through(self, old_hitbox, current_hitbox, target_y, max_step_up):
+        if self.p.orientation == 0:
+            entered_from_blocked_side = (
+                old_hitbox.right <= self.p.hitbox.left and
+                current_hitbox.right > self.p.hitbox.left
+            )
+        elif self.p.orientation == 1:
+            entered_from_blocked_side = (
+                old_hitbox.left >= self.p.hitbox.right and
+                current_hitbox.left < self.p.hitbox.right
+            )
+        else:
+            return False
+
+        entered_from_below = (
+            old_hitbox.top >= self.p.hitbox.bottom and
+            current_hitbox.top < self.p.hitbox.bottom
+        )
+        well_below_surface = current_hitbox.bottom > target_y + max_step_up
+        return entered_from_below or (entered_from_blocked_side and well_below_surface)

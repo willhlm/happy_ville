@@ -1,6 +1,7 @@
 import pygame
+from engine.lights import LightManager
 from engine.utils import read_files
-from engine.system import activation_manager, time_field_manager, save_load, asset_preloader, controller, lights, timer, signals, time_manager, font_manager, input_interpreter, transition_controller, sequence_manager, deferred_texture_manager, stimuli
+from engine.system import activation_manager, time_field_manager, save_load, asset_preloader, controller, timer, signals, time_manager, font_manager, input_interpreter, transition_controller, sequence_manager, deferred_texture_manager, stimuli
 from engine import groups
 from engine.sound import game_audio
 from gameplay.entities.player import player
@@ -33,7 +34,7 @@ class GameObjects():
         self.normal_map_generator = NormalMapGenerator(self)
         self.controller = controller.Controller()
         self.asset_preloader = asset_preloader.AssetPreloader(self)
-        self.lights = lights.Lights(self)
+        self.lights = LightManager(self)
         self.stimuli = stimuli.StimulusManager(self)
         self.timer_manager = timer.Timer_manager(self)
         self.deferred_textures = deferred_texture_manager.DeferredTextureManager()
@@ -257,7 +258,7 @@ class GameObjects():
                     pygame.draw.rect(image, (0,0,0, 150), (int(platform.hitbox[0]-self.camera_manager.camera.scroll[0]),int(platform.hitbox[1]-self.camera_manager.camera.scroll[1]),platform.hitbox[2],platform.hitbox[3]), 0)#draw hitbox
             for fade in self.bg_fade:
                 pygame.draw.rect(image, (255,100,100), (int(fade.hitbox[0]-fade.parallax[0]*self.camera_manager.camera.scroll[0]),int(fade.hitbox[1]-fade.parallax[1]*self.camera_manager.camera.scroll[1]),fade.hitbox[2],fade.hitbox[3]),1)#draw hitbox
-            for light in self.lights.lights_sources:
+            for light in self.lights.light_sources:
                 pygame.draw.rect(image, (255,100,100), (int(light.hitbox[0]-light.parallax[0]*self.camera_manager.camera.scroll[0]),int(light.hitbox[1]-light.parallax[1]*self.camera_manager.camera.scroll[1]),light.hitbox[2],light.hitbox[3]),1)#draw hitbox
 
             for group in self.all_bgs.group_dict.values():
