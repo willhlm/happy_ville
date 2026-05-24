@@ -28,7 +28,6 @@ class Idle(Basic_states):
 class Hit1(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.loots()
 
     def handle_input(self,input,**kwarg):
         if input == 'open':
@@ -37,7 +36,6 @@ class Hit1(Basic_states):
 class Hit2(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.loots()
 
     def handle_input(self,input,**kwarg):
         if input == 'open':
@@ -46,4 +44,3 @@ class Hit2(Basic_states):
 class Interacted(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.loots()
