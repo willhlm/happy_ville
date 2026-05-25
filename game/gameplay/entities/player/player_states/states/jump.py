@@ -19,7 +19,7 @@ class JumpMain(PhaseAirBase):
         self.entity.animation.frame = kwarg.get('frame', 0)
         self.jump_dash_timer = C.jump_dash_timer
         self.entity.flags['ground'] = False
-        self.shroomboost = 1
+        self.shroomboost = kwarg.get('jump_boost', 1)
         self.air_timer = kwarg.get('air_timer', C.air_timer)
         self.entity.game_objects.cosmetics.add(Dusts(self.entity.hitbox.center, self.entity.game_objects, dir = self.entity.dir, state = 'two'))
 
@@ -47,8 +47,9 @@ class JumpMain(PhaseAirBase):
             self.do_ability()
         elif input.name == 'a':
             input.processed()
-            if self.entity.flags['shroompoline']:
-                self.shroomboost = 2
+            if self.entity.flags['bounce_jump']:
+                self.shroomboost = self.entity.consume_bounce_jump()
+                self.air_timer = max(self.air_timer, C.air_timer)
 
     def handle_release_input(self, input):
         if input.name == 'a':

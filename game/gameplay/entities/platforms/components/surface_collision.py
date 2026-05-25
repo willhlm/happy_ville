@@ -85,6 +85,8 @@ class OneWayUpSurfaceCollisionComponent(SurfaceCollisionComponent):
         return ()
 
     def accepts_floor_contact(self, entity, old_hitbox, current_hitbox, target_y, max_step_up):
+        if entity.go_through.get('drop_through', False):
+            return False
         if entity.velocity[1] < 0:
             return False
         if current_hitbox.bottom < target_y:
