@@ -39,6 +39,9 @@ class BiomeManager:
     def configure_weather(self, group: str, parallax):
         self.biome.configure_weather(group, parallax)
 
+    def configure_particles(self, group: str, parallax):
+        self.biome.configure_particles(group, parallax)
+
     def post_process(self, group: str, parallax):
         self.biome.post_process(group, parallax)
 

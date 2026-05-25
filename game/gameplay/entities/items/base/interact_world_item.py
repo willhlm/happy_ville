@@ -100,7 +100,7 @@ class InteractWorldItem(WorldItem):
         )
 
     def interact(self, player):
-        if self.picked_up or self.is_interacting:
+        if self.consumed or self.is_interacting:
             return False
         self.is_interacting = True
         self.interact_component.interact_with_pickup_text(player)

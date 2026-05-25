@@ -107,7 +107,14 @@ class Player(Character):
         return self.progression.abilities
 
     def _reset_flags(self):
-        self.flags = {'ground': False, 'shroompoline': False, 'attack_able': True, 'grounddash': True, 'sprint_chain_active': False}# flags to check if on ground (used for jumpåing), #a flag to make sure you can only swing sword when this is False
+        self.flags = {
+            'ground': False,
+            'bounce_jump': False,
+            'attack_able': True,
+            'grounddash': True,
+            'sprint_chain_active': False,
+        }# flags to check if on ground (used for jumpåing), #a flag to make sure you can only swing sword when this is False
+        self.bounce_jump_boost = 1
 
     def update_render(self, dt):#called in group
         scaled_dt = self.hitstop.get_sim_dt(dt)
@@ -156,8 +163,22 @@ class Player(Character):
     def on_go_through_timeout(self):
         self.flags['go_through'] = False
 
-    def on_shroomjump_timout(self):
-        self.flags['shroompoline'] = False
+    def arm_bounce_jump(self, jump_boost=1, duration=C.shroomjump_timer_player):
+        self.flags['bounce_jump'] = True
+        self.bounce_jump_boost = jump_boost
+        self.game_objects.timer_manager.remove_ID_timer('bounce_jump')
+        self.game_objects.timer_manager.start_timer(duration, self.on_bounce_jump_timeout, ID='bounce_jump')
+
+    def consume_bounce_jump(self):
+        jump_boost = self.bounce_jump_boost
+        self.flags['bounce_jump'] = False
+        self.bounce_jump_boost = 1
+        self.game_objects.timer_manager.remove_ID_timer('bounce_jump')
+        return jump_boost
+
+    def on_bounce_jump_timeout(self):
+        self.flags['bounce_jump'] = False
+        self.bounce_jump_boost = 1
 
     def on_grounddash_timout(self):
         self.flags['grounddash'] = True

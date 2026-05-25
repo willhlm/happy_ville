@@ -19,9 +19,8 @@ class Shroompoline(Enemy):#an enemy or interactable?
             if self.game_objects.player.hitbox.bottom < self.jump_box.top + offset:
                 self.currentstate.enter_state('Hurt')
                 self.game_objects.player.velocity[1] = -10
-                player.flags['shroompoline'] = True
                 self.game_objects.player.currentstate.enter_state('Jump_main')
-                self.game_objects.timer_manager.start_timer(C.shroomjump_timer_player, player.on_shroomjump_timout)#adds a timer to timer_manager and sets self.invincible to false after a while
+                player.arm_bounce_jump(jump_boost=2)
 
     def update_hitbox(self):
         self.body.update_hitbox()

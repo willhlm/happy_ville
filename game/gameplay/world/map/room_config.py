@@ -17,6 +17,7 @@ class MusicTrackConfig:
 class RoomConfig:
     music: Optional[List[MusicTrackConfig]] = None
     weather: Optional[Dict[str, Any]] = None
+    particles: Optional[Dict[str, Any]] = None
     live_blur: Optional[bool] = None
     ambient_light: Optional[Any] = None
     player_lights: Optional[List[Dict[str, Any]]] = None
@@ -31,6 +32,8 @@ def merge_room_configs(*configs: RoomConfig) -> RoomConfig:
             merged.music = deepcopy(config.music)
         if config.weather is not None:
             merged.weather = deepcopy(config.weather)
+        if config.particles is not None:
+            merged.particles = deepcopy(config.particles)
         if config.live_blur is not None:
             merged.live_blur = config.live_blur
         if config.ambient_light is not None:

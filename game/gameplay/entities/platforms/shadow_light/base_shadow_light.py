@@ -9,7 +9,7 @@ class BaseShadowLight(TexturedPlatform):#parent class: add the subclasses to cos
 
     def check_light(self):
         new_platforms = []
-        for light in self.game_objects.lights.light_sources:
+        for light in self.game_objects.lights.iter_active_lights():
             #if not light.shadow_light: continue
             if not self.hitbox.colliderect(light.hitbox): continue
 

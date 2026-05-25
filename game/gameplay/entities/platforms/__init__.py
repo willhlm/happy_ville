@@ -8,6 +8,7 @@ from .dynamic.smacker.smacker import Smacker
 from .shadow_light.shadow_light_1 import ShadowLight_1
 from .actors.boulder.boulder_platform import BoulderPlatform
 from .texture.seed_platform import SeedPlatform
+from .texture.flower.flower_platform import FlowerPlatform
 from .actors.bridge.bridge_platform import BridgePlatform
 from .texture.conveyor_belt import ConveyorBelt
 from .actors.door.left_door_platform import LeftDoorPlatform

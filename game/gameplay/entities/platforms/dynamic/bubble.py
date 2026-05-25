@@ -110,6 +110,10 @@ class Bubble(DynamicPlatform):#dynamic one: #shoudl be added to platforms and dy
                     self.velocity[1] += dir[1] * 0.1
 
     def platform_collision(self, platform):# Determine the direction of collision based on velocity and relative positions
+        if isinstance(platform, Bubble):
+            if self._resolve_bubble_collision(platform):
+                return
+
         if self.velocity[1] > 0:  # Moving down
             if self.hitbox.bottom > platform.hitbox.top and self.hitbox.top < platform.hitbox.bottom:# Collision from the top of the platform
             # self.rect.bottom = platform.hitbox.top  # Resolve collision
@@ -127,3 +131,19 @@ class Bubble(DynamicPlatform):#dynamic one: #shoudl be added to platforms and dy
             if self.hitbox.left < platform.hitbox.right and self.hitbox.right > platform.hitbox.left:# Collision from the right side of the platform
                 pass
                 #self.rect.left = platform.hitbox.right  # Resolve collision
+
+    def _resolve_bubble_collision(self, platform):
+        if not self.hitbox.colliderect(platform.hitbox):
+            return False
+
+        if self.old_hitbox.bottom <= platform.old_hitbox.top + 1:
+            return True
+
+        if self.old_hitbox.top >= platform.old_hitbox.bottom - 1:
+            self.deactivate()
+            return True
+
+        if self.hitbox.centery >= platform.hitbox.centery:
+            self.deactivate()
+
+        return True
