@@ -127,12 +127,6 @@ class StaticSpawner(c.SpawnerCommon):
                         priority = property["value"]
                 self.game_objects.camera_blocks.add(c.Stop(self.game_objects, object_size, object_position, mode, camera_offset, priority))
 
-            elif local_id == 15:
-                particle_type = next(property["value"] for property in properties if property["name"] == "particle")
-                shader_screen = getattr(c.screen_particles, particle_type)
-                target_groups = self.game_objects.all_fgs if layer_name.startswith("fg") else self.game_objects.all_bgs
-                target_groups.add(layer_name, shader_screen(self.game_objects, parallax, 20))
-
             elif local_id == 16:
                 kwargs = {}
                 for property in properties:

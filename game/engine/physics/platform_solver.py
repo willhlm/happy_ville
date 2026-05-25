@@ -339,9 +339,12 @@ class PlatformCollisionSolver:
             getattr(contact_state, 'support_body', None),
             getattr(contact_state, 'previous_support_body', None),
         ):
-            if platform is not None:
+            if platform is not None and self._is_active_support_candidate(platform):
                 candidates.append(platform)
         return candidates
+
+    def _is_active_support_candidate(self, platform):
+        return platform in self.game_objects.platforms
 
     def _is_touching_support(self, entity, platform):
         hitbox = entity.hitbox

@@ -3,6 +3,7 @@ from copy import deepcopy
 from engine.utils import read_files
 
 from gameplay.world.weather import weather
+from gameplay.entities.visuals.particles import screen_particles
 
 from ..room_config import RoomConfig, merge_room_configs
 
@@ -15,6 +16,7 @@ class Biome:
         self.level = map_loader
         self.live_blur = False
         self.weather_config = {}
+        self.particles_config = {}
         self.active_room_id = None
         self._current_music_signature = None
         self._weather_registry = {
@@ -39,6 +41,7 @@ class Biome:
     def clear_biome(self):
         self.live_blur = False
         self.weather_config = {}
+        self.particles_config = {}
         self.active_room_id = None
         self._current_music_signature = None
 
@@ -61,6 +64,7 @@ class Biome:
         self.active_room_id = room_id
         self.live_blur = False
         self.weather_config = {}
+        self.particles_config = {}
 
         config = self.get_room_config(room_id)
 
@@ -69,6 +73,8 @@ class Biome:
 
         if config.weather is not None:
             self.weather_config = deepcopy(config.weather)
+        if config.particles is not None:
+            self.particles_config = deepcopy(config.particles)
 
         self._apply_music(config.music or [])
 
@@ -110,3 +116,28 @@ class Biome:
                     self.level.game_objects.all_fgs.add(group, new_weather)
                 else:
                     self.level.game_objects.all_bgs.add(group, new_weather)
+
+    def configure_particles(self, group: str, parallax):
+        particle_config = self.particles_config.get("layers", {}).get(group)
+        if not particle_config:
+            return
+
+        particle_name = particle_config.get("particle", particle_config.get("type"))
+        if not particle_name:
+            return
+
+        self._spawn_particle_layer(
+            group,
+            parallax,
+            particle_name=particle_name,
+            number_particles=particle_config.get("number_particles", 20),
+        )
+
+    def _spawn_particle_layer(self, group: str, parallax, particle_name: str, number_particles: int = 20):
+        particle_cls = getattr(screen_particles, particle_name)
+        new_particle_layer = particle_cls(self.level.game_objects, parallax, number_particles)
+
+        if group.startswith("fg"):
+            self.level.game_objects.all_fgs.add(group, new_particle_layer)
+        else:
+            self.level.game_objects.all_bgs.add(group, new_particle_layer)

@@ -1,13 +1,18 @@
+from itertools import chain
 from engine.render.blur_kernel import build_gaussian_kernel
-
 from engine.lights.source import LightSource
-
 
 class LightManager:
     def __init__(self, game_objects):
         self.game_objects = game_objects
         self.set_ambient_light([0, 0, 0, 0])
-        self.light_sources = []
+        # Policy:
+        # - only active lights count against max_light_sources
+        # - sleeping lights stay registered under their owner and can wake later
+        # - if the active pool is full, waking lights remain paused
+        self.active_lights = []
+        self.paused_lights = []
+        self.owner_lights = {}
         self.shaders = {
             'light': game_objects.shaders['light'],
             'blur': game_objects.shaders['blur_fast'],
@@ -27,6 +32,8 @@ class LightManager:
         self.blur_radius = 2.0
         self._blur_r_int = 0
         self._blur_weights = None
+        self._point_capacity = self.max_occluder_rectangles * 4
+        self._init_render_buffers()
         self._rebuild_blur_kernel()
         self.update_render(0)
 
@@ -43,31 +50,57 @@ class LightManager:
     def _rebuild_blur_kernel(self):
         self._blur_r_int, self._blur_weights = build_gaussian_kernel(self.blur_radius)
 
-    def update_render(self, dt):
+    def _init_render_buffers(self):
         self.normal_interact = [0] * self.max_light_sources
         self.num_rectangle = [0] * self.max_light_sources
         self.occluder_start_index = [0] * self.max_light_sources
-        self.points = []
-        self.positions = [(0, 0)] * self.max_light_sources
+        self.positions = [[0, 0] for _ in range(self.max_light_sources)]
         self.radius = [0] * self.max_light_sources
         self.colour = [[0, 0, 0, 0] for _ in range(self.max_light_sources)]
         self.start_angle = [0] * self.max_light_sources
         self.end_angle = [0] * self.max_light_sources
         self.min_radius = [0] * self.max_light_sources
+        self.points = [[0, 0] for _ in range(self._point_capacity)]
+
+    def _reset_render_buffers(self):
+        for index in range(self.max_light_sources):
+            self.normal_interact[index] = 0
+            self.num_rectangle[index] = 0
+            self.occluder_start_index[index] = 0
+            self.positions[index][0] = 0
+            self.positions[index][1] = 0
+            self.radius[index] = 0
+            self.colour[index][0] = 0
+            self.colour[index][1] = 0
+            self.colour[index][2] = 0
+            self.colour[index][3] = 0
+            self.start_angle[index] = 0
+            self.end_angle[index] = 0
+            self.min_radius[index] = 0
+
+        for index in range(self._point_capacity):
+            self.points[index][0] = 0
+            self.points[index][1] = 0
+
+    def update_render(self, dt):
+        self._reset_render_buffers()
         rectangle_cursor = 0
         active_light_count = 0
 
-        for light in self.light_sources[:]:
+        for light in self.active_lights[:]:
             light.update(dt)
+            if light not in self.active_lights:
+                continue
             if not self._should_render_light(light):
                 continue
 
-            self.positions[active_light_count] = (
-                light.position[0],
-                self.game_objects.game.window_size[1] - light.position[1],
-            )
+            self.positions[active_light_count][0] = light.position[0]
+            self.positions[active_light_count][1] = self.game_objects.game.window_size[1] - light.position[1]
             self.radius[active_light_count] = light.radius
-            self.colour[active_light_count] = light.colour
+            self.colour[active_light_count][0] = light.colour[0]
+            self.colour[active_light_count][1] = light.colour[1]
+            self.colour[active_light_count][2] = light.colour[2]
+            self.colour[active_light_count][3] = light.colour[3]
             self.start_angle[active_light_count] = light.start_angle
             self.end_angle[active_light_count] = light.end_angle
             self.min_radius[active_light_count] = light.min_radius
@@ -75,7 +108,6 @@ class LightManager:
             rectangle_cursor = self.list_points(light, active_light_count, rectangle_cursor)
             active_light_count += 1
 
-        self.points.extend([(0, 0)] * (self.max_occluder_rectangles * 4 - len(self.points)))
         self.active_light_count = active_light_count
         self.shaders['light']['num_lights'] = active_light_count
 
@@ -104,43 +136,168 @@ class LightManager:
             self.occluder_start_index[index] = rectangle_cursor
             return rectangle_cursor
 
-        platforms = self.game_objects.physics.platform_spatial_index.query_rect(light.hitbox)
+        platforms = self._get_light_platforms(light)
         available = max(self.max_occluder_rectangles - rectangle_cursor, 0)
         platforms = platforms[:available]
         self.occluder_start_index[index] = rectangle_cursor
         self.num_rectangle[index] = len(platforms)
-        self.points.extend(self.get_points(platforms))
+        self._write_platform_points(platforms, rectangle_cursor)
         return rectangle_cursor + len(platforms)
 
-    def get_points(self, platforms):
-        points = []
+    def _get_light_platforms(self, light):
+        if light.cache_platforms and light._cached_platforms is not None:
+            return light._cached_platforms
+
+        platforms = self.game_objects.physics.platform_spatial_index.query_rect(light.hitbox)
+        if light.cache_platforms:
+            light._cached_platforms = platforms
+        return platforms
+
+    def _write_platform_points(self, platforms, rectangle_cursor):
         scroll = self.game_objects.camera_manager.camera.scroll
+        point_index = rectangle_cursor * 4
         for rec in platforms:
-            points += [
-                (rec.hitbox.topleft[0] - scroll[0], rec.hitbox.topleft[1] - scroll[1]),
-                (rec.hitbox.topright[0] - scroll[0], rec.hitbox.topright[1] - scroll[1]),
-                (rec.hitbox.bottomright[0] - scroll[0], rec.hitbox.bottomright[1] - scroll[1]),
-                (rec.hitbox.bottomleft[0] - scroll[0], rec.hitbox.bottomleft[1] - scroll[1]),
-            ]
-        return points
+            self.points[point_index][0] = rec.hitbox.topleft[0] - scroll[0]
+            self.points[point_index][1] = rec.hitbox.topleft[1] - scroll[1]
+            self.points[point_index + 1][0] = rec.hitbox.topright[0] - scroll[0]
+            self.points[point_index + 1][1] = rec.hitbox.topright[1] - scroll[1]
+            self.points[point_index + 2][0] = rec.hitbox.bottomright[0] - scroll[0]
+            self.points[point_index + 2][1] = rec.hitbox.bottomright[1] - scroll[1]
+            self.points[point_index + 3][0] = rec.hitbox.bottomleft[0] - scroll[0]
+            self.points[point_index + 3][1] = rec.hitbox.bottomleft[1] - scroll[1]
+            point_index += 4
 
     def clear_lights(self):
-        self.light_sources = []
+        self.active_lights = []
+        self.paused_lights = []
+        self.owner_lights = {}
         self.shaders['light']['num_lights'] = 0
 
-    def create(self, target, *, components=None, **properties):
-        if len(self.light_sources) >= self.max_light_sources:
-            return None
+    def iter_active_lights(self):
+        return iter(self.active_lights)
 
+    def iter_lights(self):
+        return chain(self.active_lights, self.paused_lights)
+
+    def create(self, target, *, components=None, **properties):
         light = LightSource(self.game_objects, target, components=components, **properties)
-        self.light_sources.append(light)
-        self.shaders['light']['num_lights'] = len(self.light_sources)
+        owner = self._get_managed_owner(target)
+        light.owner = owner
+        if owner is None:
+            if not self._has_active_capacity():
+                return None
+            self.active_lights.append(light)
+        else:
+            self.owner_lights.setdefault(owner, []).append(light)
+            # Managed owners can create lights while sleeping; those lights stay paused
+            # until the owner wakes and there is active capacity available.
+            target_list = self.paused_lights if owner.pause_group in owner.groups() else self.active_lights
+            if target_list is self.active_lights and not self._has_active_capacity():
+                self._remove_from_list(self.owner_lights[owner], light)
+                if not self.owner_lights[owner]:
+                    self.owner_lights.pop(owner, None)
+                return None
+            target_list.append(light)
+        self.shaders['light']['num_lights'] = len(self.active_lights)
         return light
 
     def remove(self, light):
-        if light in self.light_sources:
-            self.light_sources.remove(light)
-            self.shaders['light']['num_lights'] = len(self.light_sources)
+        self._remove_light(light, promote=True)
+
+    def _remove_light(self, light, *, promote):
+        self._remove_from_list(self.active_lights, light)
+        self._remove_from_list(self.paused_lights, light)
+        owner = light.owner
+        if owner is not None:
+            lights = self.owner_lights.get(owner, [])
+            self._remove_from_list(lights, light)
+            if not lights:
+                self.owner_lights.pop(owner, None)
+        light.owner = None
+        if promote:
+            self._promote_paused_lights()
+        self.shaders['light']['num_lights'] = len(self.active_lights)
+
+    def detach_from_owner(self, light):
+        owner = light.owner
+        if owner is None:
+            return
+
+        lights = self.owner_lights.get(owner, [])
+        self._remove_from_list(lights, light)
+        if not lights:
+            self.owner_lights.pop(owner, None)
+        light.owner = None
+
+        if light in self.paused_lights:
+            # Detached lights become free-floating effects, but they still respect
+            # the active-light cap instead of bypassing it.
+            if self._has_active_capacity():
+                self.paused_lights.remove(light)
+                self.active_lights.append(light)
+            else:
+                self._promote_paused_lights()
+
+        self.shaders['light']['num_lights'] = len(self.active_lights)
+
+    def on_owner_slept(self, owner):
+        for light in self.owner_lights.get(owner, []):
+            if light in self.active_lights:
+                self.active_lights.remove(light)
+                self.paused_lights.append(light)
+        self._promote_paused_lights()
+        self.shaders['light']['num_lights'] = len(self.active_lights)
+
+    def on_owner_woke(self, owner):
+        for light in self.owner_lights.get(owner, []):
+            # Waking is best-effort: the owner may wake without recovering all of
+            # its lights if the active pool is already full.
+            if not self._has_active_capacity():
+                break
+            if light in self.paused_lights:
+                self.paused_lights.remove(light)
+                self.active_lights.append(light)
+        self.shaders['light']['num_lights'] = len(self.active_lights)
+
+    def remove_owner_lights(self, owner):
+        for light in list(self.owner_lights.get(owner, [])):
+            self._remove_light(light, promote=False)
+        self._promote_paused_lights()
+        self.shaders['light']['num_lights'] = len(self.active_lights)
+
+    def _get_managed_owner(self, target):
+        if getattr(target, 'always_active', False):
+            return None
+        if not hasattr(target, 'group') or not hasattr(target, 'pause_group'):
+            return None
+        return target
+
+    @staticmethod
+    def _remove_from_list(items, light):
+        if light in items:
+            items.remove(light)
+
+    def _has_active_capacity(self):
+        return len(self.active_lights) < self.max_light_sources
+
+    def _promote_paused_lights(self):
+        if not self._has_active_capacity():
+            return
+
+        for light in list(self.paused_lights):
+            if not self._has_active_capacity():
+                break
+            if not self._is_wake_eligible(light):
+                continue
+            self.paused_lights.remove(light)
+            self.active_lights.append(light)
+
+    @staticmethod
+    def _is_wake_eligible(light):
+        owner = light.owner
+        if owner is None:
+            return False
+        return owner.pause_group not in owner.groups()
 
     def draw(self, target):
         self.shaders['light']['rectangleCorners'] = self.points

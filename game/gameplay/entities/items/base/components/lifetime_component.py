@@ -4,7 +4,8 @@ class ItemLifetimeComponent:
         self.lifetime = lifetime
 
     def update(self, dt):
+        if self.item.consumed:
+            return
         self.lifetime -= dt
         if self.lifetime <= 0:
-            self.item.kill()
-
+            self.item.start_fade()

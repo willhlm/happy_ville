@@ -56,6 +56,7 @@ class SceneBuilder:
             self._load_layers(gdata["layers"], parallax, offset, ctx, map_def, group, biome_mgr.biome, viewport_center)
             self._load_objects(gdata["objects"], parallax, offset, "front", ctx, biome_mgr, map_def, group, viewport_center)
 
+            biome_mgr.configure_particles(group, parallax)
             biome_mgr.configure_weather(group, parallax)
             biome_mgr.post_process(group, parallax)
 

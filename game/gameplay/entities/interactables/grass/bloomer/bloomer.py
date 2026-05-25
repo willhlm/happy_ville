@@ -33,15 +33,8 @@ class Bloomer(Interactables):
         self.bloomed = True
         self.currentstate.handle_input('bloom')
         self.bloom_stimulus = self.game_objects.stimuli.register_source(self, channel='light', radius=300, strength=1.6, falloff=0.0015, tags={'flower'})
-        self.bloom_light = self.game_objects.lights.create(self, radius=300, colour=[255, 255, 255, 255])
-        self.shader_state.add_shader(
-            'glow',
-            colour=(132 / 255, 255 / 255, 246 / 255),
-            intensity=0.9,
-            radial_center=(33/48, (32-13)/32),
-            radial_inner=0.1,
-            radial_outer=0.3,
-        )
+        self.bloom_light = self.game_objects.lights.create(self, cache_platforms = True, radius=300, colour=[255, 255, 255, 255])
+        self.shader_state.add_shader('glow', colour=(132 / 255, 255 / 255, 246 / 255), intensity=0.9, radial_center=(33/48, (32-13)/32), radial_inner=0.1, radial_outer=0.3)
 
     def on_noncollision(self, entity):#one time none collision
         pass

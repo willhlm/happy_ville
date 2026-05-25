@@ -29,5 +29,6 @@ class StaticEntity(pygame.sprite.Sprite):#all enteties
 
     def kill(self):
         self.on_kill_cleanup()
+        self.game_objects.lights.remove_owner_lights(self)
         self.game_objects.deferred_textures.track(self)
         super().kill()

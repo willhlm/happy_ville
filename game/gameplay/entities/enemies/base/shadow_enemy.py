@@ -5,7 +5,7 @@ class ShadowEnemy(Enemy):#enemies that can onlly take dmg in light -> dark forst
         super().__init__(pos,game_objects)
 
     def check_light(self):
-        for light in self.game_objects.lights.light_sources:
+        for light in self.game_objects.lights.iter_active_lights():
             if not light.shadow_interact: continue
             collision = self.hitbox.colliderect(light.hitbox)
             if collision:

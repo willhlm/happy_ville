@@ -57,6 +57,7 @@ class ActivationManager:
             return
         sprite.remove(sprite.group)
         sprite.add(sprite.pause_group)
+        self.game_objects.lights.on_owner_slept(sprite)
 
     def wake(self, sprite):
         if not self._is_managed(sprite):
@@ -65,6 +66,7 @@ class ActivationManager:
             return
         sprite.add(sprite.group)
         sprite.remove(sprite.pause_group)
+        self.game_objects.lights.on_owner_woke(sprite)
 
     def _is_managed(self, sprite):
         return hasattr(sprite, "group") and hasattr(sprite, "pause_group")

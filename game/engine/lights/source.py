@@ -9,6 +9,7 @@ class LightSource:
         self.game_objects = game_objects
         self.manager = game_objects.lights
         self.target = target
+        self.owner = None
 
         radius = float(properties.get('radius', 150))
         self.init_radius = radius
@@ -22,8 +23,10 @@ class LightSource:
         self.parallax = properties.get('parallax', [1, 1])
 
         self.platform_interact = properties.get('platform_interact', False)
+        self.cache_platforms = properties.get('cache_platforms', False)
         self.normal_interact = float(properties.get('normal_interact', True))
         self.shadow_interact = properties.get('shadow_interact', False)
+        self._cached_platforms = None
 
         center_getter = resolve_center_getter(target)
         center = center_getter()
@@ -51,6 +54,7 @@ class LightSource:
 
     def detach(self):
         self.sync = StaticPositionSync(lambda: self.hitbox.center)
+        self.manager.detach_from_owner(self)
 
     def kill(self):
         self.manager.remove(self)
@@ -62,9 +66,13 @@ class LightSource:
         self.hitbox.height = radius * 2
         self.hitbox.center = center
         self.rect = self.hitbox.copy()
+        self.invalidate_platform_cache()
 
     def set_alpha(self, alpha):
         self.colour[-1] = max(0.0, min(1.0, alpha / 255))
+
+    def invalidate_platform_cache(self):
+        self._cached_platforms = None
 
     def sync_render_position(self):
         scroll = self.game_objects.camera_manager.camera.scroll

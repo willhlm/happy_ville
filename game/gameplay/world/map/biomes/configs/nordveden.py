@@ -28,6 +28,15 @@ DEFAULT_ROOM_CONFIG = RoomConfig(
             }
         },
     },
+    particles={
+        "layers": {
+            "bg2": {"particle": "Vertical_circles", "number_particles": 20},
+            "bg3": {"particle": "Vertical_circles", "number_particles": 20},
+            "bg4": {"particle": "Vertical_circles", "number_particles": 20},
+            "bg5": {"particle": "Vertical_circles", "number_particles": 20},
+            "bg6": {"particle": "Vertical_circles", "number_particles": 20},
+        }
+    },
 )
 
 ROOM_CONFIGS = {

@@ -626,30 +626,6 @@
                          "width":640,
                          "x":208,
                          "y":752
-                        }, 
-                        {
-                         "height":0,
-                         "id":1935,
-                         "name":"",
-                         "polygon":[
-                                {
-                                 "x":0,
-                                 "y":0
-                                }, 
-                                {
-                                 "x":128,
-                                 "y":128
-                                }, 
-                                {
-                                 "x":0,
-                                 "y":128
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":0,
-                         "x":1456,
-                         "y":816
                         }],
                  "opacity":1,
                  "type":"objectgroup",

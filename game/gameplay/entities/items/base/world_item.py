@@ -29,7 +29,7 @@ class WorldItem(AnimatedEntity):
         self.shader_state = EntityShaderManager(self)
         self.lifetime_component = None
         self.age = 0
-        self.picked_up = False
+        self.consumed = False
 
     #item difnition methods
     @classmethod
@@ -69,12 +69,18 @@ class WorldItem(AnimatedEntity):
         pass
 
     def try_pickup(self, player):
-        if self.picked_up:
+        if self.consumed:
             return False
         if self.pickup(player) is False:
             return False
-        self.picked_up = True
+        self.consumed = True
         return True
+
+    def start_fade(self, alpha=255, fade_rate=0.9, kill_threshold=10):
+        if self.consumed: return            
+        self.consumed = True
+        self.velocity = [0, 0]
+        self.shader_state.enter_state('Alpha', alpha=alpha, fade_rate=fade_rate, kill_threshold=kill_threshold, on_complete=self.kill)
 
     #collisiona and platform support
     def on_collision(self, entity):
