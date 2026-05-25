@@ -55,7 +55,7 @@ class ComponentPlatform(DynamicPlatform):
         self.props = props
         self.crushes_entities = parse_bool(props.get('crushes_entities', True), default=True)
 
-        name = props.get("sprite_path", "generic/default")    
+        name = props.get("sprite_path", "generic/default")
         self.sprites = read_files.load_sprites_dict(f"assets/sprites/entities/platforms/{name}" + '/', game_objects)
         self.image = self.sprites["idle"][0]
 
@@ -79,7 +79,7 @@ class ComponentPlatform(DynamicPlatform):
 
     def kill(self):
         self.components = []
-        super().kill()            
+        super().kill()
 
     def draw(self, target):
         self.game_objects.game.display.render(self.image,target,
@@ -87,4 +87,4 @@ class ComponentPlatform(DynamicPlatform):
                 int(self.rect[0] - self.game_objects.camera_manager.camera.scroll[0]),
                 int(self.rect[1] - self.game_objects.camera_manager.camera.scroll[1]),
             ),
-        )        
+        )

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.8" tiledversion="1.8.2" name="interactables" tilewidth="224" tileheight="288" tilecount="16" columns="0">
+<tileset version="1.10" tiledversion="1.10.1" name="interactables" tilewidth="224" tileheight="288" tilecount="17" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <transformations hflip="1" vflip="0" rotate="0" preferuntransformed="0"/>
  <tile id="2">
@@ -83,5 +83,8 @@
    <property name="enemy_type" value=""/>
   </properties>
   <image width="96" height="112" source="../../sprites/entities/interactables/larv_web/idle/idle.png"/>
+ </tile>
+ <tile id="18">
+  <image width="55" height="50" source="../../sprites/entities/interactables/chests/amber_bush/full/001.png"/>
  </tile>
 </tileset>

@@ -3,6 +3,7 @@ from .ability_ball.boss_reward_ball import BossRewardBall
 from .chests.chest_3 import Chest_3 as Chest
 from .chests.amber_rock import AmberRock
 from .chests.amber_tree import AmberTree
+from .chests.amber_bush import AmberBush
 
 from .doors.door_interact import DoorInteract
 from .doors.door import Door
@@ -29,7 +30,7 @@ from .sign.sign import Sign
 from .sources.bubble_source import BubbleSource
 from .sources.crystal_source import CrystalSource
 from .sources.falling_rock.falling_rock_source import FallingRockSource
-from .sources.droplet.droplet_source import DropletSource 
+from .sources.droplet.droplet_source import DropletSource
 
 from .statues.abilities.air_dash_upgrade_statue import AirDashUpgradeStatue
 from .statues.abilities.ability_upgrade_statue import ThunderAbilityUpgradeStatue

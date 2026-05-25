@@ -92,7 +92,7 @@ class InteractableSpawner(c.SpawnerCommon):
 
             elif local_id == 18:
                 state = self.game_objects.world_state.objects.get_bucket(biome_room_name, "loot_container").get(str(loot_container_index), False)
-                self.game_objects.interactables.add(c.AmberRock(object_position, self.game_objects, state, str(loot_container_index)))
+                self.game_objects.interactables.add(c.AmberBush(object_position, self.game_objects, state, str(loot_container_index)))
                 loot_container_index += 1
 
             elif local_id == 19:

@@ -34,19 +34,19 @@ class Player(Character):
         self.combat_tracker = CombatTracker()
         self.sword = Sword(self)
 
-        self._reset_flags()                
+        self._reset_flags()
         self.grounding = PlayerGrounding(self)
         self.currentstate = StateManager(self)
         self.progression = PlayerProgressionManager(self)
         self.death_manager = DeathManager(self)
-        self.hazard_resolver = PlayerHazardResolver(self)    
+        self.hazard_resolver = PlayerHazardResolver(self)
 
         self.backpack = backpack.Backpack(self)
         self.status_component = StatusComponent(self, registry={'wet': lambda entity: Wet(entity, 60)})
 
         self.hit_component.set_invincibility_time(C.invincibility_time_player)
-        self.reset_movement()     
-        
+        self.reset_movement()
+
     def update_vel(self, dt):#called from hitsop_states
         context = self.movement_manager.resolve()
         self._movement_context = context
@@ -87,7 +87,7 @@ class Player(Character):
     def reset_movement(self):#called when loading new map or entering conversations
         self.acceleration =  [0, C.acceleration[1]]
         self.friction = C.friction_player.copy()
-        self._reset_flags()        
+        self._reset_flags()
         self.movement_manager.clear_modifiers()#maybe probably not all should be cleared?
 
     def heal_vitals(self, health=1):
@@ -107,11 +107,11 @@ class Player(Character):
         return self.progression.abilities
 
     def _reset_flags(self):
-        self.flags = {'ground': False, 'shroompoline': False, 'attack_able': True, 'grounddash': True, 'sprint_chain_active': False}# flags to check if on ground (used for jumpåing), #a flag to make sure you can only swing sword when this is False        
+        self.flags = {'ground': False, 'shroompoline': False, 'attack_able': True, 'grounddash': True, 'sprint_chain_active': False}# flags to check if on ground (used for jumpåing), #a flag to make sure you can only swing sword when this is False
 
     def update_render(self, dt):#called in group
         scaled_dt = self.hitstop.get_sim_dt(dt)
-        self.shader_state.update_render(scaled_dt)        
+        self.shader_state.update_render(scaled_dt)
 
     def update(self, dt):
         self.prev_true_pos = self.true_pos.copy()#save previous position for interpolation
@@ -119,7 +119,7 @@ class Player(Character):
         scaled_dt = self.hitstop.get_sim_dt(dt)
 
         self.abilities.update(scaled_dt)
-        self.movement_manager.update(scaled_dt)#update the movement manager: modifers 
+        self.movement_manager.update(scaled_dt)#update the movement manager: modifers
         self.update_vel(scaled_dt)
 
     def post_physics_update(self, dt):
@@ -152,6 +152,9 @@ class Player(Character):
 
     def end_coyote_time(self):
         self.grounding.end_coyote_time()
+
+    def on_go_through_timeout(self):
+        self.flags['go_through'] = False
 
     def on_shroomjump_timout(self):
         self.flags['shroompoline'] = False

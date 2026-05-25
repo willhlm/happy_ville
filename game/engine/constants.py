@@ -24,6 +24,7 @@ jump_dash_timer = 3#how many frames from pressing jump/dash to pressing dash/jum
 ground_dash_timer = 40 #cooldown frames between dash
 cayote_timer_player = 4#how many frames from falling in which the player can still jump
 air_timer = 14#for how long one can press A and keep jumping
+go_through_timer = 5
 
 #input buffers
 shroomjump_timer_player = 3#how many frames the player can press jump, after landing on a shroompolin, and do shroomjump
