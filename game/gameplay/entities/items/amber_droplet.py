@@ -33,7 +33,7 @@ class AmberDroplet(CollisionWorldItem):
 
         self.game_objects.sound.play_sfx(self.sounds['death'][0], vol=0.3)
 
-        self.game_objects.particles.emit("pick_up_spark", pos = self.hitbox.center, n=3, colour = [255, 240, 180, 255])
+        self.game_objects.particles.emit("pick_up_spark", pos = self.hitbox.center, n=2, colour = [255, 240, 180, 255])
         self.kill()
         #self.currentstate.handle_input('death')
 

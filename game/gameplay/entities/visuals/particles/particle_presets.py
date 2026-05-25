@@ -138,7 +138,7 @@ def pick_up_spark(pos, game_objects, *, colour):#used for pick up, mainly amber 
     # scale=0.8, fade_scale=7
     return (
         ParticleBuilder(pos, game_objects)
-        .spark(scale=0.8, colour=colour)
+        .spark(scale=0.6, colour=colour)
         .velocity_random(
             min_speed=8, max_speed=8,
         )
