@@ -85,6 +85,6 @@
   <image width="96" height="112" source="../../sprites/entities/interactables/larv_web/idle/idle.png"/>
  </tile>
  <tile id="18">
-  <image width="55" height="50" source="../../sprites/entities/interactables/chests/amber_bush/full/001.png"/>
+  <image width="61" height="56" source="../../sprites/entities/interactables/chests/amberbush/idle/001.png"/>
  </tile>
 </tileset>

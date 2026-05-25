@@ -33,7 +33,7 @@ shroomjump_timer_player = 3#how many frames the player can press jump, after lan
 invincibility_time_player = 50
 invincibility_time_enemy = 20
 sword_time_player = 25#how long one has to wait before can swing the sword again
-hurt_animation_length = 15#how long enteties turn white upon dmg
+hurt_animation_length = 7#how long enteties turn white upon dmg
 default_enemydmg_hitstop = 7
 down_angle = 0.45
 

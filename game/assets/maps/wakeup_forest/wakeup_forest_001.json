@@ -1685,15 +1685,15 @@
                         }, 
                         {
                          "gid":17490,
-                         "height":50,
-                         "id":362,
+                         "height":56,
+                         "id":364,
                          "name":"",
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":55,
-                         "x":1472,
-                         "y":672
+                         "width":61,
+                         "x":1495,
+                         "y":674
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -2520,7 +2520,7 @@
          "y":0
         }],
  "nextlayerid":96,
- "nextobjectid":363,
+ "nextobjectid":365,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.1",
