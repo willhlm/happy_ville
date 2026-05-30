@@ -28,6 +28,7 @@ class Idle(Basic_states):
 class Hit1(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
+        entity.amber_per_hit = 4
 
     def handle_input(self,input,**kwarg):
         if input == 'open':
@@ -36,6 +37,7 @@ class Hit1(Basic_states):
 class Hit2(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
+        entity.amber_per_hit = 10
 
     def handle_input(self,input,**kwarg):
         if input == 'open':
