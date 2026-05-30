@@ -1,4 +1,4 @@
-from .event_triggers import BossEncounter, ButterflyEncounter, EventTrigger, MiniBoss, Narration, StartLarvParty, StopLarvParty
+from .event_triggers import BossEncounter, ButterflyEncounter, EventTrigger, Narration, StartLarvParty, StopLarvParty
 from .fields import SlowmotionField
 from .hazards import Hole
 from .navigation import PathCollision, PathInteract, SafeSpawn

@@ -18,11 +18,8 @@ class BossEncounter(Sequence):
 
         self.game_objects.game.state_manager.exit_to_state('gameplay')
 
-        self.entity = kwargs.get('entity')
-        if not self.entity and kwargs.get('ID'):
-            self.entity = game_objects.map.ctx.references[kwargs['ID']]
-
         self.encounter_id = kwargs['ID']
+        self.entity = game_objects.map.ctx.references[self.encounter_id]
         self.config = get_boss_encounter_config(self.encounter_id)
         self.steps = self.config.get('steps', [])
         self.step_index = 0
@@ -64,12 +61,20 @@ class BossEncounter(Sequence):
             player.acceleration[0] = action['value']
         elif action_type == 'player_velocity_x':
             player.velocity[0] = action['value']
+        elif action_type == 'emit_signal':
+            signal_name = action.get('signal', self.entity.ID)
+            if signal_name:
+                self.game_objects.signals.emit(signal_name, **action.get('kwargs', {}))
+        elif action_type == 'entity_state':
+            self.entity.currentstate.enter_state(action['state'], **action.get('kwargs', {}))
         elif action_type == 'boss_tasks':
             self.entity.currentstate.clear_tasks()
             for task in action.get('tasks', []):
                 self.entity.currentstate.queue_task(**task)
             if action.get('start', True):
                 self.entity.currentstate.start_next_task()
+        elif action_type == 'boss_method':
+            getattr(self.entity, action['method'])(**action.get('kwargs', {}))
         elif action_type == 'boss_start_aggro':
             self.entity.start_aggro(delay=action.get('delay', 0))
         elif action_type == 'camera_exit':

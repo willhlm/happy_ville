@@ -9,6 +9,7 @@ class Boss(Enemy):
         self.vitals.set_health(self.vitals.max_health)
         self.always_active = True
         self.ID = ID
+        self.encounter_sequence_key = 'boss_encounter'
         self.reward = None
 
     def start_aggro(self, delay = 0):
@@ -18,10 +19,19 @@ class Boss(Enemy):
         self.currentstate.queue_task(task = 'think')
         self.currentstate.start_next_task()
 
+    def start_encounter_sequence(self):
+        if not self.ID:
+            return
+        if self.game_objects.sequence_manager.is_active(self.encounter_sequence_key):
+            return
+        self.game_objects.sequence_manager.start_sequence(self.encounter_sequence_key, ID=self.ID)
+
     def dead(self):#called when death animation is finished
         self.flags['aggro'] = False
         self.hit_component.set_invincibility(True) 
         self.game_objects.world_state.narrative.mark_boss_defeated(self.ID)
+        if self.ID:
+            self.game_objects.signals.emit(self.ID, phase="finish")
 
         reward = self.build_reward()
         if reward is not None:

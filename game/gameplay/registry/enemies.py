@@ -49,4 +49,5 @@ REGISTER_ENEMIES = {
     'flow_copter': FlowCopter,
     'spore_puff': SporePuff,    
     'moss': Moss,    
+    'toadess': Toadess,
 }

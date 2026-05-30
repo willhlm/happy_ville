@@ -2,7 +2,6 @@ import pygame
 
 from ..base import BaseArea
 
-
 class BossEncounter(BaseArea):
     blocks_on_flow_complete = True
 
@@ -12,7 +11,6 @@ class BossEncounter(BaseArea):
         self.hitbox = self.rect.copy()
         self.ID = kwarg.get('ID', False)
         self.kwarg = kwarg
-        self.event = kwarg.get('event', 'boss_encounter')
 
     def release_texture(self):
         pass
@@ -27,12 +25,9 @@ class BossEncounter(BaseArea):
             return
 
         if not self.game_objects.world_state.narrative.is_flow_complete(self.ID):
-            kwarg = dict(self.kwarg)
-            if self.ID:
-                kwarg['entity'] = self.game_objects.map.ctx.references[self.ID]
-            self.game_objects.sequence_manager.start_sequence(self.event, **kwarg)
+            self.game_objects.sequence_manager.start_sequence('boss_encounter', **self.kwarg)
         self.kill()
 
     @classmethod
     def get_completion_key(cls, kwarg):
-        return kwarg.get('ID', kwarg['event'])
+        return kwarg.get('ID', 'boss_encounter')

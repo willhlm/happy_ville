@@ -44,7 +44,7 @@ class WorldStateDrivenPlatform(StatefulTexturedPlatform):
         if self.ID_key is not None:
             self.game_objects.signals.subscribe(self.ID_key, self.toggle_platform)
 
-    def toggle_platform(self):
+    def toggle_platform(self, **kwargs):
         if self.ID_key is not None:
             self.game_objects.world_state.objects.toggle_bool(
                 self.game_objects.map.biome_room_name,
