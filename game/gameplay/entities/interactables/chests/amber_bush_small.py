@@ -3,13 +3,13 @@ from gameplay.entities.interactables.chests.base.loot_containers import LootCont
 from gameplay.entities.shared.components.loot.item_loot_emitter import ItemLootEmitterComponent
 from . import amber_bush_states
 
-class AmberBush(LootContainers):#amber source
+class AmberBushSmall(LootContainers):#amber source
     def __init__(self, pos, game_objects, state, ID_key):
         super().__init__(pos, game_objects, state, ID_key)
         self.sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/interactables/amber_tree/')
-        self.amber_per_hit = 4
-        self.currentstate = amber_bush_states.Idle(self)
-        self.health = 3
+        self.currentstate = amber_bush_states.Hit2(self)
+        self.amber_per_hit = 5
+        self.health = 1
         self.loot_emitter = ItemLootEmitterComponent(self, spawn_velocity=[0, -3.5], spawn_velocity_range=[2, 1])
 
     def on_collision(self, entity):#one time collision

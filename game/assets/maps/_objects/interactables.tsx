@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.10.1" name="interactables" tilewidth="224" tileheight="288" tilecount="17" columns="0">
+<tileset version="1.10" tiledversion="1.10.1" name="interactables" tilewidth="224" tileheight="288" tilecount="18" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <transformations hflip="1" vflip="0" rotate="0" preferuntransformed="0"/>
  <tile id="2">
@@ -86,5 +86,8 @@
  </tile>
  <tile id="18">
   <image width="61" height="56" source="../../sprites/entities/interactables/chests/amberbush/idle/001.png"/>
+ </tile>
+ <tile id="19">
+  <image width="44" height="43" source="../../sprites/entities/interactables/chests/amberbushsmall/idle/Sprite-0003.png"/>
  </tile>
 </tileset>
