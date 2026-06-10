@@ -14,7 +14,7 @@ class LootContainers(Interactables):
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
         self.hitbox.midbottom = self.rect.midbottom
 
-        self.health = 3
+        self.health = 1
         self.ID_key = ID_key#an ID key to identify which item that the player is intracting within the world
         self.loot_emitter = ItemLootEmitterComponent(self, spawn_velocity=[0, -2], spawn_velocity_range=[2, 0])
 
@@ -29,19 +29,19 @@ class LootContainers(Interactables):
 
     def loots(self):#this is called when the opening animation is finished
         self.loot_emitter.emit_inventory(self.inventory)
-   
+
     def take_dmg(self, effect):
         """Called by hit_component after modifiers run. Apply damage and effects."""
         self.health -= effect.damage
-        
+
         # Play hurt sound
         self.shader_state.handle_input('hurt', colour = [1,1,1,1], direction = [1,0.5])
-        self.hit_loot()        
-        
+        self.hit_loot()
+
         if self.health > 0:  # Still alive
             pass
         else:  # dead
-            self.currentstate.handle_input('open')        
+            self.currentstate.handle_input('open')
             self.game_objects.world_state.objects.set_bool(self.game_objects.map.biome_room_name,'loot_container',self.ID_key,True)
 
         return effect

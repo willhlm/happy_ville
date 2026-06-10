@@ -17,7 +17,12 @@ class Wolfies(Boss):
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 35, 45)
 
-        self.currentstate = task_manager.TaskManager(self, wolfies_states.STATE_REGISTRY, WOLFIES_CONFIG['patterns'])
+        self.currentstate = task_manager.TaskManager(
+            self,
+            wolfies_states.STATE_REGISTRY,
+            WOLFIES_CONFIG['patterns'],
+            WOLFIES_CONFIG['selector'],
+        )
 
         self.reward = ProgressionUnlockReward(
             preview_sprite='dash_ground_main',

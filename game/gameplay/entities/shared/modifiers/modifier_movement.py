@@ -20,6 +20,7 @@ class MovementManager:
         self.entity = entity
         self.modifiers = {}             # name -> modifier instance (stackable)
         self.authoritative_mods = {}    # name -> modifier instance (authoritative)
+        self.immunities = set()
 
         self._sorted_modifiers = []
         self._sorted_authoritative = []
@@ -39,12 +40,20 @@ class MovementManager:
         }
 
     def add_modifier(self, modifier, priority=0, authoritative=False, **kwarg):
+        if modifier in self.immunities:
+            return
         inst = self.registry[modifier](priority, **kwarg)
         if authoritative:
             self.authoritative_mods[modifier] = inst
         else:
             self.modifiers[modifier] = inst
         self._sort_modifiers()
+
+    def add_immunity(self, modifier):
+        self.immunities.add(modifier)
+
+    def remove_immunity(self, modifier):
+        self.immunities.discard(modifier)
 
     def remove_modifier(self, modifier):
         removed = False

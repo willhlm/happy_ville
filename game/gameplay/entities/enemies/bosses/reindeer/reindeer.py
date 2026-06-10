@@ -3,6 +3,7 @@ from gameplay.entities.enemies.base.boss import Boss
 from gameplay.entities.shared.boss_rewards import ProgressionUnlockReward
 from engine.utils import read_files
 from . import reindeer_states
+from .config import REINDEER_CONFIG
 from gameplay.entities.enemies.bosses.shared import task_manager
 from gameplay.entities.projectiles import HurtBox
 
@@ -13,16 +14,21 @@ class Reindeer(Boss):
         self.image = self.sprites['idle_nice'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 35, 45)
-        self.health = 2
-        self.currentstate = task_manager.TaskManager(self, reindeer_states.STATE_REGISTRY, reindeer_states.PATTERNS)
+        self.vitals.set_max_health(REINDEER_CONFIG['health'])
+        self.vitals.set_health(self.vitals.max_health)
+        self.currentstate = task_manager.TaskManager(
+            self,
+            reindeer_states.STATE_REGISTRY,
+            REINDEER_CONFIG['patterns'],
+            REINDEER_CONFIG['selector'],
+        )
 
         self.reward = ProgressionUnlockReward(
             preview_sprite='dash_ground_main',
             progress_key='dash',
         )
-        self.attack_distance = [100, 50]
-        #self.chase_distance = [200, 50]
-        self.jump_distance = [240, 50]
+        self.attack_distance = REINDEER_CONFIG['attack_distance']
+        self.jump_distance = REINDEER_CONFIG['jump_distance']
         self.attack = HurtBox
 
         self.light = self.game_objects.lights.create(self, radius=150)

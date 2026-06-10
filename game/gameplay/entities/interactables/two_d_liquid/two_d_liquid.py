@@ -84,3 +84,6 @@ class TwoDLiquid(StaticEntity):#inside interactables_fg group. fg because in fro
         vel_scale = [abs(seed.velocity[0])/20,abs(seed.velocity[1])/ 20]
         self.splash(seed.hitbox.midbottom, lifetime = 100, dir = [0,1], colour = [self.behavior.liquid_tint[0]*255, self.behavior.liquid_tint[1]*255, self.behavior.liquid_tint[2]*255, 255], vel = {'gravity': [14 * vel_scale[0], 7 * vel_scale[0]]}, fade_scale = 0.3, gradient=0, scale = 2)
         seed.seed_spawner.spawn_bubble()        
+
+    def take_hit(self, effect):
+        return False, effect

@@ -7,7 +7,7 @@ class AmberBush(LootContainers):#amber source
     def __init__(self, pos, game_objects, state, ID_key):
         super().__init__(pos, game_objects, state, ID_key)
         self.sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/interactables/amber_tree/')
-        self.amber_per_hit = 4
+        self.amber_per_hit = 5
         self.currentstate = amber_bush_states.Idle(self)
         self.health = 3
         self.loot_emitter = ItemLootEmitterComponent(self, spawn_velocity=[0, -3.5], spawn_velocity_range=[2, 1])

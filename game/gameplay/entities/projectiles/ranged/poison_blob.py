@@ -7,13 +7,13 @@ class PoisonBlob(PlatformProjectile):
         super().__init__(pos, game_objects)
         self.sprites = PoisonBlob.sprites
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0], pos[1], self.image.width,self.image.height)
+        self.rect = pygame.Rect(pos[0], pos[1], 16, 16)
         self.hitbox = self.rect.copy()
 
         self.lifetime = kwarg.get('lifetime', 100)
         self.dir = kwarg.get('dir', [1, -1])
         amp = kwarg.get('amp', [5, 5])
-        self.velocity = [-amp[0] * self.dir[0], amp[1] * self.dir[1]]
+        self.velocity = [amp[0] * self.dir[0], amp[1] * self.dir[1]]
 
     def update(self, dt):
         super().update(dt)
@@ -24,11 +24,11 @@ class PoisonBlob(PlatformProjectile):
 
     def on_projectile_clash_lost(self, other):
         self.velocity = [0,0]
-        self.currentstate.handle_input('Death')
+        self.currentstate.handle_input('death')
 
     def collision_platform(self,platform):
         self.velocity = [0,0]
-        self.currentstate.handle_input('Death')
+        self.currentstate.handle_input('death')
 
     def handle_platform_collision(self, collision):
         self.collision_platform(collision.collider)

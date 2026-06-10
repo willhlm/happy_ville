@@ -24,11 +24,13 @@ class Idle(Basic_states):
     def handle_input(self,input,**kwarg):
         if input == 'open':
             self.enter_state('Hit1')
+        elif input == 'break':
+            self.enter_state('Break')
 
 class Hit1(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
-        entity.amber_per_hit = 4
+        entity.amber_per_hit = 5
 
     def handle_input(self,input,**kwarg):
         if input == 'open':
@@ -42,6 +44,20 @@ class Hit2(Basic_states):
     def handle_input(self,input,**kwarg):
         if input == 'open':
             self.enter_state('Interacted')
+
+class Break(Basic_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def increase_phase(self):
+        self.enter_state('Fade')
+
+class Fade(Basic_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def increase_phase(self):
+        self.entity.kill()
 
 class Interacted(Basic_states):
     def __init__(self,entity):

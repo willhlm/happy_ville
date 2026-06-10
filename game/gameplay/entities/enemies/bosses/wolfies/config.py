@@ -3,6 +3,9 @@ WOLFIES_CONFIG = {
     'attack_distance': [100, 50],
     'jump_distance': [240, 50],
     'ability': 'dash',
+    'selector': {
+        'mode': 'random',
+    },
 
     'patterns': {
         "slash": {

@@ -1,0 +1,22 @@
+{
+  "camera": "Deer_encounter",
+  "steps": [
+    {
+      "time": 0,
+      "actions": [
+        { "type": "emit_signal", "signal": "bjorn_boss", "kwargs": { "phase": "start" } },
+        { "type": "player_state", "state": "idle" },
+        { "type": "player_acceleration_x", "value": 0 },
+        { "type": "boss_method", "method": "start_wake_intro" }
+      ]
+    },
+    {
+      "time": 180,
+      "actions": [
+        { "type": "mark_flow_complete" },
+        { "type": "camera_exit" },
+        { "type": "exit_state" }
+      ]
+    }
+  ]
+}

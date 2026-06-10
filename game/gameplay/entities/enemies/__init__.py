@@ -3,6 +3,8 @@ from .bosses.wolfies.wolfies import Wolfies
 from .bosses.rhoutta_encounter import RhouttaEncounter
 from .bosses.butterfly.butterfly import Butterfly
 from .bosses.cocoon.cocoon_boss import CocoonBoss
+from .bosses.toadess.toadess import Toadess
+from .bosses.bjorn.bjorn import Bjorn
 
 from .animals.bird.bird import Bird
 
@@ -39,7 +41,6 @@ from .common.ground.wild_swine.wild_swine import WildSwine
 from .common.ground.maggot.maggot import Maggot
 from .common.ground.hedge.hedge import Hedge
 from .common.ground.tagg_mus.tagg_mus import TaggMus
-from .common.ground.bjorn.bjorn import Bjorn
 from .common.ground.lyktgubbe.lyktgubbe import Lyktgubbe
 from .common.ground.trap_flower.trap_flower import TrapFlower
 from .common.ground.moss.moss import Moss

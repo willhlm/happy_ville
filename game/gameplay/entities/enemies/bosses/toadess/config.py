@@ -1,0 +1,101 @@
+TOADESS_CONFIG = {
+    "health": 10,
+    "attack_distance": [90, 60],
+    "jump_distance": [220, 90],
+    "selector": {
+        "mode": "random",
+        "phase_pattern_cycles": {
+            1: ["walk", "spit", "lick", "jump", "jump_chain"],
+            2: ["spit", "walk", "lick", "jump", "lick"],
+        },
+    },
+    "walk_speed": 5,
+    "walk_duration": 80,
+    "walk_stop_distance": 120,
+    "jump_speed": 2.6,
+    "jump_velocity": 7,
+    "fall_animation": "jump_main",
+    "hurt_recovery": 180,
+    "attack_cooldowns": {
+        "lick": 75,
+        "spit": 110,
+    },
+    "phase_health_thresholds": {
+        "phase_2": 0.5,
+    },
+    "patterns": {
+        "walk": {
+            "range": "far",
+            "tasks": [
+                {"task": "walk", "duration": 80},
+                {"task": "think"},
+            ],
+        },
+        "lick": {
+            "range": "mid",
+            "tasks": [
+                {"task": "lick_pre"},
+                {"task": "lick_main"},
+                {"task": "wait", "duration": 24},
+                {"task": "think"},
+            ],
+        },
+        "spit": {
+            "range": "mid",
+            "tasks": [
+                {"task": "spit_pre"},
+                {"task": "spit_main"},
+                {"task": "wait", "duration": 30},
+                {"task": "think"},
+            ],
+        },
+        "jump": {
+            "range": "far",
+            "tasks": [
+                {"task": "jump_pre"},
+                {"task": "jump_main"},
+                {"task": "fall"},
+                {"task": "land"},
+                {"task": "wait", "duration": 18},
+                {"task": "think"},
+            ],
+        },
+        "jump_chain": {
+            "range": "mid",
+            "tasks": [
+                {"task": "jump_pre"},
+                {"task": "jump_main"},
+                {"task": "fall"},
+                {"task": "land"},
+                {"task": "wait", "duration": 18},
+                {"task": "jump_pre"},
+                {"task": "jump_main"},
+                {"task": "fall"},
+                {"task": "land"},
+                {"task": "wait", "duration": 18},
+                {"task": "jump_pre"},
+                {"task": "jump_main"},
+                {"task": "fall"},
+                {"task": "land"},
+                {"task": "wait", "duration": 18},                                
+                {"task": "think"},
+            ],
+        },        
+    },
+    "encounter_intro_tasks": [
+        {"task": "intro_fall"},
+        {"task": "land"},
+        {"task": "wait", "duration": 50},
+        {"task": "roar_pre"},
+        {"task": "roar_main"},
+        {"task": "roar_post"},        
+        {"task": "idle"},
+    ],
+    "phase_transition_tasks": [
+        {"task": "roar_pre"},
+        {"task": "roar_main"},
+        {"task": "roar_post"},
+        {"task": "wait", "duration": 50},
+        {"task": "think"},
+    ],
+}
