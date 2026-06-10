@@ -36,6 +36,7 @@ class MovementManager:
             'shield_glide': ShieldGlide,
             'air_boost': AirBoost,
             'contained': Contained,
+            'surface_lock': SurfaceLock,
         }
 
     def add_modifier(self, modifier, priority=0, authoritative=False, **kwarg):
@@ -281,3 +282,15 @@ class Contained(MovementModifier):
         context.gravity = 0
         context.velocity = [0, 0]
         context.max_vel = [0, 0]
+
+
+class SurfaceLock(MovementModifier):
+    def __init__(self, priority, **kwarg):
+        super().__init__(priority)
+        self.entity = kwarg['entity']
+
+    def apply(self, context):
+        context.gravity = 0
+        context.friction = [0, 0]
+        context.velocity[0] -= self.entity.velocity[0]
+        context.velocity[1] -= self.entity.velocity[1]

@@ -94,6 +94,12 @@ class ConveyorBelt(TexturedPlatform):
             return {}
 
         return {
+            'movement_modifier': {
+                'name': 'surface_lock',
+                'priority': 100,
+                'authoritative': True,
+                'entity': entity,
+            },
             'wall_glide': {
                 'friction_start': 0.2,
                 'friction_end': 0.2,
