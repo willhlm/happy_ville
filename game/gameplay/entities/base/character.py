@@ -23,7 +23,6 @@ class Character(AnimatedEntity):#enemy, NPC,player
         self.acceleration = [0, C.acceleration[1]]
         self.friction = C.friction.copy()
         self.max_vel = C.max_vel.copy()
-        self._movement_context = modifier_movement.MovementContext(self)
 
         self.shader_state = EntityShaderManager(self)
         self.hit_component = HitComponent(self)
@@ -52,7 +51,6 @@ class Character(AnimatedEntity):#enemy, NPC,player
 
     def update_vel(self, dt):#called from hitsop_states
         context = self.movement_manager.resolve()
-        self._movement_context = context
 
         self.velocity[1] += dt * (context.gravity - self.velocity[1] * context.friction[1]) + context.velocity[1]#gravity
         self.velocity[1] = min(self.velocity[1], context.max_vel[1])#set a y max speed#
@@ -141,6 +139,14 @@ class Character(AnimatedEntity):#enemy, NPC,player
     def has_collision_kind(self, collision_kind, side=None):
         return self.contact_state.has_collision_kind(collision_kind, side=side)
 
+    def has_wall_glide_collision(self):
+        return (
+            self.has_collision_kind('wall') or                       
+            self.has_collision_kind('belt') or           
+            self.has_collision_kind('Wall')
+            
+        )
+
     def get_real_velocity(self, dt):
         return self.contact_state.get_real_velocity(dt)
 
@@ -167,15 +173,6 @@ class Character(AnimatedEntity):#enemy, NPC,player
 
     def get_previous_support_body(self):
         return self.contact_state.previous_support_body
-
-    def should_apply_support_motion(self, axis, amount):
-        if amount == 0:
-            return False
-
-        if axis == 'y':
-            return True
-
-        return not self._movement_context.lock_support_axes[0]
 
     def get_support_contact_tolerance(self):
         return 1

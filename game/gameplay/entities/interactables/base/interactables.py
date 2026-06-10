@@ -31,7 +31,6 @@ class Interactables(AnimatedEntity):#interactables
     def take_hit(self, effect):
         effect.defender_callbacks.pop('particles', None)
         effect.defender_callbacks.pop('hitstop', None)
-        effect.attacker_callbacks.pop('sword_jump', None)
         effect.attacker_callbacks.pop('hitstop', None)
         effect.attacker_callbacks.pop('sword_jump', None)
         return self.hit_component.take_hit(effect)

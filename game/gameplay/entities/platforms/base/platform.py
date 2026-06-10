@@ -28,6 +28,9 @@ class Platform(pygame.sprite.Sprite):
     def get_support_motion(self, entity):
         return None
 
+    def get_surface_motion(self, entity, contact_state=None):
+        return None
+
     def get_floor_samples(self, entity):
         return self.surface_collision.get_floor_samples(entity)
 

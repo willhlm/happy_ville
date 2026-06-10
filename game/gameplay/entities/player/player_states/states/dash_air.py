@@ -79,13 +79,10 @@ class DashAirPre(PhaseBase):
             self.land_from_dash()
             return
 
-        if self.entity.has_collision_kind('belt') or self.entity.has_collision_kind('Wall'):
+        if self.entity.has_wall_glide_collision():
             self.entity.shader_state.remove_shader('mb')
             if self.entity.acceleration[0] != 0:
-                if self.entity.has_collision_kind('belt'):
-                    self.enter_state('belt_glide')
-                else:
-                    self.enter_state('wall_glide')
+                self.enter_state('wall_glide')
             else:
                 self.enter_state('idle')
 

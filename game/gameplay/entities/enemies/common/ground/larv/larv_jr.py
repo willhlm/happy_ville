@@ -2,10 +2,9 @@ import pygame
 
 from engine.utils import read_files
 from gameplay.entities.enemies.common.shared.state_machine import StateManager
+from gameplay.entities.enemies.common.shared.surface_crawler import Fall, Hurt, Land, Patrol, SurfaceCrawlerEnemy, Wait
 
 from .config import ENEMY_CONFIG
-from .states import Fall, Land, Patrol, Wait, Hurt
-from .surface_larv import SurfaceLarv
 
 LARV_JR_STATES = {
     'patrol': Patrol,
@@ -15,7 +14,7 @@ LARV_JR_STATES = {
     'hurt': Hurt,
 }
 
-class LarvJr(SurfaceLarv):
+class LarvJr(SurfaceCrawlerEnemy):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
         self.config = ENEMY_CONFIG['larv_jr']

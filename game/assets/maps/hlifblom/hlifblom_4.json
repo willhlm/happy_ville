@@ -243,7 +243,55 @@
                  "draworder":"topdown",
                  "id":49,
                  "name":"back",
-                 "objects":[],
+                 "objects":[
+                        {
+                         "gid":1863,
+                         "height":32,
+                         "id":1783,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":48,
+                         "x":544,
+                         "y":1280
+                        }, 
+                        {
+                         "gid":1863,
+                         "height":32,
+                         "id":1788,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":48,
+                         "x":1184,
+                         "y":1088
+                        }, 
+                        {
+                         "gid":1863,
+                         "height":32,
+                         "id":1789,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":48,
+                         "x":1600,
+                         "y":944
+                        }, 
+                        {
+                         "gid":1863,
+                         "height":32,
+                         "id":1792,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":48,
+                         "x":480,
+                         "y":544
+                        }],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -588,30 +636,6 @@
                          "y":960
                         }, 
                         {
-                         "height":0,
-                         "id":1765,
-                         "name":"",
-                         "polygon":[
-                                {
-                                 "x":0,
-                                 "y":0
-                                }, 
-                                {
-                                 "x":224,
-                                 "y":-192
-                                }, 
-                                {
-                                 "x":0,
-                                 "y":-192
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":0,
-                         "x":544,
-                         "y":1136
-                        }, 
-                        {
                          "gid":1808,
                          "height":64,
                          "id":1766,
@@ -796,6 +820,90 @@
                          "width":528,
                          "x":976,
                          "y":816
+                        }, 
+                        {
+                         "gid":1803,
+                         "height":16,
+                         "id":1784,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"trap_flower"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":720,
+                         "y":848
+                        }, 
+                        {
+                         "gid":1803,
+                         "height":16,
+                         "id":1785,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"flow_copter"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":416,
+                         "y":704
+                        }, 
+                        {
+                         "gid":1803,
+                         "height":16,
+                         "id":1786,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"flow_copter"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":624,
+                         "y":1088
+                        }, 
+                        {
+                         "gid":1808,
+                         "height":64,
+                         "id":1787,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":192,
+                         "x":544,
+                         "y":1008
+                        }, 
+                        {
+                         "gid":1803,
+                         "height":16,
+                         "id":1790,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"trap_flower"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":2064,
+                         "y":768
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -823,7 +931,7 @@
          "y":0
         }],
  "nextlayerid":51,
- "nextobjectid":1783,
+ "nextobjectid":1793,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -849,6 +957,10 @@
         {
          "firstgid":1836,
          "source":"..\/_objects\/interactables.tsx"
+        }, 
+        {
+         "firstgid":1855,
+         "source":"objects\/objects.tsx"
         }],
  "tilewidth":16,
  "type":"map",

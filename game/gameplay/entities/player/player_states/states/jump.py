@@ -50,6 +50,7 @@ class JumpMain(PhaseAirBase):
             if self.entity.flags['bounce_jump']:
                 self.shroomboost = self.entity.consume_bounce_jump()
                 self.air_timer = max(self.air_timer, C.air_timer)
+                self.jump_dash_timer = max(self.jump_dash_timer, C.bounce_dash_jump_buffer_player)
 
     def handle_release_input(self, input):
         if input.name == 'a':
@@ -70,4 +71,4 @@ class JumpMain(PhaseAirBase):
 
     def consume_contact_state(self):
         if self.entity.has_collision_kind('belt'):
-            self.enter_state('belt_glide')
+            self.enter_state('wall_glide')     

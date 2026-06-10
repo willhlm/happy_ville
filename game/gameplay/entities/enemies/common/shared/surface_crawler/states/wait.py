@@ -3,9 +3,9 @@ from gameplay.entities.enemies.common.shared.state_machine.states.base_state imp
 
 class Wait(BaseState):
     def __init__(self, entity, deciders, config_key, **kwargs):
-        self.wait_time = kwargs.get('time', 35)
-        self.next_state = kwargs.get('next_state', 'crawl')
-        self.turn = kwargs.get('turn', False)
+        self.wait_time = kwargs.get("time", 35)
+        self.next_state = kwargs.get("next_state", "crawl")
+        self.turn = kwargs.get("turn", False)
         super().__init__(entity, deciders, config_key)
         self.entity.velocity = [0, 0]
         self.entity.animation.play("idle", 0.2)

@@ -13,6 +13,7 @@ class PlayerGrounding:
 
         if self.player.was_on_floor():
             self.begin_coyote_time()
+            return
 
     def on_coyote_timeout(self):
         self.player.flags['ground'] = False

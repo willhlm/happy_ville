@@ -58,7 +58,7 @@ class Crystal_mines(Biome):
                         kwarg["lifetime"] = int(property["value"])
                     elif property["name"] == "frequency":
                         kwarg["frequency"] = int(property["value"])
-
+                
                 new_emitter = CrystalSource(object_position, self.level.game_objects, **kwarg)
                 self.level.game_objects.interactables.add(new_emitter)
 

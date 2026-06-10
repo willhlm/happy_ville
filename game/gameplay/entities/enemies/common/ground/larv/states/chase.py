@@ -1,4 +1,4 @@
-from .crawl import Crawl
+from gameplay.entities.enemies.common.shared.surface_crawler import Crawl
 
 
 class Chase(Crawl):

@@ -21,6 +21,7 @@ class MovementManager:
         self.modifiers = {}             # name -> modifier instance (stackable)
         self.authoritative_mods = {}    # name -> modifier instance (authoritative)
         self.immunities = set()
+        self._contact_synced_modifiers = set()
 
         self._sorted_modifiers = []
         self._sorted_authoritative = []
@@ -29,8 +30,6 @@ class MovementManager:
             'up_stream_horizontal': UpStreamHorizontal,
             'up_stream_vertical': UpStreamVertical,
             'two_d_liquid': TwoDLiquid,
-            'belt': Belt,
-            'wall_glide': WallGlide,
             'dash_jump': DashJump,
             'dash': Dash,
             'up_stream': UpStream,
@@ -98,6 +97,7 @@ class MovementManager:
         return context
 
     def consume_contact_state(self):
+        self._sync_contact_modifiers()
         self._consume_modifier_contact_state()
 
     def update(self, dt):
@@ -126,13 +126,26 @@ class MovementManager:
         for mod in self._sorted_modifiers.copy():
             mod.consume_contact_state(contact_state)
 
+    def _sync_contact_modifiers(self):
+        desired_modifiers = self.entity.contact_state.get_movement_modifiers()
+        active_modifiers = self._contact_synced_modifiers
+
+        for modifier_name in active_modifiers - desired_modifiers.keys():
+            self.remove_modifier(modifier_name)
+
+        for modifier_name, config in desired_modifiers.items():
+            kwargs = config.copy()
+            kwargs.pop('name', None)
+            self.add_modifier(modifier_name, **kwargs)
+
+        self._contact_synced_modifiers = set(desired_modifiers.keys())
+
 class MovementContext:
     def __init__(self, entity = None):
         self.gravity = entity.acceleration[1] if entity and hasattr(entity, 'acceleration') else C.acceleration[1]
         self.velocity = [0, 0]
         self.friction = entity.friction.copy() if entity and hasattr(entity, 'friction') else C.friction.copy()
         self.max_vel = entity.max_vel.copy() if entity and hasattr(entity, 'max_vel') else C.max_vel.copy()
-        self.lock_support_axes = [False, False]
 
         self.air_timer = C.air_timer
         self.upstream = 1  # scale for upstream movement: sampled during upstream collision
@@ -171,30 +184,6 @@ class TwoDLiquid(MovementModifier):
     def apply(self, context):
         context.friction[0] *= 2
         context.friction[1] *= 2
-
-class Belt(MovementModifier):
-    def __init__(self, priority, **kwarg):
-        super().__init__(priority)
-        self.entity = kwarg['entity']
-        self.direction = kwarg['direction']
-        self.axis = kwarg['axis']
-        self.side = kwarg['side']
-
-    def runs_with_authoritative(self) -> bool:
-        return True
-
-    def apply(self, context):
-        if self.axis == 'x':
-            context.velocity[1] += self.direction[1] if self.side == 'right' else -self.direction[1]
-            return
-
-        if self.axis != 'y':
-            return
-
-        context.velocity[0] += self.direction[0] * 0.1
-
-        if hasattr(self.entity, 'dir') and hasattr(self.entity, 'friction'):
-            context.friction[0] = C.friction_player[0] - 0.1 * self.direction[0] * self.entity.dir[0]
 
 class AirBoost(MovementModifier):
     def __init__(self, priority, **kwarg):
@@ -262,17 +251,6 @@ class ShieldGlide(MovementModifier):
         context.gravity *= self.gravity_scale
         context.friction[1] = max(context.friction[1], self.fall_friction)
 
-#authorivie ones.
-class WallGlide(MovementModifier):
-    def __init__(self, priority):
-        super().__init__(priority)
-        self.end_friction = 0.1
-        self.friction = 0.5
-
-    def apply(self, context):
-        self.friction -= 0.011
-        context.friction[1] = max(self.friction, self.end_friction)
-
 class Dash(MovementModifier):
     def __init__(self, priority, **kwarg):
         super().__init__(priority)
@@ -281,7 +259,6 @@ class Dash(MovementModifier):
 
     def apply(self, context):
         context.gravity = 0
-        context.lock_support_axes[0] = True
         context.velocity[0] += self.dash_vel * self.entity.dir[0]
 
 class DashJump(MovementModifier):
@@ -296,7 +273,6 @@ class DashJump(MovementModifier):
         self.dash_jump_vel += 0.6
         self.dash_jump_vel = min(self.dash_jump_vel, 0)
         context.gravity = C.acceleration[1] / self.g_constant
-        context.lock_support_axes[0] = True
         context.velocity[0] += self.dash_vel * self.entity.dir[0]
         context.velocity[1] += self.dash_jump_vel        
 

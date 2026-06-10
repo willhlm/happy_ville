@@ -12,4 +12,5 @@ from .ranged.shield import Shield
 from .ranged.droplet.droplet import ProjectileDroplet
 from .ranged.slam_attack import SlamAttack
 from .ranged.tagg import Tagg
+from .ranged.crystal_tagg.crystal_tagg import CrystalTagg
 

@@ -23,6 +23,7 @@ class StateManager():
         'heal',
         'crouch',
         'plat_bone',
+        'wall_glide',
     )
 
     def __init__(self, entity):
@@ -40,7 +41,6 @@ class StateManager():
             'dash_ground': DashGroundState,
             'dash_jump': DashJumpState,
             'wall_glide': WallGlideState,
-            'belt_glide': BeltGlideState,
             'wall_jump': WallJumpState,
             'sword_stand1': SwordStand1State,
             'sword_stand2': SwordStand2State,

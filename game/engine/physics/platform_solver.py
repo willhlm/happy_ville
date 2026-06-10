@@ -69,10 +69,24 @@ class PlatformCollisionSolver:
             if support_body:
                 raw_support_motion = getattr(support_body, 'get_support_motion', lambda _entity: None)(entity)
                 if raw_support_motion is not None:
-                    if entity.should_apply_support_motion('x', raw_support_motion[0]):
+                    if raw_support_motion[0] != 0:
                         support_motion[0] = raw_support_motion[0]
-                    if entity.should_apply_support_motion('y', raw_support_motion[1]):
+                    if raw_support_motion[1] != 0:
                         support_motion[1] = raw_support_motion[1]
+
+            if support_motion == [0.0, 0.0]:
+                surface_body = contact_state.previous_surface_body
+                if surface_body and surface_body is not support_body:
+                    raw_surface_motion = getattr(
+                        surface_body,
+                        'get_surface_motion',
+                        lambda _entity, contact_state=None: None,
+                    )(entity, contact_state=contact_state)
+                    if raw_surface_motion is not None:
+                        if raw_surface_motion[0] != 0:
+                            support_motion[0] = raw_surface_motion[0]
+                        if raw_surface_motion[1] != 0:
+                            support_motion[1] = raw_surface_motion[1]
 
             contact_state.motion_result.requested_motion = (
                 entity.velocity[0] * entity_dt + support_motion[0],

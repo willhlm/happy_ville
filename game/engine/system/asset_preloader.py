@@ -75,6 +75,7 @@ class AssetPreloader:
                 ProjectileDroplet,
                 SlamAttack,
                 Tagg,
+                CrystalTagg,
                 Leaves,
                 BackgroundDroplet,
                 weather.FlashFX,

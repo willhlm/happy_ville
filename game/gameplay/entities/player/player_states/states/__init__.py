@@ -1,4 +1,3 @@
-from .belt_glide import BeltGlideState
 from .bow import BowState
 from .crouch import CrouchState
 from .dash_air import DashAirState

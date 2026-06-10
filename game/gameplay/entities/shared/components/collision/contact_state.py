@@ -1,10 +1,19 @@
 class ContactEffect:
+    def __init__(self, mapping=None):
+        self.mapping = mapping or {}
+
     def apply(self, entity):
         return None
 
+    def get_movement_modifier(self):
+        return self.mapping.get('movement_modifier')
+
+    def get_wall_glide_profile(self):
+        return self.mapping.get('wall_glide')
+
     @classmethod
     def from_mapping(cls, mapping):
-        return cls()
+        return cls(mapping)
 
 
 class MotionResult:
@@ -144,6 +153,30 @@ class ContactState:
     def get_collisions_for_side(self, side):
         return [collision for collision in self.collisions if collision.side == side]
 
+    def get_movement_modifiers(self):
+        modifiers = {}
+        for collision in self._iter_modifier_priority_collisions():
+            config = collision.contact_effect.get_movement_modifier()
+            if not config:
+                continue
+
+            modifier_name = config.get('name')
+            if not modifier_name or modifier_name in modifiers:
+                continue
+
+            modifiers[modifier_name] = config
+        return modifiers
+
+    def get_wall_glide_profile(self, side=None):
+        collisions = self.wall_collisions
+        if side is not None:
+            collisions = [collision for collision in collisions if collision.side == side]
+
+        for collision in collisions:
+            return collision.contact_effect.get_wall_glide_profile()
+
+        return None
+
     def has_collision_kind(self, collision_kind, side=None):
         for collision in self.collisions:
             if side is not None and collision.side != side:
@@ -191,3 +224,13 @@ class ContactState:
 
     def is_on_ceiling(self):
         return self.ceiling_collision is not None
+
+    def _iter_modifier_priority_collisions(self):
+        if self.floor_collision:
+            yield self.floor_collision
+
+        for collision in self.wall_collisions:
+            yield collision
+
+        if self.ceiling_collision:
+            yield self.ceiling_collision

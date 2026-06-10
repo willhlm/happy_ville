@@ -192,24 +192,6 @@
                  "name":"statics",
                  "objects":[
                         {
-                         "gid":1,
-                         "height":16,
-                         "id":511,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"spawn",
-                                 "type":"string",
-                                 "value":"1"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":512,
-                         "y":1056
-                        }, 
-                        {
                          "gid":8,
                          "height":96,
                          "id":512,
@@ -223,7 +205,7 @@
                         }, 
                         {
                          "gid":8,
-                         "height":320,
+                         "height":400,
                          "id":517,
                          "name":"",
                          "rotation":0,
@@ -231,29 +213,6 @@
                          "visible":true,
                          "width":288,
                          "x":288,
-                         "y":1008
-                        }, 
-                        {
-                         "gid":11,
-                         "height":80,
-                         "id":518,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"path_to",
-                                 "type":"string",
-                                 "value":"crystal_mines_14"
-                                }, 
-                                {
-                                 "name":"spawn",
-                                 "type":"string",
-                                 "value":"2"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":448,
                          "y":1088
                         }, 
                         {
@@ -270,7 +229,7 @@
                         }, 
                         {
                          "gid":8,
-                         "height":96,
+                         "height":160,
                          "id":520,
                          "name":"",
                          "rotation":0,
@@ -278,7 +237,7 @@
                          "visible":true,
                          "width":224,
                          "x":1088,
-                         "y":976
+                         "y":960
                         }, 
                         {
                          "gid":8,
@@ -288,7 +247,7 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":272,
+                         "width":384,
                          "x":1408,
                          "y":976
                         }, 
@@ -318,13 +277,13 @@
                         }, 
                         {
                          "gid":8,
-                         "height":80,
+                         "height":240,
                          "id":524,
                          "name":"",
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":592,
+                         "width":352,
                          "x":1088,
                          "y":800
                         }, 
@@ -337,12 +296,12 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"crystal_mines_13"
+                                 "value":"crystal_mines_11"
                                 }, 
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"6"
+                                 "value":"3"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -360,7 +319,7 @@
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"2"
+                                 "value":"1"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -371,26 +330,26 @@
                         }, 
                         {
                          "gid":11,
-                         "height":80,
+                         "height":176,
                          "id":528,
                          "name":"",
                          "properties":[
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"crystal_mines_6"
+                                 "value":"crystal_mines_13"
                                 }, 
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"1"
+                                 "value":"5"
                                 }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":1536,
-                         "y":880
+                         "x":1664,
+                         "y":848
                         }, 
                         {
                          "gid":1,
@@ -401,14 +360,14 @@
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"3"
+                                 "value":"2"
                                 }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":1472,
-                         "y":848
+                         "x":1600,
+                         "y":784
                         }, 
                         {
                          "gid":8,
@@ -433,6 +392,42 @@
                          "width":32,
                          "x":1344,
                          "y":1184
+                        }, 
+                        {
+                         "height":0,
+                         "id":533,
+                         "name":"",
+                         "polygon":[
+                                {
+                                 "x":0,
+                                 "y":0
+                                }, 
+                                {
+                                 "x":208,
+                                 "y":-112
+                                }, 
+                                {
+                                 "x":208,
+                                 "y":0
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":0,
+                         "x":1584,
+                         "y":880
+                        }, 
+                        {
+                         "gid":8,
+                         "height":112,
+                         "id":535,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":368,
+                         "x":1440,
+                         "y":672
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -448,7 +443,7 @@
          "y":0
         }],
  "nextlayerid":62,
- "nextobjectid":533,
+ "nextobjectid":536,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -463,7 +458,7 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":47,
+         "firstgid":52,
          "source":"..\/_objects\/interactables.tsx"
         }],
  "tilewidth":16,

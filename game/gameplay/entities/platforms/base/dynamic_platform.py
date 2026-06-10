@@ -21,6 +21,16 @@ class DynamicPlatform(Platform):
                 return motion
         return None
 
+    def get_surface_motion(self, entity, contact_state=None):
+        for c in self.components:
+            getter = getattr(c, 'get_surface_motion', None)
+            if getter is None:
+                continue
+            motion = getter(entity, contact_state=contact_state)
+            if motion is not None:
+                return motion
+        return super().get_surface_motion(entity, contact_state=contact_state)
+
     def get_floor_samples(self, entity):
         samples = []
         for component in self.components:

@@ -2,9 +2,8 @@ import pygame
 
 from engine.utils import read_files
 from gameplay.entities.enemies.common.shared.state_machine import StateManager
+from gameplay.entities.enemies.common.shared.surface_crawler import Crawl, Fall, Hurt, Land, SurfaceCrawlerEnemy, Wait
 
-from ..surface_larv import SurfaceLarv
-from ..states import Crawl, Fall, Land, Wait, Hurt
 from .config import ENEMY_CONFIG
 
 LARV_WALL_STATES = {
@@ -15,7 +14,7 @@ LARV_WALL_STATES = {
     'hurt': Hurt,
 }
 
-class LarvWall(SurfaceLarv):
+class LarvWall(SurfaceCrawlerEnemy):
     def __init__(self, pos, game_objects, **kwargs):
         super().__init__(pos, game_objects)
         self.config = ENEMY_CONFIG['larv_wall']

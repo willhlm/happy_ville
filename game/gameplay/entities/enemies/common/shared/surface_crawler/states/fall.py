@@ -5,7 +5,7 @@ class Fall(BaseState):
     def __init__(self, entity, deciders, config_key, **kwargs):
         super().__init__(entity, deciders, config_key)
         self.entity.surface_stick_physics.set_enabled(False)
-        self.entity.animation.play(kwargs.get('animation', 'idle'), 0.18)
+        self.entity.animation.play(kwargs.get("animation", "idle"), 0.18)
 
     def update_logic(self, dt):
         pass
@@ -19,4 +19,4 @@ class Fall(BaseState):
 
         self.entity.angle = self.entity.surface_stick_physics.get_angle()
         self.entity.surface_stick_physics.set_enabled(True)
-        self.enter_state('land')
+        self.enter_state("land")

@@ -27,7 +27,8 @@ air_timer = 14#for how long one can press A and keep jumping
 go_through_timer = 5
 
 #input buffers
-shroomjump_timer_player = 3#how many frames the player can press jump, after landing on a shroompolin, and do shroomjump
+bounce_dash_jump_buffer_player = 5#how many frames after consuming a bounce jump the player can still trigger dash jump
+bounce_jump_buffer_player = 5#how many frames the player can press jump after landing on a bounce platform
 
 #combat
 invincibility_time_player = 50

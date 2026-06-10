@@ -49,7 +49,6 @@ class Player(Character):
 
     def update_vel(self, dt):#called from hitsop_states
         context = self.movement_manager.resolve()
-        self._movement_context = context
 
         self.velocity[1] += dt * (context.gravity - self.velocity[1] * context.friction[1]) + context.velocity[1]
         self.velocity[1] = min(self.velocity[1], self.max_vel[1])#set a y max speed#
@@ -163,7 +162,7 @@ class Player(Character):
     def on_go_through_timeout(self):
         self.flags['go_through'] = False
 
-    def arm_bounce_jump(self, jump_boost=1, duration=C.shroomjump_timer_player):
+    def arm_bounce_jump(self, jump_boost=1, duration=C.bounce_jump_buffer_player):
         self.flags['bounce_jump'] = True
         self.bounce_jump_boost = jump_boost
         self.game_objects.timer_manager.remove_ID_timer('bounce_jump')

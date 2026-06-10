@@ -1,9 +1,5 @@
+from gameplay.entities.enemies.common.shared.surface_crawler import Crawl, Fall, Hurt, Land, Patrol, Wait
+
 from .attack import AttackMain, AttackPre
 from .chase import Chase
-from .crawl import Crawl
-from .fall import Fall
 from .hanging import Hanging
-from .land import Land
-from .patrol import Patrol
-from .wait import Wait
-from .hurt import Hurt
