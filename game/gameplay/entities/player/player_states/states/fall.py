@@ -93,11 +93,7 @@ class FallPre(PhaseAirBase):
                 self.enter_state('land', phase='soft')
             return
 
-        if self.entity.has_collision_kind('belt'):
-            self.enter_state('belt_glide')
-            return
-
-        if self.entity.has_collision_kind('Wall'):
+        if self.entity.has_wall_glide_collision():
             self.enter_state('wall_glide')
 
 class FallMain(FallPre):

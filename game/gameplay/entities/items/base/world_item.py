@@ -25,7 +25,6 @@ class WorldItem(AnimatedEntity):
         self.acceleration = C.acceleration_item.copy()
         self.friction = C.friction_item.copy()
         self.max_vel = C.max_vel_item.copy()
-        self._movement_context = modifier_movement.MovementContext(self)
         self.shader_state = EntityShaderManager(self)
         self.lifetime_component = None
         self.age = 0
@@ -48,7 +47,6 @@ class WorldItem(AnimatedEntity):
     #update merhods
     def update_vel(self, dt):
         context = self.movement_manager.resolve()
-        self._movement_context = context
         self.velocity[1] += dt * (context.gravity - self.velocity[1] * context.friction[1]) + context.velocity[1]
         self.velocity[1] = min(self.velocity[1], context.max_vel[1])
         self.velocity[0] += dt * (self.acceleration[0] - context.friction[0] * self.velocity[0]) + context.velocity[0]
@@ -95,9 +93,6 @@ class WorldItem(AnimatedEntity):
     def apply_ground_snap_velocity(self):
         if self.bounce_coefficient < 0.1:
             self.velocity[1] = max(self.velocity[1], 0.6)
-
-    def should_apply_support_motion(self, axis, amount):
-        return amount != 0
 
     def get_support_contact_tolerance(self):
         return 10

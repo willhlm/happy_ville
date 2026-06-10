@@ -41,10 +41,20 @@ class SurfaceCollisionComponent:
         return None
 
     def get_contact_metadata(self, entity, side, axis, collision_kind):
-        return {}
+        metadata = {}
+        if axis == 'x':
+            metadata['wall_glide'] = self.get_wall_glide_profile(entity, side, collision_kind)
+        return metadata
 
     def supports_surface_stick(self, entity, side):
         return side in self.STICKABLE_SIDES
+
+    def get_wall_glide_profile(self, entity, side, collision_kind):
+        return {
+            'friction_start': 0.5,
+            'friction_end': 0.1,
+            'friction_decay': 0.011,
+        }
 
     def _build_floor_sample(self, entity, clamp_floor=False, collision_kind='block'):
         if not self._overlaps_horizontally(entity):

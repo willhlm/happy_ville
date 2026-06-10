@@ -300,6 +300,11 @@ class LightManager:
         return owner.pause_group not in owner.groups()
 
     def draw(self, target):
+        self.layer1.clear(0, 0, 0, 0)
+        self.layer2.clear(0, 0, 0, 0)
+        self.layer3.clear(0, 0, 0, 0)
+        self.screen_copy.clear(0, 0, 0, 0)
+
         self.shaders['light']['rectangleCorners'] = self.points
         self.shaders['light']['occluder_start_index'] = self.occluder_start_index
         self.shaders['light']['lightPositions'] = self.positions
@@ -317,8 +322,7 @@ class LightManager:
         self.shaders['blend']['background'] = self.screen_copy.texture
         self.shaders['blur']['r'] = self._blur_r_int
         self.shaders['blur']['weights'] = self._blur_weights
-        self.layer2.clear(0, 0, 0, 0)
-        self.layer3.clear(0, 0, 0, 0)
+
 
         self.game_objects.game.display.use_alpha_blending(False)
         self.game_objects.game.display.render(self.layer1.texture, self.layer2, shader=self.shaders['light'])

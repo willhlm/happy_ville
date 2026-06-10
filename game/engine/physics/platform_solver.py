@@ -69,10 +69,32 @@ class PlatformCollisionSolver:
             if support_body:
                 raw_support_motion = getattr(support_body, 'get_support_motion', lambda _entity: None)(entity)
                 if raw_support_motion is not None:
-                    if entity.should_apply_support_motion('x', raw_support_motion[0]):
+                    if raw_support_motion[0] != 0:
                         support_motion[0] = raw_support_motion[0]
-                    if entity.should_apply_support_motion('y', raw_support_motion[1]):
+                    if raw_support_motion[1] != 0:
                         support_motion[1] = raw_support_motion[1]
+
+            if support_motion == [0.0, 0.0]:
+                surface_body = contact_state.previous_surface_body
+                if surface_body and surface_body is not support_body:
+                    raw_surface_motion = getattr(
+                        surface_body,
+                        'get_surface_motion',
+                        lambda _entity, contact_state=None: None,
+                    )(entity, contact_state=contact_state)
+                    if raw_surface_motion is not None:
+                        if raw_surface_motion[0] != 0:
+                            support_motion[0] = raw_surface_motion[0]
+                        if raw_surface_motion[1] != 0:
+                            support_motion[1] = raw_surface_motion[1]
+
+            if support_motion == [0.0, 0.0]:
+                raw_attachment_motion = self._get_surface_attachment_motion(entity, contact_state)
+                if raw_attachment_motion is not None:
+                    if raw_attachment_motion[0] != 0:
+                        support_motion[0] = raw_attachment_motion[0]
+                    if raw_attachment_motion[1] != 0:
+                        support_motion[1] = raw_attachment_motion[1]
 
             contact_state.motion_result.requested_motion = (
                 entity.velocity[0] * entity_dt + support_motion[0],
@@ -89,6 +111,17 @@ class PlatformCollisionSolver:
 
         contact_state.finalize()
         contact_state.complete_motion(entity.hitbox)
+
+    def _get_surface_attachment_motion(self, entity, contact_state):
+        surface_attachment = getattr(entity, "surface_attachment", None)
+        if surface_attachment is None:
+            return None
+
+        is_attached = getattr(surface_attachment, "is_attached", None)
+        if is_attached is None or not is_attached():
+            return None
+
+        return surface_attachment.get_surface_motion(contact_state=contact_state)
 
     def _resolve_motion(self, motion):
         for _ in range(4):

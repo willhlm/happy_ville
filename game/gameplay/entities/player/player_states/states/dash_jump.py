@@ -68,17 +68,14 @@ class DashJumpPre(PhaseBase):
             self.land_from_dash_jump()
             return
 
-        if self.entity.has_collision_kind('belt') or self.entity.has_collision_kind('Wall'):
+        if self.entity.has_wall_glide_collision():
             hit_facing_wall = (
                 self.entity.is_on_wall_side('right') and self.entity.dir[0] > 0
             ) or (
                 self.entity.is_on_wall_side('left') and self.entity.dir[0] < 0
             )
             if hit_facing_wall and self.entity.acceleration[0] != 0 and self.buffer_time < 0:
-                if self.entity.has_collision_kind('belt'):
-                    self.enter_state('belt_glide')
-                else:
-                    self.enter_state('wall_glide')
+                self.enter_state('wall_glide')
 
 class DashJumpMain(PhaseBase):
     def __init__(self, entity, **kwarg):

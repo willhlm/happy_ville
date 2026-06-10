@@ -2,7 +2,7 @@ class TraversalUnlockManager:
     BUNDLES = {
         'dash': ('sprint', 'dash_ground', 'dash_jump'),
         'air_dash': ('dash_air',),
-        'climbing_gear': ('wall_glide', 'belt_glide', 'wall_jump'),
+        'climbing_gear': ('wall_jump',),
     }
 
     DEPENDENCIES = {

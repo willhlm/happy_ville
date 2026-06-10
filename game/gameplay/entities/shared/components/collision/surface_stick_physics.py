@@ -1,8 +1,10 @@
 from engine.utils.functions import sign
+from gameplay.entities.common.surface_side import SURFACE_ANGLE_BY_SIDE, SURFACE_SIDES
 
 class NullSurfaceStickPhysics:
     def __init__(self, entity):
         self.entity = entity
+        self.surface_side = "bottom"
 
     def set_enabled(self, enabled=True):
         return None
@@ -67,7 +69,7 @@ class SurfaceStickPhysics:
         self.clockwise = clockwise
         self.enabled = True
         self.freefall_gravity = entity.acceleration[1]
-        self.surface_side = initial_side if initial_side in self.INWARD_VECTORS else "bottom"
+        self.surface_side = initial_side
         self.surface_body = None
 
     def set_enabled(self, enabled=True):
@@ -106,10 +108,10 @@ class SurfaceStickPhysics:
     def reverse_direction(self):
         self.clockwise = not self.clockwise
 
-    def post_physics_update(self, dt=None):
+    def post_physics_update(self, dt):
         if not self.enabled:
             return
-        if dt is not None and dt <= 0:
+        if dt <= 0:
             return
 
         contact_state = self.entity.contact_state
@@ -147,12 +149,7 @@ class SurfaceStickPhysics:
             return
 
     def get_angle(self):
-        return {
-            "bottom": 0,
-            "left": -90,
-            "top": 180,
-            "right": 90,
-        }[self.surface_side]
+        return SURFACE_ANGLE_BY_SIDE[self.surface_side]
 
     def detach(self):
         self.entity.acceleration[1] = self.freefall_gravity
@@ -203,7 +200,7 @@ class SurfaceStickPhysics:
             self._snap_to_surface(platform, self.surface_side)
             return
 
-        for side in self.INWARD_VECTORS:
+        for side in SURFACE_SIDES:
             platform = self._find_platform_from_points(self._get_surface_probe_points(side), side)
             if platform:
                 self.surface_side = side

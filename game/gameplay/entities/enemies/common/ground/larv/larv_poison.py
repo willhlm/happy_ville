@@ -3,12 +3,12 @@ import pygame
 from engine.utils import read_files
 from engine.utils.functions import sign
 from gameplay.entities.enemies.common.shared.state_machine import StateManager
+from gameplay.entities.enemies.common.shared.surface_crawler import Fall, Hurt, Land, SurfaceCrawlerEnemy, Wait
 from gameplay.entities.projectiles.ranged.poison_blob import PoisonBlob
 
 from .config import ENEMY_CONFIG
 from .hanging_component import HangingComponent
-from .surface_larv import SurfaceLarv
-from .states import AttackMain, AttackPre, Chase, Fall, Hanging, Land, Wait, Hurt
+from .states import AttackMain, AttackPre, Chase, Hanging
 
 LARV_POISON_STATES = {
     'attack_pre': AttackPre,
@@ -21,7 +21,7 @@ LARV_POISON_STATES = {
     'hurt': Hurt,    
 }
 
-class LarvPoison(SurfaceLarv):
+class LarvPoison(SurfaceCrawlerEnemy):
     def __init__(self, pos, game_objects, initial_state = None, anchor_pos = None):
         super().__init__(pos, game_objects)
         self.config = ENEMY_CONFIG['larv_poison']

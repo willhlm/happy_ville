@@ -2,12 +2,12 @@ import pygame, random
 
 from engine.utils import read_files
 from gameplay.entities.enemies.common.shared.state_machine import StateManager
+from gameplay.entities.enemies.common.shared.surface_crawler import Fall, Hurt, Land, Patrol, SurfaceCrawlerEnemy, Wait
 
 from .larv_jr import LarvJr
 from .config import ENEMY_CONFIG
 from .hanging_component import HangingComponent
-from .surface_larv import SurfaceLarv
-from .states import Fall, Hanging, Land, Patrol, Wait, Hurt
+from .states import Hanging
 
 LARV_STATES = {
     'patrol': Patrol,
@@ -18,7 +18,7 @@ LARV_STATES = {
     'hurt': Hurt,
 }
 
-class Larv(SurfaceLarv):
+class Larv(SurfaceCrawlerEnemy):
     def __init__(self, pos, game_objects, initial_state = None, anchor_pos = None):
         super().__init__(pos, game_objects)
         self.config = ENEMY_CONFIG['larv']

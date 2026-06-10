@@ -72,15 +72,12 @@ class DashGroundPre(PhaseBase):
         super().enter_state(state, **kwarg)
 
     def consume_contact_state(self):
-        if self.entity.has_collision_kind('Wall') or self.entity.has_collision_kind('belt'):
+        if self.entity.has_wall_glide_collision():
             self.wall_buffer -= 1
             if self.wall_buffer > 0:
                 return
             if self.entity.acceleration[0] != 0:
-                if self.entity.has_collision_kind('belt'):
-                    self.enter_state('belt_glide')
-                else:
-                    self.enter_state('wall_glide')
+                self.enter_state('wall_glide')
             else:
                 self.enter_state('idle')
 
