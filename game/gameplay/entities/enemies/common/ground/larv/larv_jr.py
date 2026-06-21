@@ -24,6 +24,7 @@ class LarvJr(SurfaceCrawlerEnemy):
         self.hitbox = pygame.Rect(pos[0], pos[1], 22, 12)
         self.vitals.set_max_health(self.config['health'])
         self.vitals.set_health(self.vitals.max_health)
+        self.inventory = {'amber_droplet':1}
         movement_config = self.config['movement']
 
         self.init_surface_stick_motion(

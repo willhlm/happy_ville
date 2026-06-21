@@ -110,9 +110,9 @@ ENEMY_CONFIG = {
             'attack_main': {},
         }
     },
-    
+
     'larv_jr': {
-        'health': 3,
+        'health': 1,
         'initial_state': 'patrol',
         'speeds': {
             'crawl': 0.5,

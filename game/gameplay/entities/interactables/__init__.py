@@ -4,6 +4,8 @@ from .chests.chest_3 import Chest_3 as Chest
 from .chests.amber_rock import AmberRock
 from .chests.amber_tree import AmberTree
 from .chests.amber_bush import AmberBush
+from .chests.amber_bush_small import AmberBushSmall
+from .chests.amber_bush_break import AmberBushBreak
 
 from .doors.door_interact import DoorInteract
 from .doors.door import Door
