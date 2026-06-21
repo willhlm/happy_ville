@@ -50,4 +50,5 @@ REGISTER_ENEMIES = {
     'spore_puff': SporePuff,    
     'moss': Moss,    
     'toadess': Toadess,
+    'bat': Bat,
 }

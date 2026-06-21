@@ -116,7 +116,8 @@
  </tile>
  <tile id="22">
   <properties>
-   <property name="ID" value=""/>
+   <property name="projectile_id" value=""/>
+   <property name="spawn_id" value=""/>
   </properties>
  </tile>
  <tile id="23">

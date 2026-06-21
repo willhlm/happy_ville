@@ -4,6 +4,7 @@ from gameplay.entities.shared.components.body.entity_body import EntityBody
 from gameplay.entities.shared.components.hit.hitstop_component import HitstopComponent
 from gameplay.entities.shared.components.hit import hit_effects
 from gameplay.entities.projectiles.base.projectile_clash_component import ProjectileClashComponent
+from gameplay.entities.shared.render.entity_shader_manager import EntityShaderManager
 
 class ProjectileBase(AnimatedEntity):
     uses_platform_collider = False
@@ -11,6 +12,7 @@ class ProjectileBase(AnimatedEntity):
         super().__init__(pos, game_objects)
         self.body = EntityBody(self)
         self.hitstop = HitstopComponent()
+        self.shader_state = EntityShaderManager(self)
         self.velocity = [0, 0]
         self.lifetime = kwarg.get('lifetime', 300)
         self.flags = {'invincibility': False, 'charge_blocks': kwarg.get('charge_blocks', False), 'aggro': True}
@@ -30,6 +32,9 @@ class ProjectileBase(AnimatedEntity):
     def destroy(self):
         if self.lifetime < 0:
             self.kill()
+
+    def update_render(self, dt):
+        self.shader_state.update_render(dt)
 
     def collision_platform(self, collision_plat):
         effect = self.create_effect()
@@ -84,4 +89,17 @@ class ProjectileBase(AnimatedEntity):
         return hit_effects.HitEffect(self.game_objects, damage=self.dmg, attacker=self)
 
     def release_texture(self):
-        pass
+        self.shader_state.release()
+
+    def draw(self, target):
+        blit_pos = [
+            int(self.rect[0] - self.game_objects.camera_manager.camera.scroll[0]),
+            int(self.rect[1] - self.game_objects.camera_manager.camera.scroll[1]),
+        ]
+        self.shader_state.draw(
+            self.image,
+            target,
+            blit_pos,
+            flip=self.dir[0] > 0,
+            angle=getattr(self, 'angle', 0),
+        )

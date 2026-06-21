@@ -25,6 +25,7 @@ from .common.flying.bees.small_bee.small_bee import SmallBee
 from .common.flying.krakan.krakan import Krakan
 from .common.flying.raven.raven import Raven
 from .common.flying.flow_copter.flow_copter import FlowCopter
+from .common.flying.bat.bat import Bat
 
 from .common.ground.spore_puff.spore_puff import SporePuff
 from .common.ground.crab_crystal.crab_crystal import CrabCrystal

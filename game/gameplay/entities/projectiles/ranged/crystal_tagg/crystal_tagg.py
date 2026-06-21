@@ -39,7 +39,7 @@ class CrystalTagg(PlatformProjectile):
 
     def draw(self, target):#called just before draw in group
         blit_pos = [int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1])]
-        self.game_objects.game.display.render(self.image, target, position = blit_pos, angle = self.angle, shader = self.shader)
+        self.shader_state.draw(self.image, target, blit_pos, angle=self.angle)
 
     def on_projectile_clash_lost(self, other):
         self.velocity = [0,0]

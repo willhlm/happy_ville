@@ -194,7 +194,7 @@ class StaticSpawner(c.SpawnerCommon):
                 self.game_objects.interactables.add(c.ZoomCollision(object_position, self.game_objects, object_size, **kwargs))
 
             elif local_id == 22:
-                self.game_objects.cosmetics.add(c.AreaSpawner(object_position, self.game_objects, object_size, **c.props_list_to_dict(properties)))
+                c.AreaSpawner(object_position, self.game_objects, object_size, **c.props_list_to_dict(properties))
 
             elif local_id == 23:
                 kwargs = {}

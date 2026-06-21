@@ -736,7 +736,7 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":720,
+                         "x":496,
                          "y":656
                         }, 
                         {
@@ -754,7 +754,7 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":896,
+                         "x":672,
                          "y":576
                         }, 
                         {
@@ -984,6 +984,47 @@
                          "width":256,
                          "x":2736,
                          "y":736
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":513,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"bat"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1120,
+                         "y":464
+                        }, 
+                        {
+                         "gid":23,
+                         "height":96,
+                         "id":514,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"projectile_id",
+                                 "type":"string",
+                                 "value":"crystal_tagg"
+                                }, 
+                                {
+                                 "name":"spawn_id",
+                                 "type":"string",
+                                 "value":"bat_crystal"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":352,
+                         "x":880,
+                         "y":448
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -999,7 +1040,7 @@
          "y":0
         }],
  "nextlayerid":62,
- "nextobjectid":513,
+ "nextobjectid":516,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

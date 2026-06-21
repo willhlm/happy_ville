@@ -287,6 +287,17 @@
                  "height":16,
                  "id":208,
                  "name":"",
+                 "properties":[
+                        {
+                         "name":"projectile_id",
+                         "type":"string",
+                         "value":"falling_rock"
+                        }, 
+                        {
+                         "name":"spawn_id",
+                         "type":"string",
+                         "value":"debug_area_spawner"
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,

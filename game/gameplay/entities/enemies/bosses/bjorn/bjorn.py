@@ -31,7 +31,16 @@ class Bjorn(Boss):
         self.game_objects.projectiles.add_enemy(attack)
 
     def slam(self):
-        self.game_objects.signals.emit("fall_projectiles", attack_id="bjorn_slam", source=self)
+        self.game_objects.areas.request_projectile_spawns(
+            "bjorn_slam",
+            count=10,
+            selector='all',
+            fallback_projectile_id='falling_rock',
+            warning_interval=6,
+            spawn_interval=40,
+            spawn_origin='offscreen',
+            warning_particle_type='falling_debris_warning',
+        )
 
     def start_wake_intro(self):
         self.currentstate.clear_tasks()

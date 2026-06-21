@@ -19,8 +19,6 @@ class Arrow(PlatformProjectile):#should it be called seed?
         self.velocity = [amp * self.dir[0] * 20 / normalise, amp * self.dir[1] * 20 / normalise]
         self.seed_spawner = seed_spawner.SeedSpawner(self)
 
-        self.once = False
-
         self.acceleration = [0, 0.1]
         self.friction = [0.01, 0.01]
         self.max_vel = [10, 10]
@@ -40,10 +38,6 @@ class Arrow(PlatformProjectile):#should it be called seed?
     def _get_trajectory_angle(self):
         return math.degrees(math.atan2(self.velocity[1], self.velocity[0]))
 
-    def draw(self, target):#called just before draw in group
-        self.blit_pos = [int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1])]
-        self.game_objects.game.display.render(self.image, target, position = self.blit_pos, angle = self.angle, flip = self.dir[0] > 0)#shader render
-
     def pool(game_objects):
         Arrow.sprites = read_files.load_sprites_dict('assets/sprites/entities/projectiles/arrow/', game_objects)
 
@@ -51,8 +45,6 @@ class Arrow(PlatformProjectile):#should it be called seed?
         self.kill()
 
     def collision_interactables(self,interactable):#collusion interactables
-        if self.once: return
-        self.once = True
         interactable.seed_collision(self)
         damage_applied, modified_effect = interactable.take_hit(self.create_effect())
         if damage_applied:
@@ -72,7 +64,5 @@ class Arrow(PlatformProjectile):#should it be called seed?
 
     def _collide_with_platform(self, dir, block):
         self.velocity = [0,0]
-        if self.once: return
-        self.once = True
         self.seed_spawner.spawn_seed(block, dir)
         self.kill()

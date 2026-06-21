@@ -4,6 +4,7 @@ from .npcs import REGISTER_NPCS
 from .enemies import REGISTER_ENEMIES
 from .event_triggers import REGISTER_EVENT_TRIGGERS
 from .events import REGISTER_EVENTS
+from .projectiles import REGISTER_PROJECTILES
 from .quests import REGISTER_QUESTS
 from .sequences import REGISTER_SEQUENCES
 
@@ -20,6 +21,7 @@ class RegistryManager():
             "enemies": REGISTER_ENEMIES,
             "event_triggers": REGISTER_EVENT_TRIGGERS,
             "events": REGISTER_EVENTS,
+            "projectiles": REGISTER_PROJECTILES,
             "quests": REGISTER_QUESTS,
             "sequences": REGISTER_SEQUENCES,
             #"interactables": REGISTER_INTERACTABLES,

@@ -2,7 +2,6 @@ import pygame
 from gameplay.entities.projectiles.base.platform_projectile import PlatformProjectile
 from engine.utils import read_files
 from . import states_droplet
-from gameplay.entities.shared.render.entity_shader_manager import EntityShaderManager
 
 class ProjectileDroplet(PlatformProjectile):#droplet that can be placed, the source makes this and can hurt player
     def __init__(self,pos, game_objects):
@@ -13,7 +12,6 @@ class ProjectileDroplet(PlatformProjectile):#droplet that can be placed, the sou
         self.hitbox = self.rect.copy()
         self.lifetime = 100
         self.currentstate = states_droplet.Idle(self)
-        self.shader_state = EntityShaderManager(self)
 
         if game_objects.world_state.narrative.events.get('tjasolmai', False):#if water boss (golden fields) is dead
             self.dmg = 1#acid
@@ -42,10 +40,3 @@ class ProjectileDroplet(PlatformProjectile):#droplet that can be placed, the sou
 
     def pool(game_objects):
         ProjectileDroplet.sprites = read_files.load_sprites_dict('assets/sprites/entities/visuals/environments/droplet/', game_objects)
-
-    def update_render(self, dt):
-        self.shader_state.update_render(dt)
-
-    def draw(self,target):
-        blit_pos = [int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1])]
-        self.shader_state.draw(self.image, target, blit_pos, flip = self.dir[0] > 0)

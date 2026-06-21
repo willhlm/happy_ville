@@ -21,6 +21,7 @@ from gameplay.narrative.quests_events.manager import QuestsEventsManager
 from gameplay.registry.registry_manager import RegistryManager
 from engine.particles.particle_system import ParticleSystem
 from gameplay.entities.shared.render.layer_resource_pool import LayerResourcePool
+from gameplay.entities.areas import AreaManager
 
 from gameplay.world.transforms.world_transform_controller import WorldTransformController
 
@@ -29,6 +30,7 @@ class GameObjects():
         self.game = game
         self.font = font_manager.FontManager(self)#intitilise the font manager class
         self.signals = signals.Signals()        
+        self.areas = AreaManager(self)
         self.shaders = read_files.load_shaders_dict(self)#load all shaders aavilable into a dict
         self.fade = FadeService(self)
         self.normal_map_generator = NormalMapGenerator(self)
@@ -109,6 +111,7 @@ class GameObjects():
         self.timer_manager.clear_timers()
         self.weather.empty()
         self.physics.clear_state()
+        self.areas.clear()
 
     def clear_world_state(self):#called when poping gameplay state
         self.sound.fade_all_music()
@@ -150,6 +153,7 @@ class GameObjects():
         self.all_bgs.update(dt)
         self.bg_interact.update(dt)
         self.all_fgs.update(dt)
+        self.areas.update(dt)
         self.cosmetics.update(dt)
         self.cosmetics_bg.update(dt)
         self.interactables.update(dt)
@@ -217,6 +221,7 @@ class GameObjects():
         #fgs
         self.all_fgs.draw(self.game.screen_manager.screens)
         #self.camera_blocks.draw()
+
 
     def _draw_hitboxes(self, target):
         #temporaries draws. Shuold be removed
