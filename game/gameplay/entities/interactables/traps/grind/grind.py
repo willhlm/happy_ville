@@ -44,15 +44,13 @@ class Grind(Interactables):#trap
     def on_collision(self, entity):#entity collision
         effect = hit_effects.create_contact_effect(
             self.game_objects,
-            damage=1,
-            hit_type='metal',
-            hitstop=10,
-            attacker=self,
-            attacker_dir=[0, 0],
+            damage = 1,
+            hit_type = self.material,
+            hitstop = 10,
+            attacker = self,
+            attacker_dir = [0, 0],
         )
         effect.attacker_callbacks.pop('hitstop', None)
-        #effect.particles['dir'] = self.dir
-
         damage_applied, modified_effect = entity.take_hit(effect)
 
     def take_hit(self, effect):
@@ -63,6 +61,5 @@ class Grind(Interactables):#trap
 
     def take_dmg(self, effect):
         """Called by hit_component after modifiers run. Apply damage and effects."""
-
         self.game_objects.camera_manager.camera_shake(amplitude=2, duration=15, scale=0.90)
         return effect

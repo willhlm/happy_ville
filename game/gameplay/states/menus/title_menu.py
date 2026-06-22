@@ -105,7 +105,7 @@ class TitleMenu(BaseUI):
             #self.game.game_objects.map.load_map(self,'village_1','1')
             #self.game.game_objects.map.load_map(self,'wakeup_forest_0001','1')
             #self.game.game_objects.map.load_map(self,'spirit_world_1','1')
-            self.game.game_objects.map.load_map(self,'nordveden_16','1')
+            self.game.game_objects.map.load_map(self,'nordveden_15','1')
             #self.game.game_objects.map.load_map(self,'village_1','1')
             #self.game.game_objects.map.load_map(self,'nordveden_windtest','1')
             #self.game.game_objects.map.load_map(self,'nordveden_6','1')

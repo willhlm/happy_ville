@@ -1,0 +1,12 @@
+{
+  "conversation_nodes": [
+    {
+      "id": "fallback_default",
+      "category": "fallback",
+      "conditions": [],
+      "lines": [
+        "Can you handle my balls"
+      ]
+    }
+  ]
+}
