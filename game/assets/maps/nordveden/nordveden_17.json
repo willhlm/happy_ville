@@ -228,7 +228,53 @@
                  "draworder":"topdown",
                  "id":73,
                  "name":"interactables",
-                 "objects":[],
+                 "objects":[
+                        {
+                         "gid":44050,
+                         "height":144,
+                         "id":602,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"ID",
+                                 "type":"string",
+                                 "value":"bjorn_boss"
+                                }, 
+                                {
+                                 "name":"erect",
+                                 "type":"bool",
+                                 "value":false
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":2144,
+                         "y":1296
+                        }, 
+                        {
+                         "gid":44050,
+                         "height":144,
+                         "id":603,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"ID",
+                                 "type":"string",
+                                 "value":"bjorn_boss"
+                                }, 
+                                {
+                                 "name":"erect",
+                                 "type":"bool",
+                                 "value":true
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":3184,
+                         "y":1248
+                        }],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -253,32 +299,8 @@
                          "y":1408
                         }, 
                         {
-                         "height":0,
-                         "id":571,
-                         "name":"",
-                         "polygon":[
-                                {
-                                 "x":0,
-                                 "y":0
-                                }, 
-                                {
-                                 "x":336,
-                                 "y":-160
-                                }, 
-                                {
-                                 "x":0,
-                                 "y":-160
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":0,
-                         "x":1280,
-                         "y":1120
-                        }, 
-                        {
                          "gid":8,
-                         "height":272,
+                         "height":400,
                          "id":572,
                          "name":"",
                          "rotation":0,
@@ -286,7 +308,7 @@
                          "visible":true,
                          "width":896,
                          "x":1104,
-                         "y":960
+                         "y":1088
                         }, 
                         {
                          "gid":11,
@@ -373,21 +395,9 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":816,
+                         "width":1312,
                          "x":2256,
                          "y":992
-                        }, 
-                        {
-                         "gid":8,
-                         "height":96,
-                         "id":585,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":240,
-                         "x":2256,
-                         "y":1088
                         }, 
                         {
                          "gid":8,
@@ -418,29 +428,6 @@
                          "width":16,
                          "x":1648,
                          "y":1184
-                        }, 
-                        {
-                         "gid":20,
-                         "height":112,
-                         "id":590,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"event",
-                                 "type":"string",
-                                 "value":"Butterfly_encounter"
-                                }, 
-                                {
-                                 "name":"new_state",
-                                 "type":"bool",
-                                 "value":true
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":2128,
-                         "y":1296
                         }, 
                         {
                          "gid":8,
@@ -486,60 +473,14 @@
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"1"
+                                 "value":"2"
                                 }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":16,
                          "x":3360,
-                         "y":1184
-                        }, 
-                        {
-                         "gid":44050,
-                         "height":144,
-                         "id":597,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"ID",
-                                 "type":"string",
-                                 "value":"bjorn_boss"
-                                }, 
-                                {
-                                 "name":"erect",
-                                 "type":"bool",
-                                 "value":true
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":32,
-                         "x":3184,
-                         "y":1280
-                        }, 
-                        {
-                         "gid":44050,
-                         "height":144,
-                         "id":598,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"ID",
-                                 "type":"string",
-                                 "value":"bjorn_boss"
-                                }, 
-                                {
-                                 "name":"erect",
-                                 "type":"bool",
-                                 "value":false
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":32,
-                         "x":2192,
-                         "y":1328
+                         "y":1200
                         }, 
                         {
                          "gid":23,
@@ -561,8 +502,8 @@
                          "type":"",
                          "visible":true,
                          "width":928,
-                         "x":2256,
-                         "y":1088
+                         "x":2208,
+                         "y":1072
                         }, 
                         {
                          "gid":4,
@@ -613,7 +554,7 @@
          "y":0
         }],
  "nextlayerid":94,
- "nextobjectid":601,
+ "nextobjectid":604,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -707,7 +648,7 @@
         }, 
         {
          "columns":32,
-         "firstgid":44058,
+         "firstgid":44060,
          "image":"tilesets\/props.png",
          "imageheight":512,
          "imagewidth":512,
@@ -719,7 +660,7 @@
          "tilewidth":16
         }, 
         {
-         "firstgid":45082,
+         "firstgid":45084,
          "source":"objects\/objects.tsx"
         }],
  "tilewidth":16,
