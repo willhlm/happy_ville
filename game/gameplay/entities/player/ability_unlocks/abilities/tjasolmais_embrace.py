@@ -55,11 +55,11 @@ class TjasolmaisEmbrace(Ability):#makes the shield, water god
         return self.entity.game_objects.controller.is_held('a')
 
     def enable_glide(self):
-        if 'shield_glide' not in self.entity.movement_manager.modifiers:
-            self.entity.movement_manager.add_modifier('shield_glide')
+        if 'shield_glide' not in self.entity.movement_modifier.modifiers:
+            self.entity.movement_modifier.add_modifier('shield_glide')
 
     def disable_glide(self):
-        self.entity.movement_manager.remove_modifier('shield_glide')
+        self.entity.movement_modifier.remove_modifier('shield_glide')
 
     def initiate(self):#called when using the abilty
         self.cancel_active_shield()

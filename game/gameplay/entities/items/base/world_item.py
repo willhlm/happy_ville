@@ -16,7 +16,7 @@ class WorldItem(AnimatedEntity):
         self.go_through = {'drop_through': True}
         self.velocity = [0, 0]
         self.body = EntityBody(self)
-        self.movement_manager = modifier_movement.MovementManager(self)
+        self.movement_modifier = modifier_movement.MovementManager(self)
         self.platform_collider = PlatformCollider(self)
         self.hitstop = HitstopComponent()
 
@@ -46,7 +46,7 @@ class WorldItem(AnimatedEntity):
 
     #update merhods
     def update_vel(self, dt):
-        context = self.movement_manager.resolve()
+        context = self.movement_modifier.resolve()
         self.velocity[1] += dt * (context.gravity - self.velocity[1] * context.friction[1]) + context.velocity[1]
         self.velocity[1] = min(self.velocity[1], context.max_vel[1])
         self.velocity[0] += dt * (self.acceleration[0] - context.friction[0] * self.velocity[0]) + context.velocity[0]
@@ -54,7 +54,7 @@ class WorldItem(AnimatedEntity):
     def update(self, dt):
         super().update(dt)
         self.age += dt
-        self.movement_manager.update(dt)
+        self.movement_modifier.update(dt)
         self.update_vel(dt)
         if self.lifetime_component:
             self.lifetime_component.update(dt)
@@ -110,7 +110,7 @@ class WorldItem(AnimatedEntity):
     def post_physics_update(self, dt):
         self.consume_contact_effects()
         self.consume_platform_collisions()
-        self.movement_manager.consume_contact_state()
+        self.movement_modifier.consume_contact_state()
         self.perform_bounce()
         self.bounce_directions.clear()
 

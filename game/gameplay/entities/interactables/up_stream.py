@@ -24,10 +24,10 @@ class UpStream(StaticEntity):#a draft that can lift enteties along a direction
     def on_collision(self, entity):#entity collision
         floor_boost = int(getattr(entity, 'is_on_floor', lambda: False)())
         entity.velocity[1] += self.dir[1] * floor_boost#a small inital boost if on ground
-        entity.movement_manager.add_modifier(self.type, speed = [self.dir[0] * self.accel_x, self.dir[1] * self.accel_y], max_speed = self.max_speed)
+        entity.movement_modifier.add_modifier(self.type, speed = [self.dir[0] * self.accel_x, self.dir[1] * self.accel_y], max_speed = self.max_speed)
 
     def on_noncollision(self, entity):
-        entity.movement_manager.remove_modifier(self.type)
+        entity.movement_modifier.remove_modifier(self.type)
 
     def collision(self, entity):
         pass

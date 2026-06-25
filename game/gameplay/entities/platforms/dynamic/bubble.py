@@ -32,7 +32,7 @@ class Bubble(DynamicPlatform):#dynamic one: #shoudl be added to platforms and dy
 
     def jumped(self):#called from player states jump_main
         self.deactivate()
-        context = self.game_objects.player.movement_manager.resolve()
+        context = self.game_objects.player.movement_modifier.resolve()
         return context.air_timer
 
     def update_vel(self, dt):

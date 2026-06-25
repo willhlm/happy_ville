@@ -209,14 +209,14 @@ class AirBoost(MovementModifier):
 
     def consume_contact_state(self, contact_state):
         if contact_state.is_on_floor() or contact_state.is_on_wall():
-            self.entity.movement_manager.remove_modifier('air_boost')
+            self.entity.movement_modifier.remove_modifier('air_boost')
 
     def update(self, dt):
         self.friction_x += dt * 0.0005
         self.friction_y -= dt * 0.0015
         self.friction_y = max(0, self.friction_y)
         if self.target - self.friction_x < 0.0003:
-            self.entity.movement_manager.remove_modifier('air_boost')
+            self.entity.movement_modifier.remove_modifier('air_boost')
 
 class UpStream(MovementModifier):
     def __init__(self, priority, **kwarg):

@@ -22,7 +22,7 @@ class Toadess(Boss):
 
         self.attack_distance = self.config["attack_distance"]
         self.jump_distance = self.config["jump_distance"]
-        self.movement_manager.add_immunity("two_d_liquid")
+        self.movement_modifier.add_immunity("two_d_liquid")
 
         self.vitals.set_max_health(self.config["health"])
         self.vitals.set_health(self.vitals.max_health)

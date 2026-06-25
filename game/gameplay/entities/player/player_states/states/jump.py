@@ -18,16 +18,14 @@ class JumpMain(PhaseAirBase):
         self.entity.game_objects.sound.play_sfx(random.choice(self.entity.sounds['jump']), vol = 0.06)
         self.entity.animation.frame = kwarg.get('frame', 0)
         self.jump_dash_timer = C.jump_dash_timer
-        self.entity.flags['ground'] = False
-        self.shroomboost = kwarg.get('jump_boost', 1)
-        self.air_timer = kwarg.get('air_timer', C.air_timer)
+        self.entity.movement_controller.start_jump(
+            jump_boost = kwarg.get('jump_boost', 1),
+            air_timer = kwarg.get('air_timer', C.air_timer),
+        )
         self.entity.game_objects.cosmetics.add(Dusts(self.entity.hitbox.center, self.entity.game_objects, dir = self.entity.dir, state = 'two'))
 
     def update(self, dt):
         self.jump_dash_timer -= dt
-        self.air_timer -= dt
-        if self.air_timer >= 0:
-            self.entity.velocity[1] = C.jump_vel_player * self.shroomboost
         if self.entity.velocity[1] >= 0.7:
             self.enter_state('fall')
 
@@ -48,14 +46,13 @@ class JumpMain(PhaseAirBase):
         elif input.name == 'a':
             input.processed()
             if self.entity.flags['bounce_jump']:
-                self.shroomboost = self.entity.consume_bounce_jump()
-                self.air_timer = max(self.air_timer, C.air_timer)
+                jump_boost = self.entity.consume_bounce_jump()
+                self.entity.movement_controller.extend_jump(jump_boost = jump_boost, air_timer = C.air_timer)
                 self.jump_dash_timer = max(self.jump_dash_timer, C.bounce_dash_jump_buffer_player)
 
     def handle_release_input(self, input):
         if input.name == 'a':
             input.processed()
-            self.entity.velocity[1] = 0.5 * self.entity.velocity[1]
             self.enter_state('fall')
 
     def swing_sword(self):

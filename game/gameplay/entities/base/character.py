@@ -17,7 +17,7 @@ class Character(AnimatedEntity):#enemy, NPC,player
         self.go_through = {'drop_through': True}
         self.velocity = [0, 0]
         self.body = EntityBody(self)
-        self.movement_manager = modifier_movement.MovementManager(self)
+        self.movement_modifier = modifier_movement.MovementManager(self)
         self.platform_collider = PlatformCollider(self)
         self.hitstop = HitstopComponent()
         self.acceleration = [0, C.acceleration[1]]
@@ -34,7 +34,7 @@ class Character(AnimatedEntity):#enemy, NPC,player
         self.hitstop.update(dt)
         scaled_dt = self.hitstop.get_sim_dt(dt)
 
-        self.movement_manager.update(scaled_dt)
+        self.movement_modifier.update(scaled_dt)
         self.update_vel(scaled_dt)
 
     def post_physics_update(self, dt):
@@ -50,7 +50,7 @@ class Character(AnimatedEntity):#enemy, NPC,player
         self.shader_state.update_render(scaled_dt)
 
     def update_vel(self, dt):#called from hitsop_states
-        context = self.movement_manager.resolve()
+        context = self.movement_modifier.resolve()
 
         self.velocity[1] += dt * (context.gravity - self.velocity[1] * context.friction[1]) + context.velocity[1]#gravity
         self.velocity[1] = min(self.velocity[1], context.max_vel[1])#set a y max speed#

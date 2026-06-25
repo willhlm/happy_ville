@@ -1,7 +1,3 @@
-
-from engine import constants as C
-from engine.utils.functions import sign
-
 #normal phases
 class PhaseBase():
     def __init__(self, entity):
@@ -36,19 +32,7 @@ class PhaseBase():
         input.processed()
 
     def handle_movement(self, axes):#all states should inehrent this function: called in update function of gameplay state
-        value = axes.move#the avlue of the press
-
-        #self.entity.acceleration[0] = C.acceleration[0] * math.ceil(abs(value[0]*0.8))#always positive, add acceleration to entity
-        multiplier = 0
-        if 0.1 < abs(value[0]) < 0.65:
-            multiplier = 0.3
-        elif abs(value[0]) >= 0.65:
-            multiplier = 1
-        self.entity.acceleration[0] = C.acceleration[0] * multiplier#always positive, add acceleration to entity
-
-        self.entity.dir[1] = -value[1]
-        if multiplier > 0:
-            self.entity.dir[0] = sign(value[0])
+        self.entity.movement_controller.apply_ground_movement(axes)
 
     def do_ability(self):#called when pressing B (E).
         self.entity.abilities.enter_equipped_state(self.enter_state)
@@ -61,17 +45,7 @@ class PhaseAirBase(PhaseBase):
         super().__init__(entity)
 
     def handle_movement(self, axes):#all states should inehrent this function: called in update function of gameplay state
-        value = axes.move#the avlue of the press
-
-        #self.entity.acceleration[0] = C.acceleration[0] * math.ceil(abs(value[0]*0.8))#always positive, add acceleration to entity
-        multiplier = 0
-        if abs(value[0]) > 0.1:
-            multiplier = 1
-        self.entity.acceleration[0] = C.acceleration[0] * multiplier#always positive, add acceleration to entity
-
-        self.entity.dir[1] = -value[1]
-        if multiplier > 0:
-            self.entity.dir[0] = sign(value[0])
+        self.entity.movement_controller.apply_air_movement(axes)
 
 class NullPhase(PhaseBase):
     def enter(self, **kwargs):
