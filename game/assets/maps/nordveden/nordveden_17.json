@@ -236,21 +236,26 @@
                          "name":"",
                          "properties":[
                                 {
-                                 "name":"ID",
-                                 "type":"string",
-                                 "value":"bjorn_boss"
-                                }, 
-                                {
                                  "name":"erect",
                                  "type":"bool",
                                  "value":false
+                                }, 
+                                {
+                                 "name":"id",
+                                 "type":"string",
+                                 "value":"bjorn_boss_1"
+                                }, 
+                                {
+                                 "name":"signal_id",
+                                 "type":"string",
+                                 "value":"bjorn_boss"
                                 }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":32,
-                         "x":2144,
-                         "y":1296
+                         "x":2128,
+                         "y":1312
                         }, 
                         {
                          "gid":44050,
@@ -259,14 +264,19 @@
                          "name":"",
                          "properties":[
                                 {
-                                 "name":"ID",
-                                 "type":"string",
-                                 "value":"bjorn_boss"
-                                }, 
-                                {
                                  "name":"erect",
                                  "type":"bool",
                                  "value":true
+                                }, 
+                                {
+                                 "name":"id",
+                                 "type":"string",
+                                 "value":"bjorn_boss_2"
+                                }, 
+                                {
+                                 "name":"signal_id",
+                                 "type":"string",
+                                 "value":"bjorn_boss"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -455,7 +465,7 @@
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"3"
+                                 "value":"2"
                                 }],
                          "rotation":0,
                          "type":"",

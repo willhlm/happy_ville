@@ -31,14 +31,14 @@ class Boss(Enemy):
         self.hit_component.set_invincibility(True) 
         self.game_objects.world_state.narrative.mark_boss_defeated(self.ID)
         if self.ID:
-            self.game_objects.signals.emit(self.ID, phase="finish")
+            self.game_objects.signals.emit(self.ID, action="open")
 
         reward = self.build_reward()
         if reward is not None:
             position = [self.hitbox.centerx, self.hitbox.centery - 50]
             self.game_objects.interactables.add(BossRewardBall(position, self.game_objects, reward))
 
-        self.game_objects.sequence_manager.start_sequence('defeated_boss', boss=self)
+            self.game_objects.sequence_manager.start_sequence('defeated_boss', boss=self)
 
     def build_reward(self):
         if self.reward is not None:

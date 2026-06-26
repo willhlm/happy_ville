@@ -47,3 +47,6 @@ class UpStream(StaticEntity):#a draft that can lift enteties along a direction
 
     def seed_collision(self, seed):
         pass
+
+    def take_hit(self, effect):
+        return effect

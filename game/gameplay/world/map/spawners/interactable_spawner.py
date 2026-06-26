@@ -49,18 +49,12 @@ class InteractableSpawner(c.SpawnerCommon):
                 self.game_objects.interactables.add(c.UberRunestone(object_position, self.game_objects))
 
             elif local_id == 10:
-                kwargs = {}
-                for property in properties:
-                    if property["name"] in ("ID", "on"):
-                        kwargs[property["name"]] = property["value"]
-                self.game_objects.interactables.add(c.Lever(object_position, self.game_objects, **kwargs))
+                obj_props = c.props_list_to_dict(obj.get("properties", []))
+                self.game_objects.interactables.add(c.Lever(object_position, self.game_objects, **obj_props))
 
             elif local_id == 11:
-                kwargs = {}
-                for property in properties:
-                    if property["name"] in ("ID", "erect"):
-                        kwargs[property["name"]] = property["value"]
-                self.game_objects.platforms.add(c.GatePlatform(object_position, self.game_objects, **kwargs))
+                obj_props = c.props_list_to_dict(obj.get("properties", []))
+                self.game_objects.platforms.add(c.GatePlatform(object_position, self.game_objects, **obj_props))
 
             elif local_id == 12:
                 statue_id = next(property["value"] for property in properties if property["name"] == "ID")
@@ -78,11 +72,8 @@ class InteractableSpawner(c.SpawnerCommon):
                     self.game_objects.loot.add(item)
 
             elif local_id == 15:
-                kwargs = {}
-                for property in properties:
-                    if property["name"] in ("ID", "erect"):
-                        kwargs[property["name"]] = property["value"]
-                self.game_objects.platforms.add(c.GatePlatformAlt(object_position, self.game_objects, **kwargs))
+                obj_props = c.props_list_to_dict(obj.get("properties", []))
+                self.game_objects.platforms.add(c.GatePlatformAlt(object_position, self.game_objects, **obj_props))
 
             elif local_id == 16:
                 self.game_objects.interactables.add(c.AirDashUpgradeStatue(object_position, self.game_objects))

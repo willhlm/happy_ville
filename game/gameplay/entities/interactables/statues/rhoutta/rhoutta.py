@@ -34,5 +34,5 @@ class RhouttaStatue(Interactables):#interact with it to get air dash
     def interact(self):#when player press t/y
         if self.interacted: return        
         self.interacted = True
-        self.game_objects.signals.emit('open')
+        self.game_objects.signals.emit('open', action='open')
         #self.game_objects.map.load_map(self.game_objects.game.state_manager.state_stack[-1],'rhoutta_encounter_1','1')

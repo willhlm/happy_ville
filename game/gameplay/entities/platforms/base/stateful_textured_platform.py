@@ -32,23 +32,55 @@ class WorldStateDrivenPlatform(StatefulTexturedPlatform):
     world_state_group = ""
 
     def __init__(self, pos, game_objects, **kwargs):
-        self.ID_key = kwargs.get("ID")
+        self.id_key = kwargs.get("id")#the key used to store the state of this platform in the world state
+        self.signal_key = kwargs.get("signal_id", self.id_key)#the key used to subscribe to signals that toggle this platform's state, defaults to the id_key if not provided
         initial_erect = game_objects.world_state.objects.load_bool(
             game_objects.map.biome_room_name,
             self.world_state_group,
-            self.ID_key,
+            self.id_key,
             initial=kwargs.get("erect", False),
         )
         initial_state = "erect" if initial_erect else "down"
         super().__init__(pos, game_objects, initial_state=initial_state)
-        if self.ID_key is not None:
-            self.game_objects.signals.subscribe(self.ID_key, self.toggle_platform)
 
-    def toggle_platform(self, **kwargs):
-        if self.ID_key is not None:
-            self.game_objects.world_state.objects.toggle_bool(
+        if self.signal_key is not None:
+            self.game_objects.signals.subscribe(self.signal_key, self.handle_signal)
+
+    def _set_erect_state(self, erect):
+        self.game_objects.world_state.objects.set_bool(
+            self.game_objects.map.biome_room_name,
+            self.world_state_group,
+            self.id_key,
+            erect,
+        )
+    
+    def open(self):
+        if type(self.currentstate).__name__ == "DownState":
+            return
+        self._set_erect_state(False)
+        self.currentstate.handle_input("transform")
+
+    def close(self):
+        if type(self.currentstate).__name__ == "ErectState":
+            return
+        self._set_erect_state(True)
+        self.currentstate.handle_input("transform")
+
+    def toggle(self):
+        self._set_erect_state(
+            not self.game_objects.world_state.objects.load_bool(
                 self.game_objects.map.biome_room_name,
                 self.world_state_group,
-                self.ID_key,
+                self.id_key,
             )
+        )
         self.currentstate.handle_input("transform")
+
+    def handle_signal(self, **kwargs):
+        action = kwargs["action"]
+        if action == "open":
+            self.open()
+        elif action == "close":
+            self.close()
+        elif action == "toggle":
+            self.toggle()
