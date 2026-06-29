@@ -25,7 +25,6 @@ class Wolfies(Boss):
         )
 
         self.reward = ProgressionUnlockReward(
-            preview_sprite='dash_ground_main',
             progress_key='dash',
         )
         self.attack_distance = WOLFIES_CONFIG['attack_distance']

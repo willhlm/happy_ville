@@ -1,4 +1,4 @@
-from .spawners import FallbackProjectileSpawner
+from .spawners import FallbackProjectileSpawner, ProjectileSpawnRequest
 
 
 class AreaManager:
@@ -63,7 +63,7 @@ class AreaManager:
     ):
         spawners = self.get_spawners(spawn_id)
         if not spawners:
-            self._spawn_fallback_projectiles(
+            return self._spawn_fallback_projectiles(
                 spawn_id=spawn_id,
                 count=count,
                 fallback_projectile_id=fallback_projectile_id,
@@ -73,7 +73,6 @@ class AreaManager:
                 spawn_interval=spawn_interval,
                 warning_particle_type=warning_particle_type,
             )
-            return
 
         if selector == 'nearest_to_player':
             player_x = self.game_objects.player.hitbox.centerx
@@ -81,8 +80,9 @@ class AreaManager:
         elif selector != 'all':
             raise ValueError(f"Unknown AreaSpawner selector '{selector}'")
 
+        request = ProjectileSpawnRequest()
         for spawner in spawners:
-            spawner.request_projectile_spawns(
+            request_id = spawner.request_projectile_spawns(
                 count=count,
                 projectile_kwargs=projectile_kwargs,
                 warning_callback=warning_callback,
@@ -94,6 +94,9 @@ class AreaManager:
                 target_offset=target_offset,
                 warning_particle_type=warning_particle_type,
             )
+            request.add_entry(spawner, request_id)
+
+        return request
 
     def _spawn_fallback_projectiles(
         self,
@@ -123,3 +126,6 @@ class AreaManager:
             spawn_interval=40 if spawn_interval is None else int(spawn_interval),
             warning_particle_type=warning_particle_type,
         )
+        request = ProjectileSpawnRequest()
+        request.add_entry(fallback_spawner, fallback_spawner.request_id)
+        return request

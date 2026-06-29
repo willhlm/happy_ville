@@ -1,6 +1,7 @@
 import pygame
 from gameplay.entities.enemies.base.flying_enemy import FlyingEnemy
 from gameplay.entities.enemies.common.shared.state_machine import StateManager
+from gameplay.entities.shared.components.projectile_spawn_request_tracker import ProjectileSpawnRequestTracker
 from gameplay.entities.visuals.cosmetics import ShockWave
 from engine.utils import read_files
 from .config import ENEMY_CONFIG
@@ -28,21 +29,24 @@ class Bat(FlyingEnemy):
         self.vitals.set_health(self.vitals.max_health)
         self.currentstate = StateManager(self, custom_states=BAT_STATES, type='flying', universal_states=['dead', 'death'])
         self.time = 0
+        self.projectile_spawn_tracker = ProjectileSpawnRequestTracker()
 
     def attack(self):
         attack_cfg = self.config['attack']
-        self.game_objects.areas.request_projectile_spawns(
-            'bat_crystal',
-            count=1,
-            selector='nearest_to_player',
-            fallback_projectile_id='crystal_tagg',
-            projectile_kwargs={'velocity': attack_cfg['crystal_velocity'].copy()},
-            warning_interval=6,
-            spawn_interval=40,
-            target_mode='player_x',
-            target_offset=attack_cfg['spawn_offset'],
-            spawn_origin='area',
-            warning_particle_type='falling_debris_warning',
+        self.projectile_spawn_tracker.track(
+            self.game_objects.areas.request_projectile_spawns(
+                'bat_crystal',
+                count=1,
+                selector='nearest_to_player',
+                fallback_projectile_id='crystal_tagg',
+                projectile_kwargs={'velocity': attack_cfg['crystal_velocity'].copy()},
+                warning_interval=6,
+                spawn_interval=40,
+                target_mode='player_x',
+                target_offset=attack_cfg['spawn_offset'],
+                spawn_origin='area',
+                warning_particle_type='falling_debris_warning',
+            )
         )
 
     def emit_scream_wave(self):
@@ -69,6 +73,10 @@ class Bat(FlyingEnemy):
 
     def stop_scream_effects(self):
         self.scream_wave.stop_emitting()
+
+    def killed(self):
+        self.projectile_spawn_tracker.cancel_all()
+        super().killed()
 
     def on_kill_cleanup(self):
         self.stop_scream_effects()

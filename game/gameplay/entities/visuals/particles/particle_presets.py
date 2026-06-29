@@ -71,7 +71,7 @@ def converging_soul(pos, game_objects, player):#when exploding an abilty ball, g
     light = game_objects.lights.create(
         particle,
         colour=[100, 200, 255, 255],
-        radius=20
+        radius=20,
     )
     particle.light = light
 

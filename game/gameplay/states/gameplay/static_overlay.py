@@ -10,7 +10,7 @@ class StaticOverlay(Gameplay):#when player obtaines a new ability, pick up inetr
         super().__init__(game)
         self.page = 0
         self.render_fade = [self.render_in, self.render_out]
-        self.fade = self.game.game_objects.fade.create("alpha", 0, max_value=150)
+        self.fade = self.game.game_objects.fade.create("alpha", 0, max_value=255)
         self.should_exit = False
         self.callback = callback
         self.overlay = game.display.make_layer(game.window_size)

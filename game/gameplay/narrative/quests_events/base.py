@@ -1,5 +1,5 @@
 class Tasks():#events and quests
-    def __init__(self, game_objects):
+    def __init__(self, game_objects, **kwargs):
         self.game_objects = game_objects
 
     def initiate_quest(self):

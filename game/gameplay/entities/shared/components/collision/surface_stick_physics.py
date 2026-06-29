@@ -1,5 +1,5 @@
 from engine.utils.functions import sign
-from gameplay.entities.common.surface_side import SURFACE_ANGLE_BY_SIDE, SURFACE_SIDES
+from gameplay.entities.shared.components.collision.surface_side import SURFACE_ANGLE_BY_SIDE, SURFACE_SIDES
 
 class NullSurfaceStickPhysics:
     def __init__(self, entity):

@@ -15,7 +15,6 @@ class WallGlide(PhaseBase):
 
     def enter(self, **kwarg):
         self.entity.animation.play(self.animation_name)
-        self.entity.movement_controller.interrupt_jump()
         self.entity.end_coyote_time()
         self.entity.flags['grounddash'] = True#allow grounddash after wallglide, but not walljump, to give player more options out of wallglide
         if self.entity.is_on_wall_side('right'):
@@ -93,3 +92,5 @@ class WallGlide(PhaseBase):
 
     def get_wall_side(self):
         return 'right' if self.dir[0] > 0 else 'left'
+
+
