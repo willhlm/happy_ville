@@ -60,7 +60,7 @@ class TwoDLiquid(StaticEntity):#inside interactables_fg group. fg because in fro
         pass
 
     def on_collision(self, entity):#player collision
-        entity.movement_manager.add_modifier('two_d_liquid')
+        entity.movement_modifier.add_modifier('two_d_liquid')
         vel_scale = max(entity.velocity[1] / C.max_vel[1], 0.5)
         self.splash(entity.hitbox.midbottom, vel_scale)
         #self.splash(entity.hitbox.midbottom, lifetime = 100, dir = [0,1], colour = [self.behavior.liquid_tint[0]*255, self.behavior.liquid_tint[1]*255, self.behavior.liquid_tint[2]*255, 255], vel = {'gravity': [7 * vel_scale, 14 * vel_scale]}, fade_scale = 0.3, gradient=0)
@@ -69,7 +69,7 @@ class TwoDLiquid(StaticEntity):#inside interactables_fg group. fg because in fro
         self.behavior.on_enter(entity)
 
     def on_noncollision(self, entity):
-        entity.movement_manager.remove_modifier('two_d_liquid')
+        entity.movement_modifier.remove_modifier('two_d_liquid')
         if hasattr(entity, 'status_component'):
             entity.status_component.activate('wet', self.behavior.liquid_tint)#water when player leaves
         vel_scale = max(entity.velocity[1] / C.max_vel[1], 0.5)

@@ -18,7 +18,7 @@ class FallState(CompositeState):
         return self.falltime >= 4000
 
     def determine_sprint(self):
-        return self.entity.flags['sprint_chain_active']
+        return self.entity.movement_controller.should_chain_sprint()
 
 class FallPre(PhaseAirBase):
     def __init__(self, entity):
@@ -50,11 +50,11 @@ class FallPre(PhaseAirBase):
         if input.name == 'a':
             input.processed()
         elif input.name == 'lb':
-            self.entity.flags['sprint_chain_active'] = False
+            self.entity.movement_controller.clear_sprint_chain()
             input.processed()
 
     def handle_movement(self, axes):
-        if self.entity.game_objects.controller.is_held('lb') and self.entity.currentstate.states['fall'].determine_sprint():
+        if self.entity.currentstate.states['fall'].determine_sprint():
             value = axes.move
             multiplier = C.sprint_multiplier if abs(value[0]) > 0.1 else 0
             self.entity.acceleration[0] = C.acceleration[0] * multiplier
@@ -81,8 +81,8 @@ class FallPre(PhaseAirBase):
 
     def consume_contact_state(self):
         if self.entity.is_on_floor():
-            should_sprint = self.entity.game_objects.controller.is_held('lb') and self.entity.currentstate.states['fall'].determine_sprint()
-            self.entity.flags['sprint_chain_active'] = False
+            should_sprint = self.entity.currentstate.states['fall'].determine_sprint()
+            self.entity.movement_controller.clear_sprint_chain()
             if self.entity.currentstate.states['fall'].determine_fall():
                 self.enter_state('land', phase='hard')
             elif should_sprint:

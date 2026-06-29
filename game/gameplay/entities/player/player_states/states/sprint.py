@@ -20,7 +20,7 @@ class SprintMain(PhaseBase):
     def update(self, dt):
         self.sprint_time += dt
         if not self.entity.has_ground_grace():
-            self.entity.flags['sprint_chain_active'] = True
+            self.entity.movement_controller.request_sprint_chain()
             self.enter_state('fall')
             self.entity.begin_coyote_time()
 
@@ -28,7 +28,7 @@ class SprintMain(PhaseBase):
         if input.name == 'a' and self.sprint_time > self.sprint_time_threshold:
             input.processed()
             self.entity.flags['grounddash'] = True
-            self.entity.flags['sprint_chain_active'] = True
+            self.entity.movement_controller.request_sprint_chain()
             self.enter_state('dash_jump')
 
     def handle_release_input(self, input):
@@ -52,7 +52,7 @@ class SprintPost(PhaseBase):
 
     def update(self, dt):
         if not self.entity.has_ground_grace():
-            self.entity.flags['sprint_chain_active'] = True
+            self.entity.movement_controller.request_sprint_chain()
             self.enter_state('fall')
             self.entity.begin_coyote_time()
 

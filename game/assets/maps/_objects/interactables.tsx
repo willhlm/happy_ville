@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.10.1" name="interactables" tilewidth="224" tileheight="288" tilecount="19" columns="0">
+<tileset version="1.8" tiledversion="1.8.2" name="interactables" tilewidth="224" tileheight="288" tilecount="19" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <transformations hflip="1" vflip="0" rotate="0" preferuntransformed="0"/>
  <tile id="2">
@@ -47,8 +47,9 @@
  </tile>
  <tile id="11">
   <properties>
-   <property name="ID" value=""/>
    <property name="erect" type="bool" value="true"/>
+   <property name="id" value=""/>
+   <property name="signal_id" value=""/>
   </properties>
   <image width="32" height="144" source="../../sprites/entities/platforms/gates/gate_1/erect/vines6.png"/>
  </tile>
@@ -70,8 +71,9 @@
  </tile>
  <tile id="15">
   <properties>
-   <property name="ID" value=""/>
    <property name="erect" type="bool" value="true"/>
+   <property name="id" value=""/>
+   <property name="signal_id" value=""/>
   </properties>
   <image width="144" height="32" source="../../sprites/entities/platforms/gates/gate_2/erect/vines6.png"/>
  </tile>
@@ -91,6 +93,6 @@
   <image width="44" height="43" source="../../sprites/entities/interactables/chests/amberbushsmall/idle/Sprite-0003.png"/>
  </tile>
  <tile id="20">
-  <image width="136" height="57" source="../../sprites/entities/interactables/chests/amberbushbreak/idle/idle1.png"/>
+  <image width="156" height="57" source="../../sprites/entities/interactables/chests/amberbushbreak/idle/idle1.png"/>
  </tile>
 </tileset>

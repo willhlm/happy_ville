@@ -4,7 +4,7 @@
     {
       "time": 0,
       "actions": [
-        { "type": "emit_signal", "signal": "bjorn_boss", "kwargs": { "phase": "start" } },
+        { "type": "emit_signal", "signal": "bjorn_boss", "kwargs": { "action": "close" } },
         { "type": "player_state", "state": "idle" },
         { "type": "player_acceleration_x", "value": 0 },
         { "type": "boss_method", "method": "start_wake_intro" }

@@ -18,7 +18,7 @@ class DashGroundState(CompositeState):
     
     def exit(self):#called when exiting the composite state
         super().exit()
-        self.entity.movement_manager.remove_modifier('dash')
+        self.entity.movement_modifier.remove_modifier('dash')
         self.entity.shader_state.remove_shader('mb')
 
 class DashGroundPre(PhaseBase):
@@ -34,7 +34,7 @@ class DashGroundPre(PhaseBase):
         self.entity.game_objects.cosmetics.add(Dusts(self.entity.hitbox.center, self.entity.game_objects, dir = self.entity.dir, state = 'one'))
         self.entity.end_coyote_time()
         self.jump_dash_timer = C.jump_dash_timer
-        self.entity.movement_manager.add_modifier('dash', entity = self.entity, authoritative = True)
+        self.entity.movement_modifier.add_modifier('dash', entity = self.entity, authoritative = True)
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0], vol = 1)
         self.wall_buffer = 3
         self.entity.dir[0] = kwarg.get('dir', self.entity.dir[0])
@@ -68,7 +68,7 @@ class DashGroundPre(PhaseBase):
 
     def enter_state(self, state, **kwarg):
         self.entity.shader_state.remove_shader('mb')
-        self.entity.movement_manager.remove_modifier('dash')
+        self.entity.movement_modifier.remove_modifier('dash')
         super().enter_state(state, **kwarg)
 
     def consume_contact_state(self):
@@ -99,7 +99,7 @@ class DashGroundMain(DashGroundPre):
         self.entity.flags['grounddash'] = False
         self.entity.game_objects.timer_manager.start_timer(C.ground_dash_timer, self.entity.on_grounddash_timout, 'dash_timeout')
         self.entity.shader_state.remove_shader('mb')
-        if self.entity.game_objects.controller.is_held('lb'):
+        if self.entity.game_objects.controller.is_held('lb') and self.entity.movement_controller.can_sprint():
             self.enter_state('sprint')
         else:
             self.enter_phase('post')
@@ -111,7 +111,7 @@ class DashGroundPost(DashGroundPre):
 
     def enter(self, **kwarg):
         self.entity.animation.play('dash_ground_post')
-        self.entity.movement_manager.remove_modifier('dash')
+        self.entity.movement_modifier.remove_modifier('dash')
         self.wall_buffer = 3
 
     def update(self, dt):

@@ -13,6 +13,7 @@ class JumpSprintPre(PhaseAirBase):
 
     def enter(self, **kwarg):
         self.entity.animation.play('jump_sprint_pre')
+        self.entity.movement_controller.interrupt_jump()
         self.air_timer = 10
         self.entity.flags['ground'] = False
 

@@ -20,5 +20,5 @@ class Lever(Interactables):
     def take_dmg(self, effect):
         self.currentstate.handle_input("Transform")
         self.game_objects.world_state.objects.toggle_bool(self.game_objects.map.biome_room_name, "lever", self.ID_key)
-        self.game_objects.signals.emit(self.ID_key)
+        self.game_objects.signals.emit(self.ID_key, action="toggle")
         return effect
