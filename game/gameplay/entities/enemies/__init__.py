@@ -1,10 +1,10 @@
 from .bosses.reindeer.reindeer import Reindeer
 from .bosses.wolfies.wolfies import Wolfies
-from .bosses.rhoutta_encounter import RhouttaEncounter
 from .bosses.butterfly.butterfly import Butterfly
 from .bosses.cocoon.cocoon_boss import CocoonBoss
 from .bosses.toadess.toadess import Toadess
 from .bosses.bjorn.bjorn import Bjorn
+from .bosses.lieaibolmmai.lieaibolmmai import Lieaibolmmai
 
 from .animals.bird.bird import Bird
 

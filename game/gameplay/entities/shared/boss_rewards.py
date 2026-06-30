@@ -3,8 +3,6 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class BossReward:
-    preview_sprite: str
-
     def apply(self, player):
         raise NotImplementedError
 

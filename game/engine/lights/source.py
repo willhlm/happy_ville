@@ -24,7 +24,7 @@ class LightSource:
 
         self.platform_interact = properties.get('platform_interact', False)
         self.cache_platforms = properties.get('cache_platforms', False)
-        self.normal_interact = float(properties.get('normal_interact', True))
+        self.normal_interact = float(properties.get('normal_interact', False))
         self.shadow_interact = properties.get('shadow_interact', False)
         self._cached_platforms = None
 

@@ -27,11 +27,18 @@ class AreaSpawner:
 
 
         self.pending_spawns = []
+        self._next_request_id = 1
 
         self.game_objects.areas.register_spawner(self)
 
     def kill(self):
         self.game_objects.areas.unregister_spawner(self)
+
+    def cancel_pending_spawns(self, request_id):
+        self.pending_spawns = [
+            pending_spawn for pending_spawn in self.pending_spawns
+            if pending_spawn.request_id != request_id
+        ]
 
     def update(self, dt):
         completed_spawns = []
@@ -64,6 +71,8 @@ class AreaSpawner:
         resolved_warning_interval = int(warning_interval) if warning_interval is not None else self.warning_interval
         resolved_spawn_interval = int(spawn_interval) if spawn_interval is not None else self.spawn_interval
         batch_size = self.resolve_batch_size(projectile_count)
+        request_id = self._next_request_id
+        self._next_request_id += 1
 
         for projectile_index in range(projectile_count):
             impact_position, spawn_position = spawn_position_callback()
@@ -78,8 +87,11 @@ class AreaSpawner:
                     warning_interval=resolved_warning_interval,
                     warning_callback=warning_callback,
                     spawn_callback=spawn_callback,
+                    request_id=request_id,
                 )
             )
+
+        return request_id
 
     def request_projectile_spawns(
         self,
@@ -104,7 +116,7 @@ class AreaSpawner:
                 particle_type=warning_particle_type,
             )
 
-        self.request_spawns(
+        return self.request_spawns(
             count=count,
             spawn_callback=lambda spawn_position, impact_position: self.spawn_projectile(
                 resolved_projectile_id,

@@ -17,7 +17,6 @@ class DashAirPre(PhaseBase):
 
     def enter(self, **kwarg):
         self.entity.animation.play('dash_air_pre')
-        self.entity.movement_controller.interrupt_jump()
         if 'air_boost' in self.entity.movement_modifier.modifiers.keys():
             self.entity.movement_modifier.remove_modifier('air_boost')
 
@@ -60,7 +59,7 @@ class DashAirPre(PhaseBase):
 
     def handle_release_input(self, input):
         if input.name == 'lb':
-            self.entity.movement_controller.clear_sprint_chain()
+            self.entity.flags['sprint_chain_active'] = False
         input.processed()
 
     def exit(self):
@@ -68,8 +67,8 @@ class DashAirPre(PhaseBase):
         self.entity.movement_modifier.remove_modifier('dash')
 
     def land_from_dash(self):
-        should_sprint = self.entity.movement_controller.should_chain_sprint()
-        self.entity.movement_controller.clear_sprint_chain()
+        should_sprint = self.entity.game_objects.controller.is_held('lb') and self.entity.flags['sprint_chain_active']
+        self.entity.flags['sprint_chain_active'] = False
         if should_sprint:
             self.enter_state('sprint')
         else:
@@ -103,12 +102,12 @@ class DashAirMain(DashGroundPre):
 
     def handle_release_input(self, input):
         if input.name == 'lb':
-            self.entity.movement_controller.clear_sprint_chain()
+            self.entity.flags['sprint_chain_active'] = False
         input.processed()
 
     def exit_state(self):
         if self.dash_length < 0:
-            self.entity.movement_controller.request_sprint_chain()
+            self.entity.flags['sprint_chain_active'] = self.entity.game_objects.controller.is_held('lb')
             self.entity.movement_modifier.add_modifier('air_boost', friction_x = 0.18, entity = self.entity)
             self.enter_state('fall')
 
@@ -138,7 +137,7 @@ class DashAirPost(DashGroundPre):
             self.entity.dir[0] = sign(value[0])
 
     def increase_phase(self):
-        self.entity.movement_controller.request_sprint_chain()
+        self.entity.flags['sprint_chain_active'] = self.entity.game_objects.controller.is_held('lb')
         self.entity.movement_modifier.add_modifier('air_boost', entity = self.entity)
         if self.entity.acceleration[0] == 0:
             self.enter_state('idle')
@@ -150,7 +149,7 @@ class DashAirPost(DashGroundPre):
 
     def handle_release_input(self, input):
         if input.name == 'lb':
-            self.entity.movement_controller.clear_sprint_chain()
+            self.entity.flags['sprint_chain_active'] = False
         input.processed()
 
     def enter_state(self, state, **kwarg):

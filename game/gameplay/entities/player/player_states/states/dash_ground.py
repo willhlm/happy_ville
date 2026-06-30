@@ -99,7 +99,7 @@ class DashGroundMain(DashGroundPre):
         self.entity.flags['grounddash'] = False
         self.entity.game_objects.timer_manager.start_timer(C.ground_dash_timer, self.entity.on_grounddash_timout, 'dash_timeout')
         self.entity.shader_state.remove_shader('mb')
-        if self.entity.game_objects.controller.is_held('lb') and self.entity.movement_controller.can_sprint():
+        if self.entity.game_objects.controller.is_held('lb'):
             self.enter_state('sprint')
         else:
             self.enter_phase('post')

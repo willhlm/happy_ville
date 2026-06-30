@@ -59,6 +59,7 @@ class TaskManager():#manager
         if isinstance(self.state, death_cls) or isinstance(self.state, dead_cls):
             return
 
+        self.entity.killed()
         self.clear_tasks()
         self.state = death_cls(self.entity)
    

@@ -50,6 +50,5 @@ class Boss(Enemy):
 
         return ProgressionUnlockReward(
             progress_key=progress_key,
-            preview_sprite=self.game_objects.player.progression.get_preview_sprite(progress_key),
         )
         

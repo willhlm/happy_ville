@@ -11,7 +11,7 @@ class StartLarvParty(EventTrigger):
             if self.game_objects.quests_events.active_quests['larv_party'].running: return
             self.game_objects.quests_events.active_quests['larv_party'].initiate_quest()
         else:
-            self.game_objects.quests_events.initiate_quest('larv_party')
+            self.game_objects.quests_events.initiate_quest('larv_party', **self.kwarg)
 
 
 class StopLarvParty(EventTrigger):

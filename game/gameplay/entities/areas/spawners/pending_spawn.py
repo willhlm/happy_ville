@@ -8,6 +8,7 @@ class PendingSpawn:
         warning_interval,
         warning_callback,
         spawn_callback,
+        request_id=None,
     ):
         self.spawn_position = spawn_position
         self.impact_position = impact_position
@@ -16,6 +17,7 @@ class PendingSpawn:
         self.warning_interval = warning_interval
         self.warning_callback = warning_callback
         self.spawn_callback = spawn_callback
+        self.request_id = request_id
         self.warning_timer = 0
 
     def update(self, dt):

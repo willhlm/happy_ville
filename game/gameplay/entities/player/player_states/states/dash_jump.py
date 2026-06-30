@@ -17,7 +17,6 @@ class DashJumpPre(PhaseBase):
 
     def enter(self, **kwarg):
         self.entity.animation.play('dash_jump_pre')
-        self.entity.movement_controller.interrupt_jump()
         self.dash_length = C.dash_jump_length
         self.entity.velocity = [0, 0]
         if int(self.entity.velocity[0]) == 0:
@@ -27,6 +26,11 @@ class DashJumpPre(PhaseBase):
         self.entity.shader_state.add_shader('mb')
         self.entity.flags['ground'] = False
         self.buffer_time = C.jump_dash_wall_timer
+
+    def exit_state(self):
+        if self.dash_length < 0:
+            self.entity.movement_modifier.add_modifier('air_boost', entity = self.entity)
+            self.enter_state('fall')
 
     def handle_movement(self, event):
         self.entity.acceleration[0] = 0
@@ -46,24 +50,18 @@ class DashJumpPre(PhaseBase):
 
     def handle_release_input(self, input):
         if input.name == 'lb':
-            self.entity.movement_controller.clear_sprint_chain()
+            self.entity.flags['sprint_chain_active'] = False
         input.processed()
 
     def land_from_dash_jump(self):
-        should_sprint = self.entity.movement_controller.should_chain_sprint()
-        self.entity.movement_controller.clear_sprint_chain()
+        should_sprint = self.entity.game_objects.controller.is_held('lb') and self.entity.flags['sprint_chain_active']
+        self.entity.flags['sprint_chain_active'] = False
         if should_sprint:
             self.enter_state('sprint')
         elif self.entity.acceleration[0] != 0:
             self.enter_state('run')
         else:
             self.enter_state('land', phase = 'soft')
-
-    def exit_state(self):
-        if self.dash_length < 0:
-            self.entity.movement_controller.request_sprint_chain()
-            self.entity.movement_modifier.add_modifier('air_boost', entity = self.entity)
-            self.enter_state('fall')
 
     def consume_contact_state(self):
         if self.entity.is_on_floor():

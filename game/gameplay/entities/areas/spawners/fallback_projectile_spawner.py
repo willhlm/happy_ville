@@ -19,6 +19,7 @@ class FallbackProjectileSpawner:
         self.projectile_id = projectile_id
         self.projectile_kwargs = projectile_kwargs or {}
         self.pending_spawns = []
+        self.request_id = 1
         self.game_objects.areas.register_fallback_spawner(self)
 
         for projectile_index in range(projectile_count):
@@ -33,11 +34,20 @@ class FallbackProjectileSpawner:
                     warning_interval=warning_interval,
                     warning_callback=self._build_warning_callback(warning_particle_type),
                     spawn_callback=self._spawn_projectile,
+                    request_id=self.request_id,
                 )
             )
 
     def kill(self):
         self.game_objects.areas.unregister_fallback_spawner(self)
+
+    def cancel_pending_spawns(self, request_id):
+        self.pending_spawns = [
+            pending_spawn for pending_spawn in self.pending_spawns
+            if pending_spawn.request_id != request_id
+        ]
+        if not self.pending_spawns:
+            self.kill()
 
     def update(self, dt):
         completed_spawns = []

@@ -1,5 +1,5 @@
 from gameplay.entities.enemies.base.enemy import Enemy
-from gameplay.entities.common.surface_side import SURFACE_BODY_ANCHOR_BY_SIDE, get_surface_draw_flip
+from gameplay.entities.shared.components.collision.surface_side import SURFACE_BODY_ANCHOR_BY_SIDE, get_surface_draw_flip
 from gameplay.entities.shared.components.collision.surface_stick_physics import NullSurfaceStickPhysics, SurfaceStickPhysics
 
 
