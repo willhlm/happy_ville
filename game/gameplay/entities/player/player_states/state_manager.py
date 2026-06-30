@@ -107,5 +107,8 @@ class StateManager():
     def can_interact(self):
         return self.composite_state.can_interact()
 
+    def get_move_dir_x(self):
+        return self.composite_state.get_move_dir_x()
+
     def increase_phase(self):
         self.composite_state.increase_phase()
