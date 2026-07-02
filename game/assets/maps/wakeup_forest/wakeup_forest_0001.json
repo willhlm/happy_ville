@@ -2005,7 +2005,7 @@
                         }, 
                         {
                          "gid":15,
-                         "height":688,
+                         "height":374,
                          "id":361,
                          "name":"",
                          "properties":[
@@ -2013,13 +2013,18 @@
                                  "name":"direction",
                                  "type":"string",
                                  "value":"right"
+                                }, 
+                                {
+                                 "name":"offset",
+                                 "type":"string",
+                                 "value":"3"
                                 }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":16,
-                         "x":3904,
-                         "y":800
+                         "width":376,
+                         "x":3544,
+                         "y":708
                         }, 
                         {
                          "gid":8,
