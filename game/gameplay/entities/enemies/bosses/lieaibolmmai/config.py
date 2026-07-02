@@ -13,9 +13,8 @@ CONFIG = {
         "roll_attack": [200, 250],
     },
     "hurt_recovery": 220,
-    "initial_state": "sleep_main",
-    "wake_intro_tasks": [
-        {"task": "sleep_post"},
+    "initial_state": "idle",
+    "encounter_intro_tasks": [
         {"task": "roar_pre"},
         {"task": "roar_main"},
         {"task": "roar_post"},

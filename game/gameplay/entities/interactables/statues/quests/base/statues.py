@@ -7,7 +7,7 @@ class Statues(Interactables):#monuments you interact to get quests or challenges
     def render_potrait(self, target):
         pass
 
-    def interact(self):#when plater press t
+    def interact(self, player=None):#when plater press t
         if self.interacted: return
         self.game_objects.game.state_manager.enter_state(state_name = 'conversation', speaker = self)
 

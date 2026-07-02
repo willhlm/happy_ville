@@ -1,4 +1,7 @@
 {
+  "boss": {
+    "mode": "existing"
+  },
   "camera": "Deer_encounter",
   "steps": [
     {

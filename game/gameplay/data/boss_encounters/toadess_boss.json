@@ -1,4 +1,9 @@
 {
+  "boss": {
+    "mode": "spawned",
+    "class": "toadess",
+    "spawn_position": "2000,600"
+  },
   "camera": "Deer_encounter",
   "steps": [
     {
@@ -13,7 +18,7 @@
     {
       "time": 300,
       "actions": [
-        { "type": "boss_start_aggro" },
+        { "type": "boss_method", "method": "start_aggro" },
         { "type": "mark_flow_complete" },
         { "type": "camera_exit" },
         { "type": "exit_state" }

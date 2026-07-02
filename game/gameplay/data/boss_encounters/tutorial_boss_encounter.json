@@ -1,4 +1,7 @@
 {
+  "boss": {
+    "mode": "existing"
+  },
   "camera": "Deer_encounter",
   "respawn_aggro_delay": 40,
   "setup_actions": [
@@ -29,16 +32,19 @@
       "time": 200,
       "actions": [
         {
-          "type": "boss_tasks",
-          "tasks": [
-            {
-              "task": "transform"
-            },
-            {
-              "task": "idle",
-              "animation": "idle"
-            }
-          ]
+          "type": "boss_method",
+          "method": "run_tasks",
+          "kwargs": {
+            "tasks": [
+              {
+                "task": "transform"
+              },
+              {
+                "task": "idle",
+                "animation": "idle"
+              }
+            ]
+          }
         },
         {
           "type": "player_velocity_x",
@@ -50,22 +56,25 @@
       "time": 350,
       "actions": [
         {
-          "type": "boss_tasks",
-          "tasks": [
-            {
-              "task": "roar_pre"
-            },
-            {
-              "task": "roar_main"
-            },
-            {
-              "task": "roar_post"
-            },
-            {
-              "task": "idle",
-              "animation": "idle"
-            }
-          ]
+          "type": "boss_method",
+          "method": "run_tasks",
+          "kwargs": {
+            "tasks": [
+              {
+                "task": "roar_pre"
+              },
+              {
+                "task": "roar_main"
+              },
+              {
+                "task": "roar_post"
+              },
+              {
+                "task": "idle",
+                "animation": "idle"
+              }
+            ]
+          }
         }
       ]
     },
@@ -76,7 +85,8 @@
           "type": "camera_exit"
         },
         {
-          "type": "boss_start_aggro"
+          "type": "boss_method",
+          "method": "start_aggro"
         },
         {
           "type": "mark_flow_complete"

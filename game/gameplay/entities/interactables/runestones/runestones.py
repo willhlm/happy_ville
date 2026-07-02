@@ -19,8 +19,9 @@ class Runestones(Interactables):
         else:
             self.currentstate = runestone_states.Idle(self)
 
-    def interact(self):
+    def interact(self, player=None):
         if type(self.currentstate).__name__ == 'Interacted': return
-        self.game_objects.player.currentstate.enter_state('crouch')
+        player = player or self.game_objects.player
+        player.currentstate.enter_state('crouch')
         self.currentstate.handle_input('transform')#goes to interacted after transform
         self.game_objects.world_state.objects.set_bool(self.game_objects.map.biome_room_name, 'runestone', self.ID_key, True)#write in the state dict that this has been picked up

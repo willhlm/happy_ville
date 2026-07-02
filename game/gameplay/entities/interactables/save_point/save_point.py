@@ -15,8 +15,9 @@ class SavePoint(Interactables):
         self.currentstate = states_savepoint.Idle(self)    
         self.hit_component.set_invincibility(True)          
 
-    def interact(self):#when player press t/y
-        self.game_objects.player.currentstate.enter_state('crouch')
-        self.game_objects.player.backpack.map.save_savepoint(map =  self.map, point = self.init_cord)
+    def interact(self, player=None):#when player press t/y
+        player = player or self.game_objects.player
+        player.currentstate.enter_state('crouch')
+        player.backpack.map.save_savepoint(map =  self.map, point = self.init_cord)
         self.currentstate.handle_input('active')
         self.game_objects.ui.overlay.play_logo_loading(self.game_objects)

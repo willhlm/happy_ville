@@ -1,4 +1,4 @@
-from gameplay.entities.interactables import RhouttaStatue, VerveTree
+from gameplay.entities.interactables import VerveTree
 
 from ..helpers import calculate_object_position, resolve_tileset
 from ..room_config import RoomConfig, merge_room_configs

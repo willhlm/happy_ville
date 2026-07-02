@@ -29,10 +29,9 @@ class FastTravel(Interactables):
         else:
             return False
 
-    def interact(self):#when player press t/y
+    def interact(self, player=None):#when player press t/y
         if self.locked:
             self.game_objects.game.state_manager.enter_state(state_name = 'Fast_travel_unlock', category = 'game_states_facilities', fast_travel = self)
         else:
             self.currentstate.handle_input('Once',animation_name = 'once',next_state='Idle')
             self.game_objects.game.state_manager.enter_state(state_name = 'Fast_travel_menu', category = 'game_states_facilities')
-

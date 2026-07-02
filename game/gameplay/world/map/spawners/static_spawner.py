@@ -56,14 +56,12 @@ class StaticSpawner(c.SpawnerCommon):
             elif local_id == 3:
                 path_props = c.props_list_to_dict(obj.get("properties", []))
                 if not self.game_objects.world_state.narrative.is_boss_defeated(path_props["ID"]):
-                    from gameplay.data.boss_encounter_configs import get_boss_encounter_config
-
                     aggro = self.game_objects.world_state.narrative.is_flow_complete(path_props["ID"])
                     boss = self.game_objects.registry.fetch("enemies", path_props["class"])(object_position, self.game_objects, path_props["ID"])
                     self.game_objects.enemies.add(boss)
                     ctx.references[path_props["ID"]] = boss
                     if aggro:
-                        boss.start_aggro(delay=get_boss_encounter_config(path_props["ID"]).get("respawn_aggro_delay", 0))
+                        boss.start_aggro()
 
             elif local_id == 5:
                 kwargs = {}

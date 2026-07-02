@@ -20,6 +20,6 @@ class UberRunestone(Interactables):
                     self.game_objects.cosmetics.add(Rune_symbol(pos,runestoneID))
                     self.runestone_number += 1
 
-    def interact(self):#when player press T
+    def interact(self, player=None):#when player press T
         if self.runestone_number == 25:
             pass#do a cutscene?

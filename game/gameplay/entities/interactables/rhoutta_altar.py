@@ -13,10 +13,9 @@ class RhouttaAltar(Interactables):#altar to trigger the cutscane at the beginnin
     def on_collision(self, entity):#player collision
         self.currentstate.handle_input('Outline')
 
-    def interact(self):#when player press t/y
+    def interact(self, player=None):#when player press t/y
         self.currentstate.handle_input('Once',animation_name = 'once',next_state='Idle')
         self.game_objects.game.state_manager.enter_state(state_name = 'Rhoutta_encounter', category = 'cutscenes')
 
     def reset_timer(self):
         self.currentstate.handle_input('Idle')
-

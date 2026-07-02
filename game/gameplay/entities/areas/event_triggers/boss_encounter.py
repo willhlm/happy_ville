@@ -3,7 +3,7 @@ import pygame
 from ..base import BaseArea
 
 class BossEncounter(BaseArea):
-    blocks_on_flow_complete = True
+    blocks_on_flow_complete = False
 
     def __init__(self, pos, game_objects, size, **kwarg):
         super().__init__(pos, game_objects)
@@ -24,8 +24,7 @@ class BossEncounter(BaseArea):
             self.kill()
             return
 
-        if not self.game_objects.world_state.narrative.is_flow_complete(self.ID):
-            self.game_objects.sequence_manager.start_sequence('boss_encounter', **self.kwarg)
+        self.game_objects.sequence_manager.start_sequence('boss_encounter', **self.kwarg)
         self.kill()
 
     @classmethod

@@ -96,6 +96,9 @@ class InteractableSpawner(c.SpawnerCommon):
                 self.game_objects.interactables.add(c.AmberBushBreak(object_position, self.game_objects, state, str(loot_container_index)))
                 loot_container_index += 1
 
+            elif local_id == 21:
+                obj_props = c.props_list_to_dict(obj.get("properties", []))
+                self.game_objects.interactables.add(c.BossStatue(object_position, self.game_objects, **obj_props))
 
             elif local_id == 190:
                 self.game_objects.platforms.add(c.BreakableBlockCharge_1(object_position, self.game_objects))

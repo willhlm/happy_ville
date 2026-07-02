@@ -19,6 +19,14 @@ class Boss(Enemy):
         self.currentstate.queue_task(task = 'think')
         self.currentstate.start_next_task()
 
+    def run_tasks(self, tasks, start=True, clear=True):
+        if clear:
+            self.currentstate.clear_tasks()
+        for task in tasks:
+            self.currentstate.queue_task(**task)
+        if start:
+            self.currentstate.start_next_task()
+
     def start_encounter_sequence(self):
         if not self.ID:
             return

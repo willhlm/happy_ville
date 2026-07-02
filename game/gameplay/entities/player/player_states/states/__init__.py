@@ -28,3 +28,4 @@ from .walk import WalkState
 from .wall_glide import WallGlideState
 from .wall_jump import WallJumpState
 from .wind import WindState
+from .pray import PrayState

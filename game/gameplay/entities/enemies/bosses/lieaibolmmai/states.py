@@ -117,40 +117,6 @@ class Walk(BaseState):
             self.entity.dir[0] *= -1
 
 
-@register_state(STATE_REGISTRY, name="sleep_main")
-class SleepMain(BaseState):
-    def __init__(self, entity, **kwargs):
-        super().__init__(entity, **kwargs)
-        self.entity.spatial_emitter_id = self.entity.game_objects.sound.register_spatial_point(
-            self.entity.sounds["sleeping"][0],
-            get_point=lambda: self.entity.hitbox.center,
-            base_volume=1,
-            loops=-1,
-            min_dist=48,
-            max_dist=500,
-        )
-        self.entity.animation.play("sleep_main")
-
-    def handle_input(self, input_type):
-        if input_type != "hurt":
-            return
-        if self.entity.ID and not self.entity.game_objects.world_state.narrative.is_flow_complete(self.entity.ID):
-            self.entity.start_encounter_sequence()
-            return
-        self.entity.start_wake_intro()
-
-
-@register_state(STATE_REGISTRY, name="sleep_post")
-class SleepPost(BaseState):
-    def __init__(self, entity, **kwargs):
-        super().__init__(entity, **kwargs)
-        self.entity.animation.play("sleep_post")
-        self.entity.game_objects.sound.unregister_emitter(self.entity.spatial_emitter_id)
-
-    def increase_phase(self):
-        self.start_next_task()
-
-
 @register_state(STATE_REGISTRY, name="roar_pre")
 class RoarPre(BaseState):
     def __init__(self, entity, **kwargs):
