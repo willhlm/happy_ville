@@ -15,7 +15,7 @@ class TraversalUnlockManager:
 
         #temorary unlocks for testing
         self.unlock('dash')#Leaibolmmái's step
-        self.unlock('climbing_gear')
+        #self.unlock('climbing_gear')
         self.unlock('air_dash')
 
     def has_unlock(self, unlock_key):

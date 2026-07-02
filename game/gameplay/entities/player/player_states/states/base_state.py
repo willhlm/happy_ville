@@ -53,6 +53,9 @@ class PhaseBase():
     def do_ability(self):#called when pressing B (E).
         self.entity.abilities.enter_equipped_state(self.enter_state)
 
+    def get_move_dir_x(self):
+        return self.entity.dir[0]
+
     def consume_contact_state(self):
         pass
 

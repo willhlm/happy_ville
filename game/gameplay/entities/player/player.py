@@ -5,6 +5,7 @@ from engine.utils import read_files
 from gameplay.entities.player.combat_tracker import CombatTracker
 from gameplay.entities.player.death_manager import DeathManager
 from gameplay.entities.player.hazard_resolver import PlayerHazardResolver
+from gameplay.entities.player.movement import MovementController
 from gameplay.entities.player.player_states.state_manager import StateManager
 from gameplay.entities.player.backpack import backpack
 from gameplay.entities.player.grounding import PlayerGrounding
@@ -35,6 +36,7 @@ class Player(Character):
         self.sword = Sword(self)
 
         self._reset_flags()
+        self.movement_controller = MovementController(self)
         self.grounding = PlayerGrounding(self)
         self.currentstate = StateManager(self)
         self.progression = PlayerProgressionManager(self)
@@ -49,13 +51,14 @@ class Player(Character):
 
     def update_vel(self, dt):#called from hitsop_states
         context = self.movement_modifier.resolve()
+        move_dir_x = self.currentstate.get_move_dir_x()
 
         self.velocity[1] += dt * (context.gravity - self.velocity[1] * context.friction[1]) + context.velocity[1]
         self.velocity[1] = min(self.velocity[1], self.max_vel[1])#set a y max speed#
         if self.velocity[1] < 0:
             self.velocity[1] = max(self.velocity[1], -context.max_vel[1])
 
-        self.velocity[0] += dt * (self.dir[0] * self.acceleration[0] - self.velocity[0] * context.friction[0]) + context.velocity[0]
+        self.velocity[0] += dt * (move_dir_x * self.acceleration[0] - self.velocity[0] * context.friction[0]) + context.velocity[0]
 
     def take_dmg(self, effect):
         """Called by hit_component after modifiers run. Apply damage and effects."""
@@ -87,6 +90,7 @@ class Player(Character):
         self.acceleration =  [0, C.acceleration[1]]
         self.friction = C.friction_player.copy()
         self._reset_flags()
+        self.movement_controller.reset()
         self.movement_modifier.clear_modifiers()#maybe probably not all should be cleared?
 
     def heal_vitals(self, health=1):
@@ -131,6 +135,7 @@ class Player(Character):
     def post_physics_update(self, dt):
         scaled_dt = self.hitstop.get_sim_dt(dt)
         self.consume_contact_state()
+        self.movement_controller.update(scaled_dt)
         self.currentstate.update(scaled_dt)
         self.animation.update(scaled_dt)
         self.backpack.radna.update()
@@ -139,6 +144,7 @@ class Player(Character):
     def consume_contact_state(self):
         super().consume_contact_state()
         self.grounding.consume_contact_state()
+        self.movement_controller.consume_contact_state()
         self.movement_modifier.consume_contact_state()
 
     def draw(self, target):#called in group

@@ -43,6 +43,9 @@ class CompositeState():#will contain pre, main, post phases of a state
     def can_interact(self):
         return self.interaction_enabled
 
+    def get_move_dir_x(self):
+        return self.current_phase.get_move_dir_x()
+
     def increase_phase(self):#called when an animation is finished for that state
         self.current_phase.increase_phase()  
 

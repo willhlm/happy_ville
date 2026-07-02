@@ -38,7 +38,7 @@ class Gameplay(GameState):
             return
 
         axes = self.game.game_objects.controller.frame.axes
-        self.game.game_objects.player.currentstate.handle_movement(axes)#move around
+        self.game.game_objects.player.movement_controller.handle_movement(axes)#move around
         self.game.game_objects.camera_manager.handle_movement(axes)
 
     def handle_events(self, input):
@@ -74,10 +74,10 @@ class Gameplay(GameState):
 
             else:
                 #interpreted = self.game.game_objects.input_interpreter.interpret(input)
-                self.game.game_objects.player.currentstate.handle_press_input(input)
+                self.game.game_objects.player.movement_controller.handle_press_input(input)
                 #self.game.game_objects.player.omamoris.handle_press_input(input)
         elif input.released:#release
-            self.game.game_objects.player.currentstate.handle_release_input(input)
+            self.game.game_objects.player.movement_controller.handle_release_input(input)
 
 class WorldGameplay(Gameplay):
     def on_pop(self):

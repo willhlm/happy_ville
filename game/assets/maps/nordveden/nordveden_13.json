@@ -1493,7 +1493,12 @@
                                 {
                                  "name":"kill",
                                  "type":"string",
-                                 "value":"20"
+                                 "value":"2"
+                                }, 
+                                {
+                                 "name":"reward",
+                                 "type":"string",
+                                 "value":"rings"
                                 }],
                          "rotation":0,
                          "type":"",
