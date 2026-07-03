@@ -24,10 +24,10 @@ class CollisionQueries:
         loot = pygame.sprite.spritecollideany(player, self.game_objects.loot, self.collided)
 
         if npc:
-            npc.interact()
+            npc.interact(player)
             return npc
         if interactable:
-            interactable.interact()
+            interactable.interact(player)
             return interactable
         if loot:
             loot.interact(player)

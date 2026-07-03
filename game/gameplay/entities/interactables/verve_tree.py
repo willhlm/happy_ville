@@ -10,6 +10,5 @@ class VerveTree(Interactables):#the place where you trade soul essence for spiri
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
 
-    def interact(self):#when player press t/y        
+    def interact(self, player=None):#when player press t/y        
         self.game_objects.world_transform_controller.start(transform_id="heaven_intro", source_pos=self.rect.center)
-

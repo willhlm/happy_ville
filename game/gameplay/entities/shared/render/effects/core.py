@@ -314,3 +314,77 @@ class Glow(Shaders):
             angle=angle,
             shader=self.game_objects.shaders['glow'],
         )
+
+class Transparent_outline(Shaders):#for bossess
+    def __init__(self, game_objects, **kwarg):
+        self.game_objects = game_objects
+        self.layer_name = kwarg.get('layer_name', 'player')
+        self.time = 0
+        self.reveal = float(kwarg.get('reveal', 0.0))
+        self.reveal_speed = float(kwarg.get('reveal_speed', 0.004))
+        self.shine_colour = self._format_colour(
+            kwarg.get('shine_colour', kwarg.get('outline_colour', kwarg.get('colour', [190, 225, 255, 235]))),
+            default_alpha=1.0,
+        )
+        self.distortion_strength = float(kwarg.get('distortion_strength', 18.0))
+        self.distortion_frequency = float(kwarg.get('distortion_frequency', 4.5))
+        self.silhouette_alpha = float(kwarg.get('silhouette_alpha', 0.82))
+        self.reveal_softness = float(kwarg.get('reveal_softness', 0.16))
+
+    def update_render(self, dt):
+        self.time += dt * 0.05
+        if self.reveal_speed <= 0:
+            return
+        self.reveal = min(1.0, self.reveal + dt * self.reveal_speed)
+
+    def set_uniforms(self):
+        shader = self.game_objects.shaders['transparent_outline']
+        shader['time'] = self.time
+        shader['shine_color'] = self.shine_colour
+        shader['reveal'] = self.reveal
+        shader['reveal_softness'] = self.reveal_softness
+        shader['distortion_strength'] = self.distortion_strength
+        shader['distortion_frequency'] = self.distortion_frequency
+        shader['silhouette_alpha'] = self.silhouette_alpha
+
+    def _apply(self, source_layer, target_layer, position=(0, 0), flip=False, angle=0, screen_texture=None, section=None):
+        self.set_uniforms()
+        shader = self.game_objects.shaders['transparent_outline']
+        shader['resolution'] = source_layer.size
+        shader['SCREEN_TEXTURE'] = (screen_texture or source_layer.texture)
+        shader['section'] = section or [0, 0, source_layer.size[0], source_layer.size[1]]
+        self.game_objects.game.display.render(
+            source_layer.texture,
+            target_layer,
+            position=position,
+            flip=flip,
+            angle=angle,
+            shader=shader,
+        )
+        return target_layer
+
+    def draw(self, source_texture, composite_screen):
+        return self._apply(source_texture, composite_screen)
+
+    def draw_to_composite(self, source_texture, target, position, flip, angle):
+        screen_copy = self.game_objects.game.screen_manager.get_screen(layer=self.layer_name, include=False)
+        section = [position[0], position[1], source_texture.size[0], source_texture.size[1]]
+        self._apply(
+            source_texture,
+            target,
+            position=position,
+            flip=flip,
+            angle=angle,
+            screen_texture=screen_copy.texture,
+            section=section,
+        )
+
+    @staticmethod
+    def _format_colour(colour, default_alpha=1.0):
+        channels = list(colour)
+        if len(channels) == 3:
+            channels.append(default_alpha)
+        if any(channel > 1 for channel in channels):
+            scale = 255
+            channels = [channel / scale for channel in channels]
+        return channels

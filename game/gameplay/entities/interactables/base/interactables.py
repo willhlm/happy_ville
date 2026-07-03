@@ -38,7 +38,7 @@ class Interactables(AnimatedEntity):#interactables
     def take_dmg(self, effect):
         return effect
 
-    def interact(self):#when player press T
+    def interact(self, player=None):#when player press T
         pass
 
     def collision(self, entity):#continiou collision

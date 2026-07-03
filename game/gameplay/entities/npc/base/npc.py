@@ -44,7 +44,7 @@ class NPC(Character):
     def render_potrait(self, terget):
         self.game_objects.game.display.render(self.portrait, terget, position = (32,32))#shader render
 
-    def interact(self):#when plater press t
+    def interact(self, player=None):#when plater press t
         self.game_objects.game.state_manager.enter_state('conversation', speaker = self)#pehrpame make a callback insted of "buissness"
 
     def random_conversation(self, text):#can say stuff through a text bubble           

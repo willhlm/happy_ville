@@ -38,7 +38,7 @@ from .statues.abilities.air_dash_upgrade_statue import AirDashUpgradeStatue
 from .statues.abilities.ability_upgrade_statue import ThunderAbilityUpgradeStatue
 from .statues.quests.quest_statue import QuestStatue
 from .statues.quests.stone_wood import StoneWood
-from .statues.rhoutta.rhoutta import RhouttaStatue
+from .statues.boss.boss_statue import BossStatue
 
 from .traps.grind.grind import Grind
 from .traps.lightning_spikes import LightningSpikes

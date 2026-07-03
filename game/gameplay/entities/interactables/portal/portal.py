@@ -24,7 +24,7 @@ class Portal(StaticEntity):#portal to make a small spirit world with challenge r
         self.empty_layer.release()
         self.noise_layer.release()
 
-    def interact(self):#when player press T at place holder interactavle
+    def interact(self, player=None):#when player press T at place holder interactavle
         self.currentstate.handle_input('grow')
 
     def update(self, dt):

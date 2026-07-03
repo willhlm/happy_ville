@@ -2776,8 +2776,8 @@
                          "type":"",
                          "visible":true,
                          "width":156,
-                         "x":1998,
-                         "y":757
+                         "x":2004,
+                         "y":756
                         }, 
                         {
                          "gid":17488,
@@ -2919,7 +2919,7 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"wakeup_forest_0001"
+                                 "value":"wakeup_forest_0002"
                                 }, 
                                 {
                                  "name":"spawn",
@@ -2954,7 +2954,7 @@
                          "visible":true,
                          "width":384,
                          "x":368,
-                         "y":1168
+                         "y":1184
                         }, 
                         {
                          "gid":11,
@@ -3028,21 +3028,21 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":64,
+                         "width":80,
                          "x":1136,
                          "y":1104
                         }, 
                         {
                          "gid":8,
-                         "height":64,
+                         "height":147,
                          "id":413,
                          "name":"",
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":176,
+                         "width":208,
                          "x":2144,
-                         "y":752
+                         "y":835
                         }, 
                         {
                          "gid":8,
@@ -3281,8 +3281,8 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":441,
-                         "y":1105
+                         "x":1163,
+                         "y":1039
                         }, 
                         {
                          "gid":3,
@@ -3409,6 +3409,39 @@
                          "width":16,
                          "x":3612,
                          "y":414
+                        }, 
+                        {
+                         "gid":20,
+                         "height":211,
+                         "id":492,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"count",
+                                 "type":"string",
+                                 "value":"2"
+                                }, 
+                                {
+                                 "name":"event",
+                                 "type":"string",
+                                 "value":"narration"
+                                }, 
+                                {
+                                 "name":"start_index",
+                                 "type":"string",
+                                 "value":"0"
+                                }, 
+                                {
+                                 "name":"text",
+                                 "type":"string",
+                                 "value":"intro_lore"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":18,
+                         "x":928,
+                         "y":1168
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -3430,7 +3463,7 @@
          "y":0
         }],
  "nextlayerid":100,
- "nextobjectid":492,
+ "nextobjectid":493,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.1",

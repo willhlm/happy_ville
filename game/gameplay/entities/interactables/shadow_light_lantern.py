@@ -14,7 +14,7 @@ class ShadowLightLantern(Interactables):#emits a shadow light upon interaction. 
         if kwarg.get('on', False):
             self.make_light()
 
-    def interact(self):#when player press t/y
+    def interact(self, player=None):#when player press t/y
         if not self.light_sources:
             self.make_light()
         else:

@@ -11,6 +11,9 @@ from .god_rays import GodRays
 from .ljus_maskar import LjusMaskar 
 from .nebula import Nebula 
 from .rainbow import Rainbow 
+from .rift import Rift
+from .space_time_crack import SpaceTimeCrack
+from .singularity import Singularity 
 from .sky import Sky 
 from .small_tree import SmallTree_1
 from .thor_mountain import ThorMountain 

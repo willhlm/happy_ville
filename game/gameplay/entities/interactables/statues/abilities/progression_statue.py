@@ -31,11 +31,12 @@ class ProgressionStatue(Interactables):
             self.shader_state.add_shader('tint', colour=[0, 0, 0, 100])
         self.text = self.get_text()
 
-    def interact(self):
+    def interact(self, player=None):
         if self.interacted:
             return
 
-        self.game_objects.player.currentstate.enter_state('Pray_pre')
+        player = player or self.game_objects.player
+        player.currentstate.enter_state('Pray_pre')
         self.grant_progression()
         self.refresh_state()
         if self.interacted:
@@ -43,7 +44,7 @@ class ProgressionStatue(Interactables):
 
         self.game_objects.game.state_manager.enter_state(
             state_name='Blit_image_text',
-            image=self.game_objects.player.sprites[self.preview_sprite][0],
+            image=player.sprites[self.preview_sprite][0],
             text=self.text,
             callback=self.on_exit,
         )

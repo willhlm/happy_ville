@@ -35,7 +35,7 @@ class Toadess(Boss):
             selector_config["pattern_cycle"] = self.get_pattern_cycle_for_phase(1)
 
         self.currentstate = task_manager.TaskManager(self, STATE_REGISTRY, self.config["patterns"], selector_config)
-        initial_state = initial_state or ("off_screen" if ID else "idle")
+        initial_state = initial_state or "idle"
         self.currentstate.enter_state(initial_state)
         self.dir[0] = -1
 

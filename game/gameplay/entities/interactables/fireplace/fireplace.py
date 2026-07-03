@@ -20,7 +20,7 @@ class Fireplace(Interactables):
 
         self.hit_component.set_invincibility(True)
 
-    def interact(self):  # when player press t/y
+    def interact(self, player=None):  # when player press t/y
         self.currentstate.handle_input('Interact')  # goes to interacted after transform
 
     def turn_on(self):#called from sttes

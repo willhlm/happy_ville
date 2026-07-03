@@ -33,23 +33,6 @@ class Idle(BaseState):
         self.entity.animation.play(kwargs.get("animation", "idle"))
 
 
-@register_state(STATE_REGISTRY, name="off_screen")
-class OffScreen(BaseState):
-    def __init__(self, entity, **kwargs):
-        super().__init__(entity, **kwargs)
-        self.entity.animation.play(kwargs.get("animation", "idle"))
-        self.staged_true_pos = list(self.entity.true_pos)
-
-    def update(self, dt):
-        self.entity.velocity = [0, 0]
-        self.entity.true_pos = list(self.staged_true_pos)
-        self.entity.rect.topleft = [round(self.staged_true_pos[0]), round(self.staged_true_pos[1])]
-        self.entity.body.update_hitbox()
-
-    def handle_input(self, input_type):
-        pass
-
-
 @register_state(STATE_REGISTRY)
 class Wait(BaseState):
     def __init__(self, entity, **kwargs):

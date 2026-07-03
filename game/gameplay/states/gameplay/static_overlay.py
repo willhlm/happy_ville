@@ -1,8 +1,10 @@
 from gameplay.states import Gameplay
 from gameplay.ui.loaders import DashInstructionLoader
+from gameplay.ui.loaders import DropDownLoader
 
 OVERLAY_LOADERS = {
     'dash': DashInstructionLoader,
+    'drop_down': DropDownLoader
 }
 
 class StaticOverlay(Gameplay):#when player obtaines a new ability, pick up inetractable item etc. It blits an image and text
@@ -17,7 +19,7 @@ class StaticOverlay(Gameplay):#when player obtaines a new ability, pick up inetr
 
         loader_cls = OVERLAY_LOADERS[overlay_key]
         self.ui_loader = loader_cls(game.game_objects)
-        self.game.game_objects.player.reset_movement()        
+        self.game.game_objects.player.reset_movement()
 
     def on_pop(self):
         self.overlay.release()

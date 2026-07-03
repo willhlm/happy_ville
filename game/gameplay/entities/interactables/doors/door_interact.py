@@ -8,9 +8,10 @@ class DoorInteract(Interactables): #game object for itneracting with locked door
         self.rect = self.rect.inflate(5,0)
         self.hitbox = self.rect.inflate(0,0)
 
-    def interact(self):
+    def interact(self, player=None):
+        player = player or self.game_objects.player
         if type(self.door.currentstate).__name__ == 'Erect':
-            if self.game_objects.player.backpack.inventory.get_quantity(self.door.key):
+            if player.backpack.inventory.get_quantity(self.door.key):
                 self.door.currentstate.handle_input('Transform')
                 if self.sfx: self.play_sfx()
             else:
@@ -24,4 +25,3 @@ class DoorInteract(Interactables): #game object for itneracting with locked door
 
     def release_texture(self):
         pass
-

@@ -24,6 +24,7 @@ class StateManager():
         'crouch',
         'plat_bone',
         'wall_glide',
+        'pray',
     )
 
     def __init__(self, entity):
@@ -61,6 +62,7 @@ class StateManager():
             'wind': WindState,
             'slow_motion': SlowMotionState,
             'bow': BowState,
+            'pray': PrayState,
         }
         self.states = {}
         self.install_states(self.BASE_STATE_KEYS)

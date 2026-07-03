@@ -12,8 +12,8 @@ class PlaceHolderInteracatble(Interactables):
     def draw(self, target):
         pass
 
-    def interact(self):#when player press T
-        self.entity.interact()
+    def interact(self, player=None):#when player press T
+        self.entity.interact(player)
 
     def release_texture(self):
         pass

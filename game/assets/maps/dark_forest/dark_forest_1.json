@@ -1255,11 +1255,6 @@
                                  "name":"event",
                                  "type":"string",
                                  "value":"boss_encounter"
-                                }, 
-                                {
-                                 "name":"new_state",
-                                 "type":"bool",
-                                 "value":true
                                 }],
                          "rotation":0,
                          "type":"",

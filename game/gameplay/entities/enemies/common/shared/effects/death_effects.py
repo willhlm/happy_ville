@@ -72,3 +72,11 @@ class EnemyDeathEffects:
             on_complete=self.enemy.kill,
         )
         return True
+
+class ShadowEnemyDeathEffect(EnemyDeathEffects):
+    def __init__(self, enemy):
+        super().__init__(enemy)
+
+        self.particle_colour = [0, 0, 0, 255]
+
+        self.alpha_fade_rate = 0.99

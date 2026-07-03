@@ -1,18 +1,50 @@
 {
+  "boss": {
+    "mode": "spawned",
+    "class": "lieaibolmmai",
+    "spawn_timing": "action",
+    "relative_to": "source",
+    "anchor": "center",
+    "offset": "0,0"
+  },
   "camera": "Deer_encounter",
   "steps": [
     {
       "time": 0,
       "actions": [
-        { "type": "emit_signal", "signal": "bjorn_boss", "kwargs": { "action": "close" } },
-        { "type": "player_state", "state": "idle" },
+        { "type": "player_state", "state": "pray" },
         { "type": "player_acceleration_x", "value": 0 },
-        { "type": "boss_method", "method": "start_wake_intro" }
+        {
+          "type": "spawn_crack",
+          "id": "ritual_crack",
+          "persist": true,
+          "group": "cosmetics_bg",
+          "relative_to": "source",
+          "anchor": "center",
+          "offset": "-50,-150",
+          "size": [300, 300],
+          "properties": {
+            "time_scale": 0.1
+          },
+          "state": "grow",
+          "state_kwargs": {
+            "duration": 120,
+            "start_scale": 30
+          }
+        }
       ]
     },
     {
-      "time": 180,
+      "time": 90,
       "actions": [
+        { "type": "spawn_boss" },
+        { "type": "boss_method", "method": "start_encounter_intro" }
+      ]
+    },
+    {
+      "time": 240,
+      "actions": [
+        { "type": "boss_method", "method": "start_aggro" },
         { "type": "mark_flow_complete" },
         { "type": "camera_exit" },
         { "type": "exit_state" }

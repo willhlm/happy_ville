@@ -11,11 +11,10 @@ class Door(Interactables):
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.inflate(0,0)
 
-    def interact(self):
+    def interact(self, player=None):
         self.currentstate.handle_input('Opening')
         self.game_objects.sound.play_sfx(self.sounds['open'][0], vol = 0.2)
         try:
             self.game_objects.change_map(collision.next_map)
         except:
             pass
-
