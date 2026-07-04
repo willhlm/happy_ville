@@ -91,6 +91,7 @@ class GameObjects():
         self.deferred_textures.release_all()
         self.fade.release_all()
         self.layer_resource_pool.flush()
+        self.ui.overlay.clear_map_assets()
         self.npcs.empty()
         self.enemies.empty()
         self.interactables.empty()

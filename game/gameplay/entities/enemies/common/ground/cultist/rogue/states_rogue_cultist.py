@@ -17,11 +17,17 @@ class Enemy_states():
     def handle_input(self, input):
         pass
 
+    def consume_contact_state(self):
+        pass
+
     def increase_phase(self):
         pass
 
     def modify_hit(self, effect):
-        return effect        
+        return effect
+
+    def die(self):
+        self.enter_state('Death')
 
 class Idle(Enemy_states):
     def __init__(self,entity):
@@ -36,6 +42,8 @@ class Idle(Enemy_states):
              self.enter_state('Walk')
         elif input =='Attack':
              self.enter_state('Attack_pre')
+        elif input in ('hurt', 'Hurt'):
+             self.enter_state('Hurt')
 
 class Walk(Enemy_states):
     def __init__(self,entity):
@@ -50,6 +58,8 @@ class Walk(Enemy_states):
              self.enter_state('Idle')
         elif input =='Attack':
              self.enter_state('Attack_pre')
+        elif input in ('hurt', 'Hurt'):
+             self.enter_state('Hurt')
 
 class Death(Enemy_states):
     def __init__(self,entity):

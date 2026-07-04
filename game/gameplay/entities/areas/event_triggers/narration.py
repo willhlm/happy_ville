@@ -6,21 +6,20 @@ class Narration(EventTrigger):
 
     def __init__(self, pos, game_objects, size, **kwarg):
         super().__init__(pos, game_objects, size, **kwarg)
-        self.start_index = int(kwarg.get('start_index', 0))
-        self.count = int(kwarg.get('count', 2))
-        self.text_key = kwarg.get('text', 'intro_lore')
-        self.mode = kwarg.get('mode', 'sequential')
+        self.narration_key = kwarg["key"]
+        self.game_objects.ui.overlay.preload_narration(self.narration_key)
 
     def on_collision(self, entity):
         if type(entity).__name__ != 'Player':
             return
 
+        narration = self.game_objects.ui.overlay.get_narration(self.narration_key)
+
         self.game_objects.ui.overlay.play_text_block(
             self.game_objects,
-            self.text_key,
-            start_index=self.start_index,
-            count=self.count,
-            mode=self.mode,
+            lines=narration["lines"],
+            mode=narration.get("mode", "block"),
+            sound=narration.get("sound"),
             channel="narration",
         )
 
@@ -29,4 +28,4 @@ class Narration(EventTrigger):
 
     @classmethod
     def get_completion_key(cls, kwarg):
-        return kwarg.get('text', kwarg.get('ID', kwarg['event']))
+        return kwarg.get('ID', kwarg["key"])

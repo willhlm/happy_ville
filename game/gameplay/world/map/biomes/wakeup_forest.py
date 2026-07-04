@@ -10,25 +10,6 @@ class Wakeup_forest(Biome):
     default_room_config = DEFAULT_ROOM_CONFIG
     room_configs = ROOM_CONFIGS
 
-    def __init__(self, level):
-        super().__init__(level)
-        intro_blocks = {
-            "intro_lore": [
-                "Before frost found the earth…",
-                "there was only song.",
-                "The world was a great dream.",
-                "Until shadow took root.",
-                "It grew within a child.",
-                "The ground beneath her wept.",
-                "To save the dream…",
-                "they laid her beneath the roots.",
-                "The roots still breathe.",
-                "And something beneath them stirs.",
-            ]
-        }
-
-        self.level.game_objects.ui.overlay.overlay_library.add_text_blocks(intro_blocks)
-
     def get_room_config(self, room_id: str) -> RoomConfig:
         config = super().get_room_config(room_id)
         if room_id == "99" and self.level.game_objects.world_state.narrative.events.get("guide", False):

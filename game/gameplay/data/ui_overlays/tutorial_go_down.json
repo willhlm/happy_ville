@@ -1,0 +1,6 @@
+{
+  "title": "Go Down",
+  "text": "Press down to drop through certain platforms.",
+  "image_path": "assets/sprites/ui/overlay/items/placeholder/placeholder.png",
+  "loader_key": "default"
+}

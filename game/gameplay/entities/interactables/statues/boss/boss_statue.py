@@ -1,6 +1,7 @@
 import pygame, random
 from engine.utils import read_files
 from gameplay.entities.interactables.base.interactables import Interactables
+from gameplay.entities.visuals.cosmetics.shock_wave import ShockWave
 
 class BossStatue(Interactables):#interact with it to get air dash
     def __init__(self, pos, game_objects, boss, id = None, **kwargs):
@@ -31,5 +32,7 @@ class BossStatue(Interactables):#interact with it to get air dash
         if self.interacted: return
         self.interacted = True
         self.game_objects.sequence_manager.start_sequence('boss_encounter', ID=self.id, source=self)
+        shock_wave = ShockWave(self.rect.center, self.game_objects)
+        self.game_objects.cosmetics.add(shock_wave)
 
     

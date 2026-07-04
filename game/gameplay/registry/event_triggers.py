@@ -7,4 +7,5 @@ REGISTER_EVENT_TRIGGERS = {
     'butterfly_encounter': ButterflyEncounter,    
     'narration': Narration,    
     'boss_encounter': BossEncounter,
+    'ui_overlay': UIOverlay,
 }
