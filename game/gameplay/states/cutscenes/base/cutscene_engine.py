@@ -1,5 +1,5 @@
 from gameplay.states.gameplay.gameplay import Gameplay
-from gameplay.entities.visuals.cosmetics import SpawnEffect
+from gameplay.entities.visuals.cosmetics import PlayerSpawnEffect
 from engine.utils import read_files
 from engine.system import animation
 

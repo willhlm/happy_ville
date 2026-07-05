@@ -5,12 +5,27 @@
   ],
   "delay_before_start": 100,
   "delay_between_waves": 150,
+  "spawn_warning_duration": 35,
+  "spawn_warning_interval": 4,
+  "spawn_wait_time": 100,
   "on_complete_reward": {
     "item": "amber_droplet",
     "pos": [1936, 1600]
   },
+  "spawn_warning_effect": {
+    "name": "enemy_spawn_effect",
+    "preset": "focused_spawn_warning",
+    "count": 10,
+    "play_sound": false,
+    "position_jitter": [10, 10],
+    "offset": [0, 0]
+  },
   "spawn_effect": {
-    "name": "spawn_effect",
+    "name": "enemy_spawn_effect",
+    "preset": "enemy_spawn_burst",
+    "count": 30,
+    "sound_volume": 0.35,
+    "position_jitter": [0, 0],
     "offset": [0, 0]
   },
   "kill_signals": {

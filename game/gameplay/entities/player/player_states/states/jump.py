@@ -23,6 +23,7 @@ class JumpMain(PhaseAirBase):
             air_timer=kwarg.get('air_timer', C.air_timer),
         )
         self.entity.game_objects.cosmetics.add(Dusts(self.entity.hitbox.center, self.entity.game_objects, dir = self.entity.dir, state = 'two'))
+        
 
     def update(self, dt):
         self.jump_dash_timer -= dt

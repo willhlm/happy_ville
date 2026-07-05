@@ -15,6 +15,8 @@ LARV_JR_STATES = {
 }
 
 class LarvJr(SurfaceCrawlerEnemy):
+    kill_signal = 'larv_jr_killed'
+
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
         self.config = ENEMY_CONFIG['larv_jr']
@@ -32,7 +34,3 @@ class LarvJr(SurfaceCrawlerEnemy):
             corner_inset = movement_config['corner_inset'],
         )
         self.currentstate = StateManager(self, type = 'ground', custom_states = LARV_JR_STATES, universal_states = ['dead', 'death', 'hurt', 'wait'])
-
-    def dead(self):#called when death animation is finished
-        super().dead()
-        self.game_objects.signals.emit('larv_jr_killed')#emit this signal

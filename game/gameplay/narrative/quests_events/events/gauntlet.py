@@ -1,8 +1,14 @@
+import random
+
 from gameplay.data.gauntlet_configs import get_gauntlet_config
 from gameplay.narrative.quests_events.base import Tasks
 
 
 class Gauntlet(Tasks):
+    FINAL_KILL_FREEZE_DURATION = 50
+    FINAL_KILL_SLOW_DURATION = 100
+    FINAL_KILL_SLOW_SCALE = 0.5
+
     def __init__(self, game_objects, **kwarg):
         super().__init__(game_objects)
         self.gauntlet_id = kwarg.get("ID", game_objects.map.biome_room_name)
@@ -15,7 +21,11 @@ class Gauntlet(Tasks):
         self.cleaned_up = False
         self.timer_id = f"gauntlet_{self.gauntlet_id}"
         self.delay_between_waves = self.config.get("delay_between_waves", 0)
+        self.spawn_wait_time = self.config.get("spawn_wait_time", 100)
+        self.spawn_warning_duration = self.config.get("spawn_warning_duration", 0)
         self.spawn_effect_config = self.config.get("spawn_effect", False)
+        self.spawn_warning_effect_config = self.config.get("spawn_warning_effect", False)
+        self.spawn_warning_interval = self.config.get("spawn_warning_interval", 8)
 
         self.game_objects.signals.subscribe("player_died", self.handle_player_death)
 
@@ -45,6 +55,17 @@ class Gauntlet(Tasks):
             return
 
         wave = waves[self.wave_index]
+        self.begin_wave(wave)
+
+    def begin_wave(self, wave):
+        warning_duration = wave.get("spawn_warning_duration", self.spawn_warning_duration)
+        self._spawn_wave_warning(wave, warning_duration)
+        if warning_duration > 0:
+            self._schedule_timer(warning_duration, lambda wave=wave: self._activate_wave(wave))
+        else:
+            self._activate_wave(wave)
+
+    def _activate_wave(self, wave):
         self.spawn_wave(wave)
         self.set_wave_signal_counts(wave)
 
@@ -52,6 +73,7 @@ class Gauntlet(Tasks):
             self.start_next_wave()
 
     def spawn_wave(self, wave):
+        spawn_wait_time = wave.get("spawn_wait_time", self.spawn_wait_time)
         for enemy_data in wave.get("spawns", []):
             enemy_name = enemy_data["enemy"]
             enemy_cls = self.game_objects.registry.fetch("enemies", enemy_name)
@@ -63,6 +85,7 @@ class Gauntlet(Tasks):
             enemy_kwargs = dict(enemy_data.get("kwargs", {}))
             enemy = enemy_cls(spawn_pos, self.game_objects, **enemy_kwargs)
             self.game_objects.enemies.add(enemy)
+            self._apply_spawn_wait(enemy, enemy_data.get("spawn_wait_time", spawn_wait_time))
 
     def set_wave_signal_counts(self, wave):
         self._unsubscribe_wave_signals()
@@ -100,24 +123,92 @@ class Gauntlet(Tasks):
             if self.active_signal_counts[signal_name] <= 0:
                 del self.active_signal_counts[signal_name]
             if not self.active_signal_counts:
-                self._schedule_timer(self.delay_between_waves, self.start_next_wave)
+                if self._is_last_wave():
+                    self._play_final_kill_time_effect()
+                    self.complete()
+                else:
+                    self._schedule_timer(self.delay_between_waves, self.start_next_wave)
 
         return _callback
+
+    def _is_last_wave(self):
+        return self.wave_index >= len(self.config.get("waves", [])) - 1
+
+    def _play_final_kill_time_effect(self):
+        self.game_objects.time_manager.modify_time(
+            time_scale=self.FINAL_KILL_SLOW_SCALE,
+            duration=self.FINAL_KILL_SLOW_DURATION,
+        )
+        self.game_objects.time_manager.modify_time(
+            time_scale=0,
+            duration=self.FINAL_KILL_FREEZE_DURATION,
+        )
+
+    def _spawn_wave_warning(self, wave, warning_duration):
+        if not self.spawn_warning_effect_config:
+            return
+
+        interval = wave.get("spawn_warning_interval", self.spawn_warning_interval)
+        for enemy_data in wave.get("spawns", []):
+            self._spawn_warning_at(enemy_data["pos"], warning_duration, interval)
+
+    def _spawn_warning_at(self, spawn_pos, warning_duration, interval):
+        self._spawn_configured_effect(spawn_pos, self.spawn_warning_effect_config)
+        if interval <= 0 or warning_duration <= interval:
+            return
+
+        self._schedule_timer(
+            interval,
+            lambda spawn_pos=spawn_pos, warning_duration=warning_duration - interval, interval=interval:
+                self._spawn_warning_at(spawn_pos, warning_duration, interval),
+        )
 
     def _spawn_effect(self, spawn_pos):
         if not self.spawn_effect_config:
             return
 
-        if isinstance(self.spawn_effect_config, dict):
-            effect_name = self.spawn_effect_config.get("name", "spawn_effect")
-            offset = self.spawn_effect_config.get("offset", [0, 0])
+        self._spawn_configured_effect(spawn_pos, self.spawn_effect_config)
+
+    def _spawn_configured_effect(self, spawn_pos, effect_config):
+        if not effect_config:
+            return
+
+        if isinstance(effect_config, dict):
+            effect_name = effect_config.get("name", "enemy_spawn_effect")
+            offset = effect_config.get("offset", [0, 0])
+            position_jitter = effect_config.get("position_jitter", [0, 0])
+            effect_kwargs = {
+                key: value
+                for key, value in effect_config.items()
+                if key not in {"name", "offset", "position_jitter"}
+            }
         else:
-            effect_name = self.spawn_effect_config
+            effect_name = effect_config
             offset = [0, 0]
+            position_jitter = [0, 0]
+            effect_kwargs = {}
 
         effect_cls = self._resolve_spawn_effect_class(effect_name)
-        effect_pos = [spawn_pos[0] + offset[0], spawn_pos[1] + offset[1]]
-        self.game_objects.cosmetics.add(effect_cls(effect_pos, self.game_objects))
+        effect_pos = self._randomize_effect_position(spawn_pos, offset, position_jitter)
+        self.game_objects.cosmetics.add(effect_cls(effect_pos, self.game_objects, **effect_kwargs))
+
+    def _randomize_effect_position(self, spawn_pos, offset, position_jitter):
+        jitter_x = random.uniform(-position_jitter[0], position_jitter[0])
+        jitter_y = random.uniform(-position_jitter[1], position_jitter[1])
+        return [
+            spawn_pos[0] + offset[0] + jitter_x,
+            spawn_pos[1] + offset[1] + jitter_y,
+        ]
+
+    def _apply_spawn_wait(self, enemy, wait_time):
+        if wait_time <= 0:
+            return
+
+        enemy.currentstate.enter_state(
+            "wait",
+            time=wait_time,
+            next_state=enemy.config.get("initial_state", "patrol"),
+        )
 
     def _resolve_spawn_effect_class(self, effect_name):
         if not isinstance(effect_name, str) or not effect_name:

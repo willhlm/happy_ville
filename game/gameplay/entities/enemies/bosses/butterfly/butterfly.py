@@ -4,6 +4,8 @@ from engine.utils import read_files
 from . import states_butterfly
 
 class Butterfly(FlyingEnemy):
+    kill_signal = 'butterfly_killed'
+
     def __init__(self, pos, game_objects):
         super().__init__(pos,game_objects)
         self.sprites = read_files.load_sprites_dict('assets/sprites/entities/enemies/bosses/butterfly/',game_objects)
@@ -16,7 +18,3 @@ class Butterfly(FlyingEnemy):
 
     def knock_back(self,dir):
         pass
-
-    def dead(self):#called when death animation is finished
-        super().dead()
-        self.game_objects.signals.emit('butterfly_killed')
