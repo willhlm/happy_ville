@@ -32,7 +32,7 @@ class Boss(Enemy):
             return
         if self.game_objects.sequence_manager.is_active(self.encounter_sequence_key):
             return
-        self.game_objects.sequence_manager.start_sequence(self.encounter_sequence_key, ID=self.ID)
+        self.game_objects.sequence_manager.start_sequence(self.encounter_sequence_key, encounter=self.ID)
 
     def dead(self):#called when death animation is finished
         self.flags['aggro'] = False

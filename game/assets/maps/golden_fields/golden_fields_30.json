@@ -472,7 +472,12 @@
                          "name":"",
                          "properties":[
                                 {
-                                 "name":"event",
+                                 "name":"trigger",
+                                 "type":"string",
+                                 "value":"acid_escape"
+                                },
+                                {
+                                 "name":"key",
                                  "type":"string",
                                  "value":"acid_escape"
                                 }],

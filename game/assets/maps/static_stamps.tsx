@@ -97,6 +97,7 @@
  <tile id="19">
   <properties>
    <property name="event" value=""/>
+   <property name="key" value=""/>
   </properties>
  </tile>
  <tile id="20">

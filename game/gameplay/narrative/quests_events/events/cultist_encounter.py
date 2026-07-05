@@ -4,7 +4,7 @@ from gameplay.narrative.quests_events.base import Tasks
 class CultistEncounter(Tasks):#called from cutscene when meeting the cultist across the bridgr the first time: initiated from cutscene
     def __init__(self, game_objects, **kwarg):
         super().__init__(game_objects)
-        self.kill = kwarg['kill']
+        self.kill = kwarg.get('kill', 2)
         self.game_objects.signals.subscribe('cultist_killed', self.incrase_kill)
         self.game_objects.signals.subscribe('player_died', self.handle_player_death)
 

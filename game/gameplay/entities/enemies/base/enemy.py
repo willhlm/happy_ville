@@ -5,7 +5,7 @@ from gameplay.entities.shared.components.hit import hit_effects
 from gameplay.entities.shared.components.loot.item_loot_emitter import ItemLootEmitterComponent
 from gameplay.entities.enemies.common.shared.effects.death_effects import EnemyDeathEffects
 from gameplay.entities.enemies.common.shared.state_machine import StateManager
-from gameplay.data.enemy import ENEMY_CONFIG 
+from gameplay.entities.enemies.configs.base_enemy_config import ENEMY_CONFIG
 
 class Enemy(Character):
     kill_signal = None

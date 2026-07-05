@@ -766,14 +766,14 @@
                          "name":"",
                          "properties":[
                                 {
-                                 "name":"event",
+                                 "name":"trigger",
                                  "type":"string",
                                  "value":"cultist_encounter"
                                 }, 
                                 {
-                                 "name":"new_state",
-                                 "type":"bool",
-                                 "value":true
+                                 "name":"key",
+                                 "type":"string",
+                                 "value":"cultist_encounter"
                                 }],
                          "rotation":0,
                          "type":"",

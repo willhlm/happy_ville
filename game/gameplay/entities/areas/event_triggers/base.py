@@ -4,16 +4,29 @@ from ..base import BaseArea
 
 
 class EventTrigger(BaseArea):
-    blocks_on_flow_complete = True
+    """Base class for map triggers.
+
+    Available trigger names are currently:
+    - narration: load narration content by key
+    - ui_overlay: load overlay content by key
+    - quest: start or resume a quest by key
+    - pause_quest: pause an active quest by key
+    - gauntlet: start the gauntlet event using key as its config id
+    - boss_encounter: start the boss encounter sequence using key as its encounter id
+    - acid_escape, cultist_encounter, golden_fields_encounter_1: start those direct events
+    - sequence: start a sequence directly by key
+    - state: enter a state directly by key
+    """
+    blocks_on_flow_complete = False
     blocks_on_event_complete = False
 
     def __init__(self, pos, game_objects, size, **kwarg):
         super().__init__(pos, game_objects)
         self.rect = pygame.Rect(pos, size)
         self.hitbox = self.rect.copy()
-        self.event = kwarg.pop('event', False)
-        self.ID = kwarg.get('ID', False)    
-        self.kwarg = kwarg
+        self.trigger = kwarg["trigger"]
+        self.key = kwarg["key"]
+        self.kwarg = dict(kwarg)
 
     def release_texture(self):
         pass
@@ -22,24 +35,37 @@ class EventTrigger(BaseArea):
         pass
 
     def on_collision(self, entity):
-        if type(entity).__name__ != 'Player': return
+        if type(entity).__name__ != "Player":
+            return
 
-        if self.ID and self.game_objects.world_state.narrative.is_flow_complete(self.ID):
+        if self.is_complete():
             self.kill()
             return
 
-        if self.game_objects.registry.fetch('sequences', self.event):
-            self.game_objects.sequence_manager.start_sequence(self.event, **self.kwarg)
-        elif self._is_registered_state():
-            self.game_objects.game.state_manager.enter_state(self.event, **self.kwarg)
-        else:
-            self.game_objects.quests_events.initiate_event(self.event, **self.kwarg)
+        activated = self.activate()
+        if not activated:
+            return
 
-        self.kill()
+        if self.should_mark_complete():
+            self.game_objects.world_state.narrative.mark_flow_complete(self.get_completion_key(self.kwarg))
 
-    def _is_registered_state(self):
-        return self.game_objects.game.state_manager.has_state(self.event)
+        if self.should_destroy():
+            self.kill()
+
+    def activate(self):
+        raise NotImplementedError
+
+    def is_complete(self):
+        if not self.blocks_on_flow_complete:
+            return False
+        return self.game_objects.world_state.narrative.is_flow_complete(self.get_completion_key(self.kwarg))
+
+    def should_mark_complete(self):
+        return False
+
+    def should_destroy(self):
+        return True
 
     @classmethod
     def get_completion_key(cls, kwarg):
-        return kwarg.get('ID', kwarg['event'])
+        return f"{kwarg['trigger']}:{kwarg['key']}"

@@ -27,3 +27,12 @@ class QuestsEventsManager():
         if event_class is None:
             raise KeyError(f"Unknown event '{event_key}'.")
         self.active_events[event_key] = event_class(self.game_objects, **kwarg)
+
+    def get_active_quest(self, quest):
+        return self.active_quests.get(self._normalize_key(quest))
+
+    def pause_quest(self, quest):
+        active_quest = self.get_active_quest(quest)
+        if active_quest is None or not hasattr(active_quest, "pause_quest"):
+            return
+        active_quest.pause_quest()

@@ -1486,19 +1486,14 @@
                          "name":"",
                          "properties":[
                                 {
-                                 "name":"event",
+                                 "name":"trigger",
                                  "type":"string",
-                                 "value":"start_larv_party"
+                                 "value":"quest"
                                 }, 
                                 {
-                                 "name":"kill",
+                                 "name":"key",
                                  "type":"string",
-                                 "value":"2"
-                                }, 
-                                {
-                                 "name":"reward",
-                                 "type":"string",
-                                 "value":"rings"
+                                 "value":"larv_party"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -1514,9 +1509,14 @@
                          "name":"",
                          "properties":[
                                 {
-                                 "name":"event",
+                                 "name":"trigger",
                                  "type":"string",
-                                 "value":"stop_larv_party"
+                                 "value":"pause_quest"
+                                }, 
+                                {
+                                 "name":"key",
+                                 "type":"string",
+                                 "value":"larv_party"
                                 }],
                          "rotation":0,
                          "type":"",

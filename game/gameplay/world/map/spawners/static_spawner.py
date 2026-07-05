@@ -156,14 +156,12 @@ class StaticSpawner(c.SpawnerCommon):
 
             elif local_id == 19:
                 kwargs = c.props_list_to_dict(properties)
-                if kwargs.get("event") == "gauntlet" and not kwargs.get("ID"):
-                    kwargs["ID"] = ctx.biome_room_name#set the id to room name if not specified, so that gauntlet configs can be reused across rooms
-                trigger_factory = self.game_objects.registry.fetch("event_triggers", kwargs["event"])
+                trigger_factory = self.game_objects.registry.fetch("event_triggers", kwargs["trigger"])
                 trigger_cls = trigger_factory or self.game_objects.registry.fetch("event_triggers", "default")
                 completion_key = trigger_cls.get_completion_key(kwargs)
                 if getattr(trigger_cls, "blocks_on_flow_complete", False) and self.game_objects.world_state.narrative.is_flow_complete(completion_key):
                     continue
-                if getattr(trigger_cls, "blocks_on_event_complete", False) and self.game_objects.world_state.narrative.is_event_complete(kwargs["event"]):
+                if getattr(trigger_cls, "blocks_on_event_complete", False) and self.game_objects.world_state.narrative.is_event_complete(kwargs["trigger"]):
                     continue
                 self.game_objects.interactables.add(trigger_cls(object_position, self.game_objects, object_size, **kwargs))
 

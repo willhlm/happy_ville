@@ -23,8 +23,8 @@ class BossEncounter(Sequence):
 
         self.game_objects.game.state_manager.exit_to_state('gameplay')
 
-        self.encounter_id = kwargs['ID']
-        self.config = get_boss_encounter_config(self.encounter_id)
+        self.encounter_key = kwargs["encounter"]
+        self.config = get_boss_encounter_config(self.encounter_key)
         self.entity = None
         source = kwargs.get('source')
         if source is not None:
@@ -72,7 +72,7 @@ class BossEncounter(Sequence):
         elif action_type == 'player_velocity_x':
             player.velocity[0] = action['value']
         elif action_type == 'emit_signal':
-            signal_name = action.get('signal', self.entity.ID if self.entity is not None else self.encounter_id)
+            signal_name = action.get('signal', self.entity.ID if self.entity is not None else self.encounter_key)
             if signal_name:
                 self.game_objects.signals.emit(signal_name, **action.get('kwargs', {}))
         elif action_type == 'boss_state':
@@ -112,7 +112,7 @@ class BossEncounter(Sequence):
     def _spawn_boss(self):
         if self.entity is not None:
             return self.entity
-        self.entity = resolve_boss_for_encounter(self.game_objects, self.encounter_id, self.config, self.actors)
+        self.entity = resolve_boss_for_encounter(self.game_objects, self.encounter_key, self.config, self.actors)
         self.actors['boss'] = self.entity
         return self.entity
 
