@@ -8,6 +8,9 @@ class SpaceTimeCrack(StaticEntity):
         super().__init__(pos, game_objects)
         self.image = game_objects.game.display.make_layer(size)
         self.size = size
+        self.rect.size = size
+        self.rect.center = pos
+        self.true_pos = list(self.rect.topleft)
         self.parallax = parallax
         self.layer_name = layer_name
         self.time = float(properties.get("time", 0))
@@ -20,7 +23,7 @@ class SpaceTimeCrack(StaticEntity):
         self.field_strength = float(properties.get("field_strength", 0.018))
         self.field_density = float(properties.get("field_density", 5.5))
         self.edge_fade = float(properties.get("edge_fade", 0.2))
-        self.radial_fade_scale = float(properties.get("radial_fade_scale", 1.55))
+        self.radial_fade_scale = float(properties.get("radial_fade_scale", 1))
         self.radial_fade_inner = float(properties.get("radial_fade_inner", 0.18))
         self.radial_field_inner = float(properties.get("radial_field_inner", 0.22))
 

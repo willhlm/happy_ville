@@ -1,13 +1,10 @@
-from gameplay.data.quest_configs import get_quest_config
 from gameplay.narrative.quests_events.base import Tasks
-
 
 class LarvParty(Tasks):#william's larv room
     def __init__(self, game_objects, **kwargs):
         super().__init__(game_objects, **kwargs)
-        config = get_quest_config("larv_party")
-        self.number = int(kwargs.get('kill', config.get('kill', 2)))#number of larvs on the map
-        self.reward = kwargs.get('reward', config.get('reward', 'rings'))#reward for completing the quest
+        self.number = int(kwargs.get('kill', 2))#number of larvs on the map
+        self.reward = kwargs.get('reward', 'rings')#reward for completing the quest
 
     def increase_kill(self):#called when larv_jr is killed: signal
         self.number -= 1

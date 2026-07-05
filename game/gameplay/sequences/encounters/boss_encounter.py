@@ -1,8 +1,12 @@
+import random
+
 from gameplay.data.boss_encounter_configs import get_boss_encounter_config
+from gameplay.entities.visuals.cosmetics import ShockWave, SpiritFlash
+from gameplay.entities.visuals.environments import GodRaysRadial
 from gameplay.entities.visuals.environments.space_time_crack import SpaceTimeCrack
 from gameplay.sequences.base import Sequence
 
-from .boss_encounter_runtime import resolve_boss_for_encounter
+from .boss_encounter_runtime import parse_pair, resolve_boss_for_encounter
 
 
 class BossEncounter(Sequence):
@@ -87,6 +91,14 @@ class BossEncounter(Sequence):
             self._spawn_boss()
         elif action_type == 'spawn_crack':
             self._spawn_crack(action)
+        elif action_type == 'spawn_god_rays':
+            self._spawn_god_rays(action)
+        elif action_type == 'spawn_flash':
+            self._spawn_flash(action)
+        elif action_type == 'spawn_shockwave':
+            self._spawn_shockwave(action)
+        elif action_type == 'emit_particles':
+            self._emit_particles(action)
         elif action_type == 'actor_method':
             actor = self.actors[action['actor']]
             getattr(actor, action['method'])(**action.get('kwargs', {}))
@@ -100,6 +112,8 @@ class BossEncounter(Sequence):
         elif action_type == 'mark_flow_complete':
             if self.entity is not None and self.entity.ID:
                 self.game_objects.world_state.narrative.mark_flow_complete(self.entity.ID)
+        elif action_type == 'reveal_boss':
+            self._reveal_boss(action)
         elif action_type == 'exit_state':
             self.finish()
 
@@ -138,10 +152,93 @@ class BossEncounter(Sequence):
             self._temporary_actor_ids.add(actor_id)
         return crack
 
+    def _spawn_god_rays(self, action):
+        properties = dict(action.get('properties', {}))
+        if 'state' in action:
+            properties['state'] = action['state']
+        if 'state_kwargs' in action:
+            properties['state_kwargs'] = action['state_kwargs']
+        rays = GodRaysRadial(
+            self._resolve_action_position(action),
+            self.game_objects,
+            parallax=action.get('parallax', [1, 1]),
+            size=tuple(action.get('size', [480, 480])),
+            **properties,
+        )
+        return self._register_action_actor(action, rays)
+
+    def _spawn_flash(self, action):
+        flash = SpiritFlash(
+            self._resolve_action_position(action),
+            self.game_objects,
+            **action.get('properties', {}),
+        )
+        return self._register_action_actor(action, flash)
+
+    def _spawn_shockwave(self, action):
+        wave = ShockWave(
+            self._resolve_action_position(action),
+            self.game_objects,
+            **action.get('properties', {}),
+        )
+        return self._register_action_actor(action, wave)
+
+    def _emit_particles(self, action):
+        base_position = self._resolve_action_position(action)
+        spread = parse_pair(action.get('spread', [0, 0]))
+        count = int(action.get('count', 1))
+        particle_count = int(action.get('particle_count', 1))
+        particle_kwargs = dict(action.get('kwargs', {}))
+        preset = action['preset']
+
+        for _ in range(count):
+            position = [
+                base_position[0] + random.uniform(-spread[0], spread[0]),
+                base_position[1] + random.uniform(-spread[1], spread[1]),
+            ]
+            self.game_objects.particles.emit(preset, position, n=particle_count, **particle_kwargs)
+
+    def _reveal_boss(self, action):
+        boss = self.entity or self._spawn_boss()
+        previous_aggro = boss.flags.get('aggro', True)
+        previous_attackable = boss.flags.get('attack_able', True)
+        boss.flags['aggro'] = False
+        boss.flags['attack_able'] = False
+        boss.hit_component.set_invincibility(True)
+        boss.velocity = [0, 0]
+
+        duration = float(action.get('duration', 30))
+        outline = boss.shader_state.effects.shaders.get('transparent_outline')
+        if outline is not None:
+            outline.reveal = 0.0
+            outline.reveal_speed = action.get('outline_reveal_speed', 1.0 / max(duration, 1.0))
+
+        def _finish_reveal():
+            boss.flags['aggro'] = previous_aggro
+            boss.flags['attack_able'] = previous_attackable
+            boss.hit_component.set_invincibility(False)
+
+        boss.shader_state.enter_state(
+            'Materialize',
+            duration=duration,
+            colour=action.get('colour', [0.92, 0.97, 1.0, 1.0]),
+            size=action.get('size', 0.12),
+            on_complete=_finish_reveal,
+        )
+
+    def _register_action_actor(self, action, actor):
+        group_name = action.get('group', 'cosmetics')
+        getattr(self.game_objects, group_name).add(actor)
+        actor_id = action.get('id')
+        if actor_id is not None:
+            self.actors[actor_id] = actor
+            if not action.get('persist', False):
+                self._temporary_actor_ids.add(actor_id)
+        return actor
+
     def _resolve_action_position(self, action):
         if 'position' in action:
-            parts = [part.strip() for part in action['position'].split(',')]
-            return [int(float(parts[0])), int(float(parts[1]))]
+            return parse_pair(action['position'])
 
         relative_to = action.get('relative_to')
         actor = self.actors[relative_to]
@@ -154,8 +251,8 @@ class BossEncounter(Sequence):
         else:
             base = [rect.centerx, rect.centery]
 
-        offset = action.get('offset', '0,0').split(',')
-        return [base[0] + int(float(offset[0])), base[1] + int(float(offset[1]))]
+        offset = parse_pair(action.get('offset', [0, 0]))
+        return [base[0] + offset[0], base[1] + offset[1]]
 
     def _kill_actor(self, actor_id):
         actor = self.actors.pop(actor_id, None)

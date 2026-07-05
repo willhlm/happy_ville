@@ -13,7 +13,7 @@ class EventTrigger(BaseArea):
     - pause_quest: pause an active quest by key
     - gauntlet: start the gauntlet event using key as its config id
     - boss_encounter: start the boss encounter sequence using key as its encounter id
-    - acid_escape, cultist_encounter, golden_fields_encounter_1: start those direct events
+    - event: start a gameplay event using key as its event id
     - sequence: start a sequence directly by key
     - state: enter a state directly by key
     """
@@ -69,3 +69,7 @@ class EventTrigger(BaseArea):
     @classmethod
     def get_completion_key(cls, kwarg):
         return f"{kwarg['trigger']}:{kwarg['key']}"
+
+    @classmethod
+    def get_event_completion_key(cls, kwarg):
+        return kwarg["trigger"]

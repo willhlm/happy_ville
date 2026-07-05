@@ -161,8 +161,10 @@ class StaticSpawner(c.SpawnerCommon):
                 completion_key = trigger_cls.get_completion_key(kwargs)
                 if getattr(trigger_cls, "blocks_on_flow_complete", False) and self.game_objects.world_state.narrative.is_flow_complete(completion_key):
                     continue
-                if getattr(trigger_cls, "blocks_on_event_complete", False) and self.game_objects.world_state.narrative.is_event_complete(kwargs["trigger"]):
-                    continue
+                if getattr(trigger_cls, "blocks_on_event_complete", False):
+                    event_completion_key = trigger_cls.get_event_completion_key(kwargs)
+                    if self.game_objects.world_state.narrative.is_event_complete(event_completion_key):
+                        continue
                 self.game_objects.interactables.add(trigger_cls(object_position, self.game_objects, object_size, **kwargs))
 
             elif local_id == 20:

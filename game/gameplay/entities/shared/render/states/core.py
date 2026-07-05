@@ -146,6 +146,43 @@ class Dissolve(BaseState):
         self.entity.game_objects.shaders['dissolve']['burn_size'] = self.size
 
 
+class Materialize(BaseState):
+    def __init__(self, entity, **kwarg):
+        super().__init__(entity)
+        self.noise_layer = self.entity.game_objects.game.display.make_layer(self.entity.image.size)
+        self.empty = self.entity.game_objects.game.display.make_layer(self.entity.image.size)
+        self.shader = self.entity.game_objects.shaders['dissolve']
+        self.time = 0.0
+        self.progress = 0.0
+        self.duration = max(float(kwarg.get('duration', 30)), 1.0)
+        self.colour = kwarg.get('colour', [0.9, 0.95, 1.0, 1.0])
+        self.size = kwarg.get('size', 0.12)
+        self.on_complete = kwarg.get('on_complete')
+
+    def update_render(self, dt):
+        self.time += dt * 0.05
+        self.progress = min(1.0, self.progress + (dt / self.duration))
+        if self.progress >= 1.0:
+            self.enter_state('Idle')
+            self.finish()
+
+    def set_uniforms(self):
+        self.empty.clear(0, 0, 0, 0)
+        self.entity.game_objects.shaders['noise_perlin']['u_resolution'] = self.entity.image.size
+        self.entity.game_objects.shaders['noise_perlin']['u_time'] = self.time
+        self.entity.game_objects.shaders['noise_perlin']['scroll'] = [0, 0]
+        self.entity.game_objects.shaders['noise_perlin']['scale'] = [10, 10]
+        self.entity.game_objects.game.display.render(
+            self.empty.texture,
+            self.noise_layer,
+            shader=self.entity.game_objects.shaders['noise_perlin'],
+        )
+        self.entity.game_objects.shaders['dissolve']['dissolve_texture'] = self.noise_layer.texture
+        self.entity.game_objects.shaders['dissolve']['dissolve_value'] = self.progress
+        self.entity.game_objects.shaders['dissolve']['burn_color'] = self.colour
+        self.entity.game_objects.shaders['dissolve']['burn_size'] = self.size
+
+
 class Swirl(BaseState):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
@@ -160,4 +197,3 @@ class Swirl(BaseState):
 
     def set_uniforms(self):
         self.shader['ratio'] = self.ratio
-

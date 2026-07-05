@@ -659,7 +659,7 @@
                                 {
                                  "name":"trigger",
                                  "type":"string",
-                                 "value":"golden_fields_encounter_1"
+                                 "value":"event"
                                 },
                                 {
                                  "name":"key",

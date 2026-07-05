@@ -13,6 +13,7 @@ from .conversation_bubbles import ConversationBubbles
 from .smoke import Smoke
 from .dusts import Dusts
 from .shock_wave import ShockWave
+from .spirit_flash import SpiritFlash
 
 from .running_particles.dust import Dust
 from .running_particles.grass import Grass

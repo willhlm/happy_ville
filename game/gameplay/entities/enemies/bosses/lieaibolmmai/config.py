@@ -18,6 +18,7 @@ CONFIG = {
         {"task": "roar_pre"},
         {"task": "roar_main"},
         {"task": "roar_post"},
+        {"task": "wait", "duration": 100},
         {"task": "think"},
     ],
     "patterns": {

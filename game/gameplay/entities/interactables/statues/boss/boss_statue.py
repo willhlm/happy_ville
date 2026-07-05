@@ -32,7 +32,4 @@ class BossStatue(Interactables):#interact with it to get air dash
         if self.interacted: return
         self.interacted = True
         self.game_objects.sequence_manager.start_sequence('boss_encounter', encounter=self.id, source=self)
-        shock_wave = ShockWave(self.rect.center, self.game_objects)
-        self.game_objects.cosmetics.add(shock_wave)
-
-    
+        

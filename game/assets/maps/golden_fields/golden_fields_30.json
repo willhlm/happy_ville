@@ -474,7 +474,7 @@
                                 {
                                  "name":"trigger",
                                  "type":"string",
-                                 "value":"acid_escape"
+                                 "value":"event"
                                 },
                                 {
                                  "name":"key",
