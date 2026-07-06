@@ -1,10 +1,8 @@
 from gameplay.states import Gameplay
 from gameplay.ui.loaders import DashInstructionLoader
-from gameplay.ui.loaders import DropDownLoader
 
 OVERLAY_LOADERS = {
-    'dash': DashInstructionLoader,
-    'drop_down': DropDownLoader
+    'dash': DashInstructionLoader
 }
 
 class StaticOverlay(Gameplay):#when player obtaines a new ability, pick up inetractable item etc. It blits an image and text

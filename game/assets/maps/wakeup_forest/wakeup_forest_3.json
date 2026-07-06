@@ -612,14 +612,9 @@
                                  "value":"narration"
                                 }, 
                                 {
-                                 "name":"start_index",
+                                 "name":"key",
                                  "type":"string",
-                                 "value":"8"
-                                }, 
-                                {
-                                 "name":"text",
-                                 "type":"string",
-                                 "value":"intro_lore"
+                                 "value":"intro_lore_05"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -635,24 +630,14 @@
                          "name":"",
                          "properties":[
                                 {
-                                 "name":"count",
-                                 "type":"string",
-                                 "value":"2"
-                                }, 
-                                {
                                  "name":"event",
                                  "type":"string",
                                  "value":"narration"
                                 }, 
                                 {
-                                 "name":"start_index",
+                                 "name":"key",
                                  "type":"string",
-                                 "value":"6"
-                                }, 
-                                {
-                                 "name":"text",
-                                 "type":"string",
-                                 "value":"intro_lore"
+                                 "value":"intro_lore_04"
                                 }],
                          "rotation":0,
                          "type":"",

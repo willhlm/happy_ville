@@ -1,9 +1,9 @@
 from gameplay.states import Gameplay
-from gameplay.ui.loaders import ItemPickupLoader
+from gameplay.ui.loaders import DefaultOverlayLoader
 
 
 DYNAMIC_OVERLAY_LOADERS = {
-    'item_pickup': ItemPickupLoader,
+    'default': DefaultOverlayLoader,
 }
 
 class DynamicOverlay(Gameplay):

@@ -2,6 +2,7 @@
 from .items import REGISTER_ITEMS
 from .npcs import REGISTER_NPCS
 from .enemies import REGISTER_ENEMIES
+from .cosmetics import REGISTER_COSMETICS
 from .event_triggers import REGISTER_EVENT_TRIGGERS
 from .events import REGISTER_EVENTS
 from .projectiles import REGISTER_PROJECTILES
@@ -19,6 +20,7 @@ class RegistryManager():
             "items": REGISTER_ITEMS,
             "npcs": REGISTER_NPCS,
             "enemies": REGISTER_ENEMIES,
+            "cosmetics": REGISTER_COSMETICS,
             "event_triggers": REGISTER_EVENT_TRIGGERS,
             "events": REGISTER_EVENTS,
             "projectiles": REGISTER_PROJECTILES,

@@ -38,7 +38,7 @@ class ItemInteractComponent:
         self.start_pickup_feedback(player)
         self.item.game_objects.game.state_manager.enter_state(
             state_name='dynamic_overlay',
-            loader_key='item_pickup',
+            loader_key='default',
             image=self.item.get_pickup_image(),
             title=self.item.get_pickup_title(),
             text=self.item.get_pickup_text(),

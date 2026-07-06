@@ -10,6 +10,5 @@ from .menus import (
     TitleMenuLoader,
 )
 from .overlay.abilities.dash_instruction_loader import DashInstructionLoader
-from .overlay.item_pickup_loader import ItemPickupLoader
-from .overlay.drop_down_loader import DropDownLoader
+from .overlay.item_pickup_loader import DefaultOverlayLoader
 from .base_loader import BaseLoader

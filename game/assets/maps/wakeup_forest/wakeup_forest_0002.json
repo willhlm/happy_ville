@@ -2911,39 +2911,6 @@
                          "y":640
                         }, 
                         {
-                         "gid":20,
-                         "height":256,
-                         "id":385,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"count",
-                                 "type":"string",
-                                 "value":"2"
-                                }, 
-                                {
-                                 "name":"event",
-                                 "type":"string",
-                                 "value":"narration"
-                                }, 
-                                {
-                                 "name":"start_index",
-                                 "type":"string",
-                                 "value":"2"
-                                }, 
-                                {
-                                 "name":"text",
-                                 "type":"string",
-                                 "value":"intro_lore"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":32,
-                         "x":1392,
-                         "y":25
-                        }, 
-                        {
                          "gid":8,
                          "height":144,
                          "id":391,

@@ -19,6 +19,7 @@ class TextOverlay(BaseOverlay):
         fade_out: float = 0.35,
         delay: float = 0.0,
         channel: str | None = None,
+        sound: str | None = None,
     ):
         self.go = game_objects
         self.lines = list(lines)
@@ -37,6 +38,7 @@ class TextOverlay(BaseOverlay):
         self.t = 0.0
         self.done = False
         self.channel = channel
+        self.sound = sound
 
         self._lifetime = max(0.0, self.fade_in + self.hold + self.fade_out)
 
@@ -54,7 +56,8 @@ class TextOverlay(BaseOverlay):
         # Fire sound once, exactly when the overlay starts displaying (after delay)
         if (not self._sound_played) and (self.t >= self.delay):
             self._sound_played = True
-            self.go.sound.play_ui_sound("narrative_text")
+            if self.sound:
+                self.go.sound.play_ui_sound(self.sound)
 
         if self.t >= self.delay + self._lifetime:
             self.done = True

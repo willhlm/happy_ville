@@ -2,10 +2,12 @@ from gameplay.narrative.quests_events.events import (
     AcidEscape,
     ButterflyEncounter,
     CultistEncounter,
+    Gauntlet,
     GoldenFieldsEncounter1,
 )
 
 REGISTER_EVENTS = {
+    'gauntlet': Gauntlet,
     'golden_fields_encounter_1': GoldenFieldsEncounter1,
     'acid_escape': AcidEscape,
     'cultist_encounter': CultistEncounter,

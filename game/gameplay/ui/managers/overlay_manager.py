@@ -5,6 +5,9 @@ from __future__ import annotations
 from collections import defaultdict, deque
 from typing import Deque, Dict, List, Optional
 
+from engine.utils import read_files
+from gameplay.data.narration_configs import get_narration_config
+from gameplay.data.ui_overlay_configs import get_ui_overlay_config
 from gameplay.ui.components.overlay.base_overlay import BaseOverlay
 from gameplay.ui.components.overlay.animated_image_overlay import LogoLoadingOverlay
 from gameplay.ui.components.overlay.text_overlay import TextOverlay
@@ -12,18 +15,13 @@ from gameplay.ui.components.overlay.text_overlay import TextOverlay
 
 class OverlayLibrary:
     def __init__(self):
-        self.text_blocks = {}
+        self.narration_blocks = {}
         self.title_cards = {}
         self.textures = {}
-
-    def add_text_blocks(self, d):
-        self.text_blocks.update(d)
+        self.dynamic_cards = {}
 
     def add_title_cards(self, d):
         self.title_cards.update(d)
-
-    def get_text(self, key):
-        return self.text_blocks[key]
 
     def get_title(self, key):
         return self.title_cards[key]
@@ -34,8 +32,46 @@ class OverlayLibrary:
     def get_texture(self, key):
         return self.textures[key]
 
+    def preload_narration(self, key):
+        if key not in self.narration_blocks:
+            self.narration_blocks[key] = get_narration_config(key)
+
+    def get_narration(self, key):
+        return self.narration_blocks[key]
+
+    def preload_dynamic_overlay(self, game_objects, key):
+        if key not in self.dynamic_cards:
+            definition = get_ui_overlay_config(key)
+            image = None
+            image_path = definition.get("image_path")
+
+            if image_path:
+                image = game_objects.game.display.surface_to_texture(
+                    read_files.load_sprite(image_path)
+                )
+
+            self.dynamic_cards[key] = {
+                "loader_key": definition.get("loader_key", "default"),
+                "image": image,
+                "title": definition.get("title", ""),
+                "text": definition.get("text", ""),
+            }
+
+    def get_dynamic_overlay(self, key):
+        return self.dynamic_cards[key]
+
+    def clear_map_assets(self):
+        self.narration_blocks.clear()
+
+        for card in self.dynamic_cards.values():
+            image = card.get("image")
+            if image:
+                image.release()
+
+        self.dynamic_cards.clear()
+
 class OverlayManager:
-    def __init__(self):
+    def __init__(self, game_objects):
         self.overlay_library = OverlayLibrary()
 
         # currently active overlays (all channels + channel-less)
@@ -99,21 +135,21 @@ class OverlayManager:
     # ----------------------------------------------------
     # Convenience: play narration from your text library
     # ----------------------------------------------------
+    def preload_narration(self, key: str) -> None:
+        self.overlay_library.preload_narration(key)
+
+    def get_narration(self, key: str):
+        return self.overlay_library.get_narration(key)
+
     def play_text_block(
         self,
         game_objects,
-        text_key: str,
         *,
-        start_index: int = 0,
-        count: int = 1,
-        mode: str = "block",          # "block" or "sequential"
+        lines,
+        mode: str = "block",
+        sound: str | None = None,
         channel: Optional[str] = "narration",
     ) -> None:
-
-        lines_all = self.overlay_library.get_text(text_key)
-
-        lines = lines_all[start_index:start_index + count]
-
         w, h = game_objects.game.window_size
         box_w = int(w * 0.6)
         box_left = (w - box_w) // 2
@@ -136,6 +172,7 @@ class OverlayManager:
                 fade_out=fade_out,
                 delay=delay,
                 channel=channel,
+                sound=sound,
             ))
         else:
             for line in lines:
@@ -150,6 +187,7 @@ class OverlayManager:
                     fade_out=fade_out,
                     delay=delay,
                     channel=channel,
+                    sound=sound,
                 ))
                 
     def play_static_overlay(self, game_objects, overlay_key: str, *, state_name: str = "static_overlay", callback=None) -> None:
@@ -158,5 +196,25 @@ class OverlayManager:
     def play_title_card(self, key):
         pass
 
+    def preload_dynamic_overlay(self, game_objects, overlay_key: str) -> None:
+        self.overlay_library.preload_dynamic_overlay(game_objects, overlay_key)
+
+    def clear_map_assets(self) -> None:
+        self.overlay_library.clear_map_assets()
+
     def play_logo_loading(self, game_objects, **kwargs) -> None:
         self.add(LogoLoadingOverlay(game_objects, **kwargs))
+
+    def play_static_overlay(self, game_objects, overlay_key: str, *, state_name: str = "static_overlay", callback=None) -> None:
+        game_objects.game.state_manager.enter_state(state_name,overlay_key=overlay_key, callback=callback)
+
+    def play_dynamic_overlay(self, game_objects, overlay_key: str, *, callback=None) -> None:
+        card = self.overlay_library.get_dynamic_overlay(overlay_key)
+        game_objects.game.state_manager.enter_state(
+            "dynamic_overlay",
+            loader_key=card["loader_key"],
+            image=card["image"],
+            title=card["title"],
+            text=card["text"],
+            callback=callback,
+        )

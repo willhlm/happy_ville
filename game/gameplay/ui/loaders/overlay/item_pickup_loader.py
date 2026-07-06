@@ -2,7 +2,7 @@ import pygame
 from gameplay.ui.components import *
 from gameplay.ui.loaders.base_loader import BaseLoader
      
-class ItemPickupLoader(BaseLoader):
+class DefaultOverlayLoader(BaseLoader):
     def __init__(self, game_objects, image, title='', text=''):
         super().__init__(game_objects)
         self.bg = game_objects.game.display.surface_to_texture(
@@ -24,15 +24,14 @@ class ItemPickupLoader(BaseLoader):
                     self.images.append(Image(self.game_objects, image, topleft_object_position, object_size))
 
         if not self.text_fields:
-            raise ValueError("ItemPickupLoader requires shared text fields in the layout")
+            raise ValueError("DefaultOverlayLoader requires shared text fields in the layout")
 
         if 'title' in self.text_fields:
             if title == '':
-                raise ValueError("ItemPickupLoader layout requires a title text field, but no title was provided")
+                raise ValueError("DefaultOverlayLoader layout requires a title text field, but no title was provided")
             self.assign_text_field('title', title)
 
         if 'text' in self.text_fields:
             if text == '':
-                raise ValueError("ItemPickupLoader layout requires a text text field, but no text was provided")
+                raise ValueError("DefaultOverlayLoader layout requires a text text field, but no text was provided")
             self.assign_text_field('text', text)
- 

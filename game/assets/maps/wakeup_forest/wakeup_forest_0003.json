@@ -3281,8 +3281,8 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":1163,
-                         "y":1039
+                         "x":464,
+                         "y":1120
                         }, 
                         {
                          "gid":3,
@@ -3409,39 +3409,6 @@
                          "width":16,
                          "x":3612,
                          "y":414
-                        }, 
-                        {
-                         "gid":20,
-                         "height":211,
-                         "id":492,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"count",
-                                 "type":"string",
-                                 "value":"2"
-                                }, 
-                                {
-                                 "name":"event",
-                                 "type":"string",
-                                 "value":"narration"
-                                }, 
-                                {
-                                 "name":"start_index",
-                                 "type":"string",
-                                 "value":"0"
-                                }, 
-                                {
-                                 "name":"text",
-                                 "type":"string",
-                                 "value":"intro_lore"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":18,
-                         "x":928,
-                         "y":1168
                         }],
                  "opacity":1,
                  "type":"objectgroup",

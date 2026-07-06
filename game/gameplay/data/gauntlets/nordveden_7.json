@@ -1,0 +1,34 @@
+{
+  "gates": [
+    "nordveden_7_left_gate",
+    "nordveden_7_right_gate"
+  ],
+  "delay_before_start": 100,
+  "delay_between_waves": 150,
+  "on_complete_reward": {
+    "item": "amber_droplet",
+    "pos": [1936, 1600]
+  },
+  "spawn_effect": {
+    "name": "spawn_effect",
+    "offset": [0, 0]
+  },
+  "kill_signals": {
+    "larv_jr": "larv_jr_killed"
+  },
+  "waves": [
+    {
+      "spawns": [
+        { "enemy": "larv_jr", "pos": [1980, 1664] },
+        { "enemy": "larv_jr", "pos": [2208, 1664] }
+      ]
+    },
+    {
+      "spawns": [
+        { "enemy": "larv_jr", "pos": [1980, 1664] },
+        { "enemy": "larv_jr", "pos": [2128, 1664] },
+        { "enemy": "larv_jr", "pos": [2000, 1536] }
+      ]
+    }
+  ]
+}

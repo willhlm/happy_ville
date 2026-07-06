@@ -11,8 +11,8 @@ class EventTrigger(BaseArea):
         super().__init__(pos, game_objects)
         self.rect = pygame.Rect(pos, size)
         self.hitbox = self.rect.copy()
-        self.event = kwarg.get('event', False)
-        self.ID = kwarg.get('ID', False)
+        self.event = kwarg.pop('event', False)
+        self.ID = kwarg.get('ID', False)    
         self.kwarg = kwarg
 
     def release_texture(self):
@@ -33,7 +33,7 @@ class EventTrigger(BaseArea):
         elif self._is_registered_state():
             self.game_objects.game.state_manager.enter_state(self.event, **self.kwarg)
         else:
-            self.game_objects.quests_events.initiate_event(self.event)
+            self.game_objects.quests_events.initiate_event(self.event, **self.kwarg)
 
         self.kill()
 
