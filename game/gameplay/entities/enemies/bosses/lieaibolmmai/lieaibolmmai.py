@@ -32,15 +32,7 @@ class Lieaibolmmai(Boss):#dash boss
 
         self.reward = ProgressionUnlockReward(progress_key='dash')
 
-        self.shader_state.add_shader(
-            'transparent_outline',
-            layer_name='player',
-            reveal_speed=0,
-            distortion_strength=2.0,
-            distortion_frequency=5.0,
-            shine_colour=[210, 235, 255, 235],
-            silhouette_alpha=0.84,
-        )
+        self.shader_state.add_shader('transparent_outline',layer_name='player',reveal_speed=0,distortion_strength=2.0,distortion_frequency=5.0,shine_colour=[210, 235, 255, 235],silhouette_alpha=0.84)
 
     def attack(self):
         attack = HurtBox(self, lifetime=10, dir=self.dir, size=[64, 32])

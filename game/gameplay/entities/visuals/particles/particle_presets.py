@@ -272,6 +272,21 @@ def falling_debris_warning(pos, game_objects, *, colour=(120, 110, 100, 255)):
         .build()
     )
 
+def focused_spawn_warning(pos, game_objects, *, colour=(245, 245, 245, 255)):#gauntlet spawn warning
+    return (
+        ParticleBuilder(pos, game_objects)
+        .circle(scale=2, gradient=1, colour=colour)
+        .velocity_directional(
+            min_speed=0.1,
+            max_speed=1,
+            direction="isotropic",
+            angle_spread=[30, 30],
+        )
+        .fade(speed=12)         
+        .lifetime(frames=40)   
+        .build()
+    )    
+
 def enemy_death_burst(pos, game_objects, *, colour=(255, 255, 255, 255), scale=6):
     return (
         ParticleBuilder(pos, game_objects)
@@ -285,6 +300,22 @@ def enemy_death_burst(pos, game_objects, *, colour=(255, 255, 255, 255), scale=6
         .ejac(end_y_vel=-0.3, damping=0.07)
         .fade(speed=8)
         .lifetime(frames=50)
+        .build()
+    )
+
+def enemy_spawn_burst(pos, game_objects, *, colour=(100, 100, 100, 255), scale=5):#gauntlets spawning.
+    return (
+        ParticleBuilder(pos, game_objects)
+        .circle(scale=scale, gradient=1, colour=list(colour))
+        .velocity_directional(
+            min_speed=5,
+            max_speed=10,
+            direction="isotropic",
+            angle_spread=[10, 10],
+        )
+        .wave(amplitude=0.3, frequency=0.15, gravity_scale=0.2)
+        .fade(speed=6)
+        .lifetime(frames=100)
         .build()
     )
 
@@ -302,7 +333,9 @@ PRESETS = {
     'drop': drop,
     'floaty_ambient':floaty_ambient,
     'falling_debris_warning': falling_debris_warning,
+    'focused_spawn_warning': focused_spawn_warning,
     'enemy_death_burst': enemy_death_burst,
+    'enemy_spawn_burst': enemy_spawn_burst,
     'pick_up_spark': pick_up_spark
 }
 

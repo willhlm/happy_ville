@@ -4,6 +4,8 @@ from engine.utils import read_files
 from gameplay.entities.projectiles import HurtBox
 
 class CultistWarrior(Enemy):
+    kill_signal = 'cultist_killed'
+
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
         self.sprites = CultistWarrior.sprites
@@ -22,7 +24,3 @@ class CultistWarrior(Enemy):
 
     def attack(self):#called from states, attack main
         self.game_objects.projectiles.add_enemy(HurtBox(self))#add to group
-
-    def dead(self):#called when death animation is finished
-        super().dead()
-        self.game_objects.signals.emit('cultist_killed')

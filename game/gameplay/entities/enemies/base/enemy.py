@@ -5,9 +5,11 @@ from gameplay.entities.shared.components.hit import hit_effects
 from gameplay.entities.shared.components.loot.item_loot_emitter import ItemLootEmitterComponent
 from gameplay.entities.enemies.common.shared.effects.death_effects import EnemyDeathEffects
 from gameplay.entities.enemies.common.shared.state_machine import StateManager
-from gameplay.data.enemy import ENEMY_CONFIG 
+from gameplay.entities.enemies.configs.base_enemy_config import ENEMY_CONFIG
 
 class Enemy(Character):
+    kill_signal = None
+
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)      
         self.group = game_objects.enemies
@@ -72,6 +74,7 @@ class Enemy(Character):
         self.death_effects.emit_particles()
         self.game_objects.world_state.statistics_state.update_kill_statistics(type(self).__name__.lower())
         self._emit_loot()
+        self._emit_kill_signal()
 
     def dead(self):#called when death animation is finished                        
         self.death_effects.play_dead_sound()
@@ -79,3 +82,7 @@ class Enemy(Character):
 
     def _emit_loot(self):
         self.loot_emitter.emit_inventory(self.inventory)
+
+    def _emit_kill_signal(self):
+        if self.kill_signal:
+            self.game_objects.signals.emit(self.kill_signal)

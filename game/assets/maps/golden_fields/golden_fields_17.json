@@ -657,7 +657,12 @@
                          "name":"",
                          "properties":[
                                 {
-                                 "name":"event",
+                                 "name":"trigger",
+                                 "type":"string",
+                                 "value":"event"
+                                },
+                                {
+                                 "name":"key",
                                  "type":"string",
                                  "value":"golden_fields_encounter_1"
                                 }],

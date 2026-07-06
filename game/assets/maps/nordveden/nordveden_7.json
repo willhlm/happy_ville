@@ -1128,15 +1128,43 @@
                          "name":"",
                          "properties":[
                                 {
-                                 "name":"event",
+                                 "name":"trigger",
                                  "type":"string",
                                  "value":"gauntlet"
+                                }, 
+                                {
+                                 "name":"key",
+                                 "type":"string",
+                                 "value":"nordveden_7"
                                 }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":160,
                          "x":2080,
+                         "y":1664
+                        }, 
+                        {
+                         "gid":20,
+                         "height":240,
+                         "id":562,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"trigger",
+                                 "type":"string",
+                                 "value":"ui_overlay"
+                                }, 
+                                {
+                                 "name":"key",
+                                 "type":"string",
+                                 "value":"tutorial_go_down"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":160,
+                         "x":1888,
                          "y":1664
                         }],
                  "opacity":1,
@@ -1187,7 +1215,7 @@
          "y":0
         }],
  "nextlayerid":120,
- "nextobjectid":562,
+ "nextobjectid":563,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

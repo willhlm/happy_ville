@@ -2,10 +2,13 @@ from gameplay.entities.areas.event_triggers import *
 
 REGISTER_EVENT_TRIGGERS = {
     'default': EventTrigger,
-    'stop_larv_party': StopLarvParty,
-    'start_larv_party': StartLarvParty,
-    'butterfly_encounter': ButterflyEncounter,    
-    'narration': Narration,    
-    'boss_encounter': BossEncounter,
-    'ui_overlay': UIOverlay,
+    'boss_encounter': BossEncounterTrigger,
+    'event': GameplayEventTrigger,
+    'gauntlet': GauntletTrigger,
+    'narration': NarrationTrigger,
+    'pause_quest': PauseQuestTrigger,
+    'quest': QuestTrigger,
+    'sequence': SequenceTrigger,
+    'state': StateTrigger,
+    'ui_overlay': UIOverlayTrigger,
 }

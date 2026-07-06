@@ -1908,7 +1908,7 @@
                          "name":"",
                          "properties":[
                                 {
-                                 "name":"event",
+                                 "name":"trigger",
                                  "type":"string",
                                  "value":"narration"
                                 }, 
@@ -2075,7 +2075,7 @@
                          "name":"",
                          "properties":[
                                 {
-                                 "name":"event",
+                                 "name":"trigger",
                                  "type":"string",
                                  "value":"narration"
                                 }, 

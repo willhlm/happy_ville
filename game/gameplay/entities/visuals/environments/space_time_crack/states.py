@@ -15,7 +15,7 @@ class Grow:
     def update(self, dt):
         self.duration -= dt
         self.entity.radial_fade_scale -= dt * 0.5
-        self.entity.radial_fade_scale = max(self.entity.radial_fade_scale, 1.55)
+        self.entity.radial_fade_scale = max(self.entity.radial_fade_scale, 1)
         if self.duration <= 0:
             self.entity.enter_state("idle")
 

@@ -2,7 +2,7 @@
   "boss": {
     "mode": "spawned",
     "class": "toadess",
-    "spawn_position": "2000,600"
+    "spawn_position": [2000, 600]
   },
   "camera": "Deer_encounter",
   "steps": [

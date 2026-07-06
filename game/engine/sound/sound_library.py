@@ -7,11 +7,12 @@ class SFXLibrary:
     def __init__(self):
         impact_sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/shared/impact/')
         enemy_shared_sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/enemies/shared/')
+        spawn_sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/shared/spawn/')
         ui_sounds = read_files.load_sounds_dict('assets/audio/sfx/ui/')
         item_sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/shared/items/')
-        self._build_sound_maps(impact_sounds, enemy_shared_sounds, ui_sounds, item_sounds)
+        self._build_sound_maps(impact_sounds, enemy_shared_sounds, spawn_sounds, ui_sounds, item_sounds)
     
-    def _build_sound_maps(self, impact_sounds, enemy_shared_sounds, ui_sounds, item_sounds):
+    def _build_sound_maps(self, impact_sounds, enemy_shared_sounds, spawn_sounds, ui_sounds, item_sounds):
         self.impact_sounds = {
             ("sword", "flesh"): impact_sounds.get('sword_flesh'),
             ("bow", "flesh"): impact_sounds.get('arrow_flesh'),
@@ -28,6 +29,10 @@ class SFXLibrary:
         self.enemy_death_sounds = {
             "killed": enemy_shared_sounds.get('killed'),
             "dead": enemy_shared_sounds.get('dead'),
+        }
+
+        self.spawn_sounds = {
+            "enemy_spawn": spawn_sounds.get("enemy_spawn"),
         }
         
         self.ui_sounds = {
@@ -49,6 +54,9 @@ class SFXLibrary:
 
     def get_enemy_death_sound(self, event):
         return self._pick_sound(self.enemy_death_sounds.get(event))
+
+    def get_spawn_sound(self, event):
+        return self._pick_sound(self.spawn_sounds.get(event))
     
     def get_ui_sound(self, ui_event):
         return self._pick_sound(self.ui_sounds.get(ui_event))
@@ -58,6 +66,8 @@ class SFXLibrary:
             return self.get_impact_sound(*args)
         elif sound_type == "enemy_death":
             return self.get_enemy_death_sound(*args)
+        elif sound_type == "spawn":
+            return self.get_spawn_sound(*args)
         elif sound_type == "ui":
             return self.get_ui_sound(*args)
         elif sound_type == "item":

@@ -1941,7 +1941,7 @@
                          "name":"",
                          "properties":[
                                 {
-                                 "name":"event",
+                                 "name":"trigger",
                                  "type":"string",
                                  "value":"ui_overlay"
                                 }, 

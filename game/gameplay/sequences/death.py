@@ -1,5 +1,5 @@
 from gameplay.sequences.base import Sequence
-from gameplay.entities.visuals.cosmetics import SpawnEffect
+from gameplay.entities.visuals.cosmetics import PlayerSpawnEffect
 
 
 class DeathSequence(Sequence):
@@ -52,7 +52,7 @@ class DeathSequence(Sequence):
         self.stage = 1
 
     def _spawn_effect(self):
-        spawneffect = SpawnEffect((0, 0), self.game_objects)
+        spawneffect = PlayerSpawnEffect((0, 0), self.game_objects)
         spawneffect.rect.midbottom = self.game_objects.player.rect.midbottom
         spawneffect.rect.bottom += 100
         self.game_objects.cosmetics.add(spawneffect)

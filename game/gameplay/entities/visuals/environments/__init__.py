@@ -6,7 +6,7 @@ from .beam import Beam
 from .cocoon import BackgroundCocoon 
 from .crystals import Crystals 
 from .death_fog import DeathFog 
-from .god_rays_radial import GodRaysRadial 
+from .god_rays_radial.god_rays_radial import GodRaysRadial 
 from .god_rays import GodRays 
 from .ljus_maskar import LjusMaskar 
 from .nebula import Nebula 

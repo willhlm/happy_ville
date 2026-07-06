@@ -3,9 +3,9 @@
     "mode": "spawned",
     "class": "lieaibolmmai",
     "spawn_timing": "action",
-    "relative_to": "source",
+    "relative_to": "ritual_crack",
     "anchor": "center",
-    "offset": "0,0"
+    "offset": [0, 0]
   },
   "camera": "Deer_encounter",
   "steps": [
@@ -21,8 +21,8 @@
           "group": "cosmetics_bg",
           "relative_to": "source",
           "anchor": "center",
-          "offset": "-50,-150",
-          "size": [300, 300],
+          "offset": [110, 0],
+          "size": [640, 360],
           "properties": {
             "time_scale": 0.1
           },
@@ -35,14 +35,118 @@
       ]
     },
     {
-      "time": 90,
+      "time": 70,
+      "actions": [
+        {
+          "type": "spawn_god_rays",
+          "id": "ritual_rays",
+          "persist": true,
+          "relative_to": "ritual_crack",
+          "anchor": "center",
+          "group": "cosmetics_bg",
+          "size": [720, 720],
+          "properties": {
+            "colour": [1.0, 0.98, 0.88, 0.72],
+            "edge_falloff_distance": 0.12
+          },
+          "state": "grow",
+          "state_kwargs": {
+            "duration": 100,
+            "edge_falloff_distance": 3,
+            "target_edge_falloff_distance": 0.12
+          }
+        }
+      ]
+    },
+    {
+      "time": 150,
+      "actions": [
+        {
+          "type": "spawn_flash",
+          "id": "arrival_light",
+          "persist": true,
+          "relative_to": "ritual_crack",
+          "anchor": "center",
+          "group": "cosmetics",
+          "properties": {
+            "size": [560, 560],
+            "duration": 90,
+            "alpha": 255,
+            "start_scale": 0.2,
+            "end_scale": 2.35,
+            "radius_scale": 1.0,
+            "alpha_scale": 0.42,
+            "gradient": 1.0,
+            "colour": [245, 252, 255]
+          }
+        },
+        {
+          "type": "spawn_flash",
+          "persist": true,
+          "relative_to": "ritual_crack",
+          "anchor": "center",
+          "group": "cosmetics",
+          "properties": {
+            "size": [560, 560],
+            "duration": 90,
+            "alpha": 255,
+            "start_scale": 0.2,
+            "end_scale": 2.35,
+            "radius_scale": 0.82,
+            "alpha_scale": 0.72,
+            "gradient": 0.9,
+            "colour": [245, 252, 255]
+          }
+        },
+        {
+          "type": "spawn_flash",
+          "persist": true,
+          "relative_to": "ritual_crack",
+          "anchor": "center",
+          "group": "cosmetics",
+          "properties": {
+            "size": [560, 560],
+            "duration": 90,
+            "alpha": 255,
+            "start_scale": 0.2,
+            "end_scale": 2.35,
+            "radius_scale": 0.62,
+            "alpha_scale": 1.0,
+            "gradient": 0.78,
+            "colour": [245, 252, 255]
+          }
+        }
+      ]
+    },
+    {
+      "time": 205,
       "actions": [
         { "type": "spawn_boss" },
+        {
+          "type": "reveal_boss",
+          "duration": 55,
+          "outline_reveal_speed": 0.022,
+          "size": 0.18,
+          "colour": [0.92, 0.97, 1.0, 1.0]
+        },
+        { "type": "kill_actor", "actor": "ritual_rays" },
+        { "type": "kill_actor", "actor": "ritual_crack" }
+      ]
+    },
+    {
+      "time": 285,
+      "actions": [
+        { "type": "kill_actor", "actor": "arrival_light" }
+      ]
+    },
+    {
+      "time": 335,
+      "actions": [
         { "type": "boss_method", "method": "start_encounter_intro" }
       ]
     },
     {
-      "time": 240,
+      "time": 520,
       "actions": [
         { "type": "boss_method", "method": "start_aggro" },
         { "type": "mark_flow_complete" },

@@ -1,11 +1,7 @@
-def _parse_pair(value):
+def parse_pair(value):
     if isinstance(value, (list, tuple)) and len(value) >= 2:
         return [int(value[0]), int(value[1])]
-    if isinstance(value, str):
-        parts = [part.strip() for part in value.split(",")]
-        if len(parts) >= 2:
-            return [int(float(parts[0])), int(float(parts[1]))]
-    raise KeyError("Boss encounter spawn_position must be formatted as 'x,y'")
+    raise KeyError("Boss encounter coordinates must be formatted as [x, y]")
 
 
 def _resolve_anchor_position(actor, anchor):
@@ -22,7 +18,7 @@ def _resolve_anchor_position(actor, anchor):
 
 def resolve_position(position_config, actors):
     if "spawn_position" in position_config:
-        return _parse_pair(position_config["spawn_position"])
+        return parse_pair(position_config["spawn_position"])
 
     relative_to = position_config.get("relative_to")
     if relative_to is None:
@@ -32,7 +28,7 @@ def resolve_position(position_config, actors):
     if actor is None:
         raise KeyError(f"Boss encounter could not resolve actor '{relative_to}' for relative positioning")
 
-    offset = _parse_pair(position_config.get("offset", "0,0"))
+    offset = parse_pair(position_config.get("offset", [0, 0]))
     anchor_position = _resolve_anchor_position(actor, position_config.get("anchor", "center"))
     return [anchor_position[0] + offset[0], anchor_position[1] + offset[1]]
 

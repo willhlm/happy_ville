@@ -1,21 +1,33 @@
 from gameplay.entities.base.static_entity import StaticEntity
+from . import states
 
 class GodRaysRadial(StaticEntity):
     def __init__(self, pos, game_objects, parallax, size, **properties):
         super().__init__(pos, game_objects)
         self.parallax = parallax
         self.image = game_objects.game.display.make_layer(size).texture
+        self.rect.size = size
+        self.rect.center = pos
+        self.true_pos = list(self.rect.topleft)
         self.shader = game_objects.shaders['rays_radial']
         self.shader['resolution'] = self.game_objects.game.window_size
         self.time = 0
         self.colour = properties.get('colour',(1.0, 0.9, 0.65, 0.6))#colour
         self.edge_falloff_distance = properties.get('edge_falloff_distance',0.3)
 
+        initial_state = properties.get("state", "idle")
+        state_kwargs = properties.get("state_kwargs", {})
+        self.enter_state(initial_state, **state_kwargs)
+
+    def enter_state(self, state_name, **kwargs):
+        self.currentstate = states.STATE_TYPES[state_name](self, **kwargs)
+
     def release_texture(self):
         self.image.release()
 
     def update(self, dt):
         self.time += dt * 0.01
+        self.currentstate.update(dt)
 
     def draw(self, target):
         self.shader['edge_falloff_distance'] = self.edge_falloff_distance

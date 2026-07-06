@@ -46,6 +46,12 @@ class GameAudio:
         sound = self.sfx_library.get_enemy_death_sound(event)
         return self.sound_player.play_sfx(sound, volume)
 
+    def play_spawn_sound(self, event, volume=0.4):
+        sound = self.sfx_library.get_spawn_sound(event)
+        if sound is None:
+            return None
+        return self.sound_player.play_sfx(sound, volume)
+
     def play_background_sound(self, track, volume=0.7, index=0, loop=-1, fade=300):
         return self.sound_player.play_priority_sound(track, volume, channel_index=index, fade_ms=fade, loops=loop)
 
