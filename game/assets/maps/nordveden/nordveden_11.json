@@ -729,6 +729,57 @@
                          "width":1120,
                          "x":2064,
                          "y":720
+                        }, 
+                        {
+                         "gid":27,
+                         "height":96,
+                         "id":890,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":384,
+                         "x":2672,
+                         "y":1184
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
+                 "x":0,
+                 "y":0
+                }, 
+                {
+                 "draworder":"topdown",
+                 "id":113,
+                 "name":"platforms",
+                 "objects":[
+                        {
+                         "gid":47995,
+                         "height":16,
+                         "id":891,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"float_on_liquid",
+                                 "type":"bool",
+                                 "value":true
+                                }, 
+                                {
+                                 "name":"solid",
+                                 "type":"bool",
+                                 "value":true
+                                }, 
+                                {
+                                 "name":"sprite_path",
+                                 "type":"string",
+                                 "value":"floating\/plank"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":64,
+                         "x":2832,
+                         "y":1120
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -777,8 +828,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":113,
- "nextobjectid":889,
+ "nextlayerid":114,
+ "nextobjectid":893,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -964,6 +1015,10 @@
          "tilecount":1024,
          "tileheight":16,
          "tilewidth":16
+        }, 
+        {
+         "firstgid":47993,
+         "source":"..\/_objects\/platforms.tsx"
         }],
  "tilewidth":16,
  "type":"map",

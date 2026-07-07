@@ -3,7 +3,7 @@ from engine import constants as C
 from gameplay.entities.base.static_entity import StaticEntity
 from . import liquid_behaviors
 
-class TwoDLiquid(StaticEntity):#inside interactables_fg group. fg because in front of player
+class TwoDLiquid(StaticEntity):
     def __init__(self, pos, game_objects, size, layer_name, **properties):
         super().__init__(pos, game_objects)
         self.empty = game_objects.game.display.make_layer(size)
@@ -17,9 +17,13 @@ class TwoDLiquid(StaticEntity):#inside interactables_fg group. fg because in fro
 
         self.time = 0
         self.size = size
+        self.transparent_top_pixels = float(properties.get("transparent_top_pixels", 5.0))
+        self.darker_region_height_pixels = float(properties.get("darker_region_height_pixels", 6.0))
 
         self.shader = game_objects.shaders['twoD_liquid']
         self.shader['u_resolution'] = self.game_objects.game.window_size
+        self.shader['lineHeightPixels'] = self.transparent_top_pixels
+        self.shader['darkerRegionHeightPixels'] = self.darker_region_height_pixels
         if game_objects.world_state.narrative.events.get('tjasolmai', False):#if water boss (golden fields) is dead
             if not properties.get('vertical', False):
                 self.behavior = liquid_behaviors.PoisonBehavior(self, **properties)
@@ -87,3 +91,6 @@ class TwoDLiquid(StaticEntity):#inside interactables_fg group. fg because in fro
 
     def take_hit(self, effect):
         return False, effect
+
+    def get_surface_top(self):
+        return self.hitbox.top + self.transparent_top_pixels

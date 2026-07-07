@@ -38,6 +38,10 @@ class PlatformSpawner(SpawnerCommon):
         if self._bool(props.get("move")) or props.get("path_points"):
             components.append("move")
             components.append("carry_on_top")
+        if self._bool(props.get("float_on_liquid")):
+            components.append("float_on_liquid")
+            if "carry_on_top" not in components:
+                components.append("carry_on_top")
         if self._bool(props.get("disappear_on_stand")):
             components.append("disappear_on_stand")
         if self._bool(props.get("breakable")):

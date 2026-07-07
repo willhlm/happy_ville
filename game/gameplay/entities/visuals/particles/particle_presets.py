@@ -292,8 +292,8 @@ def enemy_death_burst(pos, game_objects, *, colour=(255, 255, 255, 255), scale=6
         ParticleBuilder(pos, game_objects)
         .circle(scale=scale, gradient = 1, colour=list(colour))
         .velocity_directional(
-            min_speed=2.5,
-            max_speed=9,
+            min_speed=2,
+            max_speed=7,
             direction="isotropic",
             angle_spread=[10, 10],
         )

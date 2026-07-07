@@ -53,18 +53,6 @@ class FallPre(PhaseAirBase):
             self.entity.flags['sprint_chain_active'] = False
             input.processed()
 
-    def handle_movement(self, axes):
-        if self.entity.game_objects.controller.is_held('lb') and self.entity.currentstate.states['fall'].determine_sprint():
-            value = axes.move
-            multiplier = C.sprint_multiplier if abs(value[0]) > 0.1 else 0
-            self.entity.acceleration[0] = C.acceleration[0] * multiplier
-            self.entity.dir[1] = -value[1]
-            if abs(value[0]) > 0.1:
-                self.entity.dir[0] = 1 if value[0] > 0 else -1
-            return
-
-        super().handle_movement(axes)
-
     def swing_sword(self):
         if not self.entity.flags['attack_able']:
             return

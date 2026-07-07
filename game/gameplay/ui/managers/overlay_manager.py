@@ -158,7 +158,7 @@ class OverlayManager:
         fade_in = 0.25
         hold = 1.6
         fade_out = 0.35
-        delay = 0.0        
+        delay = 0.0
 
         if mode == "block":
             self.add(TextOverlay(
@@ -189,6 +189,9 @@ class OverlayManager:
                     channel=channel,
                     sound=sound,
                 ))
+                
+    def play_static_overlay(self, game_objects, overlay_key: str, *, state_name: str = "static_overlay", callback=None) -> None:
+        game_objects.game.state_manager.enter_state(state_name,overlay_key=overlay_key, callback=callback)
 
     def play_title_card(self, key):
         pass
