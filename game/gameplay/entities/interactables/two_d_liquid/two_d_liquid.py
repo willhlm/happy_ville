@@ -13,17 +13,20 @@ class TwoDLiquid(StaticEntity):
         
         self.layer_name = layer_name
 
-        self.hitbox = pygame.Rect(pos, size)#for player collision
+        self.full_hitbox = pygame.Rect(pos, size)
+        self.hitbox = self.full_hitbox.copy()#for player collision
 
         self.time = 0
         self.size = size
-        self.transparent_top_pixels = float(properties.get("transparent_top_pixels", 5.0))
+        self.base_transparent_top_pixels = float(properties.get("transparent_top_pixels", 5.0))
         self.darker_region_height_pixels = float(properties.get("darker_region_height_pixels", 6.0))
+        self.height_percent = properties.get("height", 100.0)
+        self.transparent_top_pixels = self.base_transparent_top_pixels
 
         self.shader = game_objects.shaders['twoD_liquid']
         self.shader['u_resolution'] = self.game_objects.game.window_size
-        self.shader['lineHeightPixels'] = self.transparent_top_pixels
         self.shader['darkerRegionHeightPixels'] = self.darker_region_height_pixels
+        self.set_height_percent(self.height_percent)
         if game_objects.world_state.narrative.events.get('tjasolmai', False):#if water boss (golden fields) is dead
             if not properties.get('vertical', False):
                 self.behavior = liquid_behaviors.PoisonBehavior(self, **properties)
@@ -93,4 +96,22 @@ class TwoDLiquid(StaticEntity):
         return False, effect
 
     def get_surface_top(self):
-        return self.hitbox.top + self.transparent_top_pixels
+        return self.hitbox.top + self.base_transparent_top_pixels
+
+    def get_hidden_top_pixels(self):
+        visible_ratio = max(0.0, min(self.height_percent, 100.0)) * 0.01
+        return self.size[1] * (1.0 - visible_ratio)
+
+    def set_height_percent(self, height_percent):
+        self.height_percent = max(0.0, min(float(height_percent), 100.0))
+        hidden_top_pixels = self.get_hidden_top_pixels()
+
+        self.transparent_top_pixels = self.base_transparent_top_pixels + hidden_top_pixels
+        self.shader['lineHeightPixels'] = self.transparent_top_pixels
+
+        top = self.full_hitbox.top + int(round(hidden_top_pixels))
+        height = max(0, self.full_hitbox.bottom - top)
+        self.hitbox = pygame.Rect(self.full_hitbox.left, top, self.full_hitbox.width, height)
+
+    def get_height_percent(self):
+        return self.height_percent

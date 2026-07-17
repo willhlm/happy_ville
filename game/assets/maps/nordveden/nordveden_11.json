@@ -732,9 +732,15 @@
                         }, 
                         {
                          "gid":27,
-                         "height":96,
+                         "height":256,
                          "id":890,
                          "name":"",
+                         "properties":[
+                                {
+                                 "name":"height",
+                                 "type":"string",
+                                 "value":"20"
+                                }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
@@ -779,7 +785,7 @@
                          "visible":true,
                          "width":64,
                          "x":2832,
-                         "y":1120
+                         "y":960
                         }],
                  "opacity":1,
                  "type":"objectgroup",

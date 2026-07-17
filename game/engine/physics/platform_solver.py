@@ -24,17 +24,11 @@ class PlatformCollisionSolver:
             self._move_without_collisions(entity, entity_dt)
             return
 
-        support_motion = self._begin_step(entity, entity_dt)
+        requested_motion = self._begin_step(entity, entity_dt)
         motion = MotionContext(
             entity=entity,
-            requested_motion=[
-                entity.velocity[0] * entity_dt + support_motion[0],
-                entity.velocity[1] * entity_dt + support_motion[1],
-            ],
-            remaining_motion=[
-                entity.velocity[0] * entity_dt + support_motion[0],
-                entity.velocity[1] * entity_dt + support_motion[1],
-            ],
+            requested_motion=requested_motion.copy(),
+            remaining_motion=requested_motion.copy(),
         )
 
         if self._resolve_motion(motion):
@@ -47,9 +41,9 @@ class PlatformCollisionSolver:
         self._finalize_step(entity)
 
     def _move_without_collisions(self, entity, entity_dt):
-        support_motion = self._begin_step(entity, entity_dt)
-        entity.body.move_x(entity.velocity[0] * entity_dt + support_motion[0])
-        entity.body.move_y(entity.velocity[1] * entity_dt + support_motion[1])
+        requested_motion = self._begin_step(entity, entity_dt)
+        entity.body.move_x(requested_motion[0])
+        entity.body.move_y(requested_motion[1])
         self._finalize_step(entity)
 
     def _is_collidable(self, entity):
@@ -62,6 +56,7 @@ class PlatformCollisionSolver:
         entity.old_hitbox = entity.hitbox.copy()
         contact_state = getattr(entity, 'contact_state', None)
         support_motion = [0.0, 0.0]
+        coupling = [False, False]
         if contact_state:
             contact_state.begin_step((0.0, 0.0), entity.old_hitbox)
 
@@ -83,26 +78,50 @@ class PlatformCollisionSolver:
                         lambda _entity, contact_state=None: None,
                     )(entity, contact_state=contact_state)
                     if raw_surface_motion is not None:
-                        if raw_surface_motion[0] != 0:
+                        coupling = list(self._get_surface_motion_coupling(
+                            entity,
+                            surface_body=surface_body,
+                            contact_state=contact_state,
+                        ))
+                        if coupling[0] and raw_surface_motion[0] != 0:
                             support_motion[0] = raw_surface_motion[0]
-                        if raw_surface_motion[1] != 0:
+                        if coupling[1] and raw_surface_motion[1] != 0:
                             support_motion[1] = raw_surface_motion[1]
 
             if support_motion == [0.0, 0.0]:
-                raw_attachment_motion = self._get_surface_attachment_motion(entity, contact_state)
+                raw_attachment_motion, attachment = self._get_surface_attachment_motion(entity, contact_state)
                 if raw_attachment_motion is not None:
-                    if raw_attachment_motion[0] != 0:
+                    coupling = list(self._get_surface_motion_coupling(
+                        entity,
+                        surface_body=getattr(attachment, 'platform', None),
+                        contact_state=contact_state,
+                        attachment=attachment,
+                    ))
+                    if coupling[0] and raw_attachment_motion[0] != 0:
                         support_motion[0] = raw_attachment_motion[0]
-                    if raw_attachment_motion[1] != 0:
+                    if coupling[1] and raw_attachment_motion[1] != 0:
                         support_motion[1] = raw_attachment_motion[1]
 
+            requested_x = support_motion[0] if coupling[0] else entity.velocity[0] * entity_dt + support_motion[0]
+            requested_y = support_motion[1] if coupling[1] else entity.velocity[1] * entity_dt + support_motion[1]
+            if coupling[0]:
+                entity.velocity[0] = 0
+            if coupling[1]:
+                entity.velocity[1] = 0
+
             contact_state.motion_result.requested_motion = (
-                entity.velocity[0] * entity_dt + support_motion[0],
-                entity.velocity[1] * entity_dt + support_motion[1],
+                requested_x,
+                requested_y,
             )
             contact_state.applied_support_motion = (support_motion[0], support_motion[1])
 
-        return support_motion
+        if contact_state:
+            return [requested_x, requested_y]
+
+        return [
+            entity.velocity[0] * entity_dt + support_motion[0],
+            entity.velocity[1] * entity_dt + support_motion[1],
+        ]
 
     def _finalize_step(self, entity):
         contact_state = getattr(entity, 'contact_state', None)
@@ -115,13 +134,19 @@ class PlatformCollisionSolver:
     def _get_surface_attachment_motion(self, entity, contact_state):
         surface_attachment = getattr(entity, "surface_attachment", None)
         if surface_attachment is None:
-            return None
+            return None, None
 
         is_attached = getattr(surface_attachment, "is_attached", None)
         if is_attached is None or not is_attached():
-            return None
+            return None, None
 
-        return surface_attachment.get_surface_motion(contact_state=contact_state)
+        return surface_attachment.get_surface_motion(contact_state=contact_state), surface_attachment
+
+    def _get_surface_motion_coupling(self, entity, surface_body=None, contact_state=None, attachment=None):
+        getter = getattr(entity, 'get_surface_motion_coupling', None)
+        if getter is None:
+            return (False, False)
+        return getter(surface_body=surface_body, contact_state=contact_state, attachment=attachment)
 
     def _resolve_motion(self, motion):
         for _ in range(4):

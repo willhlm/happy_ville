@@ -23,7 +23,6 @@ class StateManager():
         'heal',
         'crouch',
         'plat_bone',
-        'wall_glide',
         'pray',
     )
 
@@ -52,6 +51,7 @@ class StateManager():
             'smash_side': SmashSideState,
             'smash_up': SmashUpState,
             'dash_air': DashAirState,
+            'air_glide': AirGlideState,
             'death': DeathState,
             'respawn': ReSpawnState,
             'heal': HealState,
@@ -80,6 +80,9 @@ class StateManager():
 
     def has_state(self, state_name):
         return state_name in self.states
+
+    def is_in_state(self, state_name):
+        return self.states.get(state_name) is self.composite_state
 
     def enter_state(self, state_name, phase=None, **kwargs):
         state = self.states.get(state_name)

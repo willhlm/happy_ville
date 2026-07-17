@@ -188,5 +188,10 @@ class Player(Character):
     def on_grounddash_timout(self):
         self.flags['grounddash'] = True
 
+    def get_surface_motion_coupling(self, surface_body=None, contact_state=None, attachment=None):
+        if self.is_in_state('wall_glide'):
+            return (False, True)
+        return super().get_surface_motion_coupling(surface_body=surface_body, contact_state=contact_state, attachment=attachment)
+
     def on_crush(self, block):
         self.hazard_resolver.handle_crush(block)

@@ -46,7 +46,8 @@ class VerticalPoisonBehavior(PoisonBehavior):
     def update_pos(self):
         self.entity.true_pos[1] -= self.scroll_speed * self.entity.game_objects.game.dt
         self.entity.rect.topleft = self.entity.true_pos
-        self.entity.hitbox.topleft = self.entity.rect.topleft    
+        self.entity.full_hitbox.topleft = self.entity.rect.topleft
+        self.entity.set_height_percent(self.entity.height_percent)
 
     def on_enter(self, entity):#when we kill player
         if entity in self.entity.game_objects.players:

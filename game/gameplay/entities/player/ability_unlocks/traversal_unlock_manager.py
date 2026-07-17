@@ -2,7 +2,7 @@ class TraversalUnlockManager:
     BUNDLES = {
         'dash': ('sprint', 'dash_ground', 'dash_jump'),
         'air_dash': ('dash_air',),
-        'climbing_gear': ('wall_jump',),
+        'climbing_gear': ('wall_glide', 'wall_jump'),
     }
 
     DEPENDENCIES = {
@@ -15,7 +15,7 @@ class TraversalUnlockManager:
 
         #temorary unlocks for testing
         self.unlock('dash')#Leaibolmmái's step
-        #self.unlock('climbing_gear')
+        self.unlock('climbing_gear')
         self.unlock('air_dash')
 
     def has_unlock(self, unlock_key):

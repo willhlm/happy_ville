@@ -245,6 +245,8 @@ class StaticSpawner(c.SpawnerCommon):
                     if property["name"] in ("water_tint", "darker_color", "line_color"):
                         colour = list(c.pygame.Color(property["value"]))
                         kwargs[property["name"]] = [colour[1] / 255, colour[2] / 255, colour[3] / 255, colour[0] / 255]
+                    elif property["name"] == "height":
+                        kwargs["height"] = float(property["value"])
                 self.game_objects.interactables_fg.add(c.TwoDLiquid(object_position, self.game_objects, object_size, layer_name, **kwargs))
 
             elif local_id == 27:

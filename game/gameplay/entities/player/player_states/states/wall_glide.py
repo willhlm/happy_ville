@@ -29,6 +29,7 @@ class WallGlide(PhaseBase):
         self.timer_init = 6
         self.timer = self.timer_init
         self.count_timer = False
+        self.release_dir = self.dir[0]
 
     def update(self, dt):
         if self.count_timer:
@@ -36,8 +37,7 @@ class WallGlide(PhaseBase):
             if self.timer <= 0:
                 self.fall()
         if not self.entity.is_on_wall():
-            self.entity.velocity[0] = 0
-            self.enter_state('fall', wall_dir = self.dir)
+            self.fall()
         else:
             self.apply_wall_glide_profile(dt)
             self.entity.velocity[0] += self.entity.dir[0] * 0.2
@@ -58,14 +58,17 @@ class WallGlide(PhaseBase):
         value = axes.move
         curr_dir = self.entity.dir[0]
         if value[0] * curr_dir < 0:
+            self.release_dir = -curr_dir
             self.count_timer = True
         elif value[0] * curr_dir > 0:
+            self.release_dir = curr_dir
             self.count_timer = False
             self.timer = self.timer_init
 
     def fall(self):
-        self.entity.velocity[0] = -self.entity.dir[0] * 2
-        self.enter_state('fall', wall_dir = self.dir)
+        self.entity.dir[0] = self.release_dir
+        self.entity.velocity[0] = self.release_dir * 2
+        self.enter_state('fall')
 
     def consume_contact_state(self):
         if self.entity.is_on_floor():
@@ -73,6 +76,10 @@ class WallGlide(PhaseBase):
 
     def apply_wall_glide_profile(self, dt):
         profile = self.entity.contact_state.get_wall_glide_profile(side=self.get_wall_side())
+        if profile is None:
+            self.fall()
+            return
+
         if profile != self.profile:
             self.profile = profile
             self.glide_friction = profile['friction_start']
@@ -92,5 +99,3 @@ class WallGlide(PhaseBase):
 
     def get_wall_side(self):
         return 'right' if self.dir[0] > 0 else 'left'
-
-

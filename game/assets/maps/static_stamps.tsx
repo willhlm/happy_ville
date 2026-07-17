@@ -142,6 +142,7 @@
  <tile id="26">
   <properties>
    <property name="darker_color" value=""/>
+   <property name="height" value=""/>
    <property name="line_color" value=""/>
    <property name="water_tint" value=""/>
   </properties>

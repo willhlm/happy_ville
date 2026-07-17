@@ -76,30 +76,16 @@ class ConveyorBelt(TexturedPlatform):
 
     def get_support_motion(self, entity):
         # Carry anything supported by the belt through the shared platform support-motion path.
-        # Returning the full belt vector keeps the motion logic reusable for both horizontal and vertical belts.
-        return (
-            self.direction[0] * self.carry_speed,
-            self.direction[1] * self.carry_speed * 10,
-        )
+        return self._get_motion_vector()
 
     def get_surface_motion(self, entity, contact_state=None):
-        # Vertical belts carry entities that were attached to the wall surface on the previous frame. Horizontal belts are handled by floor support motion above.
-        return (
-            self.direction[0] * self.carry_speed,
-            self.direction[1] * self.carry_speed * 10,
-        )
+        return self._get_motion_vector()
 
     def get_contact_metadata(self, entity, side, axis, collision_kind):
         if axis != 'x':
             return {}
 
         return {
-            'movement_modifier': {
-                'name': 'surface_lock',
-                'priority': 100,
-                'authoritative': True,
-                'entity': entity,
-            },
             'wall_glide': {
                 'friction_start': 0.2,
                 'friction_end': 0.2,
@@ -117,4 +103,10 @@ class ConveyorBelt(TexturedPlatform):
         return (
             CollisionSample('right', self.hitbox.left, self, self, collision_kind='belt'),
             CollisionSample('left', self.hitbox.right, self, self, collision_kind='belt'),
+        )
+
+    def _get_motion_vector(self):
+        return (
+            self.direction[0] * self.carry_speed,
+            self.direction[1] * self.carry_speed * 10,
         )

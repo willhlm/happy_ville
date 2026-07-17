@@ -140,12 +140,22 @@ class Character(AnimatedEntity):#enemy, NPC,player
         return self.contact_state.has_collision_kind(collision_kind, side=side)
 
     def has_wall_glide_collision(self):
-        return (
-            self.has_collision_kind('wall') or                       
-            self.has_collision_kind('belt') or           
-            self.has_collision_kind('Wall')
-            
-        )
+        return self.can_wall_glide() and self.contact_state.get_wall_glide_profile() is not None
+
+    def can_wall_glide(self):
+        state_manager = getattr(self, 'currentstate', None)
+        if state_manager is None:
+            return False
+        return state_manager.has_state('wall_glide')
+
+    def is_in_state(self, state_name):
+        state_manager = getattr(self, 'currentstate', None)
+        if state_manager is None:
+            return False
+        return state_manager.is_in_state(state_name)
+
+    def get_surface_motion_coupling(self, surface_body=None, contact_state=None, attachment=None):
+        return (False, False)
 
     def get_real_velocity(self, dt):
         return self.contact_state.get_real_velocity(dt)

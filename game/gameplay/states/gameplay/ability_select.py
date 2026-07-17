@@ -1,16 +1,10 @@
-from engine.utils import read_files
 from gameplay.states import Gameplay
+from gameplay.ui.components import AbilityWheel
 
 class AbilitySelect(Gameplay):#when pressing tab
     def __init__(self, game):
         super().__init__(game)
-        self.ability_manager = self.game.game_objects.player.abilities
-        self.abilities = self.ability_manager.get_equippable_keys()
-        self.index = self.abilities.index(self.ability_manager.equip)
-
-        self.sprites = read_files.load_sprites_list('assets/sprites/ui/overlay/ability_hud/', game.game_objects)#TODO
-        self.coordinates=[(40,0),(60,50),(30,60),(0,40),(20,0),(0,0)]
-        self.surface = self.game.display.make_layer(self.game.window_size)#TODO
+        self.ability_wheel = AbilityWheel(self.game.game_objects)
 
     def update(self, dt):
         dt *= 0.5#slow motion
@@ -18,27 +12,18 @@ class AbilitySelect(Gameplay):#when pressing tab
 
     def render(self):
         super().render()
-        self.surface.clear(20,20,20,100)
+        self.ability_wheel.render()
 
-        hud = self.sprites[self.index]
-        for index, ability in enumerate(self.abilities):
-            pos = [self.coordinates[index][0] + 250, self.coordinates[index][1] + 100]
-            self.game.display.render(self.ability_manager.get(ability).sprites['active_1'][0], self.surface,position =pos)
-
-        self.game.display.render(hud, self.surface,position = (250,100))
-        self.game.render_display(self.surface.texture)
+    def on_pop(self):
+        self.ability_wheel.release()
 
     def handle_events(self, input):
         input.processed()
         if input.pressed and input.name == 'down':#down
-            self.index += 1
-            if self.index > len(self.abilities)-1:
-                self.index = 0
+            self.ability_wheel.select_next()
         elif input.pressed and input.name == 'up':#up
-            self.index-=1
-            if self.index<0:
-                self.index=len(self.abilities)-1
+            self.ability_wheel.select_previous()
         elif input.released:#release
             if input.name == 'rb':
-                self.ability_manager.equip = self.abilities[self.index]
+                self.ability_wheel.equip_selected()
                 self.game.state_manager.exit_state()

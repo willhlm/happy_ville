@@ -275,7 +275,7 @@
                  "name":"back",
                  "objects":[
                         {
-                         "gid":43316,
+                         "gid":43319,
                          "height":80,
                          "id":2023,
                          "name":"",
@@ -287,7 +287,7 @@
                          "y":848
                         }, 
                         {
-                         "gid":43316,
+                         "gid":43319,
                          "height":80,
                          "id":2024,
                          "name":"",
@@ -299,7 +299,7 @@
                          "y":848
                         }, 
                         {
-                         "gid":43315,
+                         "gid":43318,
                          "height":32,
                          "id":2025,
                          "name":"",
@@ -311,7 +311,7 @@
                          "y":912
                         }, 
                         {
-                         "gid":43315,
+                         "gid":43318,
                          "height":32,
                          "id":2026,
                          "name":"",
@@ -323,7 +323,7 @@
                          "y":768
                         }, 
                         {
-                         "gid":43315,
+                         "gid":43318,
                          "height":32,
                          "id":2027,
                          "name":"",
@@ -335,7 +335,7 @@
                          "y":848
                         }, 
                         {
-                         "gid":43315,
+                         "gid":43318,
                          "height":32,
                          "id":2028,
                          "name":"",
@@ -347,7 +347,7 @@
                          "y":1088
                         }, 
                         {
-                         "gid":43315,
+                         "gid":43318,
                          "height":32,
                          "id":2029,
                          "name":"",
@@ -876,6 +876,18 @@
                          "width":16,
                          "x":1408,
                          "y":704
+                        }, 
+                        {
+                         "gid":8206,
+                         "height":96,
+                         "id":2034,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":80,
+                         "x":944,
+                         "y":1088
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -924,7 +936,7 @@
          "y":0
         }],
  "nextlayerid":46,
- "nextobjectid":2034,
+ "nextobjectid":2035,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -1030,7 +1042,7 @@
          "source":"..\/_objects\/interactables.tsx"
         }, 
         {
-         "firstgid":43307,
+         "firstgid":43310,
          "source":"objects\/objects.tsx"
         }],
  "tilewidth":16,

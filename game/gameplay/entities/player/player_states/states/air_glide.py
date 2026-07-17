@@ -1,52 +1,39 @@
+import random
 from .base_composite import CompositeState
 from .base_state import PhaseAirBase
 from engine import constants as C
 
-class FallState(CompositeState):
-    AIR_GLIDE_GROUND_PROBE_DISTANCE = 12
-
+class AirGlideState(CompositeState):
     def __init__(self, entity):
         super().__init__(entity)
-        self.phases = {'pre': FallPre(entity), 'main': FallMain(entity)}
+        self.phases = {'pre': AirGlidePre(entity), 'main': AirGlideMain(entity)}
 
-    def common_values(self):
-        self.falltime = 0
-
-    def update(self, dt):
-        self.falltime += dt
+    def update(self, dt): 
         self.current_phase.update(dt)
 
-    def determine_fall(self):
-        return self.falltime >= 4000
-
-    def determine_sprint(self):
-        return self.entity.flags['sprint_chain_active']
-
-    def can_enter_air_glide(self):
-        return (
-            self.entity.abilities.is_unlocked('shield')
-            and self.entity.currentstate.has_state('air_glide')
-            and not self.entity.game_objects.physics.collision_queries.has_floor_below(
-                self.entity,
-                self.AIR_GLIDE_GROUND_PROBE_DISTANCE,
-            )
-        )
-
-class FallPre(PhaseAirBase):
+class AirGlidePre(PhaseAirBase):
     def __init__(self, entity):
         super().__init__(entity)
 
     def enter(self, **kwarg):
+        self.enable_glide()
+        self.entity.velocity[1] = 0
         self.entity.animation.play('fall_pre')
+        self.entity.game_objects.particles.emit(
+            "enemy_death_burst",
+            pos=self.entity.hitbox.center,
+            n=30,
+            colour=[255,255,255,255],
+        )
+
+    def exit(self):
+        self.disable_glide()
 
     def handle_press_input(self, input):
         if input.name == 'a':
-            if self.entity.flags['ground']:#cayote jump
+            if self.entity.flags['ground']:
                 input.processed()
                 self.enter_state('jump')
-            elif self.entity.currentstate.states['fall'].can_enter_air_glide():
-                input.processed()
-                self.enter_state('air_glide')
         elif input.name == 'b':
             input.processed()
             self.do_ability()
@@ -64,9 +51,7 @@ class FallPre(PhaseAirBase):
     def handle_release_input(self, input):
         if input.name == 'a':
             input.processed()
-        elif input.name == 'lb':
-            self.entity.flags['sprint_chain_active'] = False
-            input.processed()
+            self.enter_state('fall')
 
     def swing_sword(self):
         if not self.entity.flags['attack_able']:
@@ -82,15 +67,30 @@ class FallPre(PhaseAirBase):
     def increase_phase(self):
         self.enter_phase('main')
 
+    def update(self, dt):
+        dx = random.uniform(-1, 1) * 20
+        dy = random.uniform(-1, 1) * 20
+        position = [self.entity.hitbox.centerx + dx, self.entity.hitbox.centery + dy]
+        self.entity.game_objects.particles.emit(
+            "tiny_trail",
+            pos=position,
+            n=1,
+            colour=C.spirit_colour,
+            dir=[0, 1],
+            vx=self.entity.velocity[0] * 0.1,
+            vy=self.entity.velocity[1] * 0.1,
+        )
+
+    def enable_glide(self):
+        if 'shield_glide' not in self.entity.movement_modifier.modifiers:
+            self.entity.movement_modifier.add_modifier('shield_glide')
+
+    def disable_glide(self):
+        self.entity.movement_modifier.remove_modifier('shield_glide')
+
     def consume_contact_state(self):
         if self.entity.is_on_floor():
-            should_sprint = self.entity.game_objects.controller.is_held('lb') and self.entity.currentstate.states['fall'].determine_sprint()
-            self.entity.flags['sprint_chain_active'] = False
-            if self.entity.currentstate.states['fall'].determine_fall():
-                self.enter_state('land', phase='hard')
-            elif should_sprint:
-                self.enter_state('sprint')
-            elif self.entity.acceleration[0] != 0:
+            if self.entity.acceleration[0] != 0:
                 self.enter_state('run')
             else:
                 self.enter_state('land', phase='soft')
@@ -99,11 +99,12 @@ class FallPre(PhaseAirBase):
         if self.entity.has_wall_glide_collision():
             self.enter_state('wall_glide')
 
-class FallMain(FallPre):
+class AirGlideMain(AirGlidePre):
     def __init__(self, entity):
         super().__init__(entity)
 
     def enter(self, **kwarg):
+        self.enable_glide()
         self.entity.animation.play('fall_main')
 
     def increase_phase(self):
