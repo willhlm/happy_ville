@@ -1781,8 +1781,8 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":80,
-                         "x":2000,
+                         "width":84,
+                         "x":1996,
                          "y":528
                         }, 
                         {
@@ -1941,14 +1941,14 @@
                          "name":"",
                          "properties":[
                                 {
-                                 "name":"trigger",
-                                 "type":"string",
-                                 "value":"ui_overlay"
-                                }, 
-                                {
                                  "name":"overlay",
                                  "type":"string",
                                  "value":"tutorial_go_down"
+                                }, 
+                                {
+                                 "name":"trigger",
+                                 "type":"string",
+                                 "value":"ui_overlay"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -2002,7 +2002,7 @@
                                  "y":0
                                 }, 
                                 {
-                                 "x":-64,
+                                 "x":-46,
                                  "y":32
                                 }, 
                                 {
@@ -2013,7 +2013,7 @@
                          "type":"",
                          "visible":true,
                          "width":0,
-                         "x":2000,
+                         "x":1996,
                          "y":496
                         }, 
                         {
