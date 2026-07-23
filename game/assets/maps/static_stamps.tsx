@@ -76,7 +76,11 @@
  </tile>
  <tile id="15">
   <properties>
-   <property name="particle" value=""/>
+   <property name="fade_speed" value="8"/>
+   <property name="offset_x" value="0"/>
+   <property name="offset_y" value="-12"/>
+   <property name="text" value=""/>
+   <property name="width" value="80"/>
   </properties>
  </tile>
  <tile id="16">
@@ -154,7 +158,11 @@
  </tile>
  <tile id="30">
   <properties>
-   <property name="type" value=""/>
+   <property name="fade_speed" type="float" value="8"/>
+   <property name="offset_x" type="int" value="0"/>
+   <property name="offset_y" type="int" value="-12"/>
+   <property name="text" value=""/>
+   <property name="width" type="int" value="80"/>
   </properties>
  </tile>
  <tile id="32">
