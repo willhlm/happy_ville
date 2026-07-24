@@ -125,6 +125,16 @@ class StaticSpawner(c.SpawnerCommon):
                         priority = property["value"]
                 self.game_objects.camera_blocks.add(c.Stop(self.game_objects, object_size, object_position, mode, camera_offset, priority))
 
+            elif local_id == 15:
+                self.game_objects.interactables.add(
+                    c.WorldTextTrigger(
+                        object_position,
+                        self.game_objects,
+                        object_size,
+                        **c.props_list_to_dict(properties),
+                    )
+                )                
+
             elif local_id == 16:
                 kwargs = {}
                 for property in properties:
@@ -256,6 +266,9 @@ class StaticSpawner(c.SpawnerCommon):
 
             elif local_id == 28:
                 self.game_objects.cosmetics.add(c.ShadowLight_1(object_position, self.game_objects, object_size))
+
+            elif local_id == 30:
+                pass
 
             elif local_id == 31:
                 self.game_objects.all_bgs.add(layer_name, c.Rainbow(object_position, self.game_objects, object_size, parallax))

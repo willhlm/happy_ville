@@ -2114,26 +2114,61 @@
                         }, 
                         {
                          "gid":20,
-                         "height":30,
-                         "id":397,
+                         "height":82,
+                         "id":399,
                          "name":"",
                          "properties":[
                                 {
                                  "name":"key",
                                  "type":"string",
-                                 "value":"tutorial_go_down"
+                                 "value":"Press down to drop through ledges and some stairs"
                                 }, 
                                 {
                                  "name":"trigger",
                                  "type":"string",
-                                 "value":"ui_overlay"
+                                 "value":"pop_up_text"
                                 }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":110,
-                         "x":2592,
-                         "y":574
+                         "width":179,
+                         "x":2555,
+                         "y":575
+                        }, 
+                        {
+                         "gid":12,
+                         "height":16,
+                         "id":400,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":112,
+                         "x":1413,
+                         "y":625
+                        }, 
+                        {
+                         "gid":20,
+                         "height":82,
+                         "id":401,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"key",
+                                 "type":"string",
+                                 "value":"Press down to drop through ledges and some stairs"
+                                }, 
+                                {
+                                 "name":"trigger",
+                                 "type":"string",
+                                 "value":"pop_up_text"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":179,
+                         "x":1376,
+                         "y":608
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -2512,7 +2547,7 @@
          "y":0
         }],
  "nextlayerid":96,
- "nextobjectid":398,
+ "nextobjectid":402,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.1",
