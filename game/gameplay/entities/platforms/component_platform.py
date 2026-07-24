@@ -2,37 +2,71 @@ from engine.utils import read_files
 from gameplay.entities.platforms.base.dynamic_platform import DynamicPlatform
 from gameplay.entities.platforms.components.platform_components import COMPONENTS
 
-'''costume properties accepted from tiled:
-damage_on_land: bool
+"""Custom properties accepted from Tiled.
+
+Collision / traversal:
+solid: bool
+oneway_up: bool
+crushes_entities: bool
+
+Damage:
 damage: str
+damage_on_land: bool
 knockback_x: str
 knockback_y: str
 
-dissaper_on_stand: bool
-respawn_time: int
-disappear_time: int
-
+Movement:
 move: bool
 move_type: str -> direction_distance, path
-disatnce: str
+distance: str
 direction: str
 phase: str
 speed: str
 pingpong: bool
 loop: bool
+path: int -> path object id
+snap_to_path: bool
+snap_mode: str -> closest, start
+smooth: bool
+samples_per_segment: int
 
-one_way_up: bool
-solid: bool
-crushes_entities: bool
+Float on liquid:
+float_on_liquid: bool
+float_offset: str
+buoyancy: str
+water_damping: str
+float_gravity: str
+max_rise_speed: str
+max_fall_speed: str
+edge_margin: str
+bob_amplitude: str
+bob_speed: str
+bob_phase: str
+landing_bob_impulse: str
+max_landing_bob_impulse: str
+landing_min_speed: str
+landing_splash_particles: int
+jump_off_bob_impulse: str
+max_jump_off_bob_impulse: str
+jump_off_min_speed: str
+jump_off_splash_particles: int
 
-sprite_path: str
-ID: str -> emits this signal ID
+Disappear / respawn:
+disappear_on_stand: bool
+disappear_time: int
+respawn_time: int
 
-breakale: bool
+Breakable:
+breakable: bool
 vulnerable_sides: str -> "top", "bottom", "left", "right"
 health: str
 invincibility_time: str
-'''
+
+Signals / visuals:
+sprite_path: str
+signal_id: str -> subscribes to this signal
+ID: str -> emitted by breakable platforms on destroy
+"""
 
 def parse_components(components):
     if isinstance(components, (list, tuple)):

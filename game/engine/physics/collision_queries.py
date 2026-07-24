@@ -8,6 +8,22 @@ class CollisionQueries:
     def check_ground(self, point):
         return self.game_objects.physics.platform_spatial_index.query_point(point) is not None
 
+    def has_floor_below(self, entity, distance):
+        if distance <= 0:
+            return False
+
+        probe = entity.hitbox.copy()
+        probe.y += 1
+        probe.height += distance
+
+        platforms = self.game_objects.physics.platform_spatial_index.query_rect(probe)
+        for platform in platforms:
+            for sample in platform.get_floor_samples(entity):
+                target_y = sample.position
+                if entity.hitbox.bottom <= target_y <= entity.hitbox.bottom + distance:
+                    return True
+        return False
+
     def request_pass_through(self, entity):
         platform_collider = getattr(entity, "platform_collider", None)
         if platform_collider is None:

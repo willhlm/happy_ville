@@ -1,4 +1,5 @@
 import math, pygame
+from engine import constants as C
 from .states_time_collision import Idle
 from gameplay.entities.shared.components.hit import hit_effects
 from gameplay.entities.platforms.components.geometry import CollisionSample
@@ -111,6 +112,179 @@ class SolidCollision(CollisionPlatformComponent):
 class CarryOnTop(PlatformComponent):
     def get_support_motion(self, entity):
         return entity.platform_collider.get_support_motion(self.p)
+
+class FloatOnLiquid(PlatformComponent):
+    """
+    Vertical buoyancy against TwoDLiquid surfaces.
+
+    Props:
+      float_offset: int pixels below liquid top where the platform settles (default 6)
+      buoyancy: float spring strength toward the target height (default 0.045)
+      water_damping: float damping while supported by liquid (default 0.18)
+      float_gravity: float downward accel when unsupported (default 0.03)
+      max_rise_speed: float clamp for upward velocity (default -1.6)
+      max_fall_speed: float clamp for downward velocity (default 2.5)
+      edge_margin: int horizontal tolerance when checking if the platform is still on the liquid (default 4)
+      bob_amplitude: float ambient supported bob in pixels (default 1.5)
+      bob_speed: float bob phase advance per frame unit (default 0.035)
+      bob_phase: float optional starting phase offset in radians (default 0.0)
+      landing_bob_impulse: float converts landing speed into downward platform impulse (default 0.18)
+      max_landing_bob_impulse: float clamp for landing impulse (default 1.2)
+      landing_min_speed: float minimum downward landing speed to react to (default 0.5)
+      landing_splash_particles: int number of splash particles on landing (default 10)
+      jump_off_bob_impulse: float converts upward jump speed into downward platform impulse (default 0.12)
+      max_jump_off_bob_impulse: float clamp for jump-off impulse (default 0.9)
+      jump_off_min_speed: float minimum upward jump speed to react to (default 0.5)
+      jump_off_splash_particles: int number of splash particles on jump-off (default 6)
+    """
+
+    def on_added(self):
+        self.float_offset = float(self.props.get("float_offset", 6))
+        self.buoyancy = float(self.props.get("buoyancy", 0.045))
+        self.water_damping = float(self.props.get("water_damping", 0.18))
+        self.float_gravity = float(self.props.get("float_gravity", 0.03))
+        self.max_rise_speed = float(self.props.get("max_rise_speed", -1.6))
+        self.max_fall_speed = float(self.props.get("max_fall_speed", 2.5))
+        self.edge_margin = int(self.props.get("edge_margin", 4))
+        self.bob_amplitude = float(self.props.get("bob_amplitude", 1.5))
+        self.bob_speed = float(self.props.get("bob_speed", 0.035))
+        self.bob_phase = float(self.props.get("bob_phase", 0.0))
+        self.landing_bob_impulse = float(self.props.get("landing_bob_impulse", 0.18))
+        self.max_landing_bob_impulse = float(self.props.get("max_landing_bob_impulse", 1.2))
+        self.landing_min_speed = float(self.props.get("landing_min_speed", 0.5))
+        self.landing_splash_particles = int(self.props.get("landing_splash_particles", 10))
+        self.jump_off_bob_impulse = float(self.props.get("jump_off_bob_impulse", 0.12))
+        self.max_jump_off_bob_impulse = float(self.props.get("max_jump_off_bob_impulse", 0.9))
+        self.jump_off_min_speed = float(self.props.get("jump_off_min_speed", 0.5))
+        self.jump_off_splash_particles = int(self.props.get("jump_off_splash_particles", 6))
+        self.bob_time = 0.0
+        self.current_liquid = None
+
+    def update(self, dt):
+        self._react_to_jump_offs()
+        liquid = self._find_supporting_liquid()
+        self.current_liquid = liquid
+
+        if liquid is None:
+            self._apply_air_gravity(dt)
+            return
+
+        self.bob_time += dt
+        self._apply_buoyancy(liquid, dt)
+
+    def _find_supporting_liquid(self):
+        margin = self.edge_margin
+        centerx = self.p.hitbox.centerx
+
+        for interactable in self.p.game_objects.interactables_fg:
+            if type(interactable).__name__ != "TwoDLiquid":
+                continue
+
+            hitbox = interactable.hitbox
+            if centerx < hitbox.left - margin or centerx > hitbox.right + margin:
+                continue
+
+            if self.p.hitbox.bottom < hitbox.top - self.p.hitbox.height:
+                continue
+
+            if self.p.hitbox.top > hitbox.bottom:
+                continue
+
+            return interactable
+
+        return None
+
+    def _apply_air_gravity(self, dt):
+        self.p.velocity[1] += self.float_gravity * dt
+        self.p.velocity[1] = min(self.p.velocity[1], self.max_fall_speed)
+
+    def on_platform_collision(self, entity, side, axis, collision_kind='block'):
+        if axis != 'y' or side != 'bottom':
+            return
+
+        contact_state = getattr(entity, 'contact_state', None)
+        if contact_state is None:
+            return
+
+        if contact_state.previous_support_body is self.p:
+            return
+
+        landing_speed = max(contact_state.motion_result.requested_motion[1], 0.0)
+        if landing_speed < self.landing_min_speed:
+            return
+
+        self._react_to_landing(entity, landing_speed)
+
+    def _react_to_landing(self, entity, landing_speed):
+        impulse = min(landing_speed * self.landing_bob_impulse, self.max_landing_bob_impulse)
+        self.p.velocity[1] += impulse
+
+        vel_scale = max(landing_speed / C.max_vel[1], 0.35)
+        self._emit_liquid_splash(vel_scale, self.landing_splash_particles)
+
+    def _react_to_jump_offs(self):
+        for entity in self._iter_jump_off_entities():
+            jump_speed = max(-entity.velocity[1], 0.0)
+            if jump_speed < self.jump_off_min_speed:
+                continue
+
+            impulse = min(jump_speed * self.jump_off_bob_impulse, self.max_jump_off_bob_impulse)
+            self.p.velocity[1] += impulse
+
+            vel_scale = max(jump_speed / abs(C.jump_vel_player), 0.25)
+            self._emit_liquid_splash(vel_scale, self.jump_off_splash_particles)
+
+    def _iter_jump_off_entities(self):
+        for group in (
+            self.p.game_objects.players,
+            self.p.game_objects.enemies,
+        ):
+            for entity in group:
+                contact_state = getattr(entity, "contact_state", None)
+                if contact_state is None:
+                    continue
+
+                if contact_state.previous_support_body is not self.p:
+                    continue
+
+                if contact_state.support_body is self.p:
+                    continue
+
+                if entity.velocity[1] >= 0:
+                    continue
+
+                yield entity
+
+    def _get_active_liquid(self):
+        return self.current_liquid or self._find_supporting_liquid()
+
+    def _emit_liquid_splash(self, vel_scale, number_particles):
+        liquid = self._get_active_liquid()
+        if liquid is None or not hasattr(liquid, "splash"):
+            return
+
+        splash_pos = (self.p.hitbox.centerx, int(liquid.get_surface_top()))
+        liquid.splash(splash_pos, vel_scale, number_particles=number_particles)
+
+    def _platform_bottom(self):
+        return self.p.true_pos[1] + self.p.hitbox.height
+
+    def _target_bottom(self, liquid):
+        bob = math.sin(self.bob_time * self.bob_speed + self.bob_phase) * self.bob_amplitude
+        surface_top = liquid.get_surface_top() if hasattr(liquid, "get_surface_top") else liquid.hitbox.top
+        return surface_top + self.float_offset + bob
+
+    def _apply_buoyancy(self, liquid, dt):
+        target_bottom = self._target_bottom(liquid)
+        displacement = self._platform_bottom() - target_bottom
+
+        self.p.velocity[1] -= displacement * self.buoyancy * dt
+        self.p.velocity[1] -= self.p.velocity[1] * self.water_damping * dt
+
+        if self._platform_bottom() > liquid.hitbox.bottom:
+            self.p.velocity[1] -= (self._platform_bottom() - liquid.hitbox.bottom) * self.buoyancy * dt
+
+        self.p.velocity[1] = max(self.max_rise_speed, min(self.p.velocity[1], self.max_fall_speed))
 
 class OneWayUpCollision(CollisionPlatformComponent):
     """One-way-up platform behavior."""
@@ -683,6 +857,7 @@ COMPONENTS = {
 
     # behaviors
     "move": Move,
+    "float_on_liquid": FloatOnLiquid,
     "disappear_on_stand": DisappearOnStand,
     "breakable": Breakable,
     "signal_toggle": ActiveGate,

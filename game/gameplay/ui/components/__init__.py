@@ -9,6 +9,7 @@ from .menus.inventory.sword import Sword
 from .menus.radna.hand import Hand
 
 from .overlay.animated_image_overlay import LogoLoadingOverlay
+from .overlay.ability_wheel import AbilityWheel
 
 from .hud.health import Health
 from .hud.health_frame import HealthFrame

@@ -5,6 +5,7 @@ class Ability():#aila abilities
     id = None
     name = None
     state_name = None
+    state_names = None
     spirit_cost = 0
     selectable = False
     max_level = 1
@@ -51,6 +52,13 @@ class Ability():#aila abilities
 
     def can_select(self):
         return self.selectable and self.is_unlocked()
+
+    def get_state_names(self):
+        if self.state_names is not None:
+            return tuple(self.state_names)
+        if self.state_name is None:
+            return ()
+        return (self.state_name,)
 
     def get_current_description(self):
         if not self.is_unlocked():

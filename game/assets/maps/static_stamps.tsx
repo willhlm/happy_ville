@@ -96,8 +96,8 @@
  </tile>
  <tile id="19">
   <properties>
-   <property name="event" value=""/>
    <property name="key" value=""/>
+   <property name="trigger" value=""/>
   </properties>
  </tile>
  <tile id="20">
@@ -142,6 +142,7 @@
  <tile id="26">
   <properties>
    <property name="darker_color" value=""/>
+   <property name="height" value=""/>
    <property name="line_color" value=""/>
    <property name="water_tint" value=""/>
   </properties>

@@ -26,7 +26,7 @@ class AbilityManager():#Player movement abilities, handles them. Contains also s
         self.unlock('bow')
         self.unlock('slow_motion')
         self.unlock('wind')
-        #self.unlock('shield')
+        self.unlock('shield')
 
     @property
     def equip(self):
@@ -83,9 +83,10 @@ class AbilityManager():#Player movement abilities, handles them. Contains also s
     def install_state_for(self, ability):
         currentstate = getattr(self.entity, 'currentstate', None)
         install_state = getattr(currentstate, 'install_state', None)
-        if install_state is None or ability.state_name is None:
+        if install_state is None:
             return
-        install_state(ability.state_name)
+        for state_name in ability.get_state_names():
+            install_state(state_name)
 
     def install_unlocked_states(self):
         for ability in self.abilities.values():

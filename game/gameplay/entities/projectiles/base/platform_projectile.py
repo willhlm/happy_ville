@@ -63,6 +63,11 @@ class PlatformProjectile(ProjectileBase):
         self.enable_surface_attachment()
         return self.surface_attachment.attach_from_collision(collision)
 
+    def get_surface_motion_coupling(self, surface_body=None, contact_state=None, attachment=None):
+        if attachment is self.surface_attachment and self.surface_attachment.is_attached():
+            return (True, True)
+        return (False, False)
+
     def on_projectile_reflected(self, other, direction, position, team=None, clamp_value=10):
         if team is not None and team != self.team:
             self.game_objects.projectiles.route(self, team)
