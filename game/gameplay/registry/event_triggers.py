@@ -11,4 +11,5 @@ REGISTER_EVENT_TRIGGERS = {
     'sequence': SequenceTrigger,
     'state': StateTrigger,
     'ui_overlay': UIOverlayTrigger,
+    'pop_up_text': PopUpTextTrigger,
 }

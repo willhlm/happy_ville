@@ -8,3 +8,4 @@ from .quest import QuestTrigger
 from .sequence import SequenceTrigger
 from .state import StateTrigger
 from .ui_overlay import UIOverlayTrigger
+from .pop_up_text import PopUpTextTrigger

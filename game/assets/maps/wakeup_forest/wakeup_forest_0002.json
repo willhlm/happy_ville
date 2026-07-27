@@ -3520,15 +3520,15 @@
                         }, 
                         {
                          "gid":14,
-                         "height":304,
+                         "height":128,
                          "id":454,
                          "name":"",
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":80,
-                         "x":1040,
-                         "y":1664
+                         "width":64,
+                         "x":1136,
+                         "y":1072
                         }, 
                         {
                          "gid":8,

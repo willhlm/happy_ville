@@ -1,4 +1,4 @@
-from .event_triggers import EventTrigger, GameplayEventTrigger, NarrationTrigger, QuestTrigger, SequenceTrigger, StateTrigger, UIOverlayTrigger
+from .event_triggers import EventTrigger, GameplayEventTrigger, NarrationTrigger, QuestTrigger, SequenceTrigger, StateTrigger, UIOverlayTrigger, PopUpTextTrigger
 from .fields import SlowmotionField
 from .hazards import Hole
 from .navigation import PathCollision, PathInteract, SafeSpawn
