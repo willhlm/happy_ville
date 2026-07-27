@@ -55,16 +55,32 @@ class ActivationManager:
             return
         if sprite.pause_group in sprite.groups():
             return
-        sprite.remove(sprite.group)
+        group = sprite.group
+        sprite._activation_group = group
+        if isinstance(group, pygame.sprite.LayeredUpdates):
+            sprite._activation_layer = group.get_layer_of_sprite(sprite)
+            sprite._activation_index = group.sprites().index(sprite)
+
+        sprite.remove(group)
         sprite.add(sprite.pause_group)
         self.game_objects.lights.on_owner_slept(sprite)
 
     def wake(self, sprite):
         if not self._is_managed(sprite):
             return
-        if sprite.group in sprite.groups():
+        group = getattr(sprite, "_activation_group", sprite.group)
+        if group in sprite.groups():
             return
-        sprite.add(sprite.group)
+
+        if isinstance(group, pygame.sprite.LayeredUpdates):
+            group.add(sprite, layer=getattr(sprite, "_activation_layer", 0))
+            index = getattr(sprite, "_activation_index", None)
+            if index is not None:
+                group._spritelist.remove(sprite)
+                group._spritelist.insert(min(index, len(group._spritelist)), sprite)
+        else:
+            group.add(sprite)
+
         sprite.remove(sprite.pause_group)
         self.game_objects.lights.on_owner_woke(sprite)
 

@@ -28,5 +28,7 @@ from .grass.cave_grass import BackgroundCaveGrass
 
 from .trees.tree import GeneralTree 
 
+from .windmill.windmill import Windmill
+
 from .vines.vines_1 import Vines_1
 from .vines.vines_2 import Vines_2

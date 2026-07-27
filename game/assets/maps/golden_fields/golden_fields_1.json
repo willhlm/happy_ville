@@ -405,7 +405,7 @@
                  "name":"interactables",
                  "objects":[
                         {
-                         "gid":59319,
+                         "gid":59320,
                          "height":48,
                          "id":271,
                          "name":"",
@@ -450,6 +450,36 @@
                          "width":224,
                          "x":2144,
                          "y":576
+                        },
+                        {
+                         "gid":59314,
+                         "height":176,
+                         "id":273,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"id",
+                                 "type":"string",
+                                 "value":"windmill_1"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":224,
+                         "x":976,
+                         "y":592
+                        },
+                        {
+                         "gid":59314,
+                         "height":176,
+                         "id":274,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":224,
+                         "x":656,
+                         "y":528
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -766,14 +796,14 @@
                          "name":"",
                          "properties":[
                                 {
-                                 "name":"trigger",
-                                 "type":"string",
-                                 "value":"event"
-                                }, 
-                                {
                                  "name":"key",
                                  "type":"string",
                                  "value":"cultist_encounter"
+                                }, 
+                                {
+                                 "name":"trigger",
+                                 "type":"string",
+                                 "value":"event"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -880,7 +910,7 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":1216,
+                         "x":1312,
                          "y":496
                         }],
                  "opacity":1,
@@ -974,7 +1004,7 @@
          "y":0
         }],
  "nextlayerid":105,
- "nextobjectid":273,
+ "nextobjectid":275,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -1145,7 +1175,7 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":59314,
+         "firstgid":59315,
          "source":"..\/_objects\/interactables.tsx"
         }],
  "tilewidth":16,

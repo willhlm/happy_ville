@@ -1,5 +1,5 @@
 import pygame
-
+from .group_utils import apply_activation
 
 class LayeredGroup:
     def __init__(self):
@@ -44,8 +44,6 @@ class LayeredUpdates(pygame.sprite.LayeredUpdates):
             sprite.update_render(dt)
 
     def update(self, dt):
-        from .group_utils import apply_activation
-
         for sprite in self.sprites():
             sprite.update(dt)
             apply_activation(sprite)
@@ -58,4 +56,3 @@ class LayeredUpdates(pygame.sprite.LayeredUpdates):
         for sprite in self.sprites():
             sprite.release_texture()
         super().empty()
-

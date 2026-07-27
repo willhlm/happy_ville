@@ -10,6 +10,7 @@ class WorldObjectState:
         'interactable_items': {},
         'breakable_platform': {},
         'bg_fade': {},
+        'windmill': {},
     }
 
     def __init__(self, state):
@@ -48,6 +49,17 @@ class WorldObjectState:
         values = self._bucket(level_name, bucket)
         values[key] = not bool(values[key])
         return values[key]
+
+    def load_value(self, level_name: str, bucket: str, key, *, initial=None):
+        """Return a persistent value, creating it from the map default once."""
+        values = self._bucket(level_name, bucket)
+        if key not in values:
+            values[key] = initial
+        return values[key]
+
+    def set_value(self, level_name: str, bucket: str, key, value):
+        self._bucket(level_name, bucket)[key] = value
+        return value
 
 
 class StatisticsState:
