@@ -12,6 +12,8 @@ from .doors.door import Door
 from .enemy_containers import EnemyCocoon, EnemyWeb
 
 from .fast_travel import FastTravel
+from .gear_box import GearBox
+from .valve import Valve
 from .fireplace.fireplace import Fireplace
 
 from .grass.cave_grass import InteractableCaveGrass
@@ -48,6 +50,7 @@ from .traps.spirit_spikes import SpiritSpikes
 from .uber_runestone import UberRunestone
 
 from .two_d_liquid.two_d_liquid import TwoDLiquid
+from .two_d_liquid.windmill_controlled_liquid import WindmillControlledLiquid
 from .up_stream import UpStream
 
 from .portal.portal import Portal

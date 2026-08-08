@@ -629,7 +629,7 @@
                         }, 
                         {
                          "gid":8,
-                         "height":32,
+                         "height":128,
                          "id":570,
                          "name":"",
                          "rotation":0,
@@ -647,7 +647,7 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":656,
+                         "width":480,
                          "x":2016,
                          "y":1568
                         }, 
@@ -660,7 +660,7 @@
                          "type":"",
                          "visible":true,
                          "width":64,
-                         "x":2608,
+                         "x":2448,
                          "y":1632
                         }, 
                         {
@@ -893,19 +893,7 @@
                         }, 
                         {
                          "gid":8,
-                         "height":48,
-                         "id":595,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":400,
-                         "x":2192,
-                         "y":816
-                        }, 
-                        {
-                         "gid":8,
-                         "height":272,
+                         "height":384,
                          "id":596,
                          "name":"",
                          "rotation":0,
@@ -913,30 +901,7 @@
                          "visible":true,
                          "width":400,
                          "x":2192,
-                         "y":704
-                        }, 
-                        {
-                         "gid":11,
-                         "height":96,
-                         "id":597,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"path_to",
-                                 "type":"string",
-                                 "value":"golden_fields_14"
-                                }, 
-                                {
-                                 "name":"spawn",
-                                 "type":"string",
-                                 "value":"1"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":2416,
-                         "y":784
+                         "y":816
                         }, 
                         {
                          "gid":8,
@@ -1100,24 +1065,6 @@
                          "y":448
                         }, 
                         {
-                         "gid":1,
-                         "height":16,
-                         "id":610,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"spawn",
-                                 "type":"string",
-                                 "value":"3"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":2352,
-                         "y":736
-                        }, 
-                        {
                          "gid":8,
                          "height":48,
                          "id":611,
@@ -1197,8 +1144,8 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":320,
-                         "x":1824,
+                         "width":224,
+                         "x":1904,
                          "y":1456
                         }, 
                         {
@@ -1368,7 +1315,7 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":31217,
+         "firstgid":31221,
          "source":"..\/_objects\/interactables.tsx"
         }],
  "tilewidth":16,

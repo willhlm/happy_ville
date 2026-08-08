@@ -10,6 +10,8 @@ class WorldObjectState:
         'interactable_items': {},
         'breakable_platform': {},
         'bg_fade': {},
+        'gear_box': {},
+        'valve': {},
         'windmill': {},
     }
 
@@ -61,6 +63,9 @@ class WorldObjectState:
         self._bucket(level_name, bucket)[key] = value
         return value
 
+    def peek_value(self, level_name: str, bucket: str, key, default=None):
+        """Read a saved value without creating map or bucket state."""
+        return self.state.get(level_name, {}).get(bucket, {}).get(key, default)
 
 class StatisticsState:
     def __init__(self, statistics, progress):

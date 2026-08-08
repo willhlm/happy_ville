@@ -4,6 +4,7 @@ from .states_time_collision import Idle
 from gameplay.entities.shared.components.hit import hit_effects
 from gameplay.entities.platforms.components.geometry import CollisionSample
 from gameplay.entities.platforms.components.surface_collision import SolidSurfaceCollisionComponent, OneWayUpSurfaceCollisionComponent
+from gameplay.entities.interactables.two_d_liquid.two_d_liquid import TwoDLiquid
 
 # ----------------------------
 # Component base
@@ -177,7 +178,7 @@ class FloatOnLiquid(PlatformComponent):
         centerx = self.p.hitbox.centerx
 
         for interactable in self.p.game_objects.interactables_fg:
-            if type(interactable).__name__ != "TwoDLiquid":
+            if not isinstance(interactable, TwoDLiquid):
                 continue
 
             hitbox = interactable.hitbox

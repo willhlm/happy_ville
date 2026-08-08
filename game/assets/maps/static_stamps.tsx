@@ -147,8 +147,11 @@
   <properties>
    <property name="darker_color" value=""/>
    <property name="height" value=""/>
+   <property name="height_per_active" type="float" value="0"/>
    <property name="line_color" value=""/>
    <property name="water_tint" value=""/>
+   <property name="windmill_ids" value=""/>
+   <property name="windmill_level" value=""/>
   </properties>
  </tile>
  <tile id="28">

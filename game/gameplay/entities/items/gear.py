@@ -6,6 +6,7 @@ from gameplay.entities.items.base.interact_world_item import InteractWorldItem
 class Gear(InteractWorldItem):
     item_definition = ItemDefinition(
         item_id='gear',
+        title='Gear',
         description='a mysterious gear',
         pickup_text='a mysterious gear, can perhaps be placed in an old machine',
         pickup_ui_image_path='assets/sprites/ui/overlay/items/placeholder/placeholder.png',

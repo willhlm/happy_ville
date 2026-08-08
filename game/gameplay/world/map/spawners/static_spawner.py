@@ -250,14 +250,23 @@ class StaticSpawner(c.SpawnerCommon):
                 target_groups.add(layer_name, light_source)
 
             elif local_id == 26:
-                kwargs = {}
-                for property in properties:
-                    if property["name"] in ("water_tint", "darker_color", "line_color"):
-                        colour = list(c.pygame.Color(property["value"]))
-                        kwargs[property["name"]] = [colour[1] / 255, colour[2] / 255, colour[3] / 255, colour[0] / 255]
-                    elif property["name"] == "height":
-                        kwargs["height"] = float(property["value"])
-                self.game_objects.interactables_fg.add(c.TwoDLiquid(object_position, self.game_objects, object_size, layer_name, **kwargs))
+                kwargs = c.props_list_to_dict(properties)
+                for name in ("water_tint", "darker_color", "line_color"):
+                    if kwargs.get(name):
+                        colour = list(c.pygame.Color(kwargs[name]))
+                        kwargs[name] = [colour[1] / 255, colour[2] / 255, colour[3] / 255, colour[0] / 255]
+                    else:
+                        kwargs.pop(name, None)
+                for name in ("height", "height_per_active"):
+                    if name in kwargs and kwargs[name] != "":
+                        kwargs[name] = float(kwargs[name])
+                    else:
+                        kwargs.pop(name, None)
+
+                liquid_cls = c.WindmillControlledLiquid if kwargs.get("windmill_ids") else c.TwoDLiquid
+                self.game_objects.interactables_fg.add(
+                    liquid_cls(object_position, self.game_objects, object_size, layer_name, **kwargs)
+                )
 
             elif local_id == 27:
                 sky = c.Sky(object_position, self.game_objects, parallax, object_size)
