@@ -95,7 +95,7 @@
    <property name="angle" value=""/>
    <property name="colour" value=""/>
    <property name="falloff" value=""/>
-   <property name="position" value=""/>
+   <property name="pixel_size" type="float" value="1"/>
   </properties>
  </tile>
  <tile id="19">

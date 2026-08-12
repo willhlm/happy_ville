@@ -154,9 +154,8 @@ class StaticSpawner(c.SpawnerCommon):
                     elif property["name"] == "falloff":
                         falloff = property["value"].split(",")
                         kwargs["falloff"] = [float(falloff[0]), float(falloff[1])]
-                    elif property["name"] == "position":
-                        position = property["value"].split(",")
-                        kwargs["position"] = [float(position[0]), float(position[1])]
+                    elif property["name"] == "pixel_size":
+                        kwargs["pixel_size"] = float(property["value"])
                     elif property["name"] == "colour":
                         colour = list(c.pygame.Color(property["value"]))
                         kwargs["colour"] = [colour[1] / 255, colour[2] / 255, colour[3] / 255, colour[0] / 255]

@@ -552,7 +552,7 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":80,
+                         "width":256,
                          "x":2208,
                          "y":976
                         }, 
@@ -789,78 +789,6 @@
                          "y":592
                         }, 
                         {
-                         "gid":3,
-                         "height":16,
-                         "id":425,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"class",
-                                 "type":"string",
-                                 "value":"mygga"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":1744,
-                         "y":784
-                        }, 
-                        {
-                         "gid":3,
-                         "height":16,
-                         "id":427,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"class",
-                                 "type":"string",
-                                 "value":"mygga"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":1568,
-                         "y":992
-                        }, 
-                        {
-                         "gid":3,
-                         "height":16,
-                         "id":430,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"class",
-                                 "type":"string",
-                                 "value":"mygga"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":2128,
-                         "y":336
-                        }, 
-                        {
-                         "gid":3,
-                         "height":16,
-                         "id":431,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"class",
-                                 "type":"string",
-                                 "value":"mygga"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":2368,
-                         "y":640
-                        }, 
-                        {
                          "gid":8,
                          "height":64,
                          "id":434,
@@ -882,31 +810,7 @@
                  "draworder":"topdown",
                  "id":105,
                  "name":"back",
-                 "objects":[
-                        {
-                         "gid":31217,
-                         "height":32,
-                         "id":432,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":32,
-                         "x":2304,
-                         "y":288
-                        }, 
-                        {
-                         "gid":31217,
-                         "height":32,
-                         "id":433,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":32,
-                         "x":2400,
-                         "y":288
-                        }],
+                 "objects":[],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
