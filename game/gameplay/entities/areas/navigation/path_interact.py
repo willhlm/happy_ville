@@ -4,7 +4,7 @@ from ..base import BaseArea
 
 
 class PathInteract(BaseArea):
-    def __init__(self, pos, game_objects, size, destination, spawn):
+    def __init__(self, pos, game_objects, size, destination, spawn, entry_action):
         super().__init__(pos, game_objects)
         self.rect = pygame.Rect(pos, size)
         self.rect.topleft = pos
@@ -12,6 +12,7 @@ class PathInteract(BaseArea):
         self.destination = destination
         self.destionation_area = destination[:destination.rfind('_')]
         self.spawn = spawn
+        self.entry_action = entry_action
 
     def release_texture(self):
         pass
@@ -20,7 +21,10 @@ class PathInteract(BaseArea):
         pass
 
     def interact(self, player=None):
-        player = player or self.game_objects.player
-        player.reset_movement()
-        player.currentstate.enter_state('Idle_main')#infstaed of idle, should make her move a little dependeing on the direction
-        self.game_objects.map.load_map(self.game_objects.game.state_manager.state_stack[-1],self.destination, self.spawn)
+        self.game_objects.sequence_manager.start_sequence(
+            "map_traversal",
+            destination=self.destination,
+            spawn=self.spawn,
+            entry_action=self.entry_action,
+            previous_state=self.game_objects.game.state_manager.state_stack[-1],
+        )

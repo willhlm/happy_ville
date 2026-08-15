@@ -7,13 +7,18 @@ class GodRaysRadial(StaticEntity):
         self.parallax = parallax
         self.image = game_objects.game.display.make_layer(size).texture
         self.rect.size = size
-        self.rect.center = pos
+        self.rect.topleft = pos
         self.true_pos = list(self.rect.topleft)
         self.shader = game_objects.shaders['rays_radial']
         self.shader['resolution'] = self.game_objects.game.window_size
         self.time = 0
         self.colour = properties.get('colour',(1.0, 0.9, 0.65, 0.6))#colour
         self.edge_falloff_distance = properties.get('edge_falloff_distance',0.3)
+
+        self.max_distance = properties.get('max_distance', 1)
+        self.min_distance = properties.get('min_distance', 0.05)
+        # Texture-space radial scale. 1.0 preserves the existing effect.
+        self.radius = max(float(properties.get('radius', 1.0)), 0.0001)
 
         initial_state = properties.get("state", "idle")
         state_kwargs = properties.get("state_kwargs", {})
@@ -34,6 +39,9 @@ class GodRaysRadial(StaticEntity):
         self.shader['time'] = self.time
         self.shader['size'] = self.image.size
         self.shader['color'] = self.colour
+        self.shader['max_distance'] = self.max_distance
+        self.shader['min_distance'] = self.min_distance
+        self.shader['radius'] = self.radius
 
-        pos = (int(self.true_pos[0]-self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1]-self.parallax[0]*self.game_objects.camera_manager.camera.scroll[1]))
+        pos = (int(self.true_pos[0]-self.parallax[0]*self.game_objects.camera_manager.camera.interp_scroll[0]),int(self.true_pos[1]-self.parallax[0]*self.game_objects.camera_manager.camera.interp_scroll[1]))
         self.game_objects.game.display.render(self.image, target, position = pos, shader = self.shader)#shader render

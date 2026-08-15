@@ -1,12 +1,12 @@
 import pygame
 
-from engine import constants as C
-
 from ..base import BaseArea
 
 
 class PathCollision(BaseArea):
-    def __init__(self, pos, game_objects, size, destination, spawn):
+    is_path_collision = True
+
+    def __init__(self, pos, game_objects, size, destination, spawn, entry_action):
         super().__init__(pos,game_objects)
         self.rect = pygame.Rect(pos,size)
         self.rect.topleft = pos
@@ -14,6 +14,7 @@ class PathCollision(BaseArea):
         self.destination = destination
         self.destionation_area = destination[:destination.rfind('_')]
         self.spawn = spawn
+        self.entry_action = entry_action
 
     def release_texture(self):
         pass
@@ -21,16 +22,19 @@ class PathCollision(BaseArea):
     def draw(self, target):
         pass
 
-    def player_movement(self, player):#the movement aila does when colliding
-        if self.rect[3] > self.rect[2]:#if player was trvelling horizontally, enforce running in that direction
-            player.currentstate.enter_state('Run_main')#infstaed of idle, should make her move a little dependeing on the direction
-            player.acceleration[0] = C.acceleration[0]
-        else:#vertical travelling
-            if player.velocity[1] < 0:#up
-                player.velocity[1] = -10
-            else:#down
-                pass
-
     def on_collision(self, player):
-        self.player_movement(player)
-        self.game_objects.map.load_map(self.game_objects.game.state_manager.state_stack[-1], self.destination, self.spawn)#nned to send previous state so that we can update and render for exampe gameplay or title screeen while fading
+        sequences = self.game_objects.sequence_manager
+        if sequences.is_active("map_traversal"):
+            return
+        sequences.start_sequence(
+            "map_traversal",
+            destination=self.destination,
+            spawn=self.spawn,
+            entry_action=self.entry_action,
+            previous_state=self.game_objects.game.state_manager.state_stack[-1],
+        )
+
+    def on_noncollision(self, player):
+        traversal = self.game_objects.sequence_manager.get_sequence("map_traversal")
+        if traversal:
+            traversal.path_cleared(self)

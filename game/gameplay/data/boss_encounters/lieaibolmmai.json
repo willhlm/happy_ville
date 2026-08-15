@@ -43,17 +43,19 @@
           "persist": true,
           "relative_to": "ritual_crack",
           "anchor": "center",
+          "offset": [-360, -360],
           "group": "cosmetics_bg",
           "size": [720, 720],
           "properties": {
             "colour": [1.0, 0.98, 0.88, 0.72],
-            "edge_falloff_distance": 0.12
+            "min_distance": 0.0
           },
           "state": "grow",
           "state_kwargs": {
             "duration": 100,
-            "edge_falloff_distance": 3,
-            "target_edge_falloff_distance": 0.12
+            "radius": 0,
+            "target_radius": 0.0,
+            "speed": 0.001
           }
         }
       ]
@@ -61,6 +63,16 @@
     {
       "time": 150,
       "actions": [
+        {
+          "type": "actor_state",
+          "actor": "ritual_rays",
+          "state": "grow",
+          "state_kwargs": {
+            "duration": 90,
+            "radius": 0.5,
+            "target_radius": 1
+          }
+        },
         {
           "type": "spawn_flash",
           "id": "arrival_light",

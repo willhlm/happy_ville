@@ -11,6 +11,8 @@ uniform vec4 color;
 
 // Changed: center position for radial rays (in normalized coordinates 0-1)
 uniform vec2 center = vec2(0.5, 0.5);
+// Texture-space scale for the complete radial effect. 1.0 is the legacy size.
+uniform float radius = 1.0;
 uniform float max_distance = 1.0; // Maximum distance for rays
 uniform float min_distance = 0.1; // Minimum distance (creates a "hole" in center)
 
@@ -90,7 +92,7 @@ void main()
     float angle = atan(toCenter.y, toCenter.x);
     
     // Normalize distance (0 = center, 1 = edge)
-    float normalizedDistance = distance / max_distance;
+    float normalizedDistance = distance / (max_distance * radius);
     
     // Enhanced animation system
     float baseTime = time * speed;

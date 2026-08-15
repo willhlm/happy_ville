@@ -28,16 +28,22 @@ class MapCoordinator:
         self.ctx: Optional[LoadContext] = None
         self.map_def: Optional[MapDefinition] = None
 
-    def load_map(self, previous_state, biome_room_name: str, spawn="1", fade=True):
+    def load_map(self, previous_state, biome_room_name: str, spawn="1", fade=True, on_loaded=None):
         biome_room_name = biome_room_name.lower()
-        self.game_objects.transition.run(previous_state, style = "alpha", action = lambda: self.load_now(biome_room_name, spawn))
+        self.game_objects.transition.run(
+            previous_state,
+            style="alpha",
+            action=lambda: self.load_now(biome_room_name, spawn, on_loaded=on_loaded),
+        )
         #self.game_objects.transition.run(previous_state, style = "mask", mask_kind = 'horizontal', feather = 0.03, action = lambda: self.load_now(biome_room_name, spawn))
 
-    def load_now(self, biome_room_name: str, spawn="1"):
+    def load_now(self, biome_room_name: str, spawn="1", on_loaded=None):
         """Call this ONLY when screen is already black."""
         biome_room_name = biome_room_name.lower()
         self.biome_room_name = biome_room_name
         self._do_load(biome_room_name, spawn)
+        if on_loaded:
+            on_loaded()
 
     def reset(self):
         self.biome_room_name = ""
@@ -50,7 +56,10 @@ class MapCoordinator:
         self.resetter.reset_for_new_map()
 
         t0 = perf_counter()
-        self.ctx = LoadContext(biome_room_name=biome_room_name, spawn=spawn)
+        self.ctx = LoadContext(
+            biome_room_name=biome_room_name,
+            spawn=spawn,
+        )
 
         self.biome_mgr.update_for_biome_room(biome_room_name)
 
@@ -58,7 +67,6 @@ class MapCoordinator:
         self.game_objects.world_state.map_state.visit_area(self.map_def.biome_name, self.map_def.biome_room_name)
 
         self.scene_builder.build(self.map_def, self.ctx, self.biome_mgr)
-
         self.biome_mgr.set_camera(self.ctx)
 
         self._organise_references()

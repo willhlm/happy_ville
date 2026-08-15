@@ -761,7 +761,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"mygga_torpedo"
+                                 "value":"vertical_mygga_torpedo"
                                 }],
                          "rotation":0,
                          "type":"",

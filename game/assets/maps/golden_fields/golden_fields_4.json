@@ -304,6 +304,11 @@
                          "name":"",
                          "properties":[
                                 {
+                                 "name":"entry_action",
+                                 "type":"string",
+                                 "value":"run_left"
+                                },
+                                {
                                  "name":"path_to",
                                  "type":"string",
                                  "value":"golden_fields_2"

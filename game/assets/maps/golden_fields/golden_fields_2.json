@@ -305,8 +305,8 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":3024,
-                         "y":592
+                         "x":3104,
+                         "y":624
                         }, 
                         {
                          "gid":11,
@@ -314,6 +314,11 @@
                          "id":205,
                          "name":"",
                          "properties":[
+                                {
+                                 "name":"entry_action",
+                                 "type":"string",
+                                 "value":"run_right"
+                                }, 
                                 {
                                  "name":"path_to",
                                  "type":"string",
@@ -353,12 +358,17 @@
                                  "name":"direction",
                                  "type":"string",
                                  "value":"right"
+                                }, 
+                                {
+                                 "name":"offset",
+                                 "type":"string",
+                                 "value":"-32"
                                 }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":16,
-                         "x":3088,
+                         "width":352,
+                         "x":2736,
                          "y":656
                         }, 
                         {

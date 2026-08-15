@@ -3,11 +3,7 @@
  <image source="static_stamps.png" width="112" height="80"/>
  <tile id="0">
   <properties>
-   <property name="down" type="bool" value="false"/>
-   <property name="left" type="bool" value="false"/>
-   <property name="right" type="bool" value="false"/>
    <property name="spawn" value=""/>
-   <property name="up" type="bool" value="false"/>
   </properties>
  </tile>
  <tile id="1">
@@ -45,6 +41,7 @@
  </tile>
  <tile id="9">
   <properties>
+   <property name="entry_action" value="idle"/>
    <property name="image" value=""/>
    <property name="path_to" value=""/>
    <property name="sfx" value=""/>
@@ -53,6 +50,7 @@
  </tile>
  <tile id="10">
   <properties>
+   <property name="entry_action" value="idle"/>
    <property name="path_to" value=""/>
    <property name="spawn" value=""/>
   </properties>
