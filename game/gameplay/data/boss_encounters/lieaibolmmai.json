@@ -35,7 +35,157 @@
       ]
     },
     {
-      "time": 70,
+      "time": 100,
+      "actions": [
+        {
+          "type": "spawn_particle_emitter",
+          "id": "ritual_warning",
+          "preset": "focused_spawn_warning",
+          "relative_to": "ritual_crack",
+          "anchor": "center",
+          "interval": 1,
+          "particle_count": 1,
+          "position_jitter": [5, 5],
+          "kwargs": {}
+        }
+      ]
+    },    
+
+    {
+      "time": 150,
+      "actions": [
+        {
+          "type": "emit_particles",
+          "preset": "enemy_death_burst",
+          "relative_to": "ritual_crack",
+          "anchor": "center",
+          "particle_count": 10,
+          "kwargs": { "scale": 2 }
+        },
+        {
+          "type": "actor_method",
+          "actor": "ritual_crack",
+          "method": "crack_tick"
+        },
+        {
+          "type": "camera_shake",
+          "kwargs": { "amplitude": 2, "duration": 12, "scale": 0.95 }
+        },
+        {
+          "type": "spawn_particle_emitter",
+          "id": "ritual_jet_45",
+          "preset": "ritual_arrival_jet",
+          "relative_to": "ritual_crack",
+          "anchor": "center",
+          "interval": 1,
+          "particle_count": 1,
+          "position_jitter": [12, 12],
+          "kwargs": { "direction": 45, "scale": 4 }
+        }
+      ]
+    },
+
+    {
+      "time": 225,
+      "actions": [
+        {
+          "type": "emit_particles",
+          "preset": "enemy_death_burst",
+          "relative_to": "ritual_crack",
+          "anchor": "center",
+          "particle_count": 14,
+          "kwargs": { "scale": 3 }
+        },
+        {
+          "type": "actor_method",
+          "actor": "ritual_crack",
+          "method": "crack_tick"
+        },
+        {
+          "type": "camera_shake",
+          "kwargs": { "amplitude": 2, "duration": 12, "scale": 0.95 }
+        },
+        {
+          "type": "spawn_particle_emitter",
+          "id": "ritual_jet_180",
+          "preset": "ritual_arrival_jet",
+          "relative_to": "ritual_crack",
+          "anchor": "center",
+          "interval": 1,
+          "particle_count": 1,
+          "position_jitter": [12, 12],
+          "kwargs": { "direction": 180, "scale": 4  }
+        }
+      ]
+    },
+    {
+      "time": 275,
+      "actions": [
+        {
+          "type": "emit_particles",
+          "preset": "enemy_death_burst",
+          "relative_to": "ritual_crack",
+          "anchor": "center",
+          "particle_count": 18,
+          "kwargs": { "scale": 4 }
+        },
+        {
+          "type": "actor_method",
+          "actor": "ritual_crack",
+          "method": "crack_tick"
+        },
+        {
+          "type": "camera_shake",
+          "kwargs": { "amplitude": 2, "duration": 12, "scale": 0.95 }
+        },
+        {
+          "type": "spawn_particle_emitter",
+          "id": "ritual_jet_0",
+          "preset": "ritual_arrival_jet",
+          "relative_to": "ritual_crack",
+          "anchor": "center",
+          "interval": 1,
+          "particle_count": 1,
+          "position_jitter": [12, 12],
+          "kwargs": { "direction": 0, "scale": 4}
+        }
+      ]
+    },
+    {
+      "time": 320,
+      "actions": [
+        {
+          "type": "emit_particles",
+          "preset": "enemy_death_burst",
+          "relative_to": "ritual_crack",
+          "anchor": "center",
+          "particle_count": 22,
+          "kwargs": { "scale": 5 }
+        },
+        {
+          "type": "actor_method",
+          "actor": "ritual_crack",
+          "method": "crack_tick"
+        },
+        {
+          "type": "camera_shake",
+          "kwargs": { "amplitude": 2, "duration": 12, "scale": 0.95 }
+        },
+        {
+          "type": "spawn_particle_emitter",
+          "id": "ritual_jet_90",
+          "preset": "ritual_arrival_jet",
+          "relative_to": "ritual_crack",
+          "anchor": "center",
+          "interval": 1,
+          "particle_count": 1,
+          "position_jitter": [12, 12],
+          "kwargs": { "direction": 90, "scale": 4 }
+        }
+      ]
+    },
+    {
+      "time": 385,
       "actions": [
         {
           "type": "spawn_god_rays",
@@ -61,7 +211,7 @@
       ]
     },
     {
-      "time": 150,
+      "time": 405,
       "actions": [
         {
           "type": "actor_state",
@@ -131,7 +281,17 @@
       ]
     },
     {
-      "time": 205,
+      "time": 430,
+      "actions": [
+        { "type": "kill_actor", "actor": "ritual_jet_45" },
+        { "type": "kill_actor", "actor": "ritual_jet_180" },
+        { "type": "kill_actor", "actor": "ritual_jet_90" },
+        { "type": "kill_actor", "actor": "ritual_jet_0" },
+        {"type": "kill_actor", "actor":"ritual_warning"}
+      ]
+    },
+    {
+      "time": 440,
       "actions": [
         { "type": "spawn_boss" },
         {
@@ -146,19 +306,19 @@
       ]
     },
     {
-      "time": 285,
+      "time": 455,
       "actions": [
         { "type": "kill_actor", "actor": "arrival_light" }
       ]
     },
     {
-      "time": 335,
+      "time": 490,
       "actions": [
         { "type": "boss_method", "method": "start_encounter_intro" }
       ]
     },
     {
-      "time": 520,
+      "time": 675,
       "actions": [
         { "type": "boss_method", "method": "start_aggro" },
         { "type": "mark_flow_complete" },

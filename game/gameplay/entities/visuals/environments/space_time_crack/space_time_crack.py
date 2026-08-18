@@ -1,12 +1,12 @@
 from gameplay.entities.base.static_entity import StaticEntity
-
 from . import states
-
+from engine.utils import read_files
 
 class SpaceTimeCrack(StaticEntity):
     def __init__(self, pos, game_objects, size, parallax, layer_name, **properties):
         super().__init__(pos, game_objects)
         self.image = game_objects.game.display.make_layer(size)
+        self.sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/visuals/environments/space_time_crack/')
         self.size = size
         self.rect.size = size
         self.rect.center = pos
@@ -19,6 +19,7 @@ class SpaceTimeCrack(StaticEntity):
         self.draw_scale = float(properties.get("draw_scale", 1.0))
         
         self.tint = tuple(properties.get("tint", (1.0, 1.0, 1.0, 1.0)))
+        self.crack_depth = float(properties.get("crack_depth", 3.0))
         self.refraction_offset = tuple(properties.get("refraction_offset", (18.0, 18.0)))
         self.field_strength = float(properties.get("field_strength", 0.018))
         self.field_density = float(properties.get("field_density", 5.5))
@@ -34,6 +35,15 @@ class SpaceTimeCrack(StaticEntity):
     def enter_state(self, state_name, **kwargs):
         self.currentstate = states.STATE_TYPES[state_name](self, **kwargs)
 
+    def crack_tick(self, amount=1.0, duration=40):
+        start_depth = self.crack_depth
+        self.enter_state(
+            "crack",
+            duration=duration,
+            start_depth=start_depth,
+            target_depth=min(start_depth + float(amount), 8.0),
+        )
+
     def update(self, dt):
         super().update(dt)
         self.time += dt * self.time_scale
@@ -48,6 +58,7 @@ class SpaceTimeCrack(StaticEntity):
         shader["time"] = self.time
         shader["resolution"] = self.size
         shader["SCREEN_TEXTURE"] = screen_copy.texture
+        shader["crack_depth"] = self.crack_depth
         shader["refraction_offset"] = self.refraction_offset
         shader["field_strength"] = self.field_strength
         shader["field_density"] = self.field_density
