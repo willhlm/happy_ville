@@ -28,7 +28,7 @@ class GoldenfieldsRotatingBlade(DynamicPlatform):
         self.crushes_entities = False
 
     def update(self, dt):
-        self.follow_rig()
+        self.follow_rig(self.rig.angle)
 
     def draw(self, target):
         alpha = self.game_objects.game.game_loop.alpha
@@ -48,9 +48,9 @@ class GoldenfieldsRotatingBlade(DynamicPlatform):
             for frame in state:
                 frame.release()
 
-    def follow_rig(self):
+    def follow_rig(self, angle):        
         angle = math.radians(
-            self.rig.angle + self.index * 360.0 / self.rig.blade_count
+            angle + self.index * 360.0 / self.rig.blade_count
         )
         hub_x, hub_y = self.rig.rect.center
         orbit_radius = self.rig.radius * 0.5
