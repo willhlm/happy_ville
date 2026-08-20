@@ -10,14 +10,15 @@ class Grow:
     def __init__(self, entity, **kwargs):
         self.entity = entity
         self.duration = kwargs.get("duration", 90)
-        self.start_edge_falloff_distance = float(kwargs.get('edge_falloff_distance', 3))
-        self.target_edge_falloff_distance = float(kwargs.get('target_edge_falloff_distance', 0.12))
-        self.entity.edge_falloff_distance = self.start_edge_falloff_distance
+        self.radius = float(kwargs.get('radius', 0))
+        self.target_radius = float(kwargs.get('target_radius', 1))
+        self.entity.radius = self.radius
+        self.speed = float(kwargs.get('speed', 0.01))
 
     def update(self, dt):
         self.duration -= dt
-        self.entity.edge_falloff_distance -= dt * 0.03
-        self.entity.edge_falloff_distance = max(self.entity.edge_falloff_distance, self.target_edge_falloff_distance)
+        self.entity.radius += dt * self.speed
+        self.entity.radius = min(self.entity.radius, self.target_radius)
         if self.duration <= 0:
             self.entity.enter_state("idle")
 

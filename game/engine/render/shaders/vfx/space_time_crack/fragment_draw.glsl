@@ -108,13 +108,13 @@ float fbm(vec2 n) {
 vec4 generateCracks(vec2 uv) {
     vec2 scaledUV = uv * crack_scale;
     vec4 crack = vec4(0.0);
-    int layerCount = max(1, int(floor(crack_depth)));
 
-    for (int i = 0; i < layerCount; i++) {
+    for (int i = 0; i < 8; i++) {
+        float layerVisibility = clamp(crack_depth - float(i), 0.0, 1.0);
         vec2 zebra = vec2(crack_zebra_amp * fbm(scaledUV / crack_zebra_scale) * crack_zebra_scale);
         vec3 voronoi = voronoiB(scaledUV + zebra);
         float d = min(1.0, crack_slope * pow(max(0.0, voronoi.x - crack_width), crack_profile));
-        crack += vec4(1.0 - d) / exp2(float(i));
+        crack += vec4(1.0 - d) * layerVisibility / exp2(float(i));
         scaledUV *= 1.5;
     }
 

@@ -30,17 +30,9 @@ class StaticSpawner(c.SpawnerCommon):
                     else:
                         self.game_objects.player.body.set_pos(ctx.spawn)
 
-                    self.game_objects.player.reset_movement()
+                    player = self.game_objects.player
+                    player.reset_movement()
                     ctx.spawned = True
-                    for prop in properties:
-                        if prop["name"] == "right":
-                            self.game_objects.player.dir[0] = 1
-                            self.game_objects.player.acceleration[0] = c.C.acceleration[0]
-                        elif prop["name"] == "left":
-                            self.game_objects.player.dir[0] = -1
-                            self.game_objects.player.acceleration[0] = c.C.acceleration[0]
-                        if prop["name"] == "up":
-                            self.game_objects.player.velocity[1] = c.C.jump_vel_player
                     break
 
             elif local_id == 1:
@@ -82,21 +74,27 @@ class StaticSpawner(c.SpawnerCommon):
 
             elif local_id == 9:
                 destination = spawn = None
+                entry_action = "idle"
                 for property in properties:
                     if property["name"] == "path_to":
                         destination = property["value"]
                     elif property["name"] == "spawn":
                         spawn = property["value"]
-                self.game_objects.interactables.add(c.PathInteract(object_position, self.game_objects, object_size, destination, spawn))
+                    elif property["name"] == "entry_action":
+                        entry_action = property["value"]
+                self.game_objects.interactables.add(c.PathInteract(object_position, self.game_objects, object_size, destination, spawn, entry_action))
 
             elif local_id == 10:
                 destination = spawn = None
+                entry_action = "idle"
                 for property in properties:
                     if property["name"] == "path_to":
                         destination = property["value"]
                     elif property["name"] == "spawn":
                         spawn = property["value"]
-                self.game_objects.interactables.add(c.PathCollision(object_position, self.game_objects, object_size, destination, spawn))
+                    elif property["name"] == "entry_action":
+                        entry_action = property["value"]
+                self.game_objects.interactables.add(c.PathCollision(object_position, self.game_objects, object_size, destination, spawn, entry_action))
 
             elif local_id == 11:
                 particle_type = next((property["value"] for property in properties if property["name"] == "particles"), "dust")

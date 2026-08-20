@@ -1,6 +1,6 @@
 import pygame
 from dataclasses import dataclass, field
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Tuple
 
 @dataclass
 class MapDefinition:

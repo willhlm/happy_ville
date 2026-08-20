@@ -23,6 +23,9 @@ class SequenceManager:
     def is_active(self, key):
         return key in self.sequences
 
+    def get_sequence(self, key):
+        return self.sequences.get(key)
+
     def blocks_gameplay_input(self):
         return any(sequence.blocks_gameplay_input for sequence in self.sequences.values())
 

@@ -2,6 +2,7 @@ import random
 
 from gameplay.data.boss_encounter_configs import get_boss_encounter_config
 from gameplay.entities.visuals.cosmetics import ShockWave, SpiritFlash
+from gameplay.entities.visuals.cosmetics import ParticleEmitterEffect
 from gameplay.entities.visuals.environments import GodRaysRadial
 from gameplay.entities.visuals.environments.space_time_crack import SpaceTimeCrack
 from gameplay.sequences.base import Sequence
@@ -99,6 +100,10 @@ class BossEncounter(Sequence):
             self._spawn_shockwave(action)
         elif action_type == 'emit_particles':
             self._emit_particles(action)
+        elif action_type == 'spawn_particle_emitter':
+            self._spawn_particle_emitter(action)
+        elif action_type == 'camera_shake':
+            self.game_objects.camera_manager.camera_shake(**action.get('kwargs', {}))
         elif action_type == 'actor_method':
             actor = self.actors[action['actor']]
             getattr(actor, action['method'])(**action.get('kwargs', {}))
@@ -197,6 +202,18 @@ class BossEncounter(Sequence):
                 base_position[1] + random.uniform(-spread[1], spread[1]),
             ]
             self.game_objects.particles.emit(preset, position, n=particle_count, **particle_kwargs)
+
+    def _spawn_particle_emitter(self, action):
+        emitter = ParticleEmitterEffect(
+            self._resolve_action_position(action),
+            self.game_objects,
+            preset=action['preset'],
+            interval=action.get('interval', 1),
+            particle_count=action.get('particle_count', 1),
+            position_jitter=parse_pair(action.get('position_jitter', [0, 0])),
+            **action.get('kwargs', {}),
+        )
+        return self._register_action_actor(action, emitter)
 
     def _reveal_boss(self, action):
         boss = self.entity or self._spawn_boss()

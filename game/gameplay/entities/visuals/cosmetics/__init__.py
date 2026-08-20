@@ -1,5 +1,6 @@
 from .blood import Blood
 from .enemy_spawn_effect import EnemySpawnEffect
+from .particle_emitter_effect import ParticleEmitterEffect
 from .player_soul import PlayerSoul
 from .thunder_ball import ThunderBall
 from .thunder_spark import ThunderSpark

@@ -303,7 +303,7 @@ def enemy_death_burst(pos, game_objects, *, colour=(255, 255, 255, 255), scale=6
         .build()
     )
 
-def enemy_spawn_burst(pos, game_objects, *, colour=(100, 100, 100, 255), scale=5):#gauntlets spawning.
+def enemy_spawn_burst(pos, game_objects, *, colour=(100, 100, 100, 255), scale=5):#gauntlets spawning. air glide
     return (
         ParticleBuilder(pos, game_objects)
         .circle(scale=scale, gradient=1, colour=list(colour))
@@ -316,6 +316,33 @@ def enemy_spawn_burst(pos, game_objects, *, colour=(100, 100, 100, 255), scale=5
         .wave(amplitude=0.3, frequency=0.15, gravity_scale=0.2)
         .fade(speed=6)
         .lifetime(frames=100)
+        .build()
+    )
+
+def ritual_arrival_jet(
+    pos,
+    game_objects,
+    *,
+    direction=0,
+    colour=(220, 242, 255, 255),
+    scale=2,
+    scale_variation=0.35,
+):
+    """A narrow, straight particle jet for the Lieaibolmmai arrival ritual."""
+    particle_scale = round(random.uniform(
+        scale * (1 - scale_variation),
+        scale * (1 + scale_variation),
+    ))
+    return (
+        ParticleBuilder(pos, game_objects)
+        .circle(scale=particle_scale, gradient=1, colour=list(colour))
+        .velocity(
+            random.uniform(14, 20),
+            direction + random.uniform(-10, 10),
+        )
+        .linear(deceleration=0)
+        .fade(speed=5)
+        .lifetime(frames=42)
         .build()
     )
 
@@ -336,6 +363,7 @@ PRESETS = {
     'focused_spawn_warning': focused_spawn_warning,
     'enemy_death_burst': enemy_death_burst,
     'enemy_spawn_burst': enemy_spawn_burst,
+    'ritual_arrival_jet': ritual_arrival_jet,
     'pick_up_spark': pick_up_spark
 }
 
