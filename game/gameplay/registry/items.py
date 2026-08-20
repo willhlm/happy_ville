@@ -12,5 +12,6 @@ REGISTER_ITEMS = {
     'memory_shard': MemoryShard,
     'dyes': Dyes,
     'journal': Journal,
+    'gear': Gear,
 
 }

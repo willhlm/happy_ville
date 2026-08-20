@@ -257,32 +257,21 @@
                  "name":"statics",
                  "objects":[
                         {
-                         "gid":11,
-                         "height":96,
-                         "id":732,
+                         "gid":8,
+                         "height":256,
+                         "id":633,
                          "name":"",
-                         "properties":[
-                                {
-                                 "name":"path_to",
-                                 "type":"string",
-                                 "value":"golden_fields_23"
-                                }, 
-                                {
-                                 "name":"spawn",
-                                 "type":"string",
-                                 "value":"2"
-                                }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":16,
-                         "x":720,
-                         "y":944
+                         "width":656,
+                         "x":1584,
+                         "y":1024
                         }, 
                         {
                          "gid":1,
                          "height":16,
-                         "id":734,
+                         "id":640,
                          "name":"",
                          "properties":[
                                 {
@@ -294,43 +283,19 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":768,
-                         "y":896
-                        }, 
-                        {
-                         "gid":8,
-                         "height":64,
-                         "id":747,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":624,
-                         "x":560,
-                         "y":1008
-                        }, 
-                        {
-                         "gid":27,
-                         "height":48,
-                         "id":780,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":128,
-                         "x":1552,
-                         "y":992
+                         "x":1840,
+                         "y":688
                         }, 
                         {
                          "gid":11,
-                         "height":80,
-                         "id":782,
+                         "height":176,
+                         "id":651,
                          "name":"",
                          "properties":[
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"tall_trees_1"
+                                 "value":"golden_fields_12"
                                 }, 
                                 {
                                  "name":"spawn",
@@ -341,235 +306,85 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":2272,
-                         "y":896
-                        }, 
-                        {
-                         "gid":1,
-                         "height":16,
-                         "id":783,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"spawn",
-                                 "type":"string",
-                                 "value":"2"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":2224,
-                         "y":864
+                         "x":1904,
+                         "y":768
                         }, 
                         {
                          "gid":8,
-                         "height":16,
-                         "id":785,
+                         "height":224,
+                         "id":652,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":400,
+                         "x":912,
+                         "y":1040
+                        }, 
+                        {
+                         "gid":8,
+                         "height":224,
+                         "id":653,
                          "name":"",
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":272,
-                         "x":1552,
-                         "y":1008
+                         "x":1312,
+                         "y":1024
                         }, 
                         {
                          "gid":8,
-                         "height":64,
-                         "id":786,
+                         "height":656,
+                         "id":654,
                          "name":"",
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":112,
-                         "x":1824,
-                         "y":1008
-                        }, 
-                        {
-                         "gid":8,
-                         "height":112,
-                         "id":787,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":400,
-                         "x":1936,
-                         "y":1008
-                        }, 
-                        {
-                         "gid":8,
-                         "height":112,
-                         "id":788,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":368,
-                         "x":1072,
-                         "y":736
-                        }, 
-                        {
-                         "gid":8,
-                         "height":128,
-                         "id":789,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":432,
-                         "x":1904,
-                         "y":816
-                        }, 
-                        {
-                         "gid":8,
-                         "height":64,
-                         "id":798,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":384,
-                         "x":560,
-                         "y":848
-                        }, 
-                        {
-                         "gid":8,
-                         "height":160,
-                         "id":799,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":128,
-                         "x":944,
-                         "y":848
-                        }, 
-                        {
-                         "gid":27,
-                         "height":32,
-                         "id":801,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":208,
-                         "x":1184,
-                         "y":992
-                        }, 
-                        {
-                         "gid":8,
-                         "height":16,
-                         "id":802,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":208,
-                         "x":1184,
-                         "y":1008
-                        }, 
-                        {
-                         "gid":8,
-                         "height":64,
-                         "id":804,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":48,
-                         "x":1680,
-                         "y":992
-                        }, 
-                        {
-                         "gid":8,
-                         "height":64,
-                         "id":805,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":160,
-                         "x":1392,
-                         "y":1008
-                        }, 
-                        {
-                         "gid":27,
-                         "height":48,
-                         "id":806,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":96,
-                         "x":1728,
-                         "y":992
-                        }, 
-                        {
-                         "gid":8,
-                         "height":48,
-                         "id":807,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":400,
-                         "x":1504,
-                         "y":816
-                        }, 
-                        {
-                         "gid":8,
-                         "height":144,
-                         "id":808,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":320,
-                         "x":1584,
-                         "y":768
-                        }, 
-                        {
-                         "gid":11,
-                         "height":16,
-                         "id":810,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"path_to",
-                                 "type":"string",
-                                 "value":"golden_fields_10"
-                                }, 
-                                {
-                                 "name":"spawn",
-                                 "type":"string",
-                                 "value":"3"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":144,
-                         "x":1440,
-                         "y":672
+                         "width":656,
+                         "x":256,
+                         "y":1056
                         }, 
                         {
                          "gid":1,
                          "height":16,
-                         "id":811,
+                         "id":657,
                          "name":"",
                          "properties":[
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"3"
+                                 "value":"2"
                                 }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":1536,
-                         "y":720
+                         "x":688,
+                         "y":304
+                        }, 
+                        {
+                         "gid":11,
+                         "height":176,
+                         "id":658,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"path_to",
+                                 "type":"string",
+                                 "value":"thor_mountain_x"
+                                }, 
+                                {
+                                 "name":"spawn",
+                                 "type":"string",
+                                 "value":"1"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":640,
+                         "y":384
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -596,7 +411,7 @@
          "y":0
         }],
  "nextlayerid":105,
- "nextobjectid":812,
+ "nextobjectid":659,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -702,7 +517,7 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":31218,
+         "firstgid":31221,
          "source":"..\/_objects\/interactables.tsx"
         }],
  "tilewidth":16,

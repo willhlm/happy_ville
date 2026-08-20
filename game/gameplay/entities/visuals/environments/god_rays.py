@@ -1,6 +1,13 @@
 from gameplay.entities.base.static_entity import StaticEntity
 
 class GodRays(StaticEntity):
+    """Screen-space directional god rays configured by a Tiled object.
+
+    ``angle`` is stored in radians; the static spawner converts the Tiled
+    degree value before constructing this object. The shader derives an
+    imaginary source on the render boundary from the ray direction.
+    ``pixel_size`` controls the size of the snapped game-pixel blocks.
+    """
     def __init__(self, pos, game_objects, parallax, size, **properties):
         super().__init__(pos, game_objects)
         self.parallax = parallax
@@ -9,9 +16,9 @@ class GodRays(StaticEntity):
         self.shader['resolution'] = self.game_objects.game.window_size
         self.time = 0
         self.colour = properties.get('colour',(1.0, 0.9, 0.65, 0.6))#colour
-        self.angle = properties.get('angle',-0.2)#radians
-        self.position = properties.get('position',(0,0))#in pixels
+        self.angle = properties.get('angle',-0.2)  # Radians: Tiled 0° is vertical; 90° is horizontal.
         self.falloff = properties.get('falloff',(0,0.3))#between 0 and 1
+        self.pixel_size = max(float(properties.get('pixel_size', 1)), 1.0)  # Logical game pixels per ray block.
 
     def release_texture(self):
         self.image.release()
@@ -21,8 +28,8 @@ class GodRays(StaticEntity):
 
     def draw(self, target):
         self.shader['angle'] = self.angle
-        self.shader['position'] = self.position
         self.shader['falloff'] = self.falloff
+        self.shader['pixelSizeScale'] = self.pixel_size
         self.shader['time'] = self.time
         self.shader['color'] = self.colour
 

@@ -1,9 +1,10 @@
-from gameplay.entities.interactables import DropletSource
+from gameplay.entities.interactables import DropletSource, GearBox, Valve
 from gameplay.entities.platforms import BridgePlatform
 
-from ..helpers import calculate_object_position, resolve_tileset
+from ..helpers import calculate_object_position, props_list_to_dict, resolve_tileset
 from .base import Biome
 from .configs.golden_fields import DEFAULT_ROOM_CONFIG, ROOM_CONFIGS
+from gameplay.entities.visuals.environments import Windmill
 
 
 class Golden_fields(Biome):
@@ -31,3 +32,28 @@ class Golden_fields(Biome):
 
                 new_drop = DropletSource(object_position, self.level.game_objects, parallax, layer_name, group)
                 group.add(layer_name, new_drop)
+
+            elif id == 4:
+                kwargs = props_list_to_dict(properties)
+                new_mill = Windmill(
+                    object_position,
+                    self.level.game_objects,
+                    parallax,
+                    layer_name,
+                    kwargs.get("id"),
+                    initial_state=kwargs.get("initial_state", "idle"),
+                )
+                if layer_name.startswith("fg"):
+                    self.level.game_objects.all_fgs.add(layer_name, new_mill)
+                else:
+                    self.level.game_objects.all_bgs.add(layer_name, new_mill)
+
+            elif id == 5:
+                self.level.game_objects.interactables.add(
+                    GearBox(object_position, self.level.game_objects, **props_list_to_dict(properties))
+                )
+
+            elif id == 6:
+                self.level.game_objects.interactables.add(
+                    Valve(object_position, self.level.game_objects, **props_list_to_dict(properties))
+                )

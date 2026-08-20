@@ -10,7 +10,6 @@ uniform vec2 size;       // kept as-is (you already use it for aspect)
 uniform vec4 color;
 
 uniform float angle = -0.2;
-uniform vec2 position = vec2(0,0);
 uniform vec2 falloff = vec2(0,0.3);
 
 uniform float spread = 0.3;
@@ -28,8 +27,10 @@ uniform float ray2_intensity = 0.3;
 uniform bool hdr = false;
 uniform float seed = 5.0;
 
-// NEW: pixelation size in *game pixels*
-uniform float pixelSizeScale = 1; // 1 = native pixels, 2 = 2x2 blocks, etc.
+// Pixelation size in logical game pixels. The game render is subsequently
+// upscaled, so 1 preserves the native pixel-art grid; larger values make the
+// rays intentionally chunkier.
+uniform float pixelSizeScale = 1.0; // 1 = native pixels, 2 = 2x2 blocks, etc.
 
 
 out vec4 COLOR;
@@ -87,19 +88,29 @@ void main()
     // 2) Snap to your pixel grid (same pixel size as the game)
     vec2 gameCoordPix = pixel_snap(gameCoord, pixelSizeScale);
 
-    // 3) Convert snapped gameCoord back to UV for sampling
-    //    This guarantees UV stays in [0..1] as long as fragmentTexCoord was in [0..1].
-    vec2 snappedUV = vec2(
-        gameCoordPix.x / resolution.x,
-        1.0 - (gameCoordPix.y / resolution.y)
-    );
-
-    // Extra safety (prevents any edge-case sampling outside)
-    snappedUV = clamp(snappedUV, vec2(0.0), vec2(1.0));
-
     // ---- God ray math (use snapped game coords) ----
+    // The imaginary source sits on the render boundary opposite the travel
+    // direction. Rotating `angle` therefore rotates source, rays, and their
+    // fade together without requiring a per-object position.
+    vec2 rayDirection = vec2(-sin(angle), cos(angle));
+    vec2 centre = resolution * 0.5;
+    vec2 distanceToSourceBoundary = vec2(1e20);
+    if (rayDirection.x > 0.0) {
+        distanceToSourceBoundary.x = centre.x / rayDirection.x;
+    } else if (rayDirection.x < 0.0) {
+        distanceToSourceBoundary.x = (resolution.x - centre.x) / -rayDirection.x;
+    }
+    if (rayDirection.y > 0.0) {
+        distanceToSourceBoundary.y = centre.y / rayDirection.y;
+    } else if (rayDirection.y < 0.0) {
+        distanceToSourceBoundary.y = (resolution.y - centre.y) / -rayDirection.y;
+    }
+    float fictionalDistance = min(distanceToSourceBoundary.x, distanceToSourceBoundary.y);
+    vec2 sourcePosition = centre - rayDirection * fictionalDistance;
+    vec2 raySpace = rotate(angle) * (gameCoordPix - sourcePosition);
     vec2 transformed =
-        (rotate(angle * 3.141592) * (gameCoordPix - position)) /
+        // `angle` is supplied in radians (Tiled degrees are converted at spawn time).
+        raySpace /
         (thickness * (1.0 - spread) + gameCoordPix.y * spread);
 
     vec2 ray1 = vec2(
@@ -125,8 +136,26 @@ void main()
         rays = clamp(noise(ray1) + (noise(ray2) * ray2_intensity), 0.0, 1.0);
     }
 
-    // Fade out edges (also in game-pixel space)
-    rays *= smoothstep(0.0, falloff.y, 1.0 - (gameCoordPix.y / resolution.y)); // bottom fade
+    // Fade from the source to the render boundary in the ray direction. At
+    // 0° this is the original top-to-bottom fade; at 90° it fades right-to-left.
+    vec2 distanceToBoundary = vec2(1e20);
+    if (rayDirection.x > 0.0) {
+        distanceToBoundary.x = (resolution.x - sourcePosition.x) / rayDirection.x;
+    } else if (rayDirection.x < 0.0) {
+        distanceToBoundary.x = -sourcePosition.x / rayDirection.x;
+    }
+    if (rayDirection.y > 0.0) {
+        distanceToBoundary.y = (resolution.y - sourcePosition.y) / rayDirection.y;
+    } else if (rayDirection.y < 0.0) {
+        distanceToBoundary.y = -sourcePosition.y / rayDirection.y;
+    }
+
+    float rayLength = max(min(distanceToBoundary.x, distanceToBoundary.y), 1.0);
+    float alongRay = raySpace.y;
+    rays *= step(0.0, alongRay);
+    rays *= smoothstep(0.0, falloff.y, 1.0 - (alongRay / rayLength));
+
+    // Fade out the rays' cross-section (also in game-pixel space).
     rays *= smoothstep(0.0 + cutoff, edge_fade + cutoff, transformed.x);       // left edge
     rays *= smoothstep(0.0 + cutoff, edge_fade + cutoff, 1.0 - transformed.x); // right edge
 
@@ -135,8 +164,9 @@ void main()
     float distToEdge = min(min(uv.x, 1.0 - uv.x), min(uv.y, 1.0 - uv.y));
     rays *= smoothstep(0.0, edge_falloff, distToEdge);
 
-    // ---- Blend with scene using snapped UV ----
-    vec4 base = texture(imageTexture, snappedUV);
+    // Keep the scene sample at its native game resolution; only the generated
+    // ray pattern uses the coarser pixel grid.
+    vec4 base = texture(imageTexture, fragmentTexCoord);
     vec3 out_rgb = screen(base, vec4(color)).rgb;
 
     COLOR = vec4(out_rgb, rays * color.a);

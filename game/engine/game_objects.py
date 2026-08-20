@@ -1,7 +1,7 @@
 import pygame
 from engine.lights import LightManager
 from engine.utils import read_files
-from engine.system import activation_manager, time_field_manager, save_load, asset_preloader, controller, timer, signals, time_manager, font_manager, input_interpreter, transition_controller, sequence_manager, deferred_texture_manager, stimuli
+from engine.system import activation_manager, time_field_manager, save_load, asset_preloader, controller, timer, signals, time_manager, font_manager, input_interpreter, transition_controller, sequence_manager, deferred_texture_manager, map_resource_registry, stimuli
 from engine import groups
 from engine.sound import game_audio
 from gameplay.entities.player import player
@@ -40,6 +40,7 @@ class GameObjects():
         self.stimuli = stimuli.StimulusManager(self)
         self.timer_manager = timer.Timer_manager(self)
         self.deferred_textures = deferred_texture_manager.DeferredTextureManager()
+        self.map_resources = map_resource_registry.MapResourceRegistry()
         self.layer_resource_pool = LayerResourcePool(self)
         self._create_groups()
         self.activation_manager = activation_manager.ActivationManager(self)
@@ -105,6 +106,7 @@ class GameObjects():
         self.cosmetics.empty()
         self.cosmetics_bg.empty()
         self.layer_pause.empty()
+        self.map_resources.release_all()
         self.bg_fade.empty()
         self.projectiles.empty()
         self.interactables_fg.empty()

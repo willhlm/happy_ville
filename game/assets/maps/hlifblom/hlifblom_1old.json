@@ -1397,11 +1397,6 @@
                                  "name":"falloff",
                                  "type":"string",
                                  "value":"0.6,0.3"
-                                }, 
-                                {
-                                 "name":"position",
-                                 "type":"string",
-                                 "value":"0,200"
                                 }],
                          "rotation":0,
                          "type":"",

@@ -282,7 +282,7 @@
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"2"
+                                 "value":"4"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -389,7 +389,7 @@
                         }, 
                         {
                          "gid":8,
-                         "height":256,
+                         "height":368,
                          "id":635,
                          "name":"",
                          "rotation":0,
@@ -397,48 +397,7 @@
                          "visible":true,
                          "width":448,
                          "x":2512,
-                         "y":656
-                        }, 
-                        {
-                         "gid":11,
-                         "height":112,
-                         "id":636,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"path_to",
-                                 "type":"string",
-                                 "value":"golden_fields_4"
-                                }, 
-                                {
-                                 "name":"spawn",
-                                 "type":"string",
-                                 "value":"1"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":2592,
                          "y":768
-                        }, 
-                        {
-                         "gid":1,
-                         "height":16,
-                         "id":637,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"spawn",
-                                 "type":"string",
-                                 "value":"2"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":2528,
-                         "y":704
                         }, 
                         {
                          "gid":8,
@@ -479,8 +438,8 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":752,
-                         "y":688
+                         "x":768,
+                         "y":704
                         }, 
                         {
                          "gid":8,
@@ -570,7 +529,30 @@
                  "draworder":"topdown",
                  "id":104,
                  "name":"interactables",
-                 "objects":[],
+                 "objects":[
+                        {
+                         "gid":31235,
+                         "height":16,
+                         "id":646,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"interactable_item",
+                                 "type":"string",
+                                 "value":"gear"
+                                }, 
+                                {
+                                 "name":"spawn_mode",
+                                 "type":"string",
+                                 "value":"wild"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":2464,
+                         "y":768
+                        }],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -585,7 +567,7 @@
          "y":0
         }],
  "nextlayerid":105,
- "nextobjectid":646,
+ "nextobjectid":647,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -691,7 +673,7 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":31218,
+         "firstgid":31221,
          "source":"..\/_objects\/interactables.tsx"
         }],
  "tilewidth":16,

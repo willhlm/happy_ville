@@ -31,6 +31,7 @@ class AssetPreloader:
                 OptionSounds,
                 AmberDroplet,
                 Bone,
+                Gear,
                 HealItem,
                 Tungsten,
                 Dyes,
