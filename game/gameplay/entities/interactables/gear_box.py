@@ -38,4 +38,5 @@ class GearBox(Interactables):
 
         object_state.set_value(self.target_level, self.target_state_group, self.id, self.target_state)
         self.game_objects.signals.emit(self.id, state=self.target_state)
+        self.game_objects.world_controller.refresh_all()
         return True

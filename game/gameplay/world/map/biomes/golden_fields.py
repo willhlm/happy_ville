@@ -1,10 +1,10 @@
 from gameplay.entities.interactables import DropletSource, GearBox, Valve
-from gameplay.entities.platforms import BridgePlatform
+from gameplay.entities.platforms import BridgePlatform, GoldenfieldsPiston
 
 from ..helpers import calculate_object_position, props_list_to_dict, resolve_tileset
 from .base import Biome
 from .configs.golden_fields import DEFAULT_ROOM_CONFIG, ROOM_CONFIGS
-from gameplay.entities.visuals.environments import Windmill
+from gameplay.entities.visuals.environments import GoldenfieldRotatingRig, Windmill
 
 
 class Golden_fields(Biome):
@@ -41,7 +41,6 @@ class Golden_fields(Biome):
                     parallax,
                     layer_name,
                     kwargs.get("id"),
-                    initial_state=kwargs.get("initial_state", "idle"),
                 )
                 if layer_name.startswith("fg"):
                     self.level.game_objects.all_fgs.add(layer_name, new_mill)
@@ -57,3 +56,21 @@ class Golden_fields(Biome):
                 self.level.game_objects.interactables.add(
                     Valve(object_position, self.level.game_objects, **props_list_to_dict(properties))
                 )
+
+            elif id == 7:
+                self.level.game_objects.platforms.add(
+                    GoldenfieldsPiston(object_position, self.level.game_objects, **props_list_to_dict(properties))
+                )
+
+            elif id == 8:
+                rig = GoldenfieldRotatingRig(
+                    object_position,
+                    self.level.game_objects,
+                    parallax,
+                    layer_name,
+                    **props_list_to_dict(properties),
+                )
+                if layer_name.startswith("fg"):
+                    self.level.game_objects.all_fgs.add(layer_name, rig)
+                else:
+                    self.level.game_objects.all_bgs.add(layer_name, rig)

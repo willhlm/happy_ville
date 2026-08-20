@@ -9,6 +9,7 @@
    <property name="disappear_on_stand" type="bool" value="false"/>
    <property name="move" type="bool" value="false"/>
    <property name="oneway_up" type="bool" value="false"/>
+   <property name="periodic_disappear" type="bool" value="false"/>
    <property name="solid" type="bool" value="false"/>
    <property name="sprite_path" value="generic/rock1"/>
   </properties>
@@ -22,6 +23,7 @@
    <property name="disappear_on_stand" type="bool" value="false"/>
    <property name="move" type="bool" value="false"/>
    <property name="oneway_up" type="bool" value="false"/>
+   <property name="periodic_disappear" type="bool" value="false"/>
    <property name="solid" type="bool" value="false"/>
    <property name="sprite_path" value="generic/rock2"/>
   </properties>

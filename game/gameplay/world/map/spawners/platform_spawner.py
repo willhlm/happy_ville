@@ -11,6 +11,7 @@ class PlatformSpawner(SpawnerCommon):
             "damage_on_land": False,
             "move": False,
             "disappear_on_stand": False,
+            "periodic_disappear": False,
             "breakable": False,
         }
 
@@ -44,6 +45,8 @@ class PlatformSpawner(SpawnerCommon):
                 components.append("carry_on_top")
         if self._bool(props.get("disappear_on_stand")):
             components.append("disappear_on_stand")
+        if self._bool(props.get("periodic_disappear")) or self._bool(props.get("disappear_periodically")):
+            components.append("periodic_disappear")
         if self._bool(props.get("breakable")):
             components.append("breakable")
         if props.get("signal_id") not in (None, "", 0, False):

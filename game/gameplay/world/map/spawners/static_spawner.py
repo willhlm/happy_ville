@@ -260,7 +260,15 @@ class StaticSpawner(c.SpawnerCommon):
                     else:
                         kwargs.pop(name, None)
 
-                liquid_cls = c.WindmillControlledLiquid if kwargs.get("windmill_ids") else c.TwoDLiquid
+                liquid_cls = c.WindmillControlledLiquid if kwargs.get("wind_network") else c.TwoDLiquid
+                if liquid_cls is c.WindmillControlledLiquid:
+                    if not self.game_objects.world_controller.golden_fields.is_registered_windmill_network(
+                        kwargs["wind_network"]
+                    ):
+                        raise ValueError(
+                            f"Unknown Golden Fields wind network '{kwargs['wind_network']}'. "
+                            "Add it to GoldenFieldsController.WINDMILL_NETWORKS."
+                        )
                 self.game_objects.interactables_fg.add(
                     liquid_cls(object_position, self.game_objects, object_size, layer_name, **kwargs)
                 )

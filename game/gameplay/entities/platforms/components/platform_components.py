@@ -1,10 +1,18 @@
 import math, pygame
 from engine import constants as C
-from .states_time_collision import Idle
+from .states_time_collision import Gone, Idle
 from gameplay.entities.shared.components.hit import hit_effects
 from gameplay.entities.platforms.components.geometry import CollisionSample
 from gameplay.entities.platforms.components.surface_collision import SolidSurfaceCollisionComponent, OneWayUpSurfaceCollisionComponent
 from gameplay.entities.interactables.two_d_liquid.two_d_liquid import TwoDLiquid
+
+
+def _as_bool(value, default=False):
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return value
+    return str(value).strip().lower() in {"1", "true", "yes", "on"}
 
 # ----------------------------
 # Component base
@@ -384,8 +392,9 @@ class MovePath(PlatformComponent):
       smooth: bool (default False)
       samples_per_segment: int (default 10)
 
-      pingpong: bool (default True)
-      loop: bool (default False)  # ignored if pingpong True
+      path_closed: bool (set automatically for Tiled polygon paths)
+      pingpong: bool (default True; disabled automatically for closed paths)
+      loop: bool (default False; closed paths loop automatically)
       snap_to_path: bool (default True)
       start_index: int (default 0)
 
@@ -401,11 +410,19 @@ class MovePath(PlatformComponent):
         self.speed = float(self.props.get("speed", 80.0)) / 60.0
         self.eps = float(self.props.get("eps", 1.0))
 
-        self.pingpong = bool(self.props.get("pingpong", True))
-        self.loop = bool(self.props.get("loop", False))
-        self.snap_to_path = bool(self.props.get("snap_to_path", True))
+        # A Tiled polygon (or a polyline whose final point returns to its
+        # first point) is a closed route. It must loop rather than use the
+        # normal open-polyline ping-pong default.
+        endpoints_match = len(self.points) >= 2 and math.hypot(
+            self.points[0][0] - self.points[-1][0],
+            self.points[0][1] - self.points[-1][1],
+        ) <= self.eps
+        self.path_closed = _as_bool(self.props.get("path_closed", False)) or endpoints_match
+        self.loop = _as_bool(self.props.get("loop", False)) or self.path_closed
+        self.pingpong = _as_bool(self.props.get("pingpong", True)) and not self.path_closed
+        self.snap_to_path = _as_bool(self.props.get("snap_to_path", True))
 
-        self.smooth = bool(self.props.get("smooth", False))
+        self.smooth = _as_bool(self.props.get("smooth", False))
         self.samples_per_segment = int(self.props.get("samples_per_segment", 10))
 
         self.dir = 1
@@ -548,11 +565,11 @@ class MovePath(PlatformComponent):
         out = []
 
         if closed:
-            # wrap indices (assumes last==first is fine; we’ll still wrap safely)
-            # build segments for each original point -> next point
-            base = pts
+            # Remove an explicit duplicate endpoint before wrapping indices.
+            # This preserves the tangent through the first waypoint.
+            base = pts[:-1] if len(pts) > 2 and pts[0] == pts[-1] else pts
             m = len(base)
-            for i in range(m - 1):  # if last==first, last segment is handled by i=m-2 -> m-1 (which is first)
+            for i in range(m):
                 p0 = base[(i - 1) % m]
                 p1 = base[i % m]
                 p2 = base[(i + 1) % m]
@@ -726,6 +743,71 @@ class DisappearOnStand(CollisionPlatformComponent):
         self.p.currentstate.handle_input("re_appear")
         self._pending = False
 
+
+class PeriodicDisappear(DisappearOnStand):
+    """Cycles a platform between its visible and hidden states.
+
+    Props (all durations use the game's timer units):
+      visible_time: time the platform remains usable before disappearing (default 120)
+      hidden_time: time before it starts reappearing (default: respawn_time or 120)
+      warning_time: optional delay spent in the ``warning`` animation (default 0)
+      periodic_phase: normalized cycle offset from 0.0 to 1.0 (default 0.0)
+
+    ``respawn_time`` is accepted as a backwards-compatible alias for
+    ``hidden_time``. A phase of 0 begins visible; 0.5 begins halfway through
+    the visible/warning/hidden cycle.
+    """
+    def on_added(self):
+        super().on_added()
+        self.visible_time = max(0, int(self.props.get("visible_time", 120)))
+        self.respawn_time = max(0, int(self.props.get(
+            "hidden_time", self.props.get("respawn_time", 120)
+        )))
+        self.warning_time = max(0, int(self.props.get("warning_time", 0)))
+        self.periodic_phase = float(self.props.get("periodic_phase", 0.0)) % 1.0
+
+        self._start_at_phase()
+
+    def _start_at_phase(self):
+        """Set the initial state and timer from the configured cycle phase."""
+        cycle_time = self.visible_time + self.warning_time + self.respawn_time
+        if cycle_time <= 0:
+            return
+
+        elapsed = self.periodic_phase * cycle_time
+        warning_start = self.visible_time
+        hidden_start = warning_start + self.warning_time
+
+        if elapsed < warning_start:
+            self.timers.start_timer(warning_start - elapsed, self._begin_disappear)
+        elif elapsed < hidden_start:
+            self._pending = True
+            self.p.currentstate.handle_input("warning")
+            self.timers.start_timer(hidden_start - elapsed, self._start_disappear)
+        else:
+            self._pending = True
+            self.p.currentstate = Gone(self.p)
+            self.timers.start_timer(cycle_time - elapsed, self._start_respawn)
+
+    def on_platform_collision(self, entity, side, axis, collision_kind='block'):
+        # Unlike DisappearOnStand, this component is driven exclusively by its
+        # shared cycle timer. Landing must not create a second, out-of-phase
+        # disappearance timer.
+        return None
+
+    def _begin_disappear(self):
+        if not self.p.alive():
+            return
+        self._pending = True
+        self.p.currentstate.handle_input("warning")
+        self.timers.start_timer(self.warning_time, self._start_disappear)
+
+    def _start_respawn(self):
+        if not self.p.alive():
+            return
+        super()._start_respawn()
+        self.timers.start_timer(self.visible_time, self._begin_disappear)
+
 class Breakable(PlatformComponent):
     """
     Damage receiver with HP + invincibility + direction-dependent vulnerability.
@@ -860,6 +942,7 @@ COMPONENTS = {
     "move": Move,
     "float_on_liquid": FloatOnLiquid,
     "disappear_on_stand": DisappearOnStand,
+    "periodic_disappear": PeriodicDisappear,
     "breakable": Breakable,
     "signal_toggle": ActiveGate,
 }

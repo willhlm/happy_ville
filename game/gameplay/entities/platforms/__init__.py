@@ -18,3 +18,4 @@ from .actors.gate.gate_platform import GatePlatform
 from .actors.gate.gate_platform_alt import GatePlatformAlt
 from .actors.gate.evil_gate_platform import EvilGatePlatform
 from .component_platform import ComponentPlatform
+from .texture.goldenfields_piston import GoldenfieldsPiston

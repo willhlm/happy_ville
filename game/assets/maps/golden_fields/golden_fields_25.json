@@ -265,7 +265,7 @@
                          "type":"",
                          "visible":true,
                          "width":352,
-                         "x":416,
+                         "x":624,
                          "y":608
                         }, 
                         {
@@ -288,7 +288,7 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":464,
+                         "x":672,
                          "y":720
                         }, 
                         {
@@ -300,7 +300,7 @@
                          "type":"",
                          "visible":true,
                          "width":480,
-                         "x":416,
+                         "x":624,
                          "y":944
                         }, 
                         {
@@ -341,7 +341,7 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":528,
+                         "x":736,
                          "y":672
                         }, 
                         {
@@ -370,8 +370,8 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":912,
-                         "x":896,
+                         "width":704,
+                         "x":1104,
                          "y":944
                         }, 
                         {
@@ -418,8 +418,8 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":1568,
-                         "x":768,
+                         "width":1360,
+                         "x":976,
                          "y":496
                         }, 
                         {
@@ -455,6 +455,11 @@
                                  "name":"float_on_liquid",
                                  "type":"bool",
                                  "value":true
+                                }, 
+                                {
+                                 "name":"sprite_path",
+                                 "type":"string",
+                                 "value":"floating\/plank"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -473,6 +478,11 @@
                                  "name":"float_on_liquid",
                                  "type":"bool",
                                  "value":true
+                                }, 
+                                {
+                                 "name":"sprite_path",
+                                 "type":"string",
+                                 "value":"floating\/plank"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -491,7 +501,55 @@
                  "draworder":"topdown",
                  "id":105,
                  "name":"back",
-                 "objects":[],
+                 "objects":[
+                        {
+                         "gid":31217,
+                         "height":32,
+                         "id":661,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":1248,
+                         "y":528
+                        }, 
+                        {
+                         "gid":31217,
+                         "height":32,
+                         "id":662,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":1408,
+                         "y":528
+                        }, 
+                        {
+                         "gid":31217,
+                         "height":32,
+                         "id":663,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":1616,
+                         "y":528
+                        }, 
+                        {
+                         "gid":31217,
+                         "height":32,
+                         "id":664,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":1520,
+                         "y":528
+                        }],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -517,7 +575,7 @@
          "y":0
         }],
  "nextlayerid":107,
- "nextobjectid":661,
+ "nextobjectid":665,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

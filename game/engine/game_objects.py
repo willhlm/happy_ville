@@ -24,6 +24,7 @@ from gameplay.entities.shared.render.layer_resource_pool import LayerResourcePoo
 from gameplay.entities.areas import AreaManager
 
 from gameplay.world.transforms.world_transform_controller import WorldTransformController
+from gameplay.world.world_controller import WorldController
 
 class GameObjects():
     def __init__(self, game):
@@ -53,6 +54,7 @@ class GameObjects():
         self.camera_manager = camera.Camera_manager(self)
         self.sound = game_audio.GameAudio(camera_scroll_getter=lambda: self.camera_manager.camera.true_scroll)
         self.world_state = world_state.World_state(self)#save/handle all world state stuff here
+        self.world_controller = WorldController(self)
         self.ui = ui.UiManager(self)
         self.save_load = save_load.Save_load(self)#contains save and load attributes to load and save game
         self.quests_events = QuestsEventsManager(self)        

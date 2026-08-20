@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.8" tiledversion="1.8.2" name="objects" tilewidth="224" tileheight="160" tilecount="5" columns="0">
+<tileset version="1.8" tiledversion="1.8.2" name="objects" tilewidth="224" tileheight="160" tilecount="7" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="2">
   <image width="224" height="48" source="../../../sprites/entities/platforms/bridge/erect/bridge.png"/>
@@ -10,7 +10,6 @@
  <tile id="4">
   <properties>
    <property name="id" value=""/>
-   <property name="initial_state" value="idle"/>
   </properties>
   <image width="160" height="160" source="../../../sprites/entities/visuals/environments/windmill/idle/idle.png"/>
  </tile>
@@ -32,5 +31,21 @@
    <property name="target_state_group" value="windmill"/>
   </properties>
   <image width="32" height="32" source="../../../sprites/entities/interactables/valve/idle/gearbox.png"/>
+ </tile>
+ <tile id="7">
+  <properties>
+   <property name="wind_network" value="golden_fields_liquid"/>
+  </properties>
+  <image width="32" height="32" source="../../../sprites/entities/platforms/piston/idle/rhoutta_encounter1.png"/>
+ </tile>
+ <tile id="8">
+  <properties>
+   <property name="blade_count" value="4"/>
+   <property name="radius" value="56"/>
+   <property name="rotation_phase" value="0"/>
+   <property name="rotation_speed" value="2.5"/>
+   <property name="wind_network" value="golden_fields_liquid"/>
+  </properties>
+  <image width="320" height="320" source="../../../sprites/entities/visuals/environments/blade_rig/idle/idle.png"/>
  </tile>
 </tileset>

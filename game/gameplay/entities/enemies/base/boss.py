@@ -38,6 +38,7 @@ class Boss(Enemy):
         self.flags['aggro'] = False
         self.hit_component.set_invincibility(True) 
         self.game_objects.world_state.narrative.mark_boss_defeated(self.ID)
+        self.game_objects.world_controller.refresh_all()
         if self.ID:
             self.game_objects.signals.emit(self.ID, action="open")
 

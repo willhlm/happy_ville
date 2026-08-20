@@ -25,6 +25,7 @@ speed: str
 pingpong: bool
 loop: bool
 path: int -> path object id
+path_closed: bool -> set automatically from a closed Tiled path
 snap_to_path: bool
 snap_mode: str -> closest, start
 smooth: bool
@@ -55,6 +56,11 @@ Disappear / respawn:
 disappear_on_stand: bool
 disappear_time: int
 respawn_time: int
+periodic_disappear: bool
+visible_time: int
+hidden_time: int
+warning_time: int
+periodic_phase: float -> normalized 0.0–1.0 cycle offset
 
 Breakable:
 breakable: bool
