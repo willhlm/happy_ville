@@ -299,7 +299,7 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":480,
+                         "width":432,
                          "x":624,
                          "y":944
                         }, 
@@ -364,14 +364,14 @@
                         }, 
                         {
                          "gid":8,
-                         "height":176,
+                         "height":192,
                          "id":652,
                          "name":"",
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":704,
-                         "x":1104,
+                         "width":80,
+                         "x":1056,
                          "y":944
                         }, 
                         {
@@ -433,6 +433,30 @@
                          "width":288,
                          "x":2336,
                          "y":576
+                        }, 
+                        {
+                         "gid":8,
+                         "height":144,
+                         "id":665,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":496,
+                         "x":1136,
+                         "y":944
+                        }, 
+                        {
+                         "gid":8,
+                         "height":192,
+                         "id":666,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":176,
+                         "x":1632,
+                         "y":944
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -446,7 +470,7 @@
                  "name":"platforms",
                  "objects":[
                         {
-                         "gid":31245,
+                         "gid":31247,
                          "height":16,
                          "id":656,
                          "name":"",
@@ -469,7 +493,7 @@
                          "y":784
                         }, 
                         {
-                         "gid":31245,
+                         "gid":31247,
                          "height":16,
                          "id":657,
                          "name":"",
@@ -511,7 +535,7 @@
                          "type":"",
                          "visible":true,
                          "width":32,
-                         "x":1248,
+                         "x":1200,
                          "y":528
                         }, 
                         {
@@ -523,7 +547,7 @@
                          "type":"",
                          "visible":true,
                          "width":32,
-                         "x":1408,
+                         "x":1344,
                          "y":528
                         }, 
                         {
@@ -535,7 +559,7 @@
                          "type":"",
                          "visible":true,
                          "width":32,
-                         "x":1616,
+                         "x":1568,
                          "y":528
                         }, 
                         {
@@ -547,7 +571,7 @@
                          "type":"",
                          "visible":true,
                          "width":32,
-                         "x":1520,
+                         "x":1456,
                          "y":528
                         }],
                  "opacity":1,
@@ -575,7 +599,7 @@
          "y":0
         }],
  "nextlayerid":107,
- "nextobjectid":665,
+ "nextobjectid":667,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -681,11 +705,11 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":31221,
+         "firstgid":31223,
          "source":"..\/_objects\/interactables.tsx"
         }, 
         {
-         "firstgid":31243,
+         "firstgid":31245,
          "source":"..\/_objects\/platforms.tsx"
         }],
  "tilewidth":16,
