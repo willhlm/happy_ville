@@ -512,19 +512,7 @@
                          "visible":true,
                          "width":496,
                          "x":1120,
-                         "y":384
-                        }, 
-                        {
-                         "gid":8,
-                         "height":64,
-                         "id":295,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":208,
-                         "x":1808,
-                         "y":432
+                         "y":416
                         }, 
                         {
                          "gid":8,
@@ -595,8 +583,8 @@
                          "type":"",
                          "visible":true,
                          "width":176,
-                         "x":816,
-                         "y":384
+                         "x":800,
+                         "y":432
                         }, 
                         {
                          "gid":12,
@@ -607,8 +595,8 @@
                          "type":"",
                          "visible":true,
                          "width":64,
-                         "x":2176,
-                         "y":432
+                         "x":1728,
+                         "y":448
                         }, 
                         {
                          "gid":12,
@@ -620,7 +608,7 @@
                          "visible":true,
                          "width":32,
                          "x":1088,
-                         "y":336
+                         "y":368
                         }, 
                         {
                          "gid":12,
@@ -908,11 +896,11 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":59317,
+         "firstgid":59319,
          "source":"..\/_objects\/interactables.tsx"
         }, 
         {
-         "firstgid":59339,
+         "firstgid":59341,
          "source":"..\/nordveden\/objects\/objects.tsx"
         }],
  "tilewidth":16,

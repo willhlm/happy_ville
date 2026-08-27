@@ -22,7 +22,8 @@ class GoldenFieldsController:
     PISTON_PROFILES = {
         "golden_fields_default": {
             0: {"visible_time": 30, "hidden_time": 180, "warning_time": 0},
-            1: {"visible_time": 75, "hidden_time": 90, "warning_time": 0},
+            1: {"visible_time": 30, "hidden_time": 180, "warning_time": 0},
+            2: {"visible_time": 75, "hidden_time": 90, "warning_time": 0},
             "all": {"mode": "always_visible"},
         },
     }

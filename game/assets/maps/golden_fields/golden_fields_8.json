@@ -304,8 +304,8 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":2016,
-                         "y":416
+                         "x":1936,
+                         "y":448
                         }, 
                         {
                          "gid":11,
@@ -327,7 +327,7 @@
                          "type":"",
                          "visible":true,
                          "width":112,
-                         "x":1968,
+                         "x":1872,
                          "y":352
                         }, 
                         {
@@ -391,7 +391,7 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":1408,
+                         "x":1376,
                          "y":1504
                         }, 
                         {
@@ -409,8 +409,8 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":1568,
-                         "y":1376
+                         "x":1456,
+                         "y":1456
                         }, 
                         {
                          "gid":8,
@@ -420,7 +420,7 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":864,
+                         "width":192,
                          "x":1312,
                          "y":1936
                         }, 
@@ -432,7 +432,7 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":1360,
+                         "width":1424,
                          "x":1312,
                          "y":2080
                         }, 
@@ -444,7 +444,7 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":624,
+                         "width":528,
                          "x":1344,
                          "y":384
                         }, 
@@ -457,7 +457,7 @@
                          "type":"",
                          "visible":true,
                          "width":48,
-                         "x":2080,
+                         "x":1984,
                          "y":368
                         }, 
                         {
@@ -481,8 +481,8 @@
                          "type":"",
                          "visible":true,
                          "width":160,
-                         "x":1920,
-                         "y":528
+                         "x":1840,
+                         "y":560
                         }, 
                         {
                          "gid":8,
@@ -492,8 +492,8 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":304,
-                         "x":2128,
+                         "width":400,
+                         "x":2032,
                          "y":320
                         }, 
                         {
@@ -522,15 +522,51 @@
                         }, 
                         {
                          "gid":8,
-                         "height":64,
+                         "height":112,
                          "id":374,
                          "name":"",
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":160,
-                         "x":1600,
-                         "y":1072
+                         "width":464,
+                         "x":1472,
+                         "y":1040
+                        }, 
+                        {
+                         "gid":8,
+                         "height":144,
+                         "id":375,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":400,
+                         "x":1504,
+                         "y":1936
+                        }, 
+                        {
+                         "gid":8,
+                         "height":16,
+                         "id":380,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":96,
+                         "x":2064,
+                         "y":1536
+                        }, 
+                        {
+                         "gid":8,
+                         "height":160,
+                         "id":381,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":112,
+                         "x":1504,
+                         "y":1792
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -575,8 +611,8 @@
                          "type":"",
                          "visible":true,
                          "width":32,
-                         "x":2160,
-                         "y":480
+                         "x":2128,
+                         "y":512
                         }, 
                         {
                          "gid":31222,
@@ -584,6 +620,16 @@
                          "id":373,
                          "name":"",
                          "properties":[
+                                {
+                                 "name":"radius",
+                                 "type":"string",
+                                 "value":"320"
+                                }, 
+                                {
+                                 "name":"rotation_speed",
+                                 "type":"string",
+                                 "value":"0.5"
+                                }, 
                                 {
                                  "name":"wind_network",
                                  "type":"string",
@@ -593,8 +639,120 @@
                          "type":"",
                          "visible":true,
                          "width":320,
-                         "x":1776,
-                         "y":1104
+                         "x":2064,
+                         "y":1920
+                        }, 
+                        {
+                         "gid":31222,
+                         "height":320,
+                         "id":376,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"radius",
+                                 "type":"string",
+                                 "value":"320"
+                                }, 
+                                {
+                                 "name":"rotation_speed",
+                                 "type":"string",
+                                 "value":"0.5"
+                                }, 
+                                {
+                                 "name":"wind_network",
+                                 "type":"string",
+                                 "value":"golden_fields_liquid"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":320,
+                         "x":1664,
+                         "y":1648
+                        }, 
+                        {
+                         "gid":31222,
+                         "height":320,
+                         "id":377,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"radius",
+                                 "type":"string",
+                                 "value":"320"
+                                }, 
+                                {
+                                 "name":"rotation_speed",
+                                 "type":"string",
+                                 "value":"0.5"
+                                }, 
+                                {
+                                 "name":"wind_network",
+                                 "type":"string",
+                                 "value":"golden_fields_liquid"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":320,
+                         "x":2048,
+                         "y":1408
+                        }, 
+                        {
+                         "gid":31222,
+                         "height":320,
+                         "id":378,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"radius",
+                                 "type":"string",
+                                 "value":"320"
+                                }, 
+                                {
+                                 "name":"rotation_speed",
+                                 "type":"string",
+                                 "value":"0.5"
+                                }, 
+                                {
+                                 "name":"wind_network",
+                                 "type":"string",
+                                 "value":"golden_fields_liquid"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":320,
+                         "x":1552,
+                         "y":864
+                        }, 
+                        {
+                         "gid":31222,
+                         "height":320,
+                         "id":379,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"radius",
+                                 "type":"string",
+                                 "value":"320"
+                                }, 
+                                {
+                                 "name":"rotation_speed",
+                                 "type":"string",
+                                 "value":"0.5"
+                                }, 
+                                {
+                                 "name":"wind_network",
+                                 "type":"string",
+                                 "value":"golden_fields_liquid"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":320,
+                         "x":2000,
+                         "y":1040
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -610,7 +768,7 @@
          "y":0
         }],
  "nextlayerid":109,
- "nextobjectid":375,
+ "nextobjectid":383,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
