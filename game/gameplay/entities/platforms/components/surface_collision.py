@@ -147,7 +147,11 @@ class RightAngleSurfaceCollisionComponent(SurfaceCollisionComponent):
         if self.p.go_through and self.p.entity_is_dropping(entity):
             return False
         if current_hitbox.bottom < target_y:
-            if target_y - old_hitbox.bottom > 1:
+            # A descending ramp moves the support point down as the entity moves
+            # horizontally.  Allow that step to be as large as this frame's
+            # horizontal/vertical motion; limiting it to one pixel intermittently
+            # drops floor contact on steeper ramps or at higher run speeds.
+            if target_y - old_hitbox.bottom > max_step_up:
                 return False
             return target_y - current_hitbox.bottom <= max_step_up
         return super().accepts_floor_contact(entity, old_hitbox, current_hitbox, target_y, max_step_up)

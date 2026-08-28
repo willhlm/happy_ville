@@ -28,7 +28,9 @@ class GoldenfieldsRotatingBlade(DynamicPlatform):
         self.crushes_entities = False
 
     def update(self, dt):
-        self.follow_rig(self.rig.angle)
+        # The rig updates after the platform group.  It owns pose updates so the
+        # collision pose and the interpolated visual pose use the same angles.
+        pass
 
     def draw(self, target):
         alpha = self.game_objects.game.game_loop.alpha
@@ -57,12 +59,16 @@ class GoldenfieldsRotatingBlade(DynamicPlatform):
         self.old_hitbox = self.hitbox.copy()
         previous_position = self.rect.topleft
         self.prev_true_pos = self.true_pos.copy()
-        self.rect.center = (
-            round(hub_x + math.cos(angle) * orbit_radius),
-            round(hub_y + math.sin(angle) * orbit_radius),
-        )
+        center_x = hub_x + math.cos(angle) * orbit_radius
+        center_y = hub_y + math.sin(angle) * orbit_radius
+        self.rect.center = (round(center_x), round(center_y))
         self.update_hitbox()
-        self.true_pos = list(self.rect.topleft)
+        # Preserve the sub-pixel visual pose; the rect remains pixel-aligned for
+        # collision detection.
+        self.true_pos = [
+            center_x - self.rect.width * 0.5,
+            center_y - self.rect.height * 0.5,
+        ]
         self.delta = [
             self.rect.left - previous_position[0],
             self.rect.top - previous_position[1],

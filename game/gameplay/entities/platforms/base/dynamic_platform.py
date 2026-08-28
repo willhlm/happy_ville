@@ -116,6 +116,16 @@ class DynamicPlatform(Platform):
             effect = component.take_dmg(effect)
         return effect
 
+    def draw(self, target):
+        self.game_objects.game.display.render(
+            self.image,
+            target,
+            position=(
+                int( self.true_pos[0] - self.game_objects.camera_manager.camera.true_scroll[0]),
+                int(self.true_pos[1] - self.game_objects.camera_manager.camera.true_scroll[1]),
+            ),
+        )
+
 class _NullState:
 
     def update(self, dt):

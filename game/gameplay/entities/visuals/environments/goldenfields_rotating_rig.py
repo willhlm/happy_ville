@@ -45,6 +45,7 @@ class GoldenfieldRotatingRig(LayeredObjects):
             return
         self.prev_angle = self.angle
         self.angle = (self.angle + self.rotation_speed * dt) % 360.0
+        self._position_blades(self.angle)
 
     def draw(self, target):
         alpha = self.game_objects.game.game_loop.alpha
