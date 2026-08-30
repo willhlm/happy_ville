@@ -8,6 +8,11 @@
     "offset": [0, 0]
   },
   "camera": "Deer_encounter",
+  "reward_spawn": {
+    "relative_to": "source",
+    "anchor": "center",
+    "offset": [110, 0]
+  },
   "steps": [
     {
       "time": 0,

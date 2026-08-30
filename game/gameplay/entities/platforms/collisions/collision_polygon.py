@@ -3,9 +3,9 @@ import pygame
 from gameplay.entities.platforms.base.platform import Platform
 
 class CollisionPolygon(Platform):
-    def __init__(self, pos, points, go_through=True):
+    def __init__(self, pos, points, **kwargs):
         super().__init__(pos, size=(0, 0))
-        self.go_through = go_through
+        self.go_through = kwargs.get("go_through", True)
         self.points = [[p[0] + pos[0], p[1] + pos[1]] for p in points]
 
         xs, ys = zip(*self.points)

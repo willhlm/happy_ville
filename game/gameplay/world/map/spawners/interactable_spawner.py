@@ -1,4 +1,5 @@
 from . import common as c
+from gameplay.entities.shared.boss_rewards import spawn_pending_boss_reward
 
 
 class InteractableSpawner(c.SpawnerCommon):
@@ -98,7 +99,11 @@ class InteractableSpawner(c.SpawnerCommon):
 
             elif local_id == 21:
                 obj_props = c.props_list_to_dict(obj.get("properties", []))
-                self.game_objects.interactables.add(c.BossStatue(object_position, self.game_objects, **obj_props))
+                statue = c.BossStatue(object_position, self.game_objects, **obj_props)
+                self.game_objects.interactables.add(statue)
+                spawn_pending_boss_reward(
+                    self.game_objects, statue.id, statue.boss, statue.hitbox.center
+                )
 
             elif local_id == 190:
                 self.game_objects.platforms.add(c.BreakableBlockCharge_1(object_position, self.game_objects))

@@ -1,7 +1,7 @@
 import pygame
 from engine.utils import read_files
 
-from gameplay.entities.items.base.components import ItemInteractComponent
+from gameplay.entities.items.base.components import ItemInteractComponent, InteractionHintComponent
 from .world_item import WorldItem
 
 
@@ -28,7 +28,12 @@ class InteractWorldItem(WorldItem):
     def __init__(self, pos, game_objects, **kwargs):
         super().__init__(pos, game_objects)
         self.interact_component = ItemInteractComponent(self, **kwargs)
+        self.interaction_hint_component = InteractionHintComponent(self, **kwargs)
         self.is_interacting = False
+
+    def update(self, dt):
+        super().update(dt)
+        self.interaction_hint_component.update(dt, active=not self.consumed and not self.is_interacting)
 
     @classmethod
     def get_pickup_title(cls):

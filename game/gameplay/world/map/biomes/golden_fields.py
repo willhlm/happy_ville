@@ -1,5 +1,5 @@
 from gameplay.entities.interactables import DropletSource, GearBox, Valve
-from gameplay.entities.platforms import BridgePlatform, GoldenfieldsPiston
+from gameplay.entities.platforms import BridgePlatform, GoldenfieldsPiston, LiftCar
 
 from ..helpers import calculate_object_position, props_list_to_dict, resolve_tileset
 from .base import Biome
@@ -74,3 +74,14 @@ class Golden_fields(Biome):
                     self.level.game_objects.all_fgs.add(layer_name, rig)
                 else:
                     self.level.game_objects.all_bgs.add(layer_name, rig)
+
+            elif id == 9:
+                props = props_list_to_dict(properties)
+                path_ref = props.get("path")
+                path_data = ctx.references.get("paths_by_id", {}).get(int(path_ref)) if path_ref else None
+                if path_data is None:
+                    raise ValueError(f"Lift {props.get('signal_id', props.get('id', ''))!r} references unknown path {path_ref!r}")
+                props["path_points"] = path_data["points"]
+                self.level.game_objects.platforms.add(
+                    LiftCar(object_position, self.level.game_objects, **props)
+                )

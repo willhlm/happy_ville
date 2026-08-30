@@ -321,7 +321,24 @@ class PlatformCollisionSolver:
         if wall_collider is not None:
             return
 
-        self._resolve_ceiling_contacts(entity, colliders, motion)
+        # Horizontal motion needs floor snapping so a player can walk over an
+        # upright ramp.  The inverse is undesirable: snapping to an inverted
+        # ramp while moving sideways after a jump produces a noticeable catch.
+        # Let its normal upward-motion collision handle the ceiling instead.
+        ceiling_colliders = [
+            platform for platform in colliders
+            if not self._is_inverted_right_angle_ramp(platform)
+        ]
+        self._resolve_ceiling_contacts(entity, ceiling_colliders, motion)
+
+    @staticmethod
+    def _is_inverted_right_angle_ramp(platform):
+        surface_collision = getattr(platform, 'surface_collision', None)
+        return (
+            surface_collision is not None
+            and type(surface_collision).__name__ == 'RightAngleSurfaceCollisionComponent'
+            and getattr(platform, 'orientation', None) in (2, 3)
+        )
 
     def _refresh_colliders(self, entity, axis, phase):
         return self._gather_platform_colliders(entity)

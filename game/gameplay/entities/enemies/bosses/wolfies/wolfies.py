@@ -10,6 +10,7 @@ from gameplay.entities.projectiles import SlamAttack
 from .config import WOLFIES_CONFIG
 
 class Wolfies(Boss):
+    reward_progress_key = 'dash'
     def __init__(self, pos, game_objects, ID):
         super().__init__(pos, game_objects, ID)        
         self.sprites = read_files.load_sprites_dict('assets/sprites/entities/enemies/bosses/wolfies/',game_objects, flip_x = True)

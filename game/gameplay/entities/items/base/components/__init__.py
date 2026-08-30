@@ -1,2 +1,3 @@
 from .interact_component import ItemInteractComponent
+from .interaction_hint_component import InteractionHintComponent
 from .lifetime_component import ItemLifetimeComponent

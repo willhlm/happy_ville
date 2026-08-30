@@ -27,9 +27,8 @@ class BossStatue(Interactables):#interact with it to get air dash
         rect = self.hitbox
         position = [rect.centerx + random.uniform(-rect[2] * 0.5, rect[2] * 0.5), rect.centery + random.uniform(rect[3]*0.1,rect[3]*0.5)]
         self.game_objects.particles.emit('spirit_wisp', position, colour =[0,0,0,255])
-        
+
     def interact(self, player=None):#when player press t/y
         if self.interacted: return
         self.interacted = True
         self.game_objects.sequence_manager.start_sequence('boss_encounter', encounter=self.id, source=self)
-        

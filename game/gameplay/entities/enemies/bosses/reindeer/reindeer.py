@@ -8,6 +8,7 @@ from gameplay.entities.enemies.bosses.shared import task_manager
 from gameplay.entities.projectiles import HurtBox
 
 class Reindeer(Boss):
+    reward_progress_key = 'dash'
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
         self.sprites = Reindeer.sprites

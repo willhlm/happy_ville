@@ -155,11 +155,12 @@ class NarrativeState:
     QUEST_COMPLETED = 'completed'
     QUEST_FAILED = 'failed'
 
-    def __init__(self, *, events, quests, flows_complete, defeated_bosses, dialogue):
+    def __init__(self, *, events, quests, flows_complete, defeated_bosses, boss_rewards, dialogue):
         self.events = events
         self.quests = quests
         self.flows_complete = flows_complete
         self.defeated_bosses = defeated_bosses
+        self.boss_rewards = boss_rewards
         self.dialogue = DialogueState(dialogue)
 
     def mark_flow_complete(self, flow_name):
@@ -173,6 +174,18 @@ class NarrativeState:
 
     def is_boss_defeated(self, boss_id):
         return self.defeated_bosses.get(boss_id, False)
+
+    def mark_boss_reward_collected(self, boss_id):
+        self.boss_rewards.setdefault(boss_id, {})['collected'] = True
+
+    def is_boss_reward_collected(self, boss_id):
+        return self.boss_rewards.get(boss_id, {}).get('collected', False)
+
+    def set_boss_reward_position(self, boss_id, position):
+        self.boss_rewards.setdefault(boss_id, {})['position'] = list(position)
+
+    def get_boss_reward_position(self, boss_id):
+        return self.boss_rewards.get(boss_id, {}).get('position')
 
     def is_event_complete(self, event_name):
         return self.events.get(event_name, False)
@@ -219,10 +232,20 @@ class World_state():
             save.get('progress', 1),
         )
         self.map_state = MapState(save.get('map_state', {}))
+        boss_rewards = save.get('boss_rewards')
+        if boss_rewards is None:
+            boss_rewards = {
+                boss_id: {'collected': True}
+                for boss_id, collected in save.get('collected_boss_rewards', {}).items()
+                if collected
+            }
+            for boss_id, position in save.get('pending_boss_rewards', {}).items():
+                boss_rewards.setdefault(boss_id, {})['position'] = position
         self.narrative = NarrativeState(
             events=save.get('events', {}),
             quests=save.get('quests', {}),
             flows_complete=save.get('flows_complete', {}),
             defeated_bosses=save.get('defeated_bosses', {}),
+            boss_rewards=boss_rewards,
             dialogue=save.get('dialogue', {}),
         )

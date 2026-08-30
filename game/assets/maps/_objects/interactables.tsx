@@ -7,7 +7,7 @@
  </tile>
  <tile id="3">
   <properties>
-   <property name="ID" value=""/>
+   <property name="signal_id" value=""/>
   </properties>
   <image width="64" height="80" source="../../sprites/entities/interactables/runestones/1/idle/runestone1.png"/>
  </tile>
@@ -42,6 +42,8 @@
  <tile id="10">
   <properties>
    <property name="ID" value=""/>
+   <property name="action" value="toggle"/>
+   <property name="value" value=""/>
   </properties>
   <image width="32" height="32" source="../../sprites/entities/interactables/lever/off/lever1.png"/>
  </tile>

@@ -2,11 +2,13 @@ from gameplay.entities.base.static_entity import StaticEntity
 
 
 class SpiritFlash(StaticEntity):
+    """A circular flash effect that grows and fades over time."""
     def __init__(self, pos, game_objects, **kwargs):
         super().__init__(pos, game_objects)
         self.size = tuple(kwargs.get("size", (420, 420)))
-        self.image = game_objects.game.display.make_layer(self.size)
-        self.empty = game_objects.game.display.make_layer(self.size)
+        self.image, self.empty = game_objects.layer_resource_pool.acquire_named_layers(
+            "spirit_flash", self.size, 2
+        )
         self.rect.size = self.size
         self.rect.center = pos
         self.true_pos = list(self.rect.topleft)
@@ -76,8 +78,8 @@ class SpiritFlash(StaticEntity):
         self.game_objects.game.display.use_standard_alpha_mode()
 
     def release_texture(self):
-        self.image.release()
-        self.empty.release()
+        # These layers are owned and released by LayerResourcePool.
+        pass
 
     @staticmethod
     def _lerp(start, end, progress):

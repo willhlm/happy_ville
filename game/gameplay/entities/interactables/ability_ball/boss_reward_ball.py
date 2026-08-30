@@ -5,7 +5,7 @@ from .states import Grow
 from gameplay.entities.shared.components.hit.hitstop_component import HitstopComponent
 
 class BossRewardBall(Interactables):
-    def __init__(self, pos, game_objects, reward):
+    def __init__(self, pos, game_objects, reward, boss_id=None):
         super().__init__(pos, game_objects)        
         self.rect = pygame.Rect(0, 0, self.image.width, self.image.height)
         self.rect.center = pos
@@ -17,6 +17,7 @@ class BossRewardBall(Interactables):
         self.currentstate = Grow(self)#start with grow
         self.health = 3
         self.reward = reward
+        self.boss_id = boss_id
 
         #shader uniforms
         self.explosion = 0        
@@ -79,3 +80,5 @@ class BossRewardBall(Interactables):
             instruction_key=self.reward.get_instruction_key(),
         )
         self.reward.apply(entity)
+        if self.boss_id is not None:
+            self.game_objects.world_state.narrative.mark_boss_reward_collected(self.boss_id)

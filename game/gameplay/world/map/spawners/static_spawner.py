@@ -1,4 +1,5 @@
 from . import common as c
+from gameplay.entities.shared.boss_rewards import spawn_pending_boss_reward
 
 
 class StaticSpawner(c.SpawnerCommon):
@@ -9,7 +10,8 @@ class StaticSpawner(c.SpawnerCommon):
 
             if "polygon" in obj.keys():
                 points_list = [(point["x"], point["y"]) for point in obj["polygon"]]
-                new_block = c.CollisionRightAngle(object_position, points_list, obj.get("properties", True))
+                kwargs = c.props_list_to_dict(obj.get("properties", []))
+                new_block = c.CollisionRightAngle(object_position, points_list, **kwargs)
                 self.game_objects.platforms.add(new_block)
                 continue
 
@@ -47,11 +49,21 @@ class StaticSpawner(c.SpawnerCommon):
 
             elif local_id == 3:
                 path_props = c.props_list_to_dict(obj.get("properties", []))
-                if not self.game_objects.world_state.narrative.is_boss_defeated(path_props["ID"]):
-                    aggro = self.game_objects.world_state.narrative.is_flow_complete(path_props["ID"])
-                    boss = self.game_objects.registry.fetch("enemies", path_props["class"])(object_position, self.game_objects, path_props["ID"])
+                boss_id = path_props["ID"]
+                narrative = self.game_objects.world_state.narrative
+                if narrative.is_boss_defeated(boss_id):
+                    fallback_position = [
+                        object_position[0] + object_size[0] * 0.5,
+                        object_position[1] + object_size[1] * 0.5 - 50,
+                    ]
+                    spawn_pending_boss_reward(
+                        self.game_objects, boss_id, path_props["class"], fallback_position
+                    )
+                else:
+                    aggro = narrative.is_flow_complete(boss_id)
+                    boss = self.game_objects.registry.fetch("enemies", path_props["class"])(object_position, self.game_objects, boss_id)
                     self.game_objects.enemies.add(boss)
-                    ctx.references[path_props["ID"]] = boss
+                    ctx.references[boss_id] = boss
                     if aggro:
                         boss.start_aggro()
 

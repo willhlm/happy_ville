@@ -3,6 +3,7 @@ from gameplay.entities.interactables import BossRewardBall
 from gameplay.entities.shared.boss_rewards import ProgressionUnlockReward
 
 class Boss(Enemy):
+    reward_progress_key = None
     def __init__(self,pos,game_objects, ID = None):
         super().__init__(pos,game_objects)
         self.vitals.set_max_health(10)
@@ -11,6 +12,7 @@ class Boss(Enemy):
         self.ID = ID
         self.encounter_sequence_key = 'boss_encounter'
         self.reward = None
+        self.reward_spawn_position = None
 
     def start_aggro(self, delay = 0):
         self.currentstate.clear_tasks()
@@ -44,8 +46,9 @@ class Boss(Enemy):
 
         reward = self.build_reward()
         if reward is not None:
-            position = [self.hitbox.centerx, self.hitbox.centery - 50]
-            self.game_objects.interactables.add(BossRewardBall(position, self.game_objects, reward))
+            position = self.reward_spawn_position or [self.hitbox.centerx, self.hitbox.centery - 50]
+            self.game_objects.world_state.narrative.set_boss_reward_position(self.ID, position)
+            self.game_objects.interactables.add(BossRewardBall(position, self.game_objects, reward, self.ID))
 
             self.game_objects.sequence_manager.start_sequence('defeated_boss', boss=self)
 
@@ -53,7 +56,13 @@ class Boss(Enemy):
         if self.reward is not None:
             return self.reward
 
-        progress_key = self.game_objects.player.progression.get_progress_key_for_boss(self.ID)
+        return self.build_reward_for_boss(self.game_objects, self.ID)
+
+    @classmethod
+    def build_reward_for_boss(cls, game_objects, boss_id):
+        progress_key = game_objects.player.progression.get_progress_key_for_boss(boss_id)
+        if progress_key is None:
+            progress_key = cls.reward_progress_key
         if progress_key is None:
             return None
 

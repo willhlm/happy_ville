@@ -7,7 +7,7 @@ from gameplay.entities.visuals.environments import GodRaysRadial
 from gameplay.entities.visuals.environments.space_time_crack import SpaceTimeCrack
 from gameplay.sequences.base import Sequence
 
-from .boss_encounter_runtime import parse_pair, resolve_boss_for_encounter
+from .boss_encounter_runtime import parse_pair, resolve_boss_for_encounter, resolve_position
 
 
 class BossEncounter(Sequence):
@@ -132,6 +132,9 @@ class BossEncounter(Sequence):
         if self.entity is not None:
             return self.entity
         self.entity = resolve_boss_for_encounter(self.game_objects, self.encounter_key, self.config, self.actors)
+        reward_spawn = self.config.get('reward_spawn')
+        if reward_spawn is not None:
+            self.entity.reward_spawn_position = resolve_position(reward_spawn, self.actors)
         self.actors['boss'] = self.entity
         return self.entity
 

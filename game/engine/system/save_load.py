@@ -15,6 +15,7 @@ class Save_load():
             'quests': world_state.quests,
             'flows_complete': world_state.flows_complete,
             'defeated_bosses': world_state.defeated_bosses,
+            'boss_rewards': world_state.narrative.boss_rewards,
             'dialogue': world_state.dialogue,
         }
         read_files.write_json("saves/slots/slot1/save.json", save_data)

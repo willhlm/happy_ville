@@ -52,6 +52,11 @@ class SceneBuilder:
             else:
                 self.game_objects.all_fgs.new_group(group, groups.LayeredUpdates())
 
+            # Paths are shared map references. Load them before biome objects so
+            # dedicated entities (such as lifts) can resolve a Tiled path ID.
+            if "paths" in gdata["objects"]:
+                self.spawner.load_paths(gdata["objects"]["paths"], parallax, offset, ctx=ctx, viewport_center=viewport_center)
+
             self._load_objects(gdata["objects"], parallax, offset, "back", ctx, biome_mgr, map_def, group, viewport_center)
             self._load_layers(gdata["layers"], parallax, offset, ctx, map_def, group, biome_mgr.biome, viewport_center)
             self._load_objects(gdata["objects"], parallax, offset, "front", ctx, biome_mgr, map_def, group, viewport_center)
@@ -65,9 +70,6 @@ class SceneBuilder:
             if "back" in data:
                 biome_mgr.load_biome_objects(data["back"], parallax, offset, ctx=ctx, map_def=map_def, layer_name=layer_name, viewport_center=viewport_center)
             return
-
-        if "paths" in data:
-            self.spawner.load_paths(data["paths"], parallax, offset, ctx=ctx, viewport_center=viewport_center)
 
         if "statics" in data:
             self.spawner.load_statics(data["statics"], parallax, offset, ctx=ctx, map_def=map_def, layer_name=layer_name, viewport_center=viewport_center)

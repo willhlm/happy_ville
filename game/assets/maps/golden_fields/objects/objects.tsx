@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.8" tiledversion="1.8.2" name="objects" tilewidth="224" tileheight="160" tilecount="7" columns="0">
+<tileset version="1.8" tiledversion="1.8.2" name="objects" tilewidth="320" tileheight="320" tilecount="8" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="2">
   <image width="224" height="48" source="../../../sprites/entities/platforms/bridge/erect/bridge.png"/>
@@ -47,5 +47,14 @@
    <property name="wind_network" value="golden_fields_liquid"/>
   </properties>
   <image width="320" height="320" source="../../../sprites/entities/visuals/environments/blade_rig/idle/idle.png"/>
+ </tile>
+ <tile id="9">
+  <properties>
+   <property name="initial_station" value=""/>
+   <property name="signal_id" value=""/>
+   <property name="lift_stations" value=""/>
+   <property name="path" type="object" value="0"/>
+  </properties>
+  <image width="144" height="64" source="../../../sprites/entities/platforms/liftcar/body/idle/rhoutta_encounter1.png"/>
  </tile>
 </tileset>

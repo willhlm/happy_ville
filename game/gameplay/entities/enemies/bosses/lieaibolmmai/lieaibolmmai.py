@@ -10,6 +10,7 @@ from .states import STATE_REGISTRY
 from .config import CONFIG
 
 class Lieaibolmmai(Boss):#dash boss
+    reward_progress_key = 'dash'
     def __init__(self, pos, game_objects, ID=None, **kwargs):
         super().__init__(pos, game_objects, ID)
         self.config = CONFIG
