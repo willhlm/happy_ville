@@ -1,6 +1,6 @@
 from .base import EventTrigger
 from gameplay.data.boss_encounter_configs import get_boss_encounter_config
-from gameplay.entities.shared.boss_rewards import spawn_pending_boss_reward
+from gameplay.entities.interactables.ability_ball.boss_reward_spawner import spawn_pending_boss_reward
 
 
 class BossEncounterTrigger(EventTrigger):

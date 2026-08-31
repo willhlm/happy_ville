@@ -1,5 +1,5 @@
 from . import common as c
-from gameplay.entities.shared.boss_rewards import spawn_pending_boss_reward
+from gameplay.entities.interactables.ability_ball.boss_reward_spawner import spawn_pending_boss_reward
 
 
 class StaticSpawner(c.SpawnerCommon):

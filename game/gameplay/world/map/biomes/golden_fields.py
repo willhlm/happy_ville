@@ -1,5 +1,6 @@
 from gameplay.entities.interactables import DropletSource, GearBox, Valve
 from gameplay.entities.platforms import BridgePlatform, GoldenfieldsPiston, LiftCar
+from gameplay.entities.platforms.dynamic.lift.controls import attach_controls
 
 from ..helpers import calculate_object_position, props_list_to_dict, resolve_tileset
 from .base import Biome
@@ -82,6 +83,19 @@ class Golden_fields(Biome):
                 if path_data is None:
                     raise ValueError(f"Lift {props.get('signal_id', props.get('id', ''))!r} references unknown path {path_ref!r}")
                 props["path_points"] = path_data["points"]
-                self.level.game_objects.platforms.add(
-                    LiftCar(object_position, self.level.game_objects, **props)
-                )
+                sprite_path = "assets/sprites/entities/platforms/lifts/liftcar/body/"
+                lift = LiftCar(object_position, self.level.game_objects, sprite_path, **props)
+                self.level.game_objects.platforms.add(lift)
+                attach_controls(lift, props)
+
+            elif id == 10:
+                props = props_list_to_dict(properties)
+                path_ref = props.get("path")
+                path_data = ctx.references.get("paths_by_id", {}).get(int(path_ref)) if path_ref else None
+                if path_data is None:
+                    raise ValueError(f"Lift {props.get('signal_id', props.get('id', ''))!r} references unknown path {path_ref!r}")
+                props["path_points"] = path_data["points"]
+                sprite_path = "assets/sprites/entities/platforms/lifts/lift/body/"
+                lift = LiftCar(object_position, self.level.game_objects, sprite_path, **props)
+                self.level.game_objects.platforms.add(lift)
+                attach_controls(lift, props)                

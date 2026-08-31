@@ -4,7 +4,7 @@ from .base.one_way_up_platform import OneWayUpPlatform
 from .collisions.collision_polygon import CollisionPolygon
 from .collisions.collision_right_angle import CollisionRightAngle
 from .dynamic.bubble import Bubble
-from .dynamic.lift_car import LiftCar
+from .dynamic.lift.lift_car import LiftCar
 from .dynamic.smacker.smacker import Smacker
 from .shadow_light.shadow_light_1 import ShadowLight_1
 from .actors.boulder.boulder_platform import BoulderPlatform

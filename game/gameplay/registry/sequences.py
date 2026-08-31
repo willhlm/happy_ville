@@ -1,4 +1,4 @@
-from gameplay.sequences import BossEncounter, ButterflyEncounter, CultistEncounter, DeerEncounter, DeathSequence, DefeatedBoss, MapTraversalSequence, StartGame
+from gameplay.sequences import BossEncounter, ButterflyEncounter, CultistEncounter, DeerEncounter, DeathSequence, DefeatedBoss, LiftTraversalSequence, MapTraversalSequence, StartGame
 
 
 REGISTER_SEQUENCES = {
@@ -8,6 +8,7 @@ REGISTER_SEQUENCES = {
     'deer_encounter': DeerEncounter,
     'death': DeathSequence,
     'defeated_boss': DefeatedBoss,
+    'lift_traversal': LiftTraversalSequence,
     'map_traversal': MapTraversalSequence,
     'start_game': StartGame,
 }

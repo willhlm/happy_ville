@@ -4,6 +4,7 @@ from .states_time_collision import Gone, Idle
 from gameplay.entities.shared.components.hit import hit_effects
 from gameplay.entities.platforms.components.geometry import CollisionSample
 from gameplay.entities.platforms.components.surface_collision import SolidSurfaceCollisionComponent, OneWayUpSurfaceCollisionComponent
+from gameplay.entities.platforms.pathing import centre_path_to_topleft
 from gameplay.entities.interactables.two_d_liquid.two_d_liquid import TwoDLiquid
 
 
@@ -386,7 +387,7 @@ class MovePath(PlatformComponent):
     Move along a polyline path from Tiled.
 
     Props expected:
-      path_points: list[(x,y)] world coords
+      path_points: list[(x,y)] world coords for the platform centre
       speed: float px/s (default 80)
 
       smooth: bool (default False)
@@ -403,7 +404,10 @@ class MovePath(PlatformComponent):
 
     def on_added(self):        
         pts = self.props.get("path_points")
-        self.points = list(pts) if pts else []
+        # Paths use the same authoring convention as lifts: every Tiled point
+        # marks the centre of the moving platform.  Dynamic-platform movement
+        # itself is top-left based, so translate the route once here.
+        self.points = centre_path_to_topleft(pts or [], self.p.rect.size)
 
         # Updates run with dt scaled so ~1.0 == one 60 Hz frame.
         # Convert designer-friendly px/s into px/frame.

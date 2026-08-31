@@ -1,11 +1,11 @@
 import pygame
 from gameplay.entities.interactables.base.interactables import Interactables
-from gameplay.entities.shared.boss_rewards import BossReward
 from .states import Grow
 from gameplay.entities.shared.components.hit.hitstop_component import HitstopComponent
+from gameplay.entities.shared.boss_rewards import BossReward
 
 class BossRewardBall(Interactables):
-    def __init__(self, pos, game_objects, reward, boss_id=None):
+    def __init__(self, pos, game_objects, reward: BossReward, boss_id=None):
         super().__init__(pos, game_objects)        
         self.rect = pygame.Rect(0, 0, self.image.width, self.image.height)
         self.rect.center = pos

@@ -6,3 +6,4 @@ from .death import DeathSequence
 from .defeated_boss import DefeatedBoss
 from .start_game import StartGame
 from .map_traversal import MapTraversalSequence
+from .lift_traversal import LiftTraversalSequence

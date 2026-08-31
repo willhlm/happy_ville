@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.8" tiledversion="1.8.2" name="objects" tilewidth="320" tileheight="320" tilecount="8" columns="0">
+<tileset version="1.8" tiledversion="1.8.2" name="objects" tilewidth="320" tileheight="320" tilecount="9" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="2">
   <image width="224" height="48" source="../../../sprites/entities/platforms/bridge/erect/bridge.png"/>
@@ -50,11 +50,31 @@
  </tile>
  <tile id="9">
   <properties>
-   <property name="initial_station" value=""/>
-   <property name="signal_id" value=""/>
-   <property name="lift_stations" value=""/>
+   <property name="control_mode" value="map_transition"/>
+   <property name="destination_continue_to" value=""/>
+   <property name="destination_lift_id" value=""/>
+   <property name="destination_map" value=""/>
+   <property name="destination_station" type="int" value="0"/>
+   <property name="lever_offset" value=""/>
+   <property name="lift_id" value=""/>
    <property name="path" type="object" value="0"/>
+   <property name="signal_id" value=""/>
+   <property name="transition_direction" value=""/>
+   <property name="transition_station" value=""/>
   </properties>
   <image width="144" height="64" source="../../../sprites/entities/platforms/liftcar/body/idle/rhoutta_encounter1.png"/>
+ </tile>
+ <tile id="10">
+  <properties>
+   <property name="boarding_offset" value=""/>
+   <property name="boarding_size" value=""/>
+   <property name="control_mode" value="signal"/>
+   <property name="initial_station" value=""/>
+   <property name="lever_offset" value=""/>
+   <property name="lift_stations" value=""/>
+   <property name="path" type="object" value="0"/>
+   <property name="signal_id" value=""/>
+  </properties>
+  <image width="112" height="64" source="../../../sprites/entities/platforms/lifts/lift/body/idle/rhoutta_encounter1.png"/>
  </tile>
 </tileset>
