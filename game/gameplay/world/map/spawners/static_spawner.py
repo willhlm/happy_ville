@@ -266,13 +266,18 @@ class StaticSpawner(c.SpawnerCommon):
                         kwargs[name] = [colour[1] / 255, colour[2] / 255, colour[3] / 255, colour[0] / 255]
                     else:
                         kwargs.pop(name, None)
-                for name in ("height", "height_per_active"):
+                for name in ("height", "height_per_active", "relay_height"):
                     if name in kwargs and kwargs[name] != "":
                         kwargs[name] = float(kwargs[name])
                     else:
                         kwargs.pop(name, None)
 
-                liquid_cls = c.WindmillControlledLiquid if kwargs.get("wind_network") else c.TwoDLiquid
+                if kwargs.get("relay_id"):
+                    liquid_cls = c.WaterRelayControlledLiquid
+                elif kwargs.get("wind_network"):
+                    liquid_cls = c.WindmillControlledLiquid
+                else:
+                    liquid_cls = c.TwoDLiquid
                 if liquid_cls is c.WindmillControlledLiquid:
                     if not self.game_objects.world_controller.golden_fields.is_registered_windmill_network(
                         kwargs["wind_network"]

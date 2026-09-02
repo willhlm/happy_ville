@@ -64,7 +64,7 @@ class DashJumpPre(PhaseBase):
             self.enter_state('land', phase = 'soft')
 
     def consume_contact_state(self):
-        if self.entity.is_on_floor():
+        if self.entity.is_on_floor() and self.entity.velocity[1] >= 0:
             self.land_from_dash_jump()
             return
 
