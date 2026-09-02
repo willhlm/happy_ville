@@ -1,11 +1,11 @@
-from gameplay.entities.interactables import DropletSource, GearBox, Valve
-from gameplay.entities.platforms import BridgePlatform, GoldenfieldsPiston, LiftCar
+from gameplay.entities.interactables import DropletSource, Valve
+from gameplay.entities.platforms import BridgePlatform, LiftCar, Piston
 from gameplay.entities.platforms.dynamic.lift.controls import attach_controls
 
 from ..helpers import calculate_object_position, props_list_to_dict, resolve_tileset
 from .base import Biome
-from .configs.golden_fields import DEFAULT_ROOM_CONFIG, ROOM_CONFIGS
-from gameplay.entities.visuals.environments import GoldenfieldRotatingRig, Windmill
+from .room_configs.golden_fields import DEFAULT_ROOM_CONFIG, ROOM_CONFIGS
+from gameplay.entities.visuals.environments import RotatingRig, WaterRelaySystem, Windmill
 
 
 class Golden_fields(Biome):
@@ -49,9 +49,7 @@ class Golden_fields(Biome):
                     self.level.game_objects.all_bgs.add(layer_name, new_mill)
 
             elif id == 5:
-                self.level.game_objects.interactables.add(
-                    GearBox(object_position, self.level.game_objects, **props_list_to_dict(properties))
-                )
+                pass
 
             elif id == 6:
                 self.level.game_objects.interactables.add(
@@ -60,11 +58,11 @@ class Golden_fields(Biome):
 
             elif id == 7:
                 self.level.game_objects.platforms.add(
-                    GoldenfieldsPiston(object_position, self.level.game_objects, **props_list_to_dict(properties))
+                    Piston(object_position, self.level.game_objects, **props_list_to_dict(properties))
                 )
 
             elif id == 8:
-                rig = GoldenfieldRotatingRig(
+                rig = RotatingRig(
                     object_position,
                     self.level.game_objects,
                     parallax,
@@ -99,3 +97,17 @@ class Golden_fields(Biome):
                 lift = LiftCar(object_position, self.level.game_objects, sprite_path, **props)
                 self.level.game_objects.platforms.add(lift)
                 attach_controls(lift, props)                
+
+            elif id == 11:
+                #water relay system
+                water = WaterRelaySystem(
+                    object_position,
+                    self.level.game_objects,
+                    parallax,
+                    layer_name,
+                    **props_list_to_dict(properties),
+                )
+                if layer_name.startswith("fg"):
+                    self.level.game_objects.all_fgs.add(layer_name, water)
+                else:
+                    self.level.game_objects.all_bgs.add(layer_name, water)

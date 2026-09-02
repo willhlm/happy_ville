@@ -1,6 +1,6 @@
 from ..helpers import calculate_object_position, resolve_tileset
 from .base import Biome
-from .configs.tall_trees import DEFAULT_ROOM_CONFIG, ROOM_CONFIGS
+from .room_configs.tall_trees import DEFAULT_ROOM_CONFIG, ROOM_CONFIGS
 
 
 class Tall_trees(Biome):

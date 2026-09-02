@@ -32,6 +32,7 @@ class AssetPreloader:
                 AmberDroplet,
                 Bone,
                 Gear,
+                WaterRelayKey,
                 HealItem,
                 Tungsten,
                 Dyes,

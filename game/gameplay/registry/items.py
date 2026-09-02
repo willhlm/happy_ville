@@ -13,5 +13,6 @@ REGISTER_ITEMS = {
     'dyes': Dyes,
     'journal': Journal,
     'gear': Gear,
+    'water_relay_key': WaterRelayKey,
 
 }

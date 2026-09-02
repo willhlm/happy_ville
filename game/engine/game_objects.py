@@ -24,7 +24,7 @@ from gameplay.entities.shared.render.layer_resource_pool import LayerResourcePoo
 from gameplay.entities.areas import AreaManager
 
 from gameplay.world.transforms.world_transform_controller import WorldTransformController
-from gameplay.world.world_controller import WorldController
+from gameplay.world.controllers import WorldController
 
 class GameObjects():
     def __init__(self, game):

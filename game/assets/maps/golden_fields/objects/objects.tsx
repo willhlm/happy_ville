@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.8" tiledversion="1.8.2" name="objects" tilewidth="320" tileheight="320" tilecount="9" columns="0">
+<tileset version="1.8" tiledversion="1.8.2" name="objects" tilewidth="320" tileheight="320" tilecount="12" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="2">
   <image width="224" height="48" source="../../../sprites/entities/platforms/bridge/erect/bridge.png"/>
@@ -15,11 +15,13 @@
  </tile>
  <tile id="5">
   <properties>
-   <property name="id" value=""/>
+   <property name="socket_id" value=""/>
    <property name="item_id" value="gear"/>
-   <property name="target_level" value=""/>
-   <property name="target_state" value="active"/>
-   <property name="target_state_group" value="windmill"/>
+   <property name="consume_item" type="bool" value="true"/>
+   <property name="signal_id" value=""/>
+   <property name="signal_action" value="activate"/>
+   <property name="signal_value" value=""/>
+   <property name="sprite_path" value="assets/sprites/entities/interactables/gear_box/"/>
   </properties>
   <image width="32" height="32" source="../../../sprites/entities/interactables/gear_box/idle/gearbox.png"/>
  </tile>
@@ -62,7 +64,7 @@
    <property name="transition_direction" value=""/>
    <property name="transition_station" value=""/>
   </properties>
-  <image width="144" height="64" source="../../../sprites/entities/platforms/liftcar/body/idle/rhoutta_encounter1.png"/>
+  <image width="144" height="64" source="../../../sprites/entities/platforms/lifts/liftcar/body/idle/rhoutta_encounter1.png"/>
  </tile>
  <tile id="10">
   <properties>
@@ -76,5 +78,16 @@
    <property name="signal_id" value=""/>
   </properties>
   <image width="112" height="64" source="../../../sprites/entities/platforms/lifts/lift/body/idle/rhoutta_encounter1.png"/>
+ </tile>
+ <tile id="11">
+  <properties>
+   <property name="relay_id" value=""/>
+   <property name="state_level" value=""/>
+   <property name="wind_network" value="golden_fields_liquid"/>
+   <property name="initial_angle" type="int" value="0"/>
+   <property name="lever_signal_id" value=""/>
+   <property name="visual_angle_offset" type="int" value="0"/>
+  </properties>
+  <image width="144" height="64" source="../../../sprites/entities/visuals/environments/water_relay/idle/idle.png"/>
  </tile>
 </tileset>

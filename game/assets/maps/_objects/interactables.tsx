@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.8" tiledversion="1.8.2" name="interactables" tilewidth="224" tileheight="288" tilecount="20" columns="0">
+<tileset version="1.8" tiledversion="1.8.2" name="interactables" tilewidth="224" tileheight="288" tilecount="21" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <transformations hflip="1" vflip="0" rotate="0" preferuntransformed="0"/>
  <tile id="2">
@@ -103,5 +103,17 @@
    <property name="id" value=""/>
   </properties>
   <image width="80" height="176" source="../../sprites/entities/interactables/statues/boss/idle/statue1.png"/>
+ </tile>
+ <tile id="22">
+  <properties>
+   <property name="consume_item" type="bool" value="true"/>
+   <property name="item_id" value=""/>
+   <property name="signal_action" value=""/>
+   <property name="signal_id" value=""/>
+   <property name="signal_value" value=""/>
+   <property name="socket_id" value=""/>
+   <property name="sprite_path" value=""/>
+  </properties>
+  <image width="32" height="32" source="../../sprites/entities/interactables/item_sockets/item_socket.png"/>
  </tile>
 </tileset>

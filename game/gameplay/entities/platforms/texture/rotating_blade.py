@@ -1,4 +1,4 @@
-"""Collision platform used by Golden Fields rotating rigs."""
+"""Collision platform used by rotating rigs."""
 
 import math
 
@@ -6,7 +6,7 @@ from engine.utils import read_files
 from gameplay.entities.platforms.base.dynamic_platform import DynamicPlatform
 
 
-class GoldenfieldsRotatingBlade(DynamicPlatform):
+class RotatingBlade(DynamicPlatform):
     """A fixed-size platform whose centre orbits a visual rig."""
 
     def __init__(self, rig, index):

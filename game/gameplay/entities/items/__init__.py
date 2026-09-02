@@ -21,4 +21,6 @@ from .soul_essence import SoulEssence
 
 from .memory_shard import MemoryShard
 
-from .gear import Gear
+from .keys.gear import Gear
+from .keys.water_relay_key import WaterRelayKey
+

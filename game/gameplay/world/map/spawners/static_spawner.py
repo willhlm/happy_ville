@@ -279,7 +279,7 @@ class StaticSpawner(c.SpawnerCommon):
                     ):
                         raise ValueError(
                             f"Unknown Golden Fields wind network '{kwargs['wind_network']}'. "
-                            "Add it to GoldenFieldsController.WINDMILL_NETWORKS."
+                            "Add it to world.configs.golden_fields_systems.WINDMILL_NETWORKS."
                         )
                 self.game_objects.interactables_fg.add(
                     liquid_cls(object_position, self.game_objects, object_size, layer_name, **kwargs)

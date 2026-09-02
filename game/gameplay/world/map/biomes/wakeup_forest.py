@@ -3,7 +3,7 @@ from gameplay.entities.interactables import VerveTree
 from ..helpers import calculate_object_position, resolve_tileset
 from ..room_config import RoomConfig, merge_room_configs
 from .base import Biome
-from .configs.wakeup_forest import DEFAULT_ROOM_CONFIG, ROOM_CONFIGS
+from .room_configs.wakeup_forest import DEFAULT_ROOM_CONFIG, ROOM_CONFIGS
 
 
 class Wakeup_forest(Biome):

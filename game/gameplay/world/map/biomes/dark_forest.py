@@ -4,7 +4,7 @@ from gameplay.entities.visuals.environments import SmallTree_1, Vines_1
 
 from ..helpers import calculate_object_position, resolve_tileset
 from .base import Biome
-from .configs.dark_forest import DEFAULT_ROOM_CONFIG, ROOM_CONFIGS
+from .room_configs.dark_forest import DEFAULT_ROOM_CONFIG, ROOM_CONFIGS
 
 
 class Dark_forest(Biome):

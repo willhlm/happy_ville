@@ -529,7 +529,7 @@
                  "name":"platforms",
                  "objects":[
                         {
-                         "gid":34797,
+                         "gid":34801,
                          "height":64,
                          "id":344,
                          "name":"",
@@ -561,7 +561,78 @@
                  "draworder":"topdown",
                  "id":105,
                  "name":"interactables",
-                 "objects":[],
+                 "objects":[
+                        {
+                         "gid":31248,
+                         "height":32,
+                         "id":345,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"consume_item",
+                                 "type":"bool",
+                                 "value":true
+                                }, 
+                                {
+                                 "name":"item_id",
+                                 "type":"string",
+                                 "value":"gear"
+                                }, 
+                                {
+                                 "name":"signal_action",
+                                 "type":"string",
+                                 "value":"activate"
+                                }, 
+                                {
+                                 "name":"signal_id",
+                                 "type":"string",
+                                 "value":"golden_fields:activate_windmill"
+                                }, 
+                                {
+                                 "name":"signal_value",
+                                 "type":"string",
+                                 "value":"windmill_2"
+                                }, 
+                                {
+                                 "name":"socket_id",
+                                 "type":"string",
+                                 "value":"windmill_1_gear_socket"
+                                }, 
+                                {
+                                 "name":"sprite_path",
+                                 "type":"string",
+                                 "value":"assets\/sprites\/entities\/interactables\/item_sockets\/gear_box\/"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":1264,
+                         "y":432
+                        }, 
+                        {
+                         "gid":31240,
+                         "height":16,
+                         "id":346,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"interactable_item",
+                                 "type":"string",
+                                 "value":"gear"
+                                }, 
+                                {
+                                 "name":"spawn_mode",
+                                 "type":"string",
+                                 "value":"wild"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1408,
+                         "y":400
+                        }],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -572,45 +643,7 @@
                  "draworder":"topdown",
                  "id":104,
                  "name":"front",
-                 "objects":[
-                        {
-                         "gid":31219,
-                         "height":32,
-                         "id":316,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"id",
-                                 "type":"string",
-                                 "value":"windmill_1"
-                                }, 
-                                {
-                                 "name":"item_id",
-                                 "type":"string",
-                                 "value":"gear"
-                                }, 
-                                {
-                                 "name":"target_level",
-                                 "type":"string",
-                                 "value":"golden_fields_2"
-                                }, 
-                                {
-                                 "name":"target_state",
-                                 "type":"string",
-                                 "value":"active"
-                                }, 
-                                {
-                                 "name":"target_state_group",
-                                 "type":"string",
-                                 "value":"windmill"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":32,
-                         "x":1360,
-                         "y":400
-                        }],
+                 "objects":[],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -625,7 +658,7 @@
          "y":0
         }],
  "nextlayerid":108,
- "nextobjectid":345,
+ "nextobjectid":348,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -731,12 +764,12 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":31223,
+         "firstgid":31226,
          "source":"..\/_objects\/interactables.tsx"
         }, 
         {
          "columns":74,
-         "firstgid":31245,
+         "firstgid":31249,
          "image":"tilesets\/VP2_Main.png",
          "imageheight":768,
          "imagewidth":1184,
@@ -748,7 +781,7 @@
          "tilewidth":16
         }, 
         {
-         "firstgid":34797,
+         "firstgid":34801,
          "source":"..\/_objects\/platforms.tsx"
         }],
  "tilewidth":16,

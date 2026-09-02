@@ -1,41 +1,27 @@
 """Golden Fields-specific derived world state."""
 
+from gameplay.world.configs.golden_fields_systems import (
+    PISTON_PROFILES,
+    WINDMILL_NETWORKS,
+)
+
 
 class GoldenFieldsController:
     """Own Golden Fields windmill networks, not global wind itself."""
 
     SIGNAL_PREFIX = "golden_fields:wind_network:"
-    WINDMILL_NETWORKS = {
-        "golden_fields_liquid": {
-            "windmill_level": "golden_fields_2",
-            "windmill_ids": ("windmill_1", "windmill_2", "windmill_3"),
-            # These are world-state defaults, rather than map-load defaults.
-            # Consumers of this network can therefore be loaded before the
-            # map containing a particular windmill has been visited.
-            "windmill_initial_states": {
-                "windmill_1": "stuck",
-                "windmill_2": "idle",
-                "windmill_3": "active",
-            },
-        },
-    }
-    PISTON_PROFILES = {
-        "golden_fields_default": {
-            0: {"visible_time": 30, "hidden_time": 180, "warning_time": 0},
-            1: {"visible_time": 30, "hidden_time": 180, "warning_time": 0},
-            2: {"visible_time": 75, "hidden_time": 90, "warning_time": 0},
-            "all": {"mode": "always_visible"},
-        },
-    }
-
+    WINDMILL_ACTIVATION_SIGNAL = "golden_fields:activate_windmill"
     def __init__(self, game_objects, world_controller):
         self.game_objects = game_objects
         self.world_controller = world_controller
         self._networks = {}
         self._turning_counts = {}
 
-        for network_id, config in self.WINDMILL_NETWORKS.items():
+        for network_id, config in WINDMILL_NETWORKS.items():
             self.register_windmill_network(network_id, **config)
+        self.game_objects.signals.subscribe(
+            self.WINDMILL_ACTIVATION_SIGNAL, self._on_windmill_activation
+        )
         self.world_controller.subscribe(
             self.world_controller.WIND_AVAILABLE, self._on_global_wind_changed
         )
@@ -100,10 +86,30 @@ class GoldenFieldsController:
     def is_registered_windmill_network(self, network_id):
         return network_id in self._networks
 
+    def activate_windmill(self, windmill_id):
+        """Persistently activate an authored windmill by its network ID."""
+        windmill_id = str(windmill_id)
+        matches = [
+            config for config in self._networks.values()
+            if windmill_id in config["windmill_ids"]
+        ]
+        if len(matches) != 1:
+            raise KeyError(f"Unknown or ambiguous Golden Fields windmill '{windmill_id}'.")
+        config = matches[0]
+        self.game_objects.world_state.objects.set_value(
+            config["windmill_level"], "windmill", windmill_id, "active"
+        )
+        self.game_objects.signals.emit(windmill_id, state="active")
+        self.refresh()
+
+    def _on_windmill_activation(self, *, action, value, **kwargs):
+        if action == "activate":
+            self.activate_windmill(value)
+
     def piston_profile(self, profile_id, network_id, turning_count):
         """Return the authored piston profile for a network's turning count."""
         try:
-            profiles = self.PISTON_PROFILES[profile_id]
+            profiles = PISTON_PROFILES[profile_id]
         except KeyError as error:
             raise KeyError(f"Unknown Golden Fields piston profile '{profile_id}'.") from error
 

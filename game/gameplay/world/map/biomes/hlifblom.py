@@ -4,7 +4,7 @@ from gameplay.entities.visuals.environments import BackgroundCaveGrass, LjusMask
 
 from ..helpers import calculate_object_position, resolve_tileset
 from .base import Biome
-from .configs.hlifblom import DEFAULT_ROOM_CONFIG, ROOM_CONFIGS
+from .room_configs.hlifblom import DEFAULT_ROOM_CONFIG, ROOM_CONFIGS
 
 
 class Hlifblom(Biome):

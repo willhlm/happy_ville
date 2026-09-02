@@ -5,7 +5,8 @@ into named, runtime conditions (for example, whether the Golden Fields wind is
 currently blowing) and broadcasts only when the derived result changes.
 """
 
-from gameplay.world.golden_fields_controller import GoldenFieldsController
+from .golden_fields_controller import GoldenFieldsController
+from .water_relay_controller import WaterRelayController
 
 
 class WorldController:
@@ -29,6 +30,7 @@ class WorldController:
         self._region_controllers = []
         self.configure_global_wind(self.WIND_BOSS_ID)
         self.golden_fields = GoldenFieldsController(game_objects, self)
+        self.water_relays = WaterRelayController(game_objects, self)
 
     @classmethod
     def signal_name(cls, condition_id):

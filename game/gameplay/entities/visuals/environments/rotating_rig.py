@@ -1,14 +1,14 @@
-"""Golden Fields visual rig that drives generated blade platforms."""
+"""Visual rig that drives generated blade platforms."""
 
 import pygame
 
-from gameplay.entities.platforms.texture.goldenfields_rotating_blade import (
-    GoldenfieldsRotatingBlade,
+from gameplay.entities.platforms.texture.rotating_blade import (
+    RotatingBlade,
 )
 from gameplay.entities.visuals.environments.base.layered_objects import LayeredObjects
 
 
-class GoldenfieldRotatingRig(LayeredObjects):
+class RotatingRig(LayeredObjects):
     """A layered environment visual that owns rotating blade platforms."""
 
     animations = {}
@@ -31,7 +31,7 @@ class GoldenfieldRotatingRig(LayeredObjects):
         self._subscribed = True
 
         self.blades = [
-            GoldenfieldsRotatingBlade(self, index)
+            RotatingBlade(self, index)
             for index in range(self.blade_count)
         ]
         self._position_blades(self.angle)

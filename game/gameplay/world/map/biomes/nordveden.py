@@ -5,7 +5,7 @@ from gameplay.entities.visuals.environments import BackgroundCocoon, GeneralTree
 
 from ..helpers import calculate_object_position, resolve_tileset
 from .base import Biome
-from .configs.nordveden import DEFAULT_ROOM_CONFIG, ROOM_CONFIGS
+from .room_configs.nordveden import DEFAULT_ROOM_CONFIG, ROOM_CONFIGS
 
 
 class Nordveden(Biome):

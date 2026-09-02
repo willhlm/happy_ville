@@ -1,5 +1,6 @@
 from . import common as c
 from gameplay.entities.interactables.ability_ball.boss_reward_spawner import spawn_pending_boss_reward
+from gameplay.entities.interactables import ItemSocket
 
 
 class InteractableSpawner(c.SpawnerCommon):
@@ -103,5 +104,18 @@ class InteractableSpawner(c.SpawnerCommon):
                 self.game_objects.interactables.add(statue)
                 spawn_pending_boss_reward(self.game_objects, statue.id, statue.boss, statue.hitbox.center)
 
-            elif local_id == 190:
-                self.game_objects.platforms.add(c.BreakableBlockCharge_1(object_position, self.game_objects))
+            elif local_id == 22:
+                props = c.props_list_to_dict(properties)
+                self.game_objects.interactables.add(
+                    ItemSocket(
+                        object_position, self.game_objects,
+                        socket_id=props.get("socket_id", props.get("id")),
+                        item_id=props["item_id"],
+                        consume_item=props.get("consume_item", True),
+                        signal_id=props["signal_id"],
+                        signal_action=props.get("signal_action", "activate"),
+                        signal_value=props.get("signal_value"),
+                        sprite_path=props.get("sprite_path") or "assets/sprites/entities/interactables/gear_box/",
+                    )
+                )
+                

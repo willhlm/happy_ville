@@ -113,7 +113,10 @@ class InteractWorldItem(WorldItem):
 
     def on_pickup_interaction_complete(self, player):
         self.is_interacting = False
-        return self.try_pickup(player)
+        picked_up = self.try_pickup(player)
+        if picked_up and self.alive():
+            self.kill()
+        return picked_up
 
     def kill(self):
         super().kill()

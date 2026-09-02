@@ -1,7 +1,7 @@
 from ..helpers import calculate_object_position, resolve_tileset
 from ..room_config import RoomConfig, merge_room_configs
 from .base import Biome
-from .configs.rhoutta_encounter import DEFAULT_ROOM_CONFIG, ROOM_CONFIGS
+from .room_configs.rhoutta_encounter import DEFAULT_ROOM_CONFIG, ROOM_CONFIGS
 
 
 class Rhoutta_encounter(Biome):

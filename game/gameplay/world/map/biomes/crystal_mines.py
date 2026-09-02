@@ -5,7 +5,7 @@ from gameplay.entities.visuals.environments import Crystals
 
 from ..helpers import calculate_object_position, resolve_tileset
 from .base import Biome
-from .configs.crystal_mines import DEFAULT_ROOM_CONFIG, ROOM_CONFIGS
+from .room_configs.crystal_mines import DEFAULT_ROOM_CONFIG, ROOM_CONFIGS
 
 
 class Crystal_mines(Biome):

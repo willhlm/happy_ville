@@ -3,17 +3,17 @@ from engine.utils import read_files
 from gameplay.entities.items.base.item_definition import ItemDefinition
 from gameplay.entities.items.base.interact_world_item import InteractWorldItem
 
-class Gear(InteractWorldItem):
+class WaterRelayKey(InteractWorldItem):
     item_definition = ItemDefinition(
-        item_id='gear',
-        title='Gear',
-        description='a mysterious gear',
-        pickup_text='a mysterious gear, can perhaps be placed in an old machine',
+        item_id='water_relay_key',
+        title='Water Relay Key',
+        description='a key for the water relay mechanism',
+        pickup_text='a key for the water relay mechanism, can perhaps be used to activate a hidden switch',
         pickup_ui_image_path='assets/sprites/ui/overlay/items/placeholder/placeholder.png',
     )
     def __init__(self,pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
-        self.sprites = Gear.sprites
+        self.sprites = WaterRelayKey.sprites
         self.interact_component.apply_visual_spawn_mode()
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
@@ -24,6 +24,6 @@ class Gear(InteractWorldItem):
 
     @classmethod
     def pool(cls, game_objects):
-        cls.sprites = read_files.load_sprites_dict('assets/sprites/entities/items/gear/',game_objects)
+        cls.sprites = read_files.load_sprites_dict('assets/sprites/entities/items/keys/water_relay_key/',game_objects)
         cls.pool_interactable_sprite(game_objects)
         cls.pool_pickup_ui_images(game_objects)

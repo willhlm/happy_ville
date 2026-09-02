@@ -10,9 +10,10 @@ class WorldObjectState:
         'interactable_items': {},
         'breakable_platform': {},
         'bg_fade': {},
-        'gear_box': {},
+        'item_socket': {},
         'valve': {},
         'windmill': {},
+        'water_relay': {},
     }
 
     def __init__(self, state):

@@ -6,7 +6,7 @@ from gameplay.entities.visuals.environments import ThorMountain
 
 from ..helpers import calculate_object_position, resolve_tileset
 from .base import Biome
-from .configs.village import DEFAULT_ROOM_CONFIG, ROOM_CONFIGS
+from .room_configs.village import DEFAULT_ROOM_CONFIG, ROOM_CONFIGS
 
 
 class Village(Biome):

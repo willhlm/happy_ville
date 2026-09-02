@@ -1,4 +1,4 @@
-"""Golden Fields' windmill-powered piston platform."""
+"""Windmill-network-powered piston platform."""
 
 import pygame
 
@@ -7,13 +7,13 @@ from engine.utils import read_files
 from gameplay.entities.platforms.components.states_time_collision import Gone, Idle
 from gameplay.entities.platforms.texture.textured_platform import TexturedPlatform
 
-class GoldenfieldsPiston(TexturedPlatform):
-    """A standalone piston with a cycle driven by a Golden Fields wind network.
+class Piston(TexturedPlatform):
+    """A standalone piston with a cycle driven by a windmill network.
 
     Tiled properties:
-      wind_network: shared Golden Fields windmill-network ID (defaults to
+      wind_network: shared windmill-network ID (defaults to
         ``golden_fields_liquid``)
-      piston_profile: Golden Fields profile ID (defaults to
+      piston_profile: piston profile ID (defaults to
         ``golden_fields_default``)
     """
 
@@ -31,7 +31,7 @@ class GoldenfieldsPiston(TexturedPlatform):
         self.currentstate = Idle(self)
 
         self.timers = game_objects.timer_manager
-        self._timer_id = f"goldenfields_piston:{id(self)}"
+        self._timer_id = f"piston:{id(self)}"
         self.periodic_phase = float(props.get("periodic_phase", 0.0)) % 1.0
 
         controller = game_objects.world_controller.golden_fields

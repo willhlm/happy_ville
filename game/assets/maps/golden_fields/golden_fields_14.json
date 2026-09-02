@@ -685,7 +685,36 @@
                          "visible":true,
                          "width":304,
                          "x":1648,
-                         "y":848
+                         "y":864
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
+                 "x":0,
+                 "y":0
+                }, 
+                {
+                 "draworder":"topdown",
+                 "id":106,
+                 "name":"front",
+                 "objects":[
+                        {
+                         "gid":31225,
+                         "height":64,
+                         "id":643,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"relay_id",
+                                 "type":"string",
+                                 "value":"water_relay_1"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":144,
+                         "x":1104,
+                         "y":1632
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -699,7 +728,7 @@
                  "name":"platforms",
                  "objects":[
                         {
-                         "gid":31243,
+                         "gid":31249,
                          "height":64,
                          "id":634,
                          "name":"",
@@ -717,7 +746,7 @@
                          "y":1728
                         }, 
                         {
-                         "gid":31243,
+                         "gid":31249,
                          "height":64,
                          "id":635,
                          "name":"",
@@ -744,7 +773,96 @@
                  "draworder":"topdown",
                  "id":104,
                  "name":"interactables",
-                 "objects":[],
+                 "objects":[
+                        {
+                         "gid":31236,
+                         "height":32,
+                         "id":645,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"ID",
+                                 "type":"string",
+                                 "value":"water_relay_1"
+                                }, 
+                                {
+                                 "name":"action",
+                                 "type":"string",
+                                 "value":"rotate"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":1184,
+                         "y":1712
+                        }, 
+                        {
+                         "gid":31248,
+                         "height":32,
+                         "id":647,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"consume_item",
+                                 "type":"bool",
+                                 "value":true
+                                }, 
+                                {
+                                 "name":"item_id",
+                                 "type":"string",
+                                 "value":"water_relay_key"
+                                }, 
+                                {
+                                 "name":"signal_action",
+                                 "type":"string",
+                                 "value":"enable"
+                                }, 
+                                {
+                                 "name":"signal_id",
+                                 "type":"string",
+                                 "value":"water_relay_1"
+                                }, 
+                                {
+                                 "name":"socket_id",
+                                 "type":"string",
+                                 "value":"water_relay_1_socket"
+                                }, 
+                                {
+                                 "name":"sprite_path",
+                                 "type":"string",
+                                 "value":"assets\/sprites\/entities\/interactables\/item_sockets\/gear_box\/"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":1072,
+                         "y":1696
+                        }, 
+                        {
+                         "gid":31240,
+                         "height":16,
+                         "id":648,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"interactable_item",
+                                 "type":"string",
+                                 "value":"water_relay_key"
+                                }, 
+                                {
+                                 "name":"spawn_mode",
+                                 "type":"string",
+                                 "value":"wild"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":992,
+                         "y":1696
+                        }],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -758,8 +876,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":106,
- "nextobjectid":643,
+ "nextlayerid":107,
+ "nextobjectid":651,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -865,11 +983,11 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":31221,
+         "firstgid":31226,
          "source":"..\/_objects\/interactables.tsx"
         }, 
         {
-         "firstgid":31243,
+         "firstgid":31249,
          "source":"..\/_objects\/platforms.tsx"
         }],
  "tilewidth":16,
