@@ -15,7 +15,7 @@ class OptionMenu(BaseUI):
         OptionMenu.menu_ui = OptionMenuLoader(game_objects)
 
     def _update_arrow(self):
-        button = self.menu_ui.buttons[self.current_button]
+        button = self.menu_ui.menu_buttons[self.current_button]
         bx, by, bw, bh = button.rect
 
         for arrow in self.menu_ui.arrows:
@@ -27,7 +27,7 @@ class OptionMenu(BaseUI):
 
     def update_render(self, dt):
         self.game.game_objects.ui.menu.update_time(dt)
-        self.menu_ui.buttons[self.current_button].active()
+        self.menu_ui.menu_buttons[self.current_button].active()
         for arrow in self.menu_ui.arrows:
             arrow.update(dt)#make them move back and forth
 
@@ -36,7 +36,7 @@ class OptionMenu(BaseUI):
         self.game.game_objects.ui.menu.render_background(self.game.screen_manager.screen)
 
         #blit buttons
-        for b in self.menu_ui.buttons:
+        for b in self.menu_ui.menu_buttons:
             b.render(self.game.screen_manager.screen)
 
         for arrow in self.menu_ui.arrows:
@@ -50,11 +50,11 @@ class OptionMenu(BaseUI):
         
         # Exit the previous button (if there was one)
         if self.previous_button is not None and self.previous_button != self.current_button:
-            self.menu_ui.buttons[self.previous_button].on_exit()
+            self.menu_ui.menu_buttons[self.previous_button].on_exit()
         
         # Enter the new button (if it's different)
         if self.previous_button != self.current_button:
-            self.menu_ui.buttons[self.current_button].on_enter()
+            self.menu_ui.menu_buttons[self.current_button].on_enter()
                 
         # Update previous button tracker
         self.previous_button = self.current_button 
@@ -65,12 +65,12 @@ class OptionMenu(BaseUI):
             if input.name == 'up':#up
                 self.current_button -= 1
                 if self.current_button < 0:
-                    self.current_button = len(self.menu_ui.buttons) - 1
+                    self.current_button = len(self.menu_ui.menu_buttons) - 1
                 self._update_arrow()
                 self._update_button()
             elif input.name == 'down':#down
                 self.current_button += 1
-                if self.current_button >= len(self.menu_ui.buttons):
+                if self.current_button >= len(self.menu_ui.menu_buttons):
                     self.current_button = 0
                 self._update_arrow()
                 self._update_button()
@@ -85,11 +85,13 @@ class OptionMenu(BaseUI):
             self.game.state_manager.enter_state('option_display')
         elif self.current_button == 1:#sounds
             self.game.state_manager.enter_state('option_sounds')
-        if self.current_button == 2:
-            self.game.RENDER_FPS_FLAG = not self.game.RENDER_FPS_FLAG
+        elif self.current_button == 2:#controller
+            self.game.state_manager.enter_state('option_controller')
         elif self.current_button == 3:
+            self.game.RENDER_FPS_FLAG = not self.game.RENDER_FPS_FLAG
+        elif self.current_button == 4:
             self.game.RENDER_HITBOX_FLAG = not self.game.RENDER_HITBOX_FLAG
 
     def on_exit(self):
-        for b in self.menu_ui.buttons:
+        for b in self.menu_ui.menu_buttons:
             b.on_exit()

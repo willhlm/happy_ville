@@ -28,7 +28,15 @@ class Game():
         self.RENDER_FPS_FLAG = True
         self.RENDER_HITBOX_FLAG = True
         self.DEBUG_PLAYER_COLLISIONS = False
-        pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.KEYUP, pygame.JOYAXISMOTION, pygame.JOYHATMOTION, pygame.JOYBUTTONUP, pygame.JOYBUTTONDOWN])
+        pygame.event.set_allowed([
+            pygame.QUIT,
+            pygame.KEYDOWN,
+            pygame.KEYUP,
+            pygame.CONTROLLERDEVICEADDED,
+            pygame.CONTROLLERDEVICEREMOVED,
+            pygame.CONTROLLERBUTTONDOWN,
+            pygame.CONTROLLERBUTTONUP,
+        ])
         pygame.event.set_blocked([pygame.TEXTINPUT, pygame.MOUSEMOTION, pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP])#for some reason, there is a text input here and there. So, blocking it
 
     def event_loop(self, dt):

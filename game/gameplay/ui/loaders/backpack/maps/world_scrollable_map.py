@@ -12,7 +12,11 @@ class ScrollableWorldMapLoader(BaseScrollableMapLoader):
 
     def load_data(self):
         self.markers = self.load_markers()
-        self.ui_elements = self.shared_objects
+        self.ui_elements = [
+            element
+            for element in self.shared_elements
+            if element not in self.controller_prompts.values()
+        ]
         self.objects = self.markers
 
     def load_markers(self):

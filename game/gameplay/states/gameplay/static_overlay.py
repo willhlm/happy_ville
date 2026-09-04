@@ -39,8 +39,7 @@ class StaticOverlay(Gameplay):#when player obtaines a new ability, pick up inetr
         self.overlay.clear(0, 0, 0, 0)
         self.game.display.render(self.ui_loader.bg, self.overlay)
         self.render_images()
-        self.render_text()
-        self.render_buttons()
+        self.render_elements()
         self.fade.render(
             self.overlay.texture,
             self.game.screen_manager.screen,
@@ -52,13 +51,9 @@ class StaticOverlay(Gameplay):#when player obtaines a new ability, pick up inetr
         for image in self.ui_loader.images:
             image.render(self.overlay)
 
-    def render_text(self):
-        for text in self.ui_loader.texts:
-            text.render(self.overlay)
-
-    def render_buttons(self):
-        for button in self.ui_loader.buttons.values():
-            button.render(self.overlay)
+    def render_elements(self):
+        for element in [*self.ui_loader.shared_elements, *self.ui_loader.page_elements]:
+            element.render(self.overlay)
 
     def render_in(self):
         self.fade.step(2)

@@ -24,5 +24,6 @@ from .elements.button import Button
 from .elements.text import Text
 from .elements.slider import Slider
 from .elements.image import Image
+from .elements.result_stamp import ResultStamp
 
 from .elements.controllers.controllers import Controllers

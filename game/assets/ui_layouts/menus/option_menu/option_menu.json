@@ -17,36 +17,12 @@
         {
          "draworder":"topdown",
          "id":2,
-         "name":"elements",
+         "name":"shared",
          "objects":[
                 {
-                 "gid":1486,
-                 "height":10,
-                 "id":15,
-                 "name":"",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":19,
-                 "x":400,
-                 "y":128
-                }, 
-                {
-                 "gid":1489,
-                 "height":10,
-                 "id":16,
-                 "name":"",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":19,
-                 "x":224,
-                 "y":128
-                }, 
-                {
-                 "gid":1485,
+                 "gid":10,
                  "height":32,
-                 "id":18,
+                 "id":22,
                  "name":"",
                  "properties":[
                         {
@@ -59,12 +35,12 @@
                  "visible":true,
                  "width":128,
                  "x":256,
-                 "y":144
+                 "y":96
                 }, 
                 {
-                 "gid":1485,
+                 "gid":10,
                  "height":32,
-                 "id":19,
+                 "id":23,
                  "name":"",
                  "properties":[
                         {
@@ -77,12 +53,12 @@
                  "visible":true,
                  "width":128,
                  "x":256,
-                 "y":192
+                 "y":144
                 }, 
                 {
-                 "gid":1485,
+                 "gid":10,
                  "height":32,
-                 "id":20,
+                 "id":24,
                  "name":"",
                  "properties":[
                         {
@@ -98,9 +74,9 @@
                  "y":240
                 }, 
                 {
-                 "gid":1485,
+                 "gid":10,
                  "height":32,
-                 "id":21,
+                 "id":25,
                  "name":"",
                  "properties":[
                         {
@@ -114,6 +90,48 @@
                  "width":128,
                  "x":256,
                  "y":288
+                }, 
+                {
+                 "gid":12,
+                 "height":10,
+                 "id":26,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":19,
+                 "x":224,
+                 "y":80
+                }, 
+                {
+                 "gid":11,
+                 "height":10,
+                 "id":27,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":19,
+                 "x":400,
+                 "y":80
+                }, 
+                {
+                 "gid":10,
+                 "height":32,
+                 "id":28,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"Controller"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":128,
+                 "x":256,
+                 "y":192
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -122,28 +140,15 @@
          "y":0
         }],
  "nextlayerid":3,
- "nextobjectid":22,
+ "nextobjectid":29,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
  "tileheight":16,
  "tilesets":[
         {
-         "columns":53,
          "firstgid":1,
-         "image":"..\/..\/..\/Sprites\/UI\/menus\/option_menu\/idle\/lighitnign_weather01.png",
-         "imageheight":448,
-         "imagewidth":855,
-         "margin":0,
-         "name":"lighitnign_weather01",
-         "spacing":0,
-         "tilecount":1484,
-         "tileheight":16,
-         "tilewidth":16
-        }, 
-        {
-         "firstgid":1485,
-         "source":"option_menu_UI.tsx"
+         "source":"..\/..\/shared.tsx"
         }],
  "tilewidth":16,
  "type":"map",

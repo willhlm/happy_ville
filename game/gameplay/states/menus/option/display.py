@@ -27,7 +27,7 @@ class OptionDisplay(BaseUI):
         OptionDisplay.menu_ui = OptionDisplayLoader(game_objects)
 
     def _update_arrow(self):
-        button = self.menu_ui.buttons[self.current_button]
+        button = self.menu_ui.option_labels[self.current_button]
         bx, by, bw, bh = button.rect
 
         for index, arrow in enumerate(self.menu_ui.arrows):
@@ -41,10 +41,10 @@ class OptionDisplay(BaseUI):
     def _update_button(self):
         """Handle button state transitions"""
         if self.previous_button is not None and self.previous_button != self.current_button:
-            self.menu_ui.buttons[self.previous_button].on_exit()
+            self.menu_ui.option_labels[self.previous_button].on_exit()
         
         if self.previous_button != self.current_button:
-            self.menu_ui.buttons[self.current_button].on_enter()
+            self.menu_ui.option_labels[self.current_button].on_enter()
         
         self.previous_button = self.current_button
 
@@ -55,7 +55,7 @@ class OptionDisplay(BaseUI):
             arrow.update(dt)
         
         # Update active button animation
-        self.menu_ui.buttons[self.current_button].active()
+        self.menu_ui.option_labels[self.current_button].active()
 
     def _get_option_display_text(self, button_index):
         """Get the current value text for each option"""
@@ -76,7 +76,7 @@ class OptionDisplay(BaseUI):
         self.game.game_objects.ui.menu.render_background(self.game.screen_manager.screen)
 
         # Render buttons with their current values
-        for i, button in enumerate(self.menu_ui.buttons):
+        for i, button in enumerate(self.menu_ui.option_labels):
             button.render(self.game.screen_manager.screen)
             
             # Render the current option value to the right of the button
@@ -103,13 +103,13 @@ class OptionDisplay(BaseUI):
             if input.name == 'up':  # Up
                 self.current_button -= 1
                 if self.current_button < 0:
-                    self.current_button = len(self.menu_ui.buttons) - 1
+                    self.current_button = len(self.menu_ui.option_labels) - 1
                 self._update_arrow()
                 self._update_button()
                 
             elif input.name == 'down':  # Down
                 self.current_button += 1
-                if self.current_button >= len(self.menu_ui.buttons):
+                if self.current_button >= len(self.menu_ui.option_labels):
                     self.current_button = 0
                 self._update_arrow()
                 self._update_button()

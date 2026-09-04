@@ -20,7 +20,7 @@ class InventoryUI(BaseUI):
     def update(self, dt):
         super().update(dt)
         self.iventory_UI.items['sword'].animation.update(dt)
-        for button in self.iventory_UI.buttons.values():
+        for button in self.iventory_UI.controller_prompts.values():
             button.update(dt)
 
     def render(self):
@@ -95,7 +95,7 @@ class InventoryUI(BaseUI):
             )
 
     def blit_bottons(self):
-        for index, button in enumerate(self.iventory_UI.buttons.values()):
+        for index, button in enumerate(self.iventory_UI.controller_prompts.values()):
             self.game_objects.game.display.render(
                 button.image,
                 self.game_objects.ui.backpack.screen,
@@ -113,13 +113,13 @@ class InventoryUI(BaseUI):
             if input.name == 'select':
                 self.exit_state()
             elif input.name == 'rb':
-                self.iventory_UI.buttons['rb'].currentstate.handle_input('press')
+                self.iventory_UI.controller_prompts['rb'].currentstate.handle_input('press')
                 self.next_page(screen_alpha=230)
             elif input.name == 'lb':
-                self.iventory_UI.buttons['lb'].currentstate.handle_input('press')
+                self.iventory_UI.controller_prompts['lb'].currentstate.handle_input('press')
                 self.previous_page(screen_alpha=230)
             elif input.name == 'a' or input.name == 'return':
-                self.iventory_UI.buttons['a'].currentstate.handle_input('press')
+                self.iventory_UI.controller_prompts['a'].currentstate.handle_input('press')
                 self.use_item()
             elif input.name in ('up', 'down', 'left', 'right'):
                 next_container = self.find_closest_position(input.name)
@@ -129,7 +129,7 @@ class InventoryUI(BaseUI):
 
         if input.released:
             if input.name == 'a' or input.name == 'return':
-                self.iventory_UI.buttons['a'].currentstate.handle_input('release')
+                self.iventory_UI.controller_prompts['a'].currentstate.handle_input('release')
 
     def find_closest_position(self, direction):
         return find_closest_in_direction(

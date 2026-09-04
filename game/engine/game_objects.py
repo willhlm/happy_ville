@@ -1,7 +1,8 @@
 import pygame
 from engine.lights import LightManager
 from engine.utils import read_files
-from engine.system import activation_manager, time_field_manager, save_load, asset_preloader, controller, timer, signals, time_manager, font_manager, input_interpreter, transition_controller, sequence_manager, deferred_texture_manager, map_resource_registry, stimuli
+from engine.system import activation_manager, time_field_manager, save_load, asset_preloader, timer, signals, time_manager, font_manager, input_interpreter, transition_controller, sequence_manager, deferred_texture_manager, map_resource_registry, stimuli
+from engine import controller
 from engine import groups
 from engine.sound import game_audio
 from gameplay.entities.player import player

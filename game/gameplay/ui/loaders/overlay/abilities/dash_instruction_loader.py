@@ -20,40 +20,43 @@ class DashInstructionLoader(BaseLoader):
             local_id = self.get_object_local_id(obj, 'dash_UI')
 
             if local_id == 4:
-                self.buttons['a'] = Controllers(
+                prompt = Controllers(
                     topleft_object_position,
                     self.game_objects,
                     'a',
-                    self.game_objects.controller.controller_type[-1],
                 )
+                self.controller_prompts['a'] = prompt
+                self.page_elements.append(prompt)
             elif local_id == 5:
-                self.buttons['b'] = Controllers(
+                prompt = Controllers(
                     topleft_object_position,
                     self.game_objects,
                     'b',
-                    self.game_objects.controller.controller_type[-1],
                 )
+                self.controller_prompts['b'] = prompt
+                self.page_elements.append(prompt)
             elif local_id == 6:
-                self.buttons['lb'] = Controllers(
+                prompt = Controllers(
                     topleft_object_position,
                     self.game_objects,
                     'lb',
-                    self.game_objects.controller.controller_type[-1],
                 )
+                self.controller_prompts['lb'] = prompt
+                self.page_elements.append(prompt)
             elif local_id == 7:
-                self.buttons['rb'] = Controllers(
+                prompt = Controllers(
                     topleft_object_position,
                     self.game_objects,
                     'rb',
-                    self.game_objects.controller.controller_type[-1],
                 )
+                self.controller_prompts['rb'] = prompt
+                self.page_elements.append(prompt)
             elif local_id == 10:
-                self.register_text_field(
-                    Text(
-                        self.game_objects,
-                        properties['text'],
-                        topleft_object_position,
-                        size=object_size,
-                    )
+                text = Text(
+                    self.game_objects,
+                    properties['text'],
+                    topleft_object_position,
+                    size=object_size,
                 )
+                self.page_elements.append(text)
  

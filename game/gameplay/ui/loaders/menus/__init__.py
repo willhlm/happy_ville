@@ -4,3 +4,4 @@ from .option_menu import OptionMenuLoader
 from .option_sounds import OptionSoundsLoader
 from .pause_menu import PauseMenuLoader
 from .title_menu import TitleMenuLoader
+from .option_controller import ControllerMenuLoader
