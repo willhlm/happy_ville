@@ -5,48 +5,65 @@ from engine.utils.functions import sign
 from gameplay.entities.visuals.effects.fade_effect import FadeEffect
 from gameplay.entities.visuals.cosmetics import Dusts
 
+
 class DashGroundState(CompositeState):
     def __init__(self, entity):
         super().__init__(entity)
-        self.phases = {'pre': DashGroundPre(entity), 'main': DashGroundMain(entity), 'post': DashGroundPost(entity)}
+        self.phases = {
+            "pre": DashGroundPre(entity),
+            "main": DashGroundMain(entity),
+            "post": DashGroundPost(entity),
+        }
 
     def common_values(self):
         self.dir = self.entity.dir.copy()
 
     def allowed(self):
-        return self.entity.flags['grounddash']
-    
-    def exit(self):#called when exiting the composite state
+        return self.entity.flags["grounddash"]
+
+    def exit(self):  # called when exiting the composite state
         super().exit()
-        self.entity.movement_modifier.remove_modifier('dash')
-        self.entity.shader_state.remove_shader('mb')
+        self.entity.movement_modifier.remove_modifier("dash")
+        self.entity.shader_state.remove_shader("mb")
+
 
 class DashGroundPre(PhaseBase):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
 
     def enter(self, **kwarg):
-        self.entity.animation.play('dash_ground_pre')
+        self.entity.animation.play("dash_ground_pre")
         self.dash_length = C.dash_length
         if int(self.entity.velocity[0]) == 0:
             self.dash_length += 1
-        self.entity.shader_state.add_shader('mb')
-        self.entity.game_objects.cosmetics.add(Dusts(self.entity.hitbox.center, self.entity.game_objects, dir = self.entity.dir, state = 'one'))
+        self.entity.shader_state.add_shader("mb")
+        self.entity.game_objects.cosmetics.add(
+            Dusts(
+                self.entity.hitbox.center,
+                self.entity.game_objects,
+                dir=self.entity.dir,
+                state="one",
+            )
+        )
         self.entity.end_coyote_time()
         self.jump_dash_timer = C.jump_dash_timer
-        self.entity.movement_modifier.add_modifier('dash', entity = self.entity, authoritative = True)
-        self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0], vol = 1)
+        self.entity.movement_modifier.add_modifier(
+            "dash", entity=self.entity, authoritative=True
+        )
+        self.entity.game_objects.sound.play_sfx(self.entity.sounds["dash"][0], vol=1)
         self.wall_buffer = 3
-        self.entity.dir[0] = kwarg.get('dir', self.entity.dir[0])
+        self.entity.dir[0] = kwarg.get("dir", self.entity.dir[0])
 
     def handle_movement(self, event):
         self.entity.acceleration[0] = 0
 
     def update(self, dt):
         self.jump_dash_timer -= dt
-        self.entity.game_objects.cosmetics.add(FadeEffect(self.entity, alpha = 100))
+        self.entity.game_objects.cosmetics.add(FadeEffect(self.entity, alpha=100))
         self.dash_length -= dt
-        self.entity.game_objects.particles.emit("spirit_aura", pos = self.entity.hitbox.center, n = 1, colour = C.spirit_colour)
+        self.entity.game_objects.particles.emit(
+            "spirit_aura", pos=self.entity.hitbox.center, n=1, colour=C.spirit_colour
+        )
         self.exit_state()
 
     def exit_state(self):
@@ -54,21 +71,21 @@ class DashGroundPre(PhaseBase):
             self.increase_phase()
 
     def handle_input(self, input, **kwarg):
-        if input == 'interrupt':
-            self.enter_state('idle')
+        if input == "interrupt":
+            self.enter_state("idle")
 
     def increase_phase(self):
-        self.enter_phase('main')
+        self.enter_phase("main")
 
     def handle_press_input(self, input):
-        if input.name == 'a':
+        if input.name == "jump":
             input.processed()
             if self.jump_dash_timer > 0:
-                self.enter_state('dash_jump', to_dash_jump = True)
+                self.enter_state("dash_jump", to_dash_jump=True)
 
     def enter_state(self, state, **kwarg):
-        self.entity.shader_state.remove_shader('mb')
-        self.entity.movement_modifier.remove_modifier('dash')
+        self.entity.shader_state.remove_shader("mb")
+        self.entity.movement_modifier.remove_modifier("dash")
         super().enter_state(state, **kwarg)
 
     def consume_contact_state(self):
@@ -77,9 +94,9 @@ class DashGroundPre(PhaseBase):
             if self.wall_buffer > 0:
                 return
             if self.entity.acceleration[0] != 0:
-                self.enter_state('wall_glide')
+                self.enter_state("wall_glide")
             else:
-                self.enter_state('idle')
+                self.enter_state("idle")
 
 
 class DashGroundMain(DashGroundPre):
@@ -87,7 +104,7 @@ class DashGroundMain(DashGroundPre):
         super().__init__(entity)
 
     def enter(self, **kwarg):
-        self.entity.animation.play('dash_ground_main')
+        self.entity.animation.play("dash_ground_main")
         self.dash_length = C.dash_length
         self.jump_dash_timer = C.jump_dash_timer
         self.wall_buffer = 3
@@ -96,13 +113,15 @@ class DashGroundMain(DashGroundPre):
         input.processed()
 
     def increase_phase(self):
-        self.entity.flags['grounddash'] = False
-        self.entity.game_objects.timer_manager.start_timer(C.ground_dash_timer, self.entity.on_grounddash_timout, 'dash_timeout')
-        self.entity.shader_state.remove_shader('mb')
-        if self.entity.game_objects.controller.is_held('lb'):
-            self.enter_state('sprint')
+        self.entity.flags["grounddash"] = False
+        self.entity.game_objects.timer_manager.start_timer(
+            C.ground_dash_timer, self.entity.on_grounddash_timout, "dash_timeout"
+        )
+        self.entity.shader_state.remove_shader("mb")
+        if self.entity.game_objects.input_manager.is_held("gameplay", "dash"):
+            self.enter_state("sprint")
         else:
-            self.enter_phase('post')
+            self.enter_phase("post")
 
 
 class DashGroundPost(DashGroundPre):
@@ -110,8 +129,8 @@ class DashGroundPost(DashGroundPre):
         super().__init__(entity)
 
     def enter(self, **kwarg):
-        self.entity.animation.play('dash_ground_post')
-        self.entity.movement_modifier.remove_modifier('dash')
+        self.entity.animation.play("dash_ground_post")
+        self.entity.movement_modifier.remove_modifier("dash")
         self.wall_buffer = 3
 
     def update(self, dt):
@@ -126,15 +145,15 @@ class DashGroundPost(DashGroundPre):
 
     def increase_phase(self):
         if self.entity.acceleration[0] == 0:
-            self.enter_state('idle')
+            self.enter_state("idle")
         else:
-            self.enter_state('run')
+            self.enter_state("run")
 
     def handle_press_input(self, input):
-        if input.name == 'a':
-            self.enter_state('jump')
+        if input.name == "jump":
+            self.enter_state("jump")
             input.processed()
 
     def enter_state(self, state, **kwarg):
-        self.entity.shader_state.remove_shader('mb')
+        self.entity.shader_state.remove_shader("mb")
         self.entity.currentstate.enter_state(state, **kwarg)

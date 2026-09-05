@@ -1,15 +1,24 @@
-from gameplay.ui.loaders import ControllerMenuLoader
+from gameplay.ui.loaders import OptionControllerLoader
+from gameplay.ui.managers.backpack_pages.navigation import find_closest_in_direction
 from ..base.base_ui import BaseUI
 
 
-class ControllerMenu(BaseUI):
+class OptionController(BaseUI):
     """Controller-options screen for rebinding the core gameplay actions."""
 
-    ACTIONS = ("a", "x", "lb", "select", "rb")
+    ACTIONS_BY_LABEL = {
+        "Jump": "jump",
+        "Attack": "attack",
+        "Interact": "interact",
+        "Ability": "ability",
+        "Dash": "dash",
+        "Ability wheel": "ability_select",
+        "Inventory": "inventory",
+    }
 
     def __init__(self, game):
         super().__init__(game)
-        self.menu_ui = ControllerMenu.menu_ui
+        self.menu_ui = OptionController.menu_ui
         self.current_button = 0
         self.previous_button = None
         self.waiting_for_binding = False
@@ -18,22 +27,21 @@ class ControllerMenu(BaseUI):
 
     @staticmethod
     def pool(game_objects):
-        ControllerMenu.menu_ui = ControllerMenuLoader(game_objects)
+        OptionController.menu_ui = OptionControllerLoader(game_objects)
 
     def _update_arrow(self):
-        button = self.menu_ui.option_labels[self.current_button]
+        button = self.menu_ui.navigation_items[self.current_button]
         bx, by, bw, bh = button.rect
-        for index, arrow in enumerate(self.menu_ui.arrows):
-            result_x = self.menu_ui.results[index][0]
+        for arrow in self.menu_ui.arrows:
             if arrow.flip:
-                arrow.set_pos((result_x + bw + 10, by))
+                arrow.set_pos((bx + bw + 10, by))
             else:
                 arrow.set_pos((bx - arrow.rect.width - 10, by))
         self.game.game_objects.sound.play_ui_sound("on_select")
 
     def update_render(self, dt):
         self.game.game_objects.ui.menu.update_time(dt)
-        self.menu_ui.option_labels[self.current_button].active()
+        self.menu_ui.navigation_items[self.current_button].active()
         for arrow in self.menu_ui.arrows:
             arrow.update(dt)
 
@@ -42,20 +50,25 @@ class ControllerMenu(BaseUI):
         self.game.game_objects.ui.menu.render_background(
             self.game.screen_manager.screen
         )
-        for index, label in enumerate(self.menu_ui.option_labels):
+        for label, result_position in zip(
+            self.menu_ui.option_labels, self.menu_ui.results
+        ):
             label.render(self.game.screen_manager.screen)
             value = (
                 "PRESS A KEY..."
-                if self.waiting_for_binding and index == self.current_button
-                else self._binding_text(index)
+                if self.waiting_for_binding
+                and self.menu_ui.navigation_items[self.current_button] is label
+                else self._binding_text(label)
             )
             self.game.game_objects.font.render(
                 self.game.screen_manager.screen,
                 value,
                 letter_frame=None,
                 color=[255, 255, 255, 255],
-                position=self.menu_ui.results[index],
+                position=result_position,
             )
+        for button in self.menu_ui.menu_buttons:
+            button.render(self.game.screen_manager.screen)
         for arrow in self.menu_ui.arrows:
             self.game.display.render(
                 arrow.image,
@@ -70,9 +83,9 @@ class ControllerMenu(BaseUI):
             self.previous_button is not None
             and self.previous_button != self.current_button
         ):
-            self.menu_ui.option_labels[self.previous_button].on_exit()
+            self.menu_ui.navigation_items[self.previous_button].on_exit()
         if self.previous_button != self.current_button:
-            self.menu_ui.option_labels[self.current_button].on_enter()
+            self.menu_ui.navigation_items[self.current_button].on_enter()
         self.previous_button = self.current_button
 
     def handle_events(self, input):
@@ -84,37 +97,58 @@ class ControllerMenu(BaseUI):
         if self.waiting_for_binding or not input.pressed:
             return
         if input.name == "up":
-            self.current_button = (self.current_button - 1) % len(
-                self.menu_ui.option_labels
-            )
-            self._update_arrow()
-            self._update_button()
+            self.move_selection("up")
         elif input.name == "down":
-            self.current_button = (self.current_button + 1) % len(
-                self.menu_ui.option_labels
-            )
-            self._update_arrow()
-            self._update_button()
+            self.move_selection("down")
+        elif input.name == "left":
+            self.move_selection("left")
+        elif input.name == "right":
+            self.move_selection("right")
         elif input.name == "start":
             self.game.state_manager.exit_state()
         elif input.name in ("return", "a"):
             self.game.game_objects.sound.play_ui_sound("select")
-            self.begin_rebind()
+            self.activate_current_item()
 
-    def begin_rebind(self):
+    def move_selection(self, direction):
+        items = self.menu_ui.navigation_items
+        target = find_closest_in_direction(items[self.current_button], items, direction)
+        if target is None:
+            return
+        self.current_button = items.index(target)
+        self._update_arrow()
+        self._update_button()
+
+    def activate_current_item(self):
+        item = self.menu_ui.navigation_items[self.current_button]
+        if item in self.menu_ui.option_labels:
+            self.begin_rebind(item)
+        elif item.text == "Reset to default":
+            self.game.game_objects.input_manager.reset_context("gameplay")
+        else:
+            self.game.state_manager.exit_state()
+
+    def begin_rebind(self, label):
         self.waiting_for_binding = True
-        self.game.game_objects.controller.begin_rebind(
-            self.ACTIONS[self.current_button]
+        self.game.game_objects.input_manager.begin_rebind(
+            "gameplay", self.ACTIONS_BY_LABEL[label.text]
         )
 
-    def _binding_text(self, index):
+    def _binding_text(self, label):
         controller = self.game.game_objects.controller
         device = "keyboard" if controller.prompt_type == "keyboard" else "controller"
-        return (
-            controller.binding_name(device, self.ACTIONS[index]) or "UNBOUND"
-        ).upper()
+        binding = self.game.game_objects.input_manager.binding_name(
+            "gameplay", self.ACTIONS_BY_LABEL[label.text], device
+        )
+        return (binding or "UNBOUND").upper()
 
     def on_exit(self):
-        self.game.game_objects.controller.cancel_rebind()
-        for label in self.menu_ui.option_labels:
-            label.on_exit()
+        self._cleanup()
+
+    def on_pop(self):
+        self._cleanup()
+
+    def _cleanup(self):
+        self.game.game_objects.input_manager.cancel_rebind()
+        for item in self.menu_ui.navigation_items:
+            item.on_exit()

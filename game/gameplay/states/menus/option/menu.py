@@ -81,17 +81,22 @@ class OptionMenu(BaseUI):
                 self.update_options()
 
     def update_options(self):
-        if self.current_button == 0:#resolution
+        if self.current_button == 0:#sounds
+            self.game.state_manager.enter_state('option_game')     
+        elif self.current_button == 1:#display
             self.game.state_manager.enter_state('option_display')
-        elif self.current_button == 1:#sounds
-            self.game.state_manager.enter_state('option_sounds')
-        elif self.current_button == 2:#controller
+        elif self.current_button == 2:#sounds
+            self.game.state_manager.enter_state('option_sounds')       
+        elif self.current_button == 3:#controller
             self.game.state_manager.enter_state('option_controller')
-        elif self.current_button == 3:
-            self.game.RENDER_FPS_FLAG = not self.game.RENDER_FPS_FLAG
         elif self.current_button == 4:
+            self.game.RENDER_FPS_FLAG = not self.game.RENDER_FPS_FLAG
+        elif self.current_button == 5:
             self.game.RENDER_HITBOX_FLAG = not self.game.RENDER_HITBOX_FLAG
 
     def on_exit(self):
         for b in self.menu_ui.menu_buttons:
             b.on_exit()
+
+    def on_resume(self):
+        self.menu_ui.menu_buttons[self.current_button].on_enter()

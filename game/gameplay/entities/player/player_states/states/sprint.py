@@ -2,10 +2,12 @@ from .base_composite import CompositeState
 from .base_state import PhaseBase
 from engine import constants as C
 
+
 class SprintState(CompositeState):
     def __init__(self, entity):
         super().__init__(entity)
-        self.phases = {'main': SprintMain(entity), 'post': SprintPost(entity)}
+        self.phases = {"main": SprintMain(entity), "post": SprintPost(entity)}
+
 
 class SprintMain(PhaseBase):
     def __init__(self, entity):
@@ -15,58 +17,59 @@ class SprintMain(PhaseBase):
 
     def enter(self, **kwarg):
         self.sprint_time = 0
-        self.entity.animation.play('sprint_main', f_rate = 0.22)
+        self.entity.animation.play("sprint_main", f_rate=0.22)
 
     def update(self, dt):
         self.sprint_time += dt
         if not self.entity.has_ground_grace():
-            self.entity.flags['sprint_chain_active'] = True
-            self.enter_state('fall')
+            self.entity.flags["sprint_chain_active"] = True
+            self.enter_state("fall")
             self.entity.begin_coyote_time()
 
     def handle_press_input(self, input):
-        if input.name == 'a' and self.sprint_time > self.sprint_time_threshold:
+        if input.name == "jump" and self.sprint_time > self.sprint_time_threshold:
             input.processed()
-            self.entity.flags['grounddash'] = True
-            self.entity.flags['sprint_chain_active'] = True
-            self.enter_state('dash_jump')
+            self.entity.flags["grounddash"] = True
+            self.entity.flags["sprint_chain_active"] = True
+            self.enter_state("dash_jump")
 
     def handle_release_input(self, input):
-        if input.name == 'a':
+        if input.name == "jump":
             input.processed()
-        elif input.name == 'lb':
-            self.enter_phase('post')
+        elif input.name == "dash":
+            self.enter_phase("post")
 
     def handle_movement(self, axes):
         self.entity.acceleration[0] = C.acceleration[0] * self.sprint_multiplier
 
         if self.entity.acceleration[0] == 0:
-            self.entity.currentstate.composite_state.enter_phase('post')
+            self.entity.currentstate.composite_state.enter_phase("post")
+
 
 class SprintPost(PhaseBase):
     def __init__(self, entity):
         super().__init__(entity)
 
     def enter(self, **kwarg):
-        self.entity.animation.play('sprint_post')
+        self.entity.animation.play("sprint_post")
 
     def update(self, dt):
         if not self.entity.has_ground_grace():
-            self.entity.flags['sprint_chain_active'] = True
-            self.enter_state('fall')
+            self.entity.flags["sprint_chain_active"] = True
+            self.enter_state("fall")
             self.entity.begin_coyote_time()
 
     def handle_press_input(self, input):
-        if input.name == 'a':
+        if input.name == "jump":
             input.processed()
-            self.enter_state('jump')
+            self.enter_state("jump")
 
     def handle_release_input(self, input):
-        if input.name == 'a':
+        if input.name == "jump":
             input.processed()
 
     def increase_phase(self):
         if self.entity.acceleration[0] == 0:
-            self.enter_state('idle')
+            self.enter_state("idle")
         else:
-            self.enter_state('run')
+            self.enter_state("run")

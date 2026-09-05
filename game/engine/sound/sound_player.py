@@ -8,7 +8,7 @@ class SoundPlayer():
         # Track base volumes for each channel
         self.channel_base_volumes = {}
     
-    def play_sfx(self, sound, volume=0.2, loops=0, fade_ms=0):
+    def play_sfx(self, sound, volume=1.0, loops=0, fade_ms=0):
         """Play a sound effect on any available channel"""
         channel = self.audio_manager.get_available_channel(True)
         final_volume = self.audio_manager.calculate_volume(volume, 'SFX')
@@ -20,7 +20,7 @@ class SoundPlayer():
         channel.play(sound, loops=loops, fade_ms=fade_ms)
         return channel
     
-    def play_priority_sound(self, sound, volume=0.7, channel_index=None, loops=-1, fade_ms=300):
+    def play_priority_sound(self, sound, volume=1.0, channel_index=None, loops=-1, fade_ms=300):
         """Play sound on reserved channel with priority management"""
         if channel_index is None:
             channel = self.audio_manager.find_free_reserved_channel()

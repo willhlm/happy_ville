@@ -5,17 +5,20 @@ from collections import deque
 import pygame
 import pygame._sdl2.controller
 
-from .bindings import ALL_ACTIONS, BindingStore
 from .devices import controller_types, discover_controllers
 from .models import AxesSnapshot, InputAction, InputFrame
+
+
+KEYBOARD_DIRECTIONS = {
+    pygame.K_RIGHT: "right", pygame.K_LEFT: "left",
+    pygame.K_UP: "up", pygame.K_DOWN: "down",
+}
 
 
 class Controller:
     """Translate device input into semantic game actions."""
 
-    BINDINGS_VERSION = BindingStore.VERSION
-
-    def __init__(self, bindings_path="config/input_bindings.json"):
+    def __init__(self):
         self.buffer_lifetime = 10
         self.ui_repeat_delay = 12
         self.ui_repeat_interval = 6
@@ -23,9 +26,10 @@ class Controller:
         self.move_deadzone = 0.2
         self.look_deadzone = 0.1
         self.trigger_threshold = 0.5
-        self.bindings = BindingStore(bindings_path)
-        self.pending_rebind = None
+        self.pending_capture = False
         self.held_buttons = set()
+        self.held_controls = set()
+        self._frame_controls = {}
         self.held_directions = set()
         self.input_buffer = deque()
         self.nav_repeat = {
@@ -43,59 +47,17 @@ class Controller:
         self.prompt_type = "keyboard"
         self.update_controller()
 
-    # Compatibility properties keep existing game code and options UI stable.
-    @property
-    def bindings_path(self):
-        return self.bindings.path
+    def begin_capture(self):
+        """Capture the next keyboard key or controller button."""
+        self.pending_capture = True
 
-    @property
-    def keyboard_buttons(self):
-        return self.bindings.keyboard_buttons
-
-    @property
-    def keyboard_directions(self):
-        return self.bindings.keyboard_directions
-
-    @property
-    def controller_buttons(self):
-        return self.bindings.controller_buttons
-
-    @property
-    def controller_directions(self):
-        return self.bindings.controller_directions
-
-    def bindings_data(self):
-        return self.bindings.data()
-
-    def save_bindings(self):
-        self.bindings.save()
-
-    def load_bindings(self):
-        return self.bindings.load()
-
-    def reset_bindings(self):
-        self.bindings.reset()
-
-    def rebind_keyboard(self, action, key):
-        self.bindings.rebind("keyboard", action, key)
-
-    def rebind_controller(self, action, button):
-        self.bindings.rebind("controller", action, button)
-
-    def binding_name(self, device, action):
-        return self.bindings.binding_name(device, action)
-
-    def begin_rebind(self, action):
-        if action not in ALL_ACTIONS:
-            raise ValueError(f"Unknown input action: {action}")
-        self.pending_rebind = action
-
-    def cancel_rebind(self):
-        self.pending_rebind = None
+    def cancel_capture(self):
+        self.pending_capture = False
 
     def update(self, events, dt):
         self._update_buffer(dt)
         frame_pressed, frame_released = set(), set()
+        self._frame_controls = {}
         for event in events:
             self._handle_event(event, frame_pressed, frame_released)
         axes = self._sample_axes()
@@ -123,12 +85,18 @@ class Controller:
     def initiate_controls(self):
         self.controllers = discover_controllers()
 
-    def rumble(self, duration=1000):
+    def rumble(self, duration=1000, amplitude=1.0):
+        amplitude = max(0.0, min(1.0, amplitude))
+        if amplitude == 0:
+            return
         for controller in self.controllers:
-            controller.rumble(0, 0.7, duration)
+            controller.rumble(0, 0.7 * amplitude, duration)
 
     def is_held(self, button_name):
         return button_name in self.held_buttons
+
+    def is_control_held(self, control_id):
+        return control_id in self.held_controls
 
     def get_inputs(self):
         return list(self.input_buffer)
@@ -142,71 +110,61 @@ class Controller:
         if lifetime is None:
             lifetime = self.buffer_lifetime
         self.input_buffer.append(
-            InputAction(
-                name,
-                pressed,
-                released,
-                axes or self.frame.axes,
-                lifetime,
-            )
+            InputAction(name, pressed, released, axes or self.frame.axes, lifetime,)
         )
 
     def _handle_event(self, event, frame_pressed, frame_released):
-        if self.pending_rebind is not None and self._capture_rebind(event):
+        if self.pending_capture and self._capture_source(event):
             return
         if event.type in (pygame.CONTROLLERDEVICEADDED, pygame.CONTROLLERDEVICEREMOVED):
             self.update_controller()
         elif event.type == pygame.KEYDOWN:
             self.prompt_type = "keyboard"
             self._handle_down(
+                f"keyboard:{event.key}",
                 event.key,
-                self.keyboard_buttons,
-                self.keyboard_directions,
                 frame_pressed,
             )
         elif event.type == pygame.KEYUP:
             self._handle_up(
+                f"keyboard:{event.key}",
                 event.key,
-                self.keyboard_buttons,
-                self.keyboard_directions,
                 frame_released,
             )
         elif event.type == pygame.CONTROLLERBUTTONDOWN:
             self._use_controller_prompt(getattr(event, "instance_id", None))
             self._handle_down(
+                f"controller:{event.button}",
                 event.button,
-                self.controller_buttons,
-                self.controller_directions,
                 frame_pressed,
             )
         elif event.type == pygame.CONTROLLERBUTTONUP:
             self._handle_up(
+                f"controller:{event.button}",
                 event.button,
-                self.controller_buttons,
-                self.controller_directions,
                 frame_released,
             )
 
-    def _handle_down(self, input_id, buttons, directions, frame_pressed):
-        action = buttons.get(input_id)
-        if action and action not in self.held_buttons:
-            self.held_buttons.add(action)
-            frame_pressed.add(action)
-        elif direction := directions.get(input_id):
+    def _handle_down(self, control_id, input_id, frame_pressed):
+        if direction := KEYBOARD_DIRECTIONS.get(input_id):
             self.held_directions.add(direction)
+        if control_id not in self.held_controls:
+            self.held_controls.add(control_id)
+            frame_pressed.add(control_id)
+            self._frame_controls[("pressed", control_id)] = control_id
 
-    def _handle_up(self, input_id, buttons, directions, frame_released):
-        action = buttons.get(input_id)
-        if action and action in self.held_buttons:
-            self.held_buttons.discard(action)
-            frame_released.add(action)
-        elif direction := directions.get(input_id):
+    def _handle_up(self, control_id, input_id, frame_released):
+        if direction := KEYBOARD_DIRECTIONS.get(input_id):
             self.held_directions.discard(direction)
+        if control_id in self.held_controls:
+            self.held_controls.discard(control_id)
+            frame_released.add(control_id)
+            self._frame_controls[("released", control_id)] = control_id
 
     def _sample_axes(self):
         keys = pygame.key.get_pressed()
         move_x = move_y = look_x = look_y = 0
-        for key, direction in self.keyboard_directions.items():
+        for key, direction in KEYBOARD_DIRECTIONS.items():
             if self._key_is_pressed(keys, key):
                 move_x, move_y = self._apply_direction(direction, move_x, move_y)
         for controller in self.controllers:
@@ -274,8 +232,14 @@ class Controller:
     def _enqueue_button_actions(self, frame_pressed, frame_released):
         for name in frame_pressed:
             self.enqueue_action(name, pressed=True, axes=self.frame.axes)
+            self.input_buffer[-1].meta["physical_input"] = self._frame_controls.get(
+                ("pressed", name)
+            )
         for name in frame_released:
             self.enqueue_action(name, released=True, axes=self.frame.axes)
+            self.input_buffer[-1].meta["physical_input"] = self._frame_controls.get(
+                ("released", name)
+            )
 
     def _enqueue_navigation_actions(self, dt):
         active = {
@@ -310,23 +274,22 @@ class Controller:
                 retained.append(action)
         self.input_buffer = retained
 
-    def _capture_rebind(self, event):
+    def _capture_source(self, event):
         if event.type == pygame.KEYDOWN:
-            self._finish_rebind("keyboard", event.key)
-            return True
-        if event.type == pygame.CONTROLLERBUTTONDOWN:
-            self._finish_rebind("controller", event.button)
+            source = f"keyboard:{event.key}"
+            device, input_id = "keyboard", event.key
+        elif event.type == pygame.CONTROLLERBUTTONDOWN:
+            source = f"controller:{event.button}"
+            device, input_id = "controller", event.button
             self._use_controller_prompt(getattr(event, "instance_id", None))
-            return True
-        return False
+        else:
+            return False
 
-    def _finish_rebind(self, device, input_id):
-        action = self.pending_rebind
-        self.bindings.rebind(device, action, input_id)
-        self.pending_rebind = None
+        self.pending_capture = False
         result = InputAction("binding_captured", pressed=True, axes=self.frame.axes)
-        result.meta.update(action=action, device=device, input_id=input_id)
+        result.meta.update(source_action=source, device=device, input_id=input_id)
         self.input_buffer.append(result)
+        return True
 
     def _use_controller_prompt(self, instance_id):
         if controller_type := self.controller_types.get(instance_id):

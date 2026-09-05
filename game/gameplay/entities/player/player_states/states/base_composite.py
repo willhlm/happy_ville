@@ -1,28 +1,32 @@
 from .base_state import NullPhase
 
-class CompositeState():#will contain pre, main, post phases of a state
+
+class CompositeState:  # will contain pre, main, post phases of a state
     def __init__(self, entity):
         self.entity = entity
         self.phases = {}
         self.current_phase = NullPhase(entity)
         self.interaction_enabled = True
 
-    def enter_phase(self, phase_name, **kwarg):#called when entering a new phase
+    def enter_phase(self, phase_name, **kwarg):  # called when entering a new phase
         self.current_phase = self.phases[phase_name]
         self.current_phase.enter(**kwarg)
 
-    def enter_state(self, phase_name, **kwarg):#called when entering a new state
-        if not phase_name: phase_name = next(iter(self.phases))#get the first phase from the dictionary if not specified        
+    def enter_state(self, phase_name, **kwarg):  # called when entering a new state
+        if not phase_name:
+            phase_name = next(
+                iter(self.phases)
+            )  # get the first phase from the dictionary if not specified
         self.common_values()
-        self.enter_phase(phase_name, **kwarg) #enter the phase of the state
+        self.enter_phase(phase_name, **kwarg)  # enter the phase of the state
 
-    def exit(self):#called when exiting the composite state
+    def exit(self):  # called when exiting the composite state
         self.current_phase.exit()
 
     def allowed(self):
         return True
 
-    def common_values(self):#set common values for the phases
+    def common_values(self):  # set common values for the phases
         pass
 
     def update(self, dt):
@@ -46,8 +50,8 @@ class CompositeState():#will contain pre, main, post phases of a state
     def get_move_dir_x(self):
         return self.current_phase.get_move_dir_x()
 
-    def increase_phase(self):#called when an animation is finished for that state
-        self.current_phase.increase_phase()  
+    def increase_phase(self):  # called when an animation is finished for that state
+        self.current_phase.increase_phase()
 
     def consume_contact_state(self):
         self.current_phase.consume_contact_state()

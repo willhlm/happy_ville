@@ -1,0 +1,53 @@
+{
+  "contexts": {
+    "gameplay": {
+      "controller:0": "jump",
+      "controller:1": "ability",
+      "controller:10": "ability_select",
+      "controller:2": "attack",
+      "controller:3": "interact",
+      "controller:4": "inventory",
+      "controller:6": "pause",
+      "controller:9": "dash",
+      "down": "down",
+      "keyboard:101": "ability",
+      "keyboard:102": "attack",
+      "keyboard:105": "inventory",
+      "keyboard:1073742049": "dash",
+      "keyboard:116": "interact",
+      "keyboard:27": "pause",
+      "keyboard:32": "jump",
+      "keyboard:9": "ability_select",
+      "left": "left",
+      "return": "return",
+      "right": "right",
+      "rt": "heal",
+      "up": "up"
+    },
+    "ui": {
+      "controller:0": "a",
+      "controller:1": "b",
+      "controller:10": "rb",
+      "controller:2": "x",
+      "controller:3": "y",
+      "controller:4": "select",
+      "controller:6": "start",
+      "controller:9": "lb",
+      "down": "down",
+      "keyboard:101": "b",
+      "keyboard:102": "x",
+      "keyboard:103": "y",
+      "keyboard:105": "select",
+      "keyboard:1073742049": "lb",
+      "keyboard:116": "y",
+      "keyboard:13": "return",
+      "keyboard:27": "start",
+      "keyboard:32": "a",
+      "keyboard:9": "rb",
+      "left": "left",
+      "right": "right",
+      "up": "up"
+    }
+  },
+  "version": 1
+}

@@ -1,165 +1,128 @@
-from engine.utils import read_files
 from gameplay.ui.loaders import OptionDisplayLoader
 from ..base.base_ui import BaseUI
 
 class OptionDisplay(BaseUI):
+    OPTION_KEYS_BY_LABEL = {
+        "Resolution": "resolution",
+        "Pixel scaling": "pixel_scaling",
+        "Vsync": "vsync",
+        "Fullscreen": "fullscreen",
+        "fps": "fps",
+    }
+
     def __init__(self, game):
         super().__init__(game)
-        self.game_settings = read_files.read_json('config/game_settings.json')
-        
+        self.settings = game.settings
+        self.menu_ui = OptionDisplay.menu_ui
         self.current_button = 0
         self.previous_button = None
-        
-        # Available resolutions
-        self.resolutions = [(640, 360), (800, 450)]
-        self.fps = [30, 60, 120]
-        
-        # Find current resolution index
-        current_res = tuple(self.game_settings['display']['resolution'])
-        current_fps = self.game_settings['display']['fps']
-        self.resolution_index = self.resolutions.index(current_res)
-        self.fps_index = self.fps.index(current_fps)
-        
         self._update_arrow()
         self._update_button()
 
+    @staticmethod
     def pool(game_objects):
         OptionDisplay.menu_ui = OptionDisplayLoader(game_objects)
 
     def _update_arrow(self):
-        button = self.menu_ui.option_labels[self.current_button]
-        bx, by, bw, bh = button.rect
-
-        for index, arrow in enumerate(self.menu_ui.arrows):
-            pos_x = self.menu_ui.results[index][0]
-            if arrow.flip:  
-                arrow.set_pos((pos_x + bw + 10, by))
+        item = self.menu_ui.navigation_items[self.current_button]
+        bx, by, bw, _ = item.rect
+        for arrow in self.menu_ui.arrows:
+            if arrow.flip:
+                x = (
+                    self.menu_ui.results[self.current_button][0] + bw + 10
+                    if item in self.menu_ui.option_labels
+                    else bx + bw + 10
+                )
+                arrow.set_pos((x, by))
             else:
                 arrow.set_pos((bx - arrow.rect.width - 10, by))
         self.play_click_sound()
 
     def _update_button(self):
-        """Handle button state transitions"""
         if self.previous_button is not None and self.previous_button != self.current_button:
-            self.menu_ui.option_labels[self.previous_button].on_exit()
-        
+            self.menu_ui.navigation_items[self.previous_button].on_exit()
         if self.previous_button != self.current_button:
-            self.menu_ui.option_labels[self.current_button].on_enter()
-        
+            self.menu_ui.navigation_items[self.current_button].on_enter()
         self.previous_button = self.current_button
 
     def update_render(self, dt):
-        """Called every frame"""
         self.game.game_objects.ui.menu.update_time(dt)
+        self.menu_ui.navigation_items[self.current_button].active()
         for arrow in self.menu_ui.arrows:
             arrow.update(dt)
-        
-        # Update active button animation
-        self.menu_ui.option_labels[self.current_button].active()
-
-    def _get_option_display_text(self, button_index):
-        """Get the current value text for each option"""
-        if button_index == 0:  # Resolution
-            res = self.resolutions[self.resolution_index]
-            return f"{res[0]}x{res[1]}"        
-        elif button_index == 1:  # VSync
-            return "ON" if self.game_settings['display']['vsync'] else "OFF"
-        elif button_index == 2:  # Fullscreen
-            return "ON" if self.game_settings['display']['fullscreen'] else "OFF"
-        elif button_index == 3:  # fps
-            res = self.fps[self.fps_index]
-            return f"{res}"             
-        return ""
 
     def render(self):
-        self.game.screen_manager.screen.clear(0, 0, 0, 0)        
-        self.game.game_objects.ui.menu.render_background(self.game.screen_manager.screen)
-
-        # Render buttons with their current values
-        for i, button in enumerate(self.menu_ui.option_labels):
-            button.render(self.game.screen_manager.screen)
-            
-            # Render the current option value to the right of the button
-            value_text = self._get_option_display_text(i)
-                                            
+        screen = self.game.screen_manager.screen
+        screen.clear(0, 0, 0, 0)
+        self.game.game_objects.ui.menu.render_background(screen)
+        for label, result_position in zip(
+            self.menu_ui.option_labels, self.menu_ui.results
+        ):
+            label.render(screen)
             self.game.game_objects.font.render(
-                self.game.screen_manager.screen,
-                value_text,
+                screen,
+                self.settings.display_option_text(
+                    self.OPTION_KEYS_BY_LABEL[label.text]
+                ),
                 letter_frame=None,
                 color=[255, 255, 255, 255],
-                position=self.menu_ui.results[i],
+                position=result_position,
             )
-
-        # Render arrows
+        for button in self.menu_ui.menu_buttons:
+            button.render(screen)
         for arrow in self.menu_ui.arrows:
-            self.game.display.render(arrow.image, self.game.screen_manager.screen, position=arrow.true_pos, flip=arrow.flip)
-
-        self.game.render_display(self.game.screen_manager.screen.texture)
+            self.game.display.render(
+                arrow.image, screen, position=arrow.true_pos, flip=arrow.flip
+            )
+        self.game.render_display(screen.texture)
 
     def handle_events(self, input):
         input.processed()
-        if input.pressed:
-            # Vertical navigation
-            if input.name == 'up':  # Up
-                self.current_button -= 1
-                if self.current_button < 0:
-                    self.current_button = len(self.menu_ui.option_labels) - 1
-                self._update_arrow()
-                self._update_button()
-                
-            elif input.name == 'down':  # Down
-                self.current_button += 1
-                if self.current_button >= len(self.menu_ui.option_labels):
-                    self.current_button = 0
-                self._update_arrow()
-                self._update_button()
-            
-            # Horizontal cycling (left/right to change values)
-            elif input.name == 'right':  # Right
-                self.cycle_option(1)
-                
-            elif input.name == 'left':  # Left
-                self.cycle_option(-1)
-        
-        # Actions
-            elif input.name in ('start', 'b'):
-                self.game.state_manager.exit_state()
+        if not input.pressed:
+            return
+        if input.name == "up":
+            self._move_selection(-1)
+        elif input.name == "down":
+            self._move_selection(1)
+        elif input.name == "left":
+            self._cycle_current_option(-1)
+        elif input.name == "right":
+            self._cycle_current_option(1)
+        elif input.name in ("start", "b"):
+            self.game.state_manager.exit_state()
+        elif input.name in ("return", "a"):
+            self._activate_current_item()
 
-    def cycle_option(self, direction):
-        """Cycle through option values (left/right)"""
-        if self.current_button == 0:  # Resolution
-            self.resolution_index += direction
-            # Wrap around
-            if self.resolution_index < 0:
-                self.resolution_index = len(self.resolutions) - 1
-            elif self.resolution_index >= len(self.resolutions):
-                self.resolution_index = 0
-            
-            # Update settings
-            self.game_settings['display']['resolution'] = list(self.resolutions[self.resolution_index])
+    def _move_selection(self, direction):
+        self.current_button = (self.current_button + direction) % len(
+            self.menu_ui.navigation_items
+        )
+        self._update_arrow()
+        self._update_button()
 
-        elif self.current_button == 1:  # VSync
-            self.game_settings['display']['vsync'] = not self.game_settings['display']['vsync']
-            
-        elif self.current_button == 2:  # Fullscreen
-            self.game_settings['display']['fullscreen'] = not self.game_settings['display']['fullscreen']
-
-        elif self.current_button == 3:  # fps
-            self.fps_index += direction
-            # Wrap around
-            if self.fps_index < 0:
-                self.fps_index = len(self.fps) - 1
-            elif self.fps_index >= len(self.fps):
-                self.fps_index = 0
-            
-            # Update settings
-            self.game_settings['display']['fps'] = self.fps[self.fps_index]
-
+    def _cycle_current_option(self, direction):
+        if self.current_button >= len(self.menu_ui.option_labels):
+            return
+        label = self.menu_ui.option_labels[self.current_button]
+        option_key = self.OPTION_KEYS_BY_LABEL[label.text]
+        self.settings.cycle_display_option(option_key, direction)
         self.play_click_sound()
 
-    def on_exit(self):
-        super().on_exit()
-        read_files.write_json(self.game_settings, 'config/game_settings.json')
+    def _activate_current_item(self):
+        item = self.menu_ui.navigation_items[self.current_button]
+        if item in self.menu_ui.option_labels:
+            self._cycle_current_option(1)
+        elif item.text == "Reset to default":
+            self.settings.reset_display_options()
+            self.game.game_objects.sound.play_ui_sound("select")
+        else:
+            self.game.game_objects.sound.play_ui_sound("select")
+            self.game.state_manager.exit_state()
+
+    def on_pop(self):
+        self.settings.save()
+        for item in self.menu_ui.navigation_items:
+            item.on_exit()
 
     def play_click_sound(self):
-        self.game.game_objects.sound.play_ui_sound('on_select')
+        self.game.game_objects.sound.play_ui_sound("on_select")

@@ -14,6 +14,9 @@ class OptionMenuLoader(BaseLoader):
         self.menu_buttons = [
             element for element in self.shared_elements if isinstance(element, Button)
         ]
+        # Tiled preserves object creation order, which may differ from the
+        # visual order after a button is inserted into an existing layout.
+        self.menu_buttons.sort(key=lambda button: (button.rect.y, button.rect.x))
         self.arrows = [
             element for element in self.shared_elements if isinstance(element, MenuArrow)
         ]

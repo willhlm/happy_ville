@@ -7,7 +7,7 @@ class SprintMovement:
         self.clear_chain()
 
     def can_sprint(self):
-        return self.entity.currentstate.has_state('sprint')
+        return self.entity.currentstate.has_state("sprint")
 
     def request_chain(self):
         self.chain_requested = self.can_sprint()
@@ -19,5 +19,5 @@ class SprintMovement:
         return (
             self.chain_requested
             and self.can_sprint()
-            and self.entity.game_objects.controller.is_held('lb')
+            and self.entity.game_objects.input_manager.is_held("gameplay", "dash")
         )

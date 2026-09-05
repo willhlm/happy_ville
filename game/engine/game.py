@@ -1,43 +1,61 @@
 import pygame, sys, time
 from engine import constants as C
-from engine.utils import read_files
-from engine.system import state_manager
+from engine.system import game_settings, state_manager
 from engine.render.screen_manager import ScreenManager
 from pygame_render import RenderEngine
 from engine import game_objects
 
-class Game():
+
+class Game:
     def __init__(self):
-        #initiate all screens
-        display_settings = read_files.read_json('config/game_settings.json')['display']
-        self.window_size = display_settings['resolution']
-        self.fps = display_settings['fps']
-        self.scale = self.scale_size()#get the scale according to your display size
-        self.display_size = [int(self.window_size[0] * self.scale), int(self.window_size[1] * self.scale)]
+        # initiate all screens
+        self.settings = game_settings.GameSettings()
+        display_settings = self.settings.data["display"]
+        self.window_size = display_settings["resolution"]
+        self.fps = display_settings["fps"]
+        self.scale = self.scale_size()  # get the scale according to your display size
+        self.display_size = [
+            int(self.window_size[0] * self.scale),
+            int(self.window_size[1] * self.scale),
+        ]
 
-        self.display = RenderEngine(self.display_size[0] - self.scale, self.display_size[1] - self.scale, fullscreen = display_settings['fullscreen'], vsync = display_settings['vsync']) #vsync -1 may be good for mac        
+        self.display = RenderEngine(
+            self.display_size[0] - self.scale,
+            self.display_size[1] - self.scale,
+            fullscreen=display_settings["fullscreen"],
+            vsync=display_settings["vsync"],
+        )  # vsync -1 may be good for mac
 
-        #initiate game related values
+        # initiate game related values
         self.game_loop = GameLoop(self)
         self.game_objects = game_objects.GameObjects(self)
         self.screen_manager = ScreenManager(self)
-        self.state_manager = state_manager.State_manager(self, 'title_menu')
+        self.state_manager = state_manager.State_manager(self, "title_menu")
 
-        #debug flags
+        # debug flags
         self.DEBUG_MODE = True
         self.RENDER_FPS_FLAG = True
         self.RENDER_HITBOX_FLAG = True
         self.DEBUG_PLAYER_COLLISIONS = False
-        pygame.event.set_allowed([
-            pygame.QUIT,
-            pygame.KEYDOWN,
-            pygame.KEYUP,
-            pygame.CONTROLLERDEVICEADDED,
-            pygame.CONTROLLERDEVICEREMOVED,
-            pygame.CONTROLLERBUTTONDOWN,
-            pygame.CONTROLLERBUTTONUP,
-        ])
-        pygame.event.set_blocked([pygame.TEXTINPUT, pygame.MOUSEMOTION, pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP])#for some reason, there is a text input here and there. So, blocking it
+        pygame.event.set_allowed(
+            [
+                pygame.QUIT,
+                pygame.KEYDOWN,
+                pygame.KEYUP,
+                pygame.CONTROLLERDEVICEADDED,
+                pygame.CONTROLLERDEVICEREMOVED,
+                pygame.CONTROLLERBUTTONDOWN,
+                pygame.CONTROLLERBUTTONUP,
+            ]
+        )
+        pygame.event.set_blocked(
+            [
+                pygame.TEXTINPUT,
+                pygame.MOUSEMOTION,
+                pygame.MOUSEBUTTONDOWN,
+                pygame.MOUSEBUTTONUP,
+            ]
+        )  # for some reason, there is a text input here and there. So, blocking it
 
     def event_loop(self, dt):
         events = pygame.event.get()
@@ -47,42 +65,50 @@ class Game():
                 sys.exit()
 
         self.game_objects.controller.update(events, dt)
-        inputs = self.game_objects.controller.get_inputs()
-        self.game_objects.input_interpreter.update(dt)#checks for flicks and other input related things
-
         active_state = self.state_manager.state_stack[-1]
+        inputs = self.game_objects.input_manager.get_inputs(active_state.state_name)
+        self.game_objects.input_interpreter.update(dt)  # checks for flicks and other input related things
+
         for input in inputs:
             if input.is_done:
                 continue
             self.state_manager.handle_events(input)
-            if self.state_manager.state_stack[-1] is not active_state:#interupt it if we change state
+            if (
+                self.state_manager.state_stack[-1] is not active_state
+            ):  # interupt it if we change state
                 break
 
     def run(self):
         self.game_loop.run()
 
-    def scale_size(self, scale = None):
-        if not scale:#if None
-            scale_w = pygame.display.Info().current_w/self.window_size[0]
-            scale_h = pygame.display.Info().current_h/self.window_size[1]
-            return min(scale_w, scale_h)
+    def scale_size(self, scale=None):
+        if not scale:  # if None
+            scale_w = pygame.display.Info().current_w / self.window_size[0]
+            scale_h = pygame.display.Info().current_h / self.window_size[1]
+            smooth_scale = min(scale_w, scale_h)
+            if self.settings.pixel_scaling == "pixel_perfect":
+                return max(1, int(smooth_scale))
+            return smooth_scale
         return scale
 
-    def render_display(self, texture, scale = True):#called from game states
-        if scale: scale = self.scale
-        else: scale = 1
-        self.display.render(texture, self.display.screen, scale = scale)
+    def render_display(self, texture, scale=True):  # called from game states
+        if scale:
+            scale = self.scale
+        else:
+            scale = 1
+        self.display.render(texture, self.display.screen, scale=scale)
 
     @property
     def viewport_center(self):
         w, h = self.window_size
         return [w * 0.5, h * 0.5]
 
-class GameLoop():
+
+class GameLoop:
     def __init__(self, game):
         self.game = game
         self.clock = pygame.time.Clock()
-        self.fixed_dt = 1.0 / 60.0# 60Hz physics step in seconds
+        self.fixed_dt = 1.0 / 60.0  # 60Hz physics step in seconds
         self.accumulator = 0.0
         self.alpha = 0.0
 
@@ -93,9 +119,11 @@ class GameLoop():
 
             # Calculate frame time in seconds
             frame_end = time.perf_counter()
-            raw_frame_time = min(frame_end - prev_time, 2.0 / self.game.fps)  # Cap large jumps
+            raw_frame_time = min(
+                frame_end - prev_time, 2.0 / self.game.fps
+            )  # Cap large jumps
             prev_time = frame_end
-            dt = max(raw_frame_time, 0.001)# Avoid zero or negative dt
+            dt = max(raw_frame_time, 0.001)  # Avoid zero or negative dt
 
             # Add to accumulator (in seconds)
             self.accumulator += dt
@@ -115,4 +143,4 @@ class GameLoop():
 
             # Update display and limit FPS
             pygame.display.flip()
-            self.clock.tick()#self.game.fps
+            self.clock.tick()  # self.game.fps
