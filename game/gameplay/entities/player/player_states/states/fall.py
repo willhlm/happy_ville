@@ -12,10 +12,27 @@ class FallState(CompositeState):
 
     def common_values(self):
         self.falltime = 0
+        self.jump_decision_timer = 0
+        self.jump_decision_pending = False
+
+    def begin_jump_decision(self):
+        self.jump_decision_timer = 0
+        self.jump_decision_pending = True
 
     def update(self, dt):
         self.falltime += dt
         self.current_phase.update(dt)
+        self.jump_decision_timer += dt
+        if self.jump_decision_timer >= C.air_jump_grace_timer:
+            if self.entity.game_objects.input_manager.is_held("gameplay", "jump") and self.can_enter_air_glide():
+                self.entity.currentstate.enter_state("air_glide")
+
+    def release_jump_decision(self):
+        if not self.jump_decision_pending:
+            return
+        self.jump_decision_pending = False
+        if self.jump_decision_timer < C.air_jump_grace_timer and self.entity.flags["double_jump_available"] and self.entity.abilities.is_unlocked("wind"):
+            self.entity.currentstate.enter_state("jump_wind", phase="main", double_jump=True)
 
     def determine_fall(self):
         return self.falltime >= 4000
@@ -24,14 +41,7 @@ class FallState(CompositeState):
         return self.entity.flags["sprint_chain_active"]
 
     def can_enter_air_glide(self):
-        return (
-            self.entity.abilities.is_unlocked("shield")
-            and self.entity.currentstate.has_state("air_glide")
-            and not self.entity.game_objects.physics.collision_queries.has_floor_below(
-                self.entity, self.AIR_GLIDE_GROUND_PROBE_DISTANCE,
-            )
-        )
-
+        return self.entity.abilities.is_unlocked("shield") and not self.entity.game_objects.physics.collision_queries.has_floor_below(self.entity, self.AIR_GLIDE_GROUND_PROBE_DISTANCE)        
 
 class FallPre(PhaseAirBase):
     def __init__(self, entity):
@@ -45,9 +55,9 @@ class FallPre(PhaseAirBase):
             if self.entity.flags["ground"]:  # cayote jump
                 input.processed()
                 self.enter_state("jump")
-            elif self.entity.currentstate.states["fall"].can_enter_air_glide():
+            else:
                 input.processed()
-                self.enter_state("air_glide")
+                self.entity.currentstate.states["fall"].begin_jump_decision()
         elif input.name == "ability":
             input.processed()
             self.do_ability()
@@ -65,6 +75,7 @@ class FallPre(PhaseAirBase):
     def handle_release_input(self, input):
         if input.name == "jump":
             input.processed()
+            self.entity.currentstate.states["fall"].release_jump_decision()
         elif input.name == "dash":
             self.entity.flags["sprint_chain_active"] = False
             input.processed()

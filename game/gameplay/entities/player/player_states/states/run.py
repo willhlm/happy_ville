@@ -95,9 +95,7 @@ class RunMain(PhaseBase):
 
         self.sfx_timer -= 1
         if self.sfx_timer == 0:
-            self.entity.game_objects.sound.play_sfx(
-                self.entity.sounds["run"][self.sfx_timer % 2], vol=0.8
-            )
+            self.entity.audio.play("footstep")
             self.sfx_timer = self.sfx_loop_time
 
         if not self.entity.has_ground_grace():

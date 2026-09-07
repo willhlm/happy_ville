@@ -50,7 +50,7 @@ class DashGroundPre(PhaseBase):
         self.entity.movement_modifier.add_modifier(
             "dash", entity=self.entity, authoritative=True
         )
-        self.entity.game_objects.sound.play_sfx(self.entity.sounds["dash"][0], vol=1)
+        self.entity.audio.play("dash")
         self.wall_buffer = 3
         self.entity.dir[0] = kwarg.get("dir", self.entity.dir[0])
 

@@ -72,12 +72,13 @@ class SpatialAudioSystem:
             )
 
     """
-    def __init__(self, play_sfx_fn: Callable[..., pygame.mixer.Channel], camera_scroll_getter=None):
+    def __init__(self, play_sfx_fn: Callable[..., pygame.mixer.Channel], set_sfx_volume_fn: Callable[..., None], camera_scroll_getter=None):
         """
         play_sfx_fn must be something like:
             play_sfx_fn(sound, loops=-1, volume=0.0, fade_ms=0) -> pygame.mixer.Channel
         """
         self._play_sfx = play_sfx_fn
+        self._set_sfx_volume = set_sfx_volume_fn
         self._emitters = {}
         self._next_id = 1
         self._camera_scroll_getter = camera_scroll_getter
@@ -190,7 +191,7 @@ class SpatialAudioSystem:
                 lpos = emitter.listener_transform(listener_pos)
                 pos2 = emitter.get_pos2(lpos)
                 amp = track_distance(lpos, pos2, r0=emitter.max_dist, r1=emitter.min_dist)
-                emitter.channel.set_volume(emitter.base_volume * amp)
+                self._set_sfx_volume(emitter.channel, emitter.base_volume * amp)
 
             except Exception:
                 dead.append(eid)

@@ -34,9 +34,15 @@ class AudioManager:
         return None
     
     def calculate_volume(self, base_volume, category):
-        category_multiplier = self.volume_settings.get(category, 10) / 10
-        overall_multiplier = self.volume_settings["overall"] / 10
+        """Apply the player's 0--10 category and overall settings to a base volume."""
+        category_multiplier = self.get_volume_multiplier(category)
+        overall_multiplier = self.get_volume_multiplier("overall")
         return base_volume * category_multiplier * overall_multiplier
+
+    def get_volume_multiplier(self, category):
+        """Return a player-facing 0--10 setting as a 0.0--1.0 multiplier."""
+        setting = self.volume_settings.get(category, 10)
+        return max(0, min(10, setting)) / 10.0
     
     def update_volume_setting(self, category, amount):
         self.volume_settings[category] += amount

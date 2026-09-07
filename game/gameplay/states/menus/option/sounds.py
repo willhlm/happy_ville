@@ -49,7 +49,7 @@ class OptionSounds(BaseUI):
         self._update_sliders()
 
     def _update_sliders(self):
-        volumes = self.game.game_objects.sound.audio_manager.volume_settings
+        volumes = self.game.game_objects.sound.volume_settings
         for key, slider in zip(self.SOUND_KEYS, self.menu_ui.slider):
             slider.set_volume(volumes[key])
 
@@ -57,7 +57,7 @@ class OptionSounds(BaseUI):
         screen = self.game.screen_manager.screen
         screen.clear(0, 0, 0, 0)
         self.game.game_objects.ui.menu.render_background(screen)
-        volumes = self.game.game_objects.sound.audio_manager.volume_settings
+        volumes = self.game.game_objects.sound.volume_settings
         for key, label, result_position in zip(
             self.SOUND_KEYS, self.menu_ui.option_labels, self.menu_ui.results
         ):
@@ -109,7 +109,7 @@ class OptionSounds(BaseUI):
         key = self.SOUND_KEYS[self.current_button]
         sound = self.game.game_objects.sound
         sound.change_volume(key, direction)
-        sound.sound_player.update_all_volumes()
+        sound.update_all_volumes()
         sound.play_ui_sound("on_select")
 
     def _activate_current_item(self):
@@ -118,11 +118,8 @@ class OptionSounds(BaseUI):
             self._change_volume(1)
         elif item.text == "Reset to default":
             self.settings.reset_sound_options()
-            volumes = self.game.game_objects.sound.audio_manager.volume_settings
             default_volumes = dict(self.settings.sounds)
-            volumes.clear()
-            volumes.update(default_volumes)
-            self.game.game_objects.sound.sound_player.update_all_volumes()
+            self.game.game_objects.sound.replace_volume_settings(default_volumes)
             self.game.game_objects.sound.play_ui_sound("select")
         else:
             self.game.game_objects.sound.play_ui_sound("select")
@@ -131,7 +128,7 @@ class OptionSounds(BaseUI):
     def on_pop(self):
         self.settings.sounds.clear()
         self.settings.sounds.update(
-            self.game.game_objects.sound.audio_manager.volume_settings
+            self.game.game_objects.sound.volume_settings
         )
         self.settings.save()
         for item in self.menu_ui.navigation_items:

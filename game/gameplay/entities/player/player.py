@@ -14,12 +14,15 @@ from gameplay.entities.player.sword.sword import Sword
 from gameplay.entities.player.ability_unlocks.progression_manager import PlayerProgressionManager
 from gameplay.entities.shared.status.status_component import StatusComponent
 from gameplay.entities.shared.status.wet import Wet
+from gameplay.entities.shared.components.audio_component import EntityAudioComponent
+from gameplay.entities.player.sound_events import PLAYER_SOUND_EVENTS
 from engine import constants as C
 
 class Player(Character):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
         self.sounds = read_files.load_sounds_dict('assets/audio/sfx/entities/player/')
+        self.audio = EntityAudioComponent(self, PLAYER_SOUND_EVENTS)
         self.sprites = read_files.load_sprites_dict('assets/sprites/entities/player/default/', game_objects, normal_map = True)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
@@ -54,7 +57,7 @@ class Player(Character):
         move_dir_x = self.currentstate.get_move_dir_x()
 
         self.velocity[1] += dt * (context.gravity - self.velocity[1] * context.friction[1]) + context.velocity[1]
-        self.velocity[1] = min(self.velocity[1], self.max_vel[1])#set a y max speed#
+        self.velocity[1] = min(self.velocity[1], context.max_vel[1])#set a y max speed#
         if self.velocity[1] < 0:
             self.velocity[1] = max(self.velocity[1], -context.max_vel[1])
 
@@ -112,7 +115,8 @@ class Player(Character):
     def _reset_flags(self):
         self.flags = {
             'ground': False,
-            'bounce_jump': False,
+            'double_jump_available': True,#doulble jump
+            'bounce_jump': False,#for muchroom, flower
             'attack_able': True,
             'grounddash': True,
             'sprint_chain_active': False,

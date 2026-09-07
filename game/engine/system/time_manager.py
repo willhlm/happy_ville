@@ -7,8 +7,15 @@ class Time_manager():#can append things in series
         self.current_modifier().update(dt)
 
     def modify_time(self, **kwarg):
-        self.time_modifiers.append(Slow_motion(self.game_objects, **kwarg))
+        modifier = Slow_motion(self.game_objects, **kwarg)
+        self.time_modifiers.append(modifier)
         self.refresh_time_scale()
+        return modifier
+
+    def remove_modifier(self, modifier):
+        if modifier in self.time_modifiers:
+            self.time_modifiers.remove(modifier)
+            self.refresh_time_scale()
 
     def reset(self):
         self.time_modifiers = [Idle()]

@@ -147,6 +147,10 @@ class RightAngleSurfaceCollisionComponent(SurfaceCollisionComponent):
         if self.p.go_through and self.p.entity_is_dropping(entity):
             return False
         if current_hitbox.bottom < target_y:
+            # Floor snapping must not pull an ascending jump back to the ramp.
+            # Actual overlaps still resolve through the normal contact path.
+            if entity.velocity[1] < 0:
+                return False
             # A descending ramp moves the support point down as the entity moves
             # horizontally.  Allow that step to be as large as this frame's
             # horizontal/vertical motion; limiting it to one pixel intermittently

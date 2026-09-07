@@ -9,7 +9,7 @@ class SoundPlayer():
         self.channel_base_volumes = {}
     
     def play_sfx(self, sound, volume=1.0, loops=0, fade_ms=0):
-        """Play a sound effect on any available channel"""
+        """Play SFX using an already-authored base volume."""
         channel = self.audio_manager.get_available_channel(True)
         final_volume = self.audio_manager.calculate_volume(volume, 'SFX')
         
@@ -21,7 +21,7 @@ class SoundPlayer():
         return channel
     
     def play_priority_sound(self, sound, volume=1.0, channel_index=None, loops=-1, fade_ms=300):
-        """Play sound on reserved channel with priority management"""
+        """Play music using an already-authored base volume on a reserved channel."""
         if channel_index is None:
             channel = self.audio_manager.find_free_reserved_channel()
             if channel is None:
@@ -49,3 +49,12 @@ class SoundPlayer():
             else:
                 # Clean up stopped channels
                 del self.channel_base_volumes[channel]
+
+    def set_sfx_channel_volume(self, channel, volume):
+        """Update an active SFX channel from an already-authored base volume.
+
+        Spatial emitters use this while their distance attenuation changes, so they
+        retain the same player-settings path as one-shot effects.
+        """
+        self.channel_base_volumes[channel] = ('SFX', volume)
+        channel.set_volume(self.audio_manager.calculate_volume(volume, 'SFX'))

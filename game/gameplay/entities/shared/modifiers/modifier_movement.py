@@ -35,6 +35,7 @@ class MovementManager:
             'shield_glide': ShieldGlide,
             'air_boost': AirBoost,
             'contained': Contained,
+            'transport': Transport,
         }
 
     def add_modifier(self, modifier, priority=0, authoritative=False, **kwarg):
@@ -274,6 +275,36 @@ class DashJump(MovementModifier):
         context.gravity = C.acceleration[1] / self.g_constant
         context.velocity[0] += self.dash_vel * self.entity.dir[0]
         context.velocity[1] += self.dash_jump_vel        
+
+class Transport(MovementModifier):
+    """Travel at a fixed speed, shortening the last step at a surface."""
+    def __init__(self, priority, entity, direction, speed, distance):
+        super().__init__(priority)
+        self.entity = entity
+        self.direction = direction
+        self.speed = speed
+        self.distance = distance
+
+    def update(self, dt):
+        travel = min(self.speed * dt, self.distance)
+        if travel <= 0:
+            self.entity.velocity = [0, 0]
+            return
+        target = self.entity.game_objects.physics.collision_queries.find_surface_in_direction(
+            self.entity, self.direction, travel,
+        )
+        if target is not None:
+            # Leave a pixel of overlap for the normal platform solver to resolve.
+            travel = min(travel, target[1] + 1)
+        self.entity.velocity = [travel / dt * value for value in self.direction]
+        self.distance -= travel
+
+    def apply(self, context):
+        context.gravity = 0
+        context.friction = [0, 0]
+        context.velocity = [0, 0]
+        context.max_vel = [self.speed, self.speed]
+
 
 class Contained(MovementModifier):
     def apply(self, context):

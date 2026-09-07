@@ -52,6 +52,9 @@ class MovementController:
     def extend_jump(self, jump_boost=None, air_timer=None):
         self.jump.extend(jump_boost=jump_boost, air_timer=air_timer)
 
+    def start_double_jump(self, jump_boost):
+        self.jump.start_double_jump(jump_boost)
+
     def release_jump(self):
         self.jump.release()
 

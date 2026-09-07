@@ -24,6 +24,7 @@ class StateManager():
         'crouch',
         'plat_bone',
         'pray',
+        'jump_wind',
     )
 
     def __init__(self, entity):
@@ -60,6 +61,7 @@ class StateManager():
             'thunder': ThunderState,
             'shield': ShieldState,
             'wind': WindState,
+            'jump_wind': JumpWindState,
             'slow_motion': SlowMotionState,
             'bow': BowState,
             'pray': PrayState,

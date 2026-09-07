@@ -42,7 +42,7 @@ class DashAirPre(PhaseBase):
             "dash", entity=self.entity, authoritative=True
         )
         self.entity.velocity[1] *= 0
-        self.entity.game_objects.sound.play_sfx(self.entity.sounds["dash"][0], vol=1)
+        self.entity.audio.play("dash")
         wall_dir = kwarg.get("wall_dir", False)
         if wall_dir:
             self.entity.dir[0] = -wall_dir[0]

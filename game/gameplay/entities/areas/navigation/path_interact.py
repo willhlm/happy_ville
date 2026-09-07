@@ -21,6 +21,8 @@ class PathInteract(BaseArea):
         pass
 
     def interact(self, player=None):
+        if self.game_objects.transition.is_busy:
+            return
         self.game_objects.sequence_manager.start_sequence(
             "map_traversal",
             destination=self.destination,

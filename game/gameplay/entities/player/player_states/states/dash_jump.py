@@ -23,7 +23,7 @@ class DashJumpPre(PhaseBase):
         self.entity.velocity = [0, 0]
         if int(self.entity.velocity[0]) == 0:
             self.dash_length += 1
-        self.entity.game_objects.sound.play_sfx(self.entity.sounds["dash"][0])
+        self.entity.audio.play("dash")
         self.entity.movement_modifier.add_modifier(
             "dash_jump", entity=self.entity, authoritative=True
         )

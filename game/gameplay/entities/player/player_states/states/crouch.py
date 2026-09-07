@@ -25,7 +25,7 @@ class CrouchPre(PhaseBase):
         effect = PrayEffect(self.entity.rect.center, self.entity.game_objects)
         effect.rect.bottom = self.entity.rect.bottom
         self.entity.game_objects.cosmetics.add(effect)
-        self.entity.game_objects.sound.play_sfx(self.entity.sounds["pray"][0])
+        self.entity.audio.play("pray")
 
     def handle_movement(self, event):
         pass

@@ -14,9 +14,7 @@ class CompositeState:  # will contain pre, main, post phases of a state
 
     def enter_state(self, phase_name, **kwarg):  # called when entering a new state
         if not phase_name:
-            phase_name = next(
-                iter(self.phases)
-            )  # get the first phase from the dictionary if not specified
+            phase_name = next(iter(self.phases))  # get the first phase from the dictionary if not specified
         self.common_values()
         self.enter_phase(phase_name, **kwarg)  # enter the phase of the state
 

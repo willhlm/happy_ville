@@ -30,3 +30,4 @@ from .wall_glide import WallGlideState
 from .wall_jump import WallJumpState
 from .wind import WindState
 from .pray import PrayState
+from .jump_wind import JumpWindState

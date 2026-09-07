@@ -22,42 +22,28 @@ class Gameplay(GameState):
         self.game.game_objects.update_render(dt)
         self.game.game_objects.world_transform_controller.update_render(dt)
         self.game.game_objects.ui.hud.update(dt)
-        self.game.game_objects.post_process.update_render(
-            dt
-        )  # apply post process shaders to the composite screen, which is large
+        self.game.game_objects.post_process.update_render(dt)  # apply post process shaders to the composite screen, which is large
 
     def render(self):
         self.game.game_objects.draw()  # rendered on multiple layers on each parallax screen
         self.game.screen_manager.render()  # renders each parllax to a composite screen with pp shader, which makes it display size
 
-        self.game.game_objects.lights.draw(
-            self.game.screen_manager.composite_screen
-        )  # before post procssing shader?
-        self.game.game_objects.post_process.apply(
-            self.game.screen_manager.composite_screen
-        )  # apply post process shaders to the composite screen, which is large
-        self.game.game_objects.ui.hud.draw(
-            self.game.screen_manager.composite_screen
-        )  # renders hud elements to the composite
-        self.game.game_objects.sequence_manager.draw(
-            self.game.screen_manager.composite_screen
-        )
-        self.game.render_display(
-            self.game.screen_manager.composite_screen.texture, scale=False
-        )
+        self.game.game_objects.lights.draw(self.game.screen_manager.composite_screen)  # before post procssing shader?
+        self.game.game_objects.post_process.apply(self.game.screen_manager.composite_screen)  # apply post process shaders to the composite screen, which is large
+        self.game.game_objects.ui.hud.draw(self.game.screen_manager.composite_screen)  # renders hud elements to the composite
+        self.game.game_objects.sequence_manager.draw(self.game.screen_manager.composite_screen)
+        self.game.render_display(self.game.screen_manager.composite_screen.texture, scale=False)#blits the composite screen to the display, which is display size
 
     def handle_movement(self):  # every frame
-        if self.game.game_objects.sequence_manager.blocks_gameplay_movement():
+        if self.game.game_objects.transition.is_busy or self.game.game_objects.sequence_manager.blocks_gameplay_movement():
             return
 
         axes = self.game.game_objects.controller.frame.axes
-        self.game.game_objects.player.movement_controller.handle_movement(
-            axes
-        )  # move around
+        self.game.game_objects.player.movement_controller.handle_movement(axes)  # move around
         self.game.game_objects.camera_manager.handle_movement(axes)
 
     def handle_events(self, input):
-        if self.game.game_objects.sequence_manager.blocks_gameplay_input():
+        if self.game.game_objects.transition.is_busy or self.game.game_objects.sequence_manager.blocks_gameplay_input():
             input.processed()
             return
 
@@ -81,29 +67,18 @@ class Gameplay(GameState):
 
             elif input.name == "down":
                 input.processed()  # should it be processed here or when passed through?
-                self.game.game_objects.physics.collision_queries.request_pass_through(
-                    self.game.game_objects.player
-                )
+                self.game.game_objects.physics.collision_queries.request_pass_through(self.game.game_objects.player)
 
-            elif input.name in (
-                "up",
-                "left",
-                "right",
-            ):  # directional UI-style actions are ignored in gameplay
+            elif input.name in ("up", "left", "right"):  # directional UI-style actions are ignored in gameplay
                 input.processed()
                 pass
 
             else:
                 # interpreted = self.game.game_objects.input_interpreter.interpret(input)
-                self.game.game_objects.player.movement_controller.handle_press_input(
-                    input
-                )
+                self.game.game_objects.player.movement_controller.handle_press_input(input)
                 # self.game.game_objects.player.omamoris.handle_press_input(input)
         elif input.released:  # release
-            self.game.game_objects.player.movement_controller.handle_release_input(
-                input
-            )
-
+            self.game.game_objects.player.movement_controller.handle_release_input(input)
 
 class WorldGameplay(Gameplay):
     def on_pop(self):

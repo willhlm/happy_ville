@@ -20,6 +20,8 @@ class IdleMain(PhaseBase):
         if not self.entity.has_ground_grace():
             self.enter_state("fall")
             self.entity.begin_coyote_time()
+        if self.entity.game_objects.input_manager.is_held("gameplay", "jump"):
+            self.enter_state("jump_wind")
 
     def handle_press_input(self, input):
         if input.name == "jump":

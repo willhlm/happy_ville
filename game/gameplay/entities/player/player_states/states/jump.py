@@ -1,4 +1,3 @@
-import random
 from .base_composite import CompositeState
 from .base_state import PhaseAirBase
 from engine import constants as C
@@ -17,9 +16,7 @@ class JumpMain(PhaseAirBase):
 
     def enter(self, **kwarg):
         self.entity.animation.play("jump_main")
-        self.entity.game_objects.sound.play_sfx(
-            random.choice(self.entity.sounds["jump"]), vol=0.06
-        )
+        self.entity.audio.play("jump")
         self.entity.animation.frame = kwarg.get("frame", 0)
         self.jump_dash_timer = C.jump_dash_timer
         self.entity.movement_controller.start_jump(
@@ -59,12 +56,8 @@ class JumpMain(PhaseAirBase):
             input.processed()
             if self.entity.flags["bounce_jump"]:
                 jump_boost = self.entity.consume_bounce_jump()
-                self.entity.movement_controller.extend_jump(
-                    jump_boost=jump_boost, air_timer=C.air_timer
-                )
-                self.jump_dash_timer = max(
-                    self.jump_dash_timer, C.bounce_dash_jump_buffer_player
-                )
+                self.entity.movement_controller.extend_jump(jump_boost=jump_boost, air_timer=C.air_timer)
+                self.jump_dash_timer = max(self.jump_dash_timer, C.bounce_dash_jump_buffer_player)
 
     def handle_release_input(self, input):
         if input.name == "jump":
