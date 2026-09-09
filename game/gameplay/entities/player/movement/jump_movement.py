@@ -17,13 +17,22 @@ class JumpMovement:
             self._clear()
 
     def start(self, jump_boost=1, air_timer=C.air_timer):
+        self.double_jump = False
         self.active = True
         self.boost = jump_boost
         self.timer = air_timer
         self.entity.flags['ground'] = False
         self.entity.velocity[1] = C.jump_vel_player * jump_boost
 
+    def start_double_jump(self, jump_boost):
+        self._clear()
+        self.double_jump = True
+        self.boost = jump_boost
+        self.entity.flags['ground'] = False
+        self.entity.velocity[1] = C.jump_vel_player * jump_boost
+
     def extend(self, jump_boost=None, air_timer=None):
+        self.double_jump = False
         if jump_boost is not None:
             self.boost = jump_boost
             self.entity.velocity[1] = C.jump_vel_player * jump_boost
@@ -32,6 +41,8 @@ class JumpMovement:
         self.active = True
 
     def release(self):
+        if self.double_jump:
+            return
         self._cut_upward_velocity()
         self._clear()
 
@@ -51,6 +62,7 @@ class JumpMovement:
             self.entity.velocity[1] *= 0.5
 
     def _clear(self):
+        self.double_jump = False
         self.active = False
         self.boost = 1
         self.timer = 0

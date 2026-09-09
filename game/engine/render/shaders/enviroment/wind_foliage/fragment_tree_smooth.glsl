@@ -6,8 +6,6 @@ in vec2 fragmentTexCoord;
 uniform sampler2D imageTexture;
 uniform float time;
 
-uniform vec2 worldPosition;
-
 // Wind parameters
 uniform float wind_strength = 1.0;
 uniform float wind_speed = 0.5;

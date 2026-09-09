@@ -7,7 +7,8 @@ class Text():
         self.game_objects = game_objects
         self.text = text
         self.rect = pygame.Rect(position, [size[0], size[1]])     
-        self.position = position
+        self.base_position = list(position)
+        self.position = list(position)
         self.colour = [255,255,255,255]
         self.font_style = font_style
     
@@ -30,3 +31,11 @@ class Text():
 
     def on_exit(self):
         pass
+
+    def update_scroll(self, scroll):
+        """Position this text relative to a scrolling map background."""
+        self.position = [
+            self.base_position[0] + scroll[0],
+            self.base_position[1] + scroll[1],
+        ]
+        self.rect.topleft = self.position

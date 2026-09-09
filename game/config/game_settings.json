@@ -1,1 +1,1 @@
-{"display": {"vsync": true, "fullscreen": false, "resolution": [640, 360], "fps": 60}, "sounds": {"SFX": 4, "music": 5, "overall": 7}}
+{"display": {"vsync": true, "fullscreen": false, "resolution": [640, 360], "fps": 60, "pixel_scaling": "pixel_perfect"}, "sounds": {"SFX": 10, "music": 10, "overall": 10}, "game": {"language": "English", "camera_shake": 100, "controller_rumble": 100, "hud_appearance": "auto"}}

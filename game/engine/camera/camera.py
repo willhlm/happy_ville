@@ -33,8 +33,18 @@ class Camera_manager():
         self.game_objects.post_process.append_shader('zoom', scale = scale, center = center, rate = rate)
 
     def camera_shake(self, **kwarg):#shake dat ass
-        self.add_decorator(Camera_shake_decorator(self.camera, **kwarg))
-        self.game_objects.controller.rumble(duration = 10 * kwarg.get('duration', 100))
+        settings = self.game_objects.game.settings
+        self.game_objects.controller.rumble(
+            duration=10 * kwarg.get('duration', 100),
+            amplitude=settings.controller_rumble / 100,
+        )
+        if settings.camera_shake == 0:
+            return
+        shake_kwargs = dict(kwarg)
+        shake_kwargs["amplitude"] = (
+            shake_kwargs.get("amplitude", 10) * settings.camera_shake / 100
+        )
+        self.add_decorator(Camera_shake_decorator(self.camera, **shake_kwargs))
 
     def reset_player_center(self):#called when loading a map in maploader
         self.camera.reset_player_center()

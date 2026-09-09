@@ -15,7 +15,11 @@ class GameAudio:
     def __init__(self, camera_scroll_getter=None):
         self.audio_manager = AudioManager(AUDIO_CONFIG)
         self.sound_player = SoundPlayer(self.audio_manager)
-        self.spatial = SpatialAudioSystem(self.sound_player.play_sfx, camera_scroll_getter=camera_scroll_getter)
+        self.spatial = SpatialAudioSystem(
+            self._play_spatial_sfx,
+            self._set_spatial_sfx_volume,
+            camera_scroll_getter=camera_scroll_getter,
+        )
 
         # Sound libraries
         self.sfx_library = SFXLibrary()
@@ -24,44 +28,67 @@ class GameAudio:
     # ----------------------------
     # Existing high-level methods
     # ----------------------------
-    def play_weapon_hit(self, weapon_type, material, volume=0.3):
+    def play_weapon_hit(self, weapon_type, material, volume=1.0):
         sound = self.sfx_library.get_impact_sound(weapon_type, material)
-        return self.sound_player.play_sfx(sound, volume)
+        return self.play_sfx(sound, vol=volume)
 
-    def play_item_sound(self, event, volume=0.4):
+    def play_item_sound(self, event, volume=1.0):
         sound = self.sfx_library.get_item_sound(event)
-        return self.sound_player.play_sfx(sound, volume)
+        return self.play_sfx(sound, vol=volume)
 
-    def play_ui_sound(self, ui_event, volume=0.4):
+    def play_ui_sound(self, ui_event, volume=1.0):
         sound = self.sfx_library.get_ui_sound(ui_event)
-        return self.sound_player.play_sfx(sound, volume)
+        return self.play_sfx(sound, vol=volume)
 
-    def play_enemy_sound(self, enemy, event, volume=0.4):
+    def play_enemy_sound(self, enemy, event, volume=1.0):
         sounds = getattr(enemy, 'sounds', {})
         sound_list = sounds.get(event)
 
         if sound_list:
-            return self.sound_player.play_sfx(random.choice(sound_list), volume)
+            return self.play_sfx(random.choice(sound_list), vol=volume)
 
         sound = self.sfx_library.get_enemy_death_sound(event)
-        return self.sound_player.play_sfx(sound, volume)
+        return self.play_sfx(sound, vol=volume)
 
-    def play_spawn_sound(self, event, volume=0.4):
+    def play_spawn_sound(self, event, volume=1.0):
         sound = self.sfx_library.get_spawn_sound(event)
         if sound is None:
             return None
-        return self.sound_player.play_sfx(sound, volume)
+        return self.play_sfx(sound, vol=volume)
 
-    def play_background_sound(self, track, volume=0.7, index=0, loop=-1, fade=300):
-        return self.sound_player.play_priority_sound(track, volume, channel_index=index, fade_ms=fade, loops=loop)
+    def play_background_sound(self, track, volume=1.0, index=0, loop=-1, fade=300):
+        """Play music at ``volume`` relative to the authored music baseline."""
+        base_volume = AUDIO_CONFIG["default_music_volume"] * volume
+        return self.sound_player.play_priority_sound(track, base_volume, channel_index=index, fade_ms=fade, loops=loop)
 
     def change_volume(self, category, amount):
         self.audio_manager.update_volume_setting(category, amount)
 
-    def play_sfx(self, sfx, loop=0, vol=1, fade=0):
-        return self.sound_player.play_sfx(sfx, loops=loop, volume=vol, fade_ms=fade)
+    @property
+    def volume_settings(self):
+        """The player-facing 0--10 sound settings used by the options UI."""
+        return self.audio_manager.volume_settings
 
-    def play_spatial_sfx(self, sfx, point, vol=1, loop=0, fade=0, min_dist=48, max_dist=300, listener_pos=None, parallax=None):
+    def replace_volume_settings(self, settings):
+        """Replace the player-facing settings and refresh active playback."""
+        self.audio_manager.volume_settings.clear()
+        self.audio_manager.volume_settings.update(settings)
+        self.update_all_volumes()
+
+    def _play_spatial_sfx(self, sound, volume=1.0, loops=0, fade_ms=0):
+        return self.play_sfx(sound, loop=loops, vol=volume, fade=fade_ms)
+
+    def _set_spatial_sfx_volume(self, channel, volume=1.0):
+        """Apply a spatial relative volume through the standard SFX path."""
+        base_volume = AUDIO_CONFIG["default_sfx_volume"] * volume
+        self.sound_player.set_sfx_channel_volume(channel, base_volume)
+
+    def play_sfx(self, sfx, loop=0, vol=1.0, fade=0):
+        """Play SFX at ``vol`` relative to the authored SFX baseline."""
+        base_volume = AUDIO_CONFIG["default_sfx_volume"] * vol
+        return self.sound_player.play_sfx(sfx, loops=loop, volume=base_volume, fade_ms=fade)
+
+    def play_spatial_sfx(self, sfx, point, vol=1.0, loop=0, fade=0, min_dist=48, max_dist=300, listener_pos=None, parallax=None):
         return self.spatial.play_point(
             sfx,
             point,
@@ -87,6 +114,10 @@ class GameAudio:
     def queue_sound(self, sound, channel_index):
         channel = self.audio_manager.get_reserved_channel(channel_index)
         channel.queue(sound)
+
+    def update_all_volumes(self):
+        """Refresh active channels after a player sound-option change."""
+        self.sound_player.update_all_volumes()
 
     # ----------------------------
     # Spatial audio API

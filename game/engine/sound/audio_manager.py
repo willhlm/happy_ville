@@ -1,6 +1,7 @@
 import pygame
 pygame.mixer.init()
 from engine.utils import read_files
+from engine.system.game_settings import GameSettings
 
 class AudioManager:
     """Low-level audio channel and volume management"""
@@ -33,9 +34,19 @@ class AudioManager:
         return None
     
     def calculate_volume(self, base_volume, category):
-        volume_multiplier = self.volume_settings.get(category, 1.0)
-        return base_volume * volume_multiplier * self.config['volume_normalizer'] * self.volume_settings['overall']
+        """Apply the player's 0--10 category and overall settings to a base volume."""
+        category_multiplier = self.get_volume_multiplier(category)
+        overall_multiplier = self.get_volume_multiplier("overall")
+        return base_volume * category_multiplier * overall_multiplier
+
+    def get_volume_multiplier(self, category):
+        """Return a player-facing 0--10 setting as a 0.0--1.0 multiplier."""
+        setting = self.volume_settings.get(category, 10)
+        return max(0, min(10, setting)) / 10.0
     
     def update_volume_setting(self, category, amount):
         self.volume_settings[category] += amount
-        self.volume_settings[category] = max(0, min(10, self.volume_settings[category]))
+        self.volume_settings[category] = max(
+            GameSettings.VOLUME_OPTIONS[0],
+            min(GameSettings.VOLUME_OPTIONS[-1], self.volume_settings[category]),
+        )

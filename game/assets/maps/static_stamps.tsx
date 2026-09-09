@@ -147,6 +147,9 @@
    <property name="height" value=""/>
    <property name="height_per_active" type="float" value="0"/>
    <property name="line_color" value=""/>
+   <property name="relay_angle" type="int" value="0"/>
+   <property name="relay_height" type="float" value="100"/>
+   <property name="relay_id" value=""/>
    <property name="water_tint" value=""/>
    <property name="wind_network" value=""/>
   </properties>

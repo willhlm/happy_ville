@@ -264,7 +264,7 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":1152,
+                         "width":144,
                          "x":2416,
                          "y":832
                         }, 
@@ -277,7 +277,7 @@
                          "type":"",
                          "visible":true,
                          "width":48,
-                         "x":2976,
+                         "x":3248,
                          "y":704
                         }, 
                         {
@@ -300,7 +300,7 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":560,
+                         "width":832,
                          "x":2448,
                          "y":416
                         }, 
@@ -344,6 +344,63 @@
                          "width":16,
                          "x":2512,
                          "y":640
+                        }, 
+                        {
+                         "gid":8,
+                         "height":128,
+                         "id":388,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":144,
+                         "x":2560,
+                         "y":912
+                        }, 
+                        {
+                         "gid":8,
+                         "height":160,
+                         "id":389,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":624,
+                         "x":2704,
+                         "y":864
+                        }, 
+                        {
+                         "gid":27,
+                         "height":64,
+                         "id":390,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"height",
+                                 "type":"string",
+                                 "value":"20"
+                                }, 
+                                {
+                                 "name":"relay_angle",
+                                 "type":"int",
+                                 "value":90
+                                }, 
+                                {
+                                 "name":"relay_height",
+                                 "type":"float",
+                                 "value":100
+                                }, 
+                                {
+                                 "name":"relay_id",
+                                 "type":"string",
+                                 "value":"water_relay_1"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":144,
+                         "x":2560,
+                         "y":784
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -370,7 +427,7 @@
          "y":0
         }],
  "nextlayerid":106,
- "nextobjectid":388,
+ "nextobjectid":391,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -476,7 +533,7 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":31221,
+         "firstgid":31226,
          "source":"..\/_objects\/interactables.tsx"
         }],
  "tilewidth":16,

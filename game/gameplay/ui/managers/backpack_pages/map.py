@@ -162,7 +162,8 @@ class MapUI(BaseUI):
         for object in self.map_UI.markers:
             object.update_scroll(self.pos)
         for object in self.get_map_ui_elements():
-            object.update_scroll(self.pos)
+            if hasattr(object, 'update_scroll'):
+                object.update_scroll(self.pos)
 
     def reset_selected(self):
         if self.selected_container and hasattr(self.selected_container, 'reset'):
@@ -225,6 +226,8 @@ class MapUI(BaseUI):
         for object in objects:
             if hasattr(object, 'draw'):
                 object.draw(target)
+            elif hasattr(object, 'render'):
+                object.render(target)
             else:
                 self.game_objects.game.display.render(
                     object.image,
@@ -233,7 +236,7 @@ class MapUI(BaseUI):
                 )
 
     def get_map_ui_elements(self):
-        return [object for object in self.map_UI.ui_elements if not hasattr(object, 'button')]
+        return self.map_UI.ui_elements
 
     def get_map_ui_buttons(self):
-        return list(self.map_UI.buttons.values())
+        return list(self.map_UI.controller_prompts.values())

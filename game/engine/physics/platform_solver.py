@@ -208,8 +208,6 @@ class PlatformCollisionSolver:
     def _resolve_floor_contacts(self, entity, colliders, motion):
         old_hitbox = getattr(entity, 'old_hitbox', entity.hitbox)
         current_hitbox = entity.hitbox
-        if motion.requested_motion[1] < 0:
-            return None
 
         max_step_up = abs(motion.requested_motion[0]) + max(0, motion.requested_motion[1]) + 2
         best_sample = None
@@ -240,7 +238,10 @@ class PlatformCollisionSolver:
             )
 
         entity.platform_collider.push_vertical_sample(best_sample)
-        if best_sample.clamp_floor:
+        # A horizontal slope correction during a rising DashJump keeps the
+        # entity outside the ramp; it is not a landing and must not cancel the
+        # upward launch velocity.
+        if best_sample.clamp_floor and motion.requested_motion[1] >= 0:
             entity.platform_collider.clamp_vertical_velocity()
         self._notify_collision_sample(entity, best_sample, axis='y')
         return best_sample.collider

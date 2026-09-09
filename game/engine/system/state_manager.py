@@ -57,8 +57,10 @@ REGISTERY = {
     # Menus
     "load_menu": LoadMenu,
     "option_display": OptionDisplay,
+    "option_game": OptionGame,
     "option_sounds": OptionSounds,
     "option_menu": OptionMenu,
+    "option_controller": OptionController,
     "pause_menu": PauseMenu,
     "title_menu": TitleMenu,
 

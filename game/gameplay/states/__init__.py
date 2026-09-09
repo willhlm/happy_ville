@@ -5,6 +5,8 @@ from .menus.title_menu import TitleMenu
 from .menus.option.display import OptionDisplay
 from .menus.option.sounds import OptionSounds
 from .menus.option.menu import OptionMenu
+from .menus.option.controller import OptionController
+from .menus.option.game import OptionGame
 
 from .gameplay.gameplay import Gameplay, WorldGameplay
 from .gameplay.ability_select import AbilitySelect

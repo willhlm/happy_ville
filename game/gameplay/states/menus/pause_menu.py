@@ -17,12 +17,12 @@ class PauseMenu(BaseUI):#when pressing ESC duing gameplay
         self._update_button()  # Initialize first button as active
 
     def update_render(self, dt):
-        self.menu_ui.buttons[self.current_button].active()# Always call active on the current button (for continuous hover effects)
+        self.menu_ui.menu_buttons[self.current_button].active()# Always call active on the current button (for continuous hover effects)
         for arrow in self.menu_ui.arrows:
             arrow.update(dt)#make them move back and forth
 
     def _update_arrow(self):
-        button = self.menu_ui.buttons[self.current_button]
+        button = self.menu_ui.menu_buttons[self.current_button]
         bx, by, bw, bh = button.rect[0], button.rect.centery, button.rect[2], button.rect[3]
 
         for arrow in self.menu_ui.arrows:
@@ -37,7 +37,7 @@ class PauseMenu(BaseUI):#when pressing ESC duing gameplay
         self.game.screen_manager.screen.clear(50,50,50,150)
         
         #blit buttons
-        for b in self.menu_ui.buttons:
+        for b in self.menu_ui.menu_buttons:
             b.render(self.game.screen_manager.screen)
 
         #blit arrow
@@ -52,11 +52,11 @@ class PauseMenu(BaseUI):#when pressing ESC duing gameplay
         
         # Exit the previous button (if there was one)
         if self.previous_button is not None and self.previous_button != self.current_button:
-            self.menu_ui.buttons[self.previous_button].on_exit()
+            self.menu_ui.menu_buttons[self.previous_button].on_exit()
         
         # Enter the new button (if it's different)
         if self.previous_button != self.current_button:
-            self.menu_ui.buttons[self.current_button].on_enter()
+            self.menu_ui.menu_buttons[self.current_button].on_enter()
                 
         # Update previous button tracker
         self.previous_button = self.current_button 
@@ -67,19 +67,19 @@ class PauseMenu(BaseUI):#when pressing ESC duing gameplay
             if input.name == 'up':#up
                 self.current_button -= 1
                 if self.current_button < 0:
-                    self.current_button = len(self.menu_ui.buttons) - 1
+                    self.current_button = len(self.menu_ui.menu_buttons) - 1
                 self._update_arrow()
                 self._update_button()  # Handle button state change
             
             elif input.name == 'down':#down
                 self.current_button += 1
-                if self.current_button >= len(self.menu_ui.buttons):
+                if self.current_button >= len(self.menu_ui.menu_buttons):
                     self.current_button = 0
                 self._update_arrow()
                 self._update_button()  # Handle button state change
             
             elif input.name in ('return', 'a'):
-                self.menu_ui.buttons[self.current_button].pressed()
+                self.menu_ui.menu_buttons[self.current_button].pressed()
                 self.change_state()
             elif input.name == 'start':
                 self.game.state_manager.exit_state()

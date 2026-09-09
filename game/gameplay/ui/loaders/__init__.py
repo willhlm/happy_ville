@@ -6,6 +6,8 @@ from .menus import (
     OptionDisplayLoader,
     OptionMenuLoader,
     OptionSoundsLoader,
+    OptionControllerLoader,
+    OptionGameLoader,
     PauseMenuLoader,
     TitleMenuLoader,
 )

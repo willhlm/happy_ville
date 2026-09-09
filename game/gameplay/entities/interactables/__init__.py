@@ -51,6 +51,7 @@ from .uber_runestone import UberRunestone
 
 from .two_d_liquid.two_d_liquid import TwoDLiquid
 from .two_d_liquid.windmill_controlled_liquid import WindmillControlledLiquid
+from .two_d_liquid.water_relay_controlled_liquid import WaterRelayControlledLiquid
 from .up_stream import UpStream
 
 from .portal.portal import Portal

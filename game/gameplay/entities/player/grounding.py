@@ -8,6 +8,7 @@ class PlayerGrounding:
     def consume_contact_state(self):
         if self.player.is_on_floor():
             self.player.flags['ground'] = True
+            self.player.flags['double_jump_available'] = True
             self.end_coyote_time()
             return
 

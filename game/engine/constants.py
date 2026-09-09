@@ -9,6 +9,7 @@ acceleration_item = [0,0.3]
 friction_item = [0,0]
 max_vel_item = [30,7]
 jump_vel_player = -5.5
+double_jump_boost = 1.5  # Multiplies jump_vel_player for the fixed double-jump impulse
 max_vel = [30,7]#[30,6]
 pogo_vel = -7
 dash_length = 5#how long  Aila dashes
@@ -24,6 +25,7 @@ jump_dash_timer = 3#how many frames from pressing jump/dash to pressing dash/jum
 ground_dash_timer = 40 #cooldown frames between dash
 cayote_timer_player = 4#how many frames from falling in which the player can still jump
 air_timer = 14#for how long one can press A and keep jumping
+air_jump_grace_timer = 10#if you should air glide or double jump
 go_through_timer = 5
 
 #input buffers

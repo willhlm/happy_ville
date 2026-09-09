@@ -67,11 +67,21 @@ class HudMeters:
         self.health_visible_timer = max(0.0, self.health_visible_timer - dt * 0.01)
         self.money_visible_timer = max(0.0, self.money_visible_timer - dt * 0.01)
 
+        hud_always_visible = self.game_objects.game.settings.hud_appearance == "on"
         health_target = 1.0
-        if self.game_objects.player.vitals.health >= self.game_objects.player.vitals.max_health and self.health_visible_timer <= 0:
+        if (
+            not hud_always_visible
+            and self.game_objects.player.vitals.health
+            >= self.game_objects.player.vitals.max_health
+            and self.health_visible_timer <= 0
+        ):
             health_target = self.HEALTH_IDLE_ALPHA
 
-        money_target = 1.0 if self.money_visible_timer > 0 else self.MONEY_IDLE_ALPHA
+        money_target = (
+            1.0
+            if self.money_visible_timer > 0
+            else self.MONEY_IDLE_ALPHA
+        )
 
         health_speed = self.HEALTH_APPEAR_SPEED if health_target > self.health_alpha.value else self.HEALTH_FADE_SPEED
         money_speed = self.MONEY_APPEAR_SPEED if money_target > self.money_alpha.value else self.MONEY_FADE_SPEED

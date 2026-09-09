@@ -24,7 +24,7 @@ class PathCollision(BaseArea):
 
     def on_collision(self, player):
         sequences = self.game_objects.sequence_manager
-        if sequences.is_active("map_traversal"):
+        if self.game_objects.transition.is_busy or sequences.is_active("map_traversal"):
             return
         sequences.start_sequence(
             "map_traversal",

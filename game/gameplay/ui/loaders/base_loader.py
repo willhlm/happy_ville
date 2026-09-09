@@ -1,11 +1,20 @@
 from engine.utils import read_files
 from os.path import basename, splitext
-from gameplay.ui.components import Controllers, InventoryContainer, Text
+from gameplay.ui.components import (
+    Button,
+    Controllers,
+    InventoryContainer,
+    MenuArrow,
+    ResultStamp,
+    Text,
+)
 
 class BaseLoader():
     # Tiled convention for UI loaders:
-    # - Use an object layer named "shared" for UI objects reused across screens.
-    # - Place those shared objects in assets/ui_layouts/shared.tsx.
+    # - assets/ui_layouts/shared.tsx defines reusable UI component types.
+    # - Use an object layer named "shared" to place instances of those types for
+    #   this screen. The layer is part of the screen layout; it is not a global
+    #   layout shared by every screen.
     # - Use an object layer named "objects" for screen-specific objects.
     # - Keep screen-specific tiles in that screen's own ..._UI.tsx tileset.
     DEFAULT_SHARED_LAYER = "shared"
@@ -17,11 +26,10 @@ class BaseLoader():
         self.game_objects = game_objects
         self.base_resolution = game_objects.game.window_size.copy()
         self.images = []
-        self.buttons = {}
-        self.shared_objects = []
-        self.containers = []
-        self.texts = []
+        self.controller_prompts = {}
         self.text_fields = {}
+        self.shared_elements = []
+        self.page_elements = []
 
     def load_UI_data(self, path, name):
         map_data = read_files.read_json(path)
@@ -34,7 +42,7 @@ class BaseLoader():
                 self.map_data['tileset_firstgids'][source_name] = tileset['firstgid']
                 if name + '_UI' in tileset['source']:#the name of the tmx file
                     self.map_data['UI_firstgid'] =  tileset['firstgid']
-        self.load_shared_objects()
+        self.load_shared_elements()
 
     def load_data(self):
         pass
@@ -75,7 +83,13 @@ class BaseLoader():
 
         return object_gid - firstgid
 
-    def load_shared_objects(self, objects=None):
+    def load_shared_elements(self, objects=None):
+        """Load this layout's instances of components from ``shared.tsx``.
+
+        Components are kept in layout order in ``shared_elements``. Semantic
+        indexes, such as ``controller_prompts`` and ``text_fields``, are kept
+        only where callers need lookup rather than rendering.
+        """
         if objects is None:
             objects = self.map_data.get(self.SHARED_OBJECT_LAYER, [])
 
@@ -89,34 +103,64 @@ class BaseLoader():
             object_size = [int(obj["width"]), int(obj["height"])]
 
             if local_id == 0:#a button
-                button = Controllers(topleft, self.game_objects, 'a', self.game_objects.controller.controller_type[-1])
-                #self.shared_objects.append(button)
-                self.buttons['a'] = button
+                button = Controllers(topleft, self.game_objects, 'a')
+                self.controller_prompts['a'] = button
+                self.shared_elements.append(button)
 
             elif local_id == 1:#b button
-                button = Controllers(topleft, self.game_objects, 'b', self.game_objects.controller.controller_type[-1])
-                #self.shared_objects.append(button)
-                self.buttons['b'] = button
+                button = Controllers(topleft, self.game_objects, 'b')
+                self.controller_prompts['b'] = button
+                self.shared_elements.append(button)
 
             elif local_id == 3:#y button
-                button = Controllers(topleft, self.game_objects, 'y', self.game_objects.controller.controller_type[-1])
-                #self.shared_objects.append(button)
-                self.buttons['y'] = button 
+                button = Controllers(topleft, self.game_objects, 'y')
+                self.controller_prompts['y'] = button
+                self.shared_elements.append(button)
 
             elif local_id == 4:#x button
-                button = Controllers(topleft, self.game_objects, 'x', self.game_objects.controller.controller_type[-1])
-                #self.shared_objects.append(button)
-                self.buttons['x'] = button                                 
+                button = Controllers(topleft, self.game_objects, 'x')
+                self.controller_prompts['x'] = button
+                self.shared_elements.append(button)
 
-            elif local_id == 5:#lb button
-                button = Controllers(topleft, self.game_objects, 'lb', self.game_objects.controller.controller_type[-1])
-                #self.shared_objects.append(button)
-                self.buttons['lb'] = button 
+            elif local_id == 5:#rb button
+                button = Controllers(topleft, self.game_objects, 'rb')
+                self.controller_prompts['rb'] = button
+                self.shared_elements.append(button)
 
-            elif local_id == 6:#rb button
-                button = Controllers(topleft, self.game_objects, 'rb', self.game_objects.controller.controller_type[-1])
-                #self.shared_objects.append(button)
-                self.buttons['rb'] = button                    
+            elif local_id == 6:#lb button
+                button = Controllers(topleft, self.game_objects, 'lb')
+                self.controller_prompts['lb'] = button
+                self.shared_elements.append(button)
+
+            elif local_id == 12:#rt
+                button = Controllers(topleft, self.game_objects, 'rt')
+                self.controller_prompts['rt'] = button
+                self.shared_elements.append(button)
+
+            elif local_id == 13:#lt
+                button = Controllers(topleft, self.game_objects, 'lt')
+                self.controller_prompts['lt'] = button
+                self.shared_elements.append(button)
+
+            elif local_id == 14:#start
+                button = Controllers(topleft, self.game_objects, 'start')
+                self.controller_prompts['start'] = button
+                self.shared_elements.append(button)
+
+            elif local_id == 15:#select
+                button = Controllers(topleft, self.game_objects, 'select')
+                self.controller_prompts['select'] = button
+                self.shared_elements.append(button)
+
+            elif local_id == 16:#ls
+                button = Controllers(topleft, self.game_objects, 'ls')
+                self.controller_prompts['ls'] = button
+                self.shared_elements.append(button)
+
+            elif local_id == 17:#rs
+                button = Controllers(topleft, self.game_objects, 'rs')
+                self.controller_prompts['rs'] = button
+                self.shared_elements.append(button)
 
             elif local_id == 7:#             
                 font_style = properties.get("font_style", "text")
@@ -128,12 +172,26 @@ class BaseLoader():
                     size=object_size,
                     font_style=font_style,
                 )
-                self.texts.append(text_obj)
+                self.shared_elements.append(text_obj)
                 self.register_text_field(text_obj, text_key=text_key)
 
             elif local_id == 8:           
                 item = properties.get("item", str(obj["id"]))                
-                self.containers.append(InventoryContainer(topleft, self.game_objects, item))                
+                container = InventoryContainer(topleft, self.game_objects, item)
+                self.shared_elements.append(container)
+
+            elif local_id == 9:
+                text = properties.get("name", str(obj["id"]))
+                self.shared_elements.append(Button(self.game_objects, text=text, position=topleft, center=True))
+
+            elif local_id == 10:
+                self.shared_elements.append(MenuArrow(topleft, self.game_objects, flip=True))
+
+            elif local_id == 11:
+                self.shared_elements.append(MenuArrow(topleft, self.game_objects))
+
+            elif local_id == 18:
+                self.shared_elements.append(ResultStamp(topleft, object_size))
 
     def _scale_position(self, pos):
         """Scale a position from base resolution to current resolution"""

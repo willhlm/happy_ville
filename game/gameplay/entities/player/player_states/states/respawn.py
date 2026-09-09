@@ -1,17 +1,19 @@
 from .base_composite import CompositeState
 from .base_state import PhaseBase
 
+
 class ReSpawnState(CompositeState):
     def __init__(self, entity):
         super().__init__(entity)
-        self.phases = {'main': ReSpawnMain(entity)}
+        self.phases = {"main": ReSpawnMain(entity)}
+
 
 class ReSpawnMain(PhaseBase):
     def __init__(self, entity):
         super().__init__(entity)
 
     def enter(self, **kwarg):
-        self.entity.animation.play('respawn')
+        self.entity.animation.play("respawn")
         self.entity.hit_component.set_invincibility(False)
 
     def handle_movement(self, event):
@@ -20,6 +22,6 @@ class ReSpawnMain(PhaseBase):
     def increase_phase(self):
         self.entity.vitals.set_health(max(self.entity.vitals.health, 0))
         self.entity.heal_vitals(self.entity.vitals.max_health)
-        if self.entity.backpack.map.spawn_point.get('bone', False):
+        if self.entity.backpack.map.spawn_point.get("bone", False):
             self.entity.backpack.map.spawn_point.pop()
-        self.enter_state('idle')
+        self.enter_state("idle")

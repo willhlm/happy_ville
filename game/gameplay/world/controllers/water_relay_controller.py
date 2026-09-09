@@ -1,5 +1,10 @@
 """Persistent, wind-powered water relay puzzles."""
 
+from gameplay.world.configs.golden_fields_systems import (
+    WATER_RELAY_ANGLES,
+    WATER_RELAYS,
+)
+
 
 class WaterRelayController:
     """Own relay state and publish the water currently available at each outlet.
@@ -12,12 +17,13 @@ class WaterRelayController:
 
     SIGNAL_PREFIX = "water_relay:"
     WORLD_STATE_GROUP = "water_relay"
-    VALID_ANGLES = (0, 90, 180, 270)
 
     def __init__(self, game_objects, world_controller):
         self.game_objects = game_objects
         self.world_controller = world_controller
         self._relays = {}
+        for relay_id, config in WATER_RELAYS.items():
+            self.register(relay_id, **config)
 
     @classmethod
     def signal_name(cls, relay_id):
@@ -100,7 +106,8 @@ class WaterRelayController:
         state = self.get_state(relay_id)
         if not state["enabled"]:
             return False
-        angle = (state["angle"] + 90 * int(steps)) % 360
+        angle_index = WATER_RELAY_ANGLES.index(state["angle"])
+        angle = WATER_RELAY_ANGLES[(angle_index + int(steps)) % len(WATER_RELAY_ANGLES)]
         self.game_objects.world_state.objects.set_value(
             config["state_level"], self.WORLD_STATE_GROUP, self._angle_key(relay_id), angle
         )
@@ -152,6 +159,7 @@ class WaterRelayController:
     @classmethod
     def _normalise_angle(cls, angle):
         angle = int(angle) % 360
-        if angle not in cls.VALID_ANGLES:
-            raise ValueError("Water relay angles must be 0, 90, 180, or 270.")
+        if angle not in WATER_RELAY_ANGLES:
+            valid_angles = ", ".join(str(value) for value in WATER_RELAY_ANGLES)
+            raise ValueError(f"Water relay angles must be one of: {valid_angles}.")
         return angle

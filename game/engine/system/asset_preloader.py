@@ -8,7 +8,7 @@ from gameplay.entities.visuals.cosmetics import *
 from gameplay.entities.visuals.effects import FadeEffect
 from gameplay.entities.visuals.environments import BackgroundDroplet, Leaves
 from gameplay.entities.visuals.particles.particles import Circle, FloatyParticles, Goop, Spark
-from gameplay.states import Bank, OptionDisplay, OptionMenu, OptionSounds
+from gameplay.states import Bank, OptionDisplay, OptionMenu, OptionSounds, OptionController, OptionGame
 from gameplay.ui.components import LogoLoadingOverlay, MenuArrow
 from gameplay.ui.components.overlay import point_arrow
 from gameplay.world.weather import weather
@@ -29,6 +29,8 @@ class AssetPreloader:
                 OptionMenu,
                 OptionDisplay,
                 OptionSounds,
+                OptionController,
+                OptionGame,
                 AmberDroplet,
                 Bone,
                 Gear,

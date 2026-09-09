@@ -1,140 +1,135 @@
-from engine.utils import read_files
 from gameplay.ui.loaders import OptionSoundsLoader
+
 from ..base.base_ui import BaseUI
 
-class OptionSounds(BaseUI):
-    def __init__(self,game):
-        super().__init__(game)
-        self.game_settings = read_files.read_json('config/game_settings.json')
-        self.current_button = 0     
-        self.sounds = ['overall', 'SFX', 'music']#the order in titled
-        self.previous_button = None
-        self._update_arrow()   
 
+class OptionSounds(BaseUI):
+    SOUND_KEYS = ("overall", "SFX", "music")
+
+    def __init__(self, game):
+        super().__init__(game)
+        self.menu_ui = OptionSounds.menu_ui
+        self.settings = game.settings
+        self.current_button = 0
+        self.previous_button = None
+        self._update_arrow()
+        self._update_button()
+
+    @staticmethod
     def pool(game_objects):
         OptionSounds.menu_ui = OptionSoundsLoader(game_objects)
 
+    def _update_arrow(self):
+        item = self.menu_ui.navigation_items[self.current_button]
+        bx, by, bw, _ = item.rect
+        for arrow in self.menu_ui.arrows:
+            if arrow.flip:
+                x = (
+                    self.menu_ui.results[self.current_button][0] + 20
+                    if item in self.menu_ui.option_labels
+                    else bx + bw + 10
+                )
+                arrow.set_pos((x, by))
+            else:
+                arrow.set_pos((bx - arrow.rect.width - 10, by))
+        self.game.game_objects.sound.play_ui_sound("on_select")
+
+    def _update_button(self):
+        if self.previous_button is not None and self.previous_button != self.current_button:
+            self.menu_ui.navigation_items[self.previous_button].on_exit()
+        if self.previous_button != self.current_button:
+            self.menu_ui.navigation_items[self.current_button].on_enter()
+        self.previous_button = self.current_button
+
     def update_render(self, dt):
         self.game.game_objects.ui.menu.update_time(dt)
-        self.menu_ui.buttons[self.current_button].active()
+        self.menu_ui.navigation_items[self.current_button].active()
         for arrow in self.menu_ui.arrows:
-            arrow.update(dt)#make them move back and forth
-        
-        # Update slider volumes to match current audio settings
+            arrow.update(dt)
         self._update_sliders()
 
     def _update_sliders(self):
-        """Update all sliders to match current volume settings"""
-        for i, slider in enumerate(self.menu_ui.slider):
-            volume = self.game.game_objects.sound.audio_manager.volume_settings[self.sounds[i]]
-            slider.set_volume(volume)
-
-    def _update_arrow(self):
-        button = self.menu_ui.buttons[self.current_button]
-        bx, by, bw, bh = button.rect[0], button.rect.centery, button.rect[2], button.rect[3]
-
-        for arrow in self.menu_ui.arrows:
-            y_pos = by - arrow.rect.height * 0.5
-            x_pos = self.menu_ui.results[self.current_button][0]
-            if arrow.flip:
-                arrow.set_pos((20 + x_pos, y_pos))  # +10 px padding
-            else:# left arrow, align to left edge of button
-                arrow.set_pos((bx - arrow.rect.width - 10 , y_pos))  # -10 px padding
-        self.game.game_objects.sound.play_ui_sound('on_select')
-
-    def _get_option_display_text(self, button_index):
-        """Get the current value text for each option"""
-        if button_index == 0:  # Resolution
-            res = self.resolutions[self.resolution_index]
-            return f"{res[0]}x{res[1]}"        
-        elif button_index == 1:  # VSync
-            return "ON" if self.game_settings['display']['vsync'] else "OFF"
-        elif button_index == 2:  # Fullscreen
-            return "ON" if self.game_settings['display']['fullscreen'] else "OFF"
-        elif button_index == 3:  # fps
-            res = self.fps[self.fps_index]
-            return f"{res}"             
-        return ""
+        volumes = self.game.game_objects.sound.volume_settings
+        for key, slider in zip(self.SOUND_KEYS, self.menu_ui.slider):
+            slider.set_volume(volumes[key])
 
     def render(self):
-        self.game.screen_manager.screen.clear(0,0,0,0)
-        self.game.game_objects.ui.menu.render_background(self.game.screen_manager.screen)
-
-        #blit buttons
-        for i, b in enumerate(self.menu_ui.buttons):
-            b.render(self.game.screen_manager.screen)
-            value_text = self.game.game_objects.sound.audio_manager.volume_settings[self.sounds[i]]                                        
+        screen = self.game.screen_manager.screen
+        screen.clear(0, 0, 0, 0)
+        self.game.game_objects.ui.menu.render_background(screen)
+        volumes = self.game.game_objects.sound.volume_settings
+        for key, label, result_position in zip(
+            self.SOUND_KEYS, self.menu_ui.option_labels, self.menu_ui.results
+        ):
+            label.render(screen)
             self.game.game_objects.font.render(
-                self.game.screen_manager.screen,
-                str(value_text),
+                screen,
+                str(volumes[key]),
                 letter_frame=None,
                 color=[255, 255, 255, 255],
-                position=self.menu_ui.results[i],
+                position=result_position,
             )
-
-
-        for b in self.menu_ui.slider:
-            b.render(self.game.screen_manager.screen)   
-
+        for slider in self.menu_ui.slider:
+            slider.render(screen)
+        for button in self.menu_ui.menu_buttons:
+            button.render(screen)
         for arrow in self.menu_ui.arrows:
-            self.game.display.render(arrow.image, self.game.screen_manager.screen, position = arrow.true_pos, flip = arrow.flip)   
+            self.game.display.render(
+                arrow.image, screen, position=arrow.true_pos, flip=arrow.flip
+            )
+        self.game.render_display(screen.texture)
 
-        #blit arrow
-        self.game.render_display(self.game.screen_manager.screen.texture)
-
-    def _update_button(self):
-        """Handle button state transitions when selection changes"""        
-        # Exit the previous button (if there was one)
-        if self.previous_button is not None and self.previous_button != self.current_button:
-            self.menu_ui.buttons[self.previous_button].on_exit()
-        
-        # Enter the new button (if it's different)
-        if self.previous_button != self.current_button:
-            self.menu_ui.buttons[self.current_button].on_enter()
-                
-        # Update previous button tracker
-        self.previous_button = self.current_button
-
-    def on_exit(self):
-        super().on_exit()
-        self.game_settings['sounds'] = self.game.game_objects.sound.audio_manager.volume_settings
-        read_files.write_json(self.game_settings, 'config/game_settings.json')#overwrite
-
-    def handle_events(self, input):        
+    def handle_events(self, input):
         input.processed()
-        if input.pressed:
-            if input.name == 'up':#up
-                self.current_button -= 1
-                if self.current_button < 0:
-                    self.current_button = len(self.menu_ui.buttons) - 1
-                self._update_arrow()
-                self._update_button()  # Handle button state change
-            elif input.name == 'down':#down
-                self.current_button += 1
-                if self.current_button >= len(self.menu_ui.buttons):
-                    self.current_button = 0
-                self._update_arrow()
-                self._update_button()  # Handle button state change
+        if not input.pressed:
+            return
+        if input.name == "up":
+            self._move_selection(-1)
+        elif input.name == "down":
+            self._move_selection(1)
+        elif input.name == "right":
+            self._change_volume(1)
+        elif input.name == "left":
+            self._change_volume(-1)
+        elif input.name in ("start", "b"):
+            self.game.state_manager.exit_state()
+        elif input.name in ("return", "a"):
+            self._activate_current_item()
 
-            elif input.name == 'right':  # Right                        
-                self.update_options(1)            
-                
-            elif input.name == 'left':  # Left
-                self.update_options(-1)
+    def _move_selection(self, direction):
+        self.current_button = (self.current_button + direction) % len(
+            self.menu_ui.navigation_items
+        )
+        self._update_arrow()
+        self._update_button()
 
-            elif input.name == 'start':
-                self.game.state_manager.exit_state()
+    def _change_volume(self, direction):
+        if self.current_button >= len(self.menu_ui.option_labels):
+            return
+        key = self.SOUND_KEYS[self.current_button]
+        sound = self.game.game_objects.sound
+        sound.change_volume(key, direction)
+        sound.update_all_volumes()
+        sound.play_ui_sound("on_select")
 
-    def update_options(self, direction):
-        """Cycle through option values (left/right)"""        
-        if self.current_button == 0: #overall            
-            self.game.game_objects.sound.change_volume('overall', direction)            
-        elif self.current_button == 1:  # SFX
-            self.game.game_objects.sound.change_volume('SFX', direction)            
-        elif self.current_button == 2:  # music
-            self.game.game_objects.sound.change_volume('music', direction)
-        
-        # Update playing sounds immediately
-        self.game.game_objects.sound.sound_player.update_all_volumes()
-        
-        self.game.game_objects.sound.play_ui_sound('on_select')
+    def _activate_current_item(self):
+        item = self.menu_ui.navigation_items[self.current_button]
+        if item in self.menu_ui.option_labels:
+            self._change_volume(1)
+        elif item.text == "Reset to default":
+            self.settings.reset_sound_options()
+            default_volumes = dict(self.settings.sounds)
+            self.game.game_objects.sound.replace_volume_settings(default_volumes)
+            self.game.game_objects.sound.play_ui_sound("select")
+        else:
+            self.game.game_objects.sound.play_ui_sound("select")
+            self.game.state_manager.exit_state()
+
+    def on_pop(self):
+        self.settings.sounds.clear()
+        self.settings.sounds.update(
+            self.game.game_objects.sound.volume_settings
+        )
+        self.settings.save()
+        for item in self.menu_ui.navigation_items:
+            item.on_exit()
