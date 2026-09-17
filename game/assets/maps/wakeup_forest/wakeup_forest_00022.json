@@ -463,7 +463,7 @@
          "visible":false,
          "x":0,
          "y":0
-        }, 
+        },
         {
          "id":55,
          "layers":[
@@ -3305,29 +3305,6 @@
                          "y":551
                         }, 
                         {
-                         "gid":15,
-                         "height":208,
-                         "id":401,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"direction",
-                                 "type":"string",
-                                 "value":"left"
-                                }, 
-                                {
-                                 "name":"offset",
-                                 "type":"string",
-                                 "value":"3"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":372,
-                         "x":924,
-                         "y":542
-                        }, 
-                        {
                          "gid":11,
                          "height":224,
                          "id":402,
@@ -3367,29 +3344,6 @@
                          "width":16,
                          "x":5136,
                          "y":480
-                        }, 
-                        {
-                         "gid":15,
-                         "height":208,
-                         "id":404,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"direction",
-                                 "type":"string",
-                                 "value":"right"
-                                }, 
-                                {
-                                 "name":"offset",
-                                 "type":"string",
-                                 "value":"3"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":374,
-                         "x":4816,
-                         "y":528
                         }, 
                         {
                          "gid":8,
@@ -4298,29 +4252,6 @@
                          "y":778
                         }, 
                         {
-                         "gid":15,
-                         "height":512,
-                         "id":508,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"direction",
-                                 "type":"string",
-                                 "value":"left"
-                                }, 
-                                {
-                                 "name":"offset",
-                                 "type":"string",
-                                 "value":"0"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":208,
-                         "x":0,
-                         "y":1344
-                        }, 
-                        {
                          "gid":8,
                          "height":16,
                          "id":509,
@@ -4451,6 +4382,86 @@
                          "width":0,
                          "x":2224,
                          "y":624
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
+                 "x":0,
+                 "y":0
+                },
+                {
+                 "draworder":"topdown",
+                 "id":103,
+                 "name":"area_stamps",
+                 "objects":[
+                        {
+                         "gid":15,
+                         "height":208,
+                         "id":401,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"direction",
+                                 "type":"string",
+                                 "value":"left"
+                                },
+                                {
+                                 "name":"offset",
+                                 "type":"string",
+                                 "value":"3"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":372,
+                         "x":924,
+                         "y":542
+                        },
+                        {
+                         "gid":15,
+                         "height":208,
+                         "id":404,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"direction",
+                                 "type":"string",
+                                 "value":"right"
+                                },
+                                {
+                                 "name":"offset",
+                                 "type":"string",
+                                 "value":"3"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":374,
+                         "x":4816,
+                         "y":528
+                        },
+                        {
+                         "gid":15,
+                         "height":512,
+                         "id":508,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"direction",
+                                 "type":"string",
+                                 "value":"left"
+                                },
+                                {
+                                 "name":"offset",
+                                 "type":"string",
+                                 "value":"0"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":208,
+                         "x":0,
+                         "y":1344
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -4763,7 +4774,7 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":103,
+ "nextlayerid":104,
  "nextobjectid":518,
  "orientation":"orthogonal",
  "renderorder":"right-down",

@@ -266,7 +266,7 @@
                                  "name":"path_to",
                                  "type":"string",
                                  "value":"golden_fields_4"
-                                }, 
+                                },
                                 {
                                  "name":"spawn",
                                  "type":"string",
@@ -416,24 +416,6 @@
                          "width":400,
                          "x":1888,
                          "y":784
-                        }, 
-                        {
-                         "gid":15,
-                         "height":128,
-                         "id":454,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"direction",
-                                 "type":"string",
-                                 "value":"right"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":2176,
-                         "y":608
                         }, 
                         {
                          "gid":11,
@@ -884,24 +866,6 @@
                          "y":1120
                         }, 
                         {
-                         "gid":15,
-                         "height":928,
-                         "id":492,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"direction",
-                                 "type":"string",
-                                 "value":"left"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":1120,
-                         "y":1184
-                        }, 
-                        {
                          "gid":8,
                          "height":16,
                          "id":494,
@@ -944,24 +908,6 @@
                          "y":1072
                         }, 
                         {
-                         "gid":15,
-                         "height":16,
-                         "id":499,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"direction",
-                                 "type":"string",
-                                 "value":"top"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":544,
-                         "x":1648,
-                         "y":256
-                        }, 
-                        {
                          "gid":8,
                          "height":64,
                          "id":500,
@@ -990,7 +936,72 @@
                  "visible":true,
                  "x":0,
                  "y":0
-                }, 
+                },
+                {
+                 "draworder":"topdown",
+                 "id":105,
+                 "name":"area_stamps",
+                 "objects":[
+                        {
+                         "gid":15,
+                         "height":128,
+                         "id":454,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"direction",
+                                 "type":"string",
+                                 "value":"right"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":2176,
+                         "y":608
+                        },
+                        {
+                         "gid":15,
+                         "height":928,
+                         "id":492,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"direction",
+                                 "type":"string",
+                                 "value":"left"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1120,
+                         "y":1184
+                        },
+                        {
+                         "gid":15,
+                         "height":16,
+                         "id":499,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"direction",
+                                 "type":"string",
+                                 "value":"top"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":544,
+                         "x":1648,
+                         "y":256
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
+                 "x":0,
+                 "y":0
+                },
                 {
                  "draworder":"topdown",
                  "id":104,
@@ -1027,7 +1038,7 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":105,
+ "nextlayerid":106,
  "nextobjectid":503,
  "orientation":"orthogonal",
  "renderorder":"right-down",

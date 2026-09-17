@@ -2,6 +2,7 @@
 
 from gameplay.world.configs.golden_fields_systems import (
     PISTON_PROFILES,
+    ROTATING_RIG_PROFILES,
     WINDMILL_NETWORKS,
 )
 
@@ -19,12 +20,8 @@ class GoldenFieldsController:
 
         for network_id, config in WINDMILL_NETWORKS.items():
             self.register_windmill_network(network_id, **config)
-        self.game_objects.signals.subscribe(
-            self.WINDMILL_ACTIVATION_SIGNAL, self._on_windmill_activation
-        )
-        self.world_controller.subscribe(
-            self.world_controller.WIND_AVAILABLE, self._on_global_wind_changed
-        )
+        self.game_objects.signals.subscribe(self.WINDMILL_ACTIVATION_SIGNAL, self._on_windmill_activation)
+        self.world_controller.subscribe(self.world_controller.WIND_AVAILABLE, self._on_global_wind_changed)
         self.world_controller.register_region_controller(self)
 
     @classmethod
@@ -119,6 +116,21 @@ class GoldenFieldsController:
         count_profiles = [count for count in profiles if isinstance(count, int) and count <= turning_count]
         if not count_profiles:
             raise ValueError(f"Piston profile '{profile_id}' needs a profile for zero turning windmills.")
+        return profiles[max(count_profiles)]
+
+    def rotating_rig_profile(self, profile_id, network_id, turning_count):
+        """Return the authored rig profile for a network's turning count."""
+        try:
+            profiles = ROTATING_RIG_PROFILES[profile_id]
+        except KeyError as error:
+            raise KeyError(f"Unknown Golden Fields rotating rig profile '{profile_id}'.") from error
+
+        if turning_count >= self.windmill_network_size(network_id) and "all" in profiles:
+            return profiles["all"]
+
+        count_profiles = [count for count in profiles if isinstance(count, int) and count <= turning_count]
+        if not count_profiles:
+            raise ValueError(f"Rotating rig profile '{profile_id}' needs a profile for zero turning windmills.")
         return profiles[max(count_profiles)]
 
     def refresh(self):

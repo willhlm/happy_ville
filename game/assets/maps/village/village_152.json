@@ -191,7 +191,7 @@
                          "width":16,
                          "x":318,
                          "y":244
-                        }, 
+                        },
                         {
                          "gid":11082,
                          "height":52,
@@ -267,7 +267,18 @@
                          "width":16,
                          "x":272,
                          "y":325
-                        }, 
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
+                 "x":0,
+                 "y":0
+                },
+                {
+                 "draworder":"topdown",
+                 "id":7,
+                 "name":"area_stamps",
+                 "objects":[
                         {
                          "gid":11087,
                          "height":16,
@@ -299,7 +310,7 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":7,
+ "nextlayerid":8,
  "nextobjectid":8,
  "orientation":"orthogonal",
  "renderorder":"right-down",

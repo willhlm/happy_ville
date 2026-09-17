@@ -7,7 +7,6 @@ from engine import constants as C
 from gameplay.entities.items import SoulEssence
 from gameplay.entities.areas import *
 from gameplay.entities.visuals.particles import screen_particles
-from gameplay.world.camera.stop import Stop
 
 from gameplay.entities.interactables import *
 from gameplay.entities.platforms import *

@@ -268,7 +268,7 @@
                                  "name":"image",
                                  "type":"string",
                                  "value":"None"
-                                }, 
+                                },
                                 {
                                  "name":"path_to",
                                  "type":"string",
@@ -351,7 +351,18 @@
                          "width":16,
                          "x":561,
                          "y":335
-                        }, 
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
+                 "x":0,
+                 "y":0
+                },
+                {
+                 "draworder":"topdown",
+                 "id":9,
+                 "name":"area_stamps",
+                 "objects":[
                         {
                          "gid":3715,
                          "height":16,
@@ -383,7 +394,7 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":9,
+ "nextlayerid":10,
  "nextobjectid":8,
  "orientation":"orthogonal",
  "renderorder":"right-down",

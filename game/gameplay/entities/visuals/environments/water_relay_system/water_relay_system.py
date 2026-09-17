@@ -20,7 +20,7 @@ class WaterRelaySystem(LayeredObjects):
         state = controller.register(
             self.relay_id,
             state_level=props.get("state_level") or self.game_objects.map.biome_room_name,
-            wind_network=props.get("wind_network", "golden_fields_liquid"),
+            wind_network=props.get("wind_network", "golden_fields_windmills"),
             initial_angle=props.get("initial_angle", 0),
             lever_signal_id=props.get("lever_signal_id"),
         )

@@ -48,7 +48,18 @@
                  "width":16,
                  "x":4320,
                  "y":608
-                }, 
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        },
+        {
+         "draworder":"topdown",
+         "id":45,
+         "name":"area_stamps",
+         "objects":[
                 {
                  "gid":15,
                  "height":160,
@@ -66,7 +77,7 @@
                  "width":16,
                  "x":4416,
                  "y":672
-                }, 
+                },
                 {
                  "gid":15,
                  "height":80,
@@ -90,7 +101,7 @@
          "visible":true,
          "x":0,
          "y":0
-        }, 
+        },
         {
          "draworder":"topdown",
          "id":5,
@@ -162,7 +173,7 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":45,
+ "nextlayerid":46,
  "nextobjectid":290,
  "orientation":"orthogonal",
  "renderorder":"right-down",

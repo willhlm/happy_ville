@@ -74,6 +74,9 @@ class SceneBuilder:
         if "statics" in data:
             self.spawner.load_statics(data["statics"], parallax, offset, ctx=ctx, map_def=map_def, layer_name=layer_name, viewport_center=viewport_center)
 
+        if "area_stamps" in data:
+            self.spawner.load_area_stamps(data["area_stamps"], parallax, offset, map_def=map_def, viewport_center=viewport_center)
+
         if "interactables" in data:
             self.spawner.load_interactables(data["interactables"], parallax, offset, map_def=map_def, layer_name=layer_name, viewport_center=viewport_center)
 

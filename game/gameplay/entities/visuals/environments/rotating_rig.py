@@ -9,13 +9,18 @@ from gameplay.entities.visuals.environments.base.layered_objects import LayeredO
 
 
 class RotatingRig(LayeredObjects):
-    """A layered environment visual that owns rotating blade platforms."""
+    """A layered environment visual that owns rotating blade platforms.
+
+    Tiled property wind_network (default golden_fields_windmills) selects its
+    power source. The default rotation profile is sampled once at map load.
+    Radius, blade_count, and rotation_phase configure its geometry and pose.
+    """
 
     animations = {}
 
     def __init__(self, pos, game_objects, parallax, layer_name, **props):
         super().__init__(pos, game_objects, parallax, layer_name)
-        self.wind_network = str(props.get("wind_network", "golden_fields_liquid"))
+        self.wind_network = str(props.get("wind_network", "golden_fields_windmills"))
         controller = game_objects.world_controller.golden_fields
         self.init_sprites("assets/sprites/entities/visuals/environments/blade_rig/")
         self.image = self.sprites["idle"][0]
@@ -24,26 +29,22 @@ class RotatingRig(LayeredObjects):
 
         self.radius = float(props.get("radius", self.image.width * 0.5))
         self.blade_count = max(1, int(props.get("blade_count", 4)))
-        self.rotation_speed = float(props.get("rotation_speed", 2.5))
         self.angle = float(props.get("rotation_phase", 0.0)) % 360.0
         self.prev_angle = self.angle
-        self.turning = controller.windmill_turning_count(self.wind_network) > 0
-        self._subscribed = True
+        profile = controller.rotating_rig_profile("golden_fields_default", self.wind_network, controller.windmill_turning_count(self.wind_network))
+        self.rotation_speed = float(profile["rotation_speed"])
+        self.turning = self.rotation_speed != 0
 
-        self.blades = [
-            RotatingBlade(self, index)
-            for index in range(self.blade_count)
-        ]
+        self.blades = [RotatingBlade(self, index) for index in range(self.blade_count)]
         self._position_blades(self.angle)
         for blade in self.blades:
             blade.sync_pose()
         self.game_objects.platforms.add(*self.blades)
-        controller.subscribe_windmill_network(self.wind_network, self._on_network_changed)
 
     def update(self, dt):
+        self.prev_angle = self.angle
         if not self.turning:
             return
-        self.prev_angle = self.angle
         self.angle = (self.angle + self.rotation_speed * dt) % 360.0
         self._position_blades(self.angle)
 
@@ -62,24 +63,9 @@ class RotatingRig(LayeredObjects):
         )
 
     def kill(self):
-        self._unsubscribe_network()
         for blade in self.blades:
             blade.kill()
         super().kill()
-
-    def release_texture(self):
-        self._unsubscribe_network()
-
-    def _unsubscribe_network(self):
-        if not self._subscribed:
-            return
-        self.game_objects.world_controller.golden_fields.unsubscribe_windmill_network(
-            self.wind_network, self._on_network_changed
-        )
-        self._subscribed = False
-
-    def _on_network_changed(self, *, turning_count, **kwargs):
-        self.turning = turning_count > 0
 
     def _position_blades(self, angle):
         for blade in self.blades:

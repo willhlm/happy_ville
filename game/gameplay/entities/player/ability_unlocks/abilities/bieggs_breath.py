@@ -2,10 +2,11 @@ from .base_ability import Ability
 from engine.utils import read_files
 from gameplay.entities.projectiles import Wind
 
-class BieggsBreath(Ability):#force push
+class BieggsBreath(Ability):#wind god
     id = 'wind'
     name = 'Wind'
     state_name = 'wind'
+    state_names = ('wind', 'double_jump')
     spirit_cost = 1
     selectable = True
     max_level = 2

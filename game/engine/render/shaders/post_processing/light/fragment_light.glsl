@@ -10,7 +10,6 @@ uniform sampler2D normal_map;
 uniform vec2 lightPositions[20]; // Assuming up to 20 light sources
 uniform float lightRadii[20];     // Corresponding radius for each light source
 uniform vec4 colour[20];
-uniform vec4 ambient;//texture(imageTexture, fragmentTexCoord); // Get background color
 
 uniform vec2 rectangleCorners[80]; // x/4 is the number of rectangles
 uniform int occluder_start_index[20];
@@ -22,9 +21,7 @@ uniform float angleEnd[20];     // End angle of the cone for each light source
 uniform float min_radius[20];     // End angle of the cone for each light source
 
 uniform float normal_interact[20];     // if the lightsource should interact with normal map
-
-float diff;
-vec3 lightDir;
+uniform float visibility_fill[20];     // player visibility light, displaced by world light
 
 out vec4 color;
 
@@ -53,7 +50,9 @@ bool isOcluded(vec2 p, vec2 q, vec2 pixelCoord, vec2 lightPos){
 }
 
 void main() {
-    vec4 backgroundColor = ambient;
+    vec3 worldUnshaded = vec3(0.0);
+    vec3 worldShaded = vec3(0.0);
+    vec3 visibilityEnergy = vec3(0.0);
     vec4 normalTex = texture(normal_map, fragmentTexCoord);
     vec2 pixelCoord = fragmentTexCoord * resolution;
     vec3 normal = normalize(normalTex.xyz * 2.0 - 1.0); // Transform normal map color to normal
@@ -70,8 +69,9 @@ void main() {
             continue;
         }
 
-        float invDistance = inversesqrt(max(distanceToLight2, epsilon));
-        vec2 toLight = lightDelta * invDistance;
+        vec2 toLight = distanceToLight2 > epsilon
+            ? lightDelta * inversesqrt(distanceToLight2)
+            : vec2(0.0, 1.0);
 
         float start = radians(angleStart[l]); // Define your start angle
         float end = radians(angleEnd[l]); // Define your end angle
@@ -108,23 +108,23 @@ void main() {
             }
         }
 
-       if (!occluded) {
-            if (normalTex.a == 0.0) {//if default. not a good solution. not sure how multiple light sources will affect this.
-                normal = vec3(toLight, 0.0); // Default normal facing out of the screen
+        if (!occluded) {
+            float falloff = 1.0 - smoothstep(0.0, lightRadius, sqrt(distanceToLight2));
+            vec3 contribution = colour[l].rgb * colour[l].a * falloff;
+            if (visibility_fill[l] > 0.5) {
+                visibilityEnergy += contribution;
+                continue;
             }
 
-            // Light intensity
-            float lightIntensity = max(1.0 - distanceToLight2 / lightRadius2, 0.0);
-
-            lightDir = normalize(vec3(toLight, 0.0));// Calculate the direction from the fragment to the light
-            diff = mix(1.0, dot(normal, lightDir), clamp(ambient.a, 0.3, 0.9)* normal_interact[l]);         //smoothstep(0.3, 0.9, ambient.a)   
-
-            // Add light to the background color
-            float fade = smoothstep(0.0, 1.0, lightIntensity);
-            backgroundColor += vec4(colour[l].xyz *  fade * colour[l].w * diff, lightIntensity * fade * colour[l].w);
+            float diffuse = normalTex.a > 0.0 ? max(dot(normal, vec3(toLight, 0.0)), 0.0) : 1.0;
+            float normalFactor = mix(1.0, diffuse, clamp(normal_interact[l], 0.0, 1.0));
+            worldUnshaded += contribution;
+            worldShaded += contribution * normalFactor;
         }
     }
 
-    backgroundColor.xyz /= max(mix(backgroundColor.w, 1, ambient.w), epsilon);//normalise the colour, and prevent division by 0        
-    color = backgroundColor;
+    float worldPeak = max(max(worldUnshaded.r, worldUnshaded.g), worldUnshaded.b);
+    float worldReach = clamp(worldPeak, 0.0, 1.0);
+    vec3 worldLighting = worldShaded / max(worldPeak, 1.0);
+    color = vec4(worldLighting + visibilityEnergy * (1.0 - worldReach), 1.0);
 }

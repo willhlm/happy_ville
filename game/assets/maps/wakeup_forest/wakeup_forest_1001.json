@@ -283,7 +283,7 @@
          "visible":true,
          "x":0,
          "y":0
-        }, 
+        },
         {
          "id":55,
          "layers":[
@@ -2013,6 +2013,29 @@
                          "y":592
                         }, 
                         {
+                         "gid":8,
+                         "height":32,
+                         "id":336,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":832,
+                         "x":2624,
+                         "y":848
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
+                 "x":0,
+                 "y":0
+                },
+                {
+                 "draworder":"topdown",
+                 "id":94,
+                 "name":"area_stamps",
+                 "objects":[
+                        {
                          "gid":15,
                          "height":16,
                          "id":335,
@@ -2029,19 +2052,7 @@
                          "width":768,
                          "x":2976,
                          "y":768
-                        }, 
-                        {
-                         "gid":8,
-                         "height":32,
-                         "id":336,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":832,
-                         "x":2624,
-                         "y":848
-                        }, 
+                        },
                         {
                          "gid":15,
                          "height":848,
@@ -2073,7 +2084,7 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":94,
+ "nextlayerid":95,
  "nextobjectid":341,
  "orientation":"orthogonal",
  "renderorder":"right-down",

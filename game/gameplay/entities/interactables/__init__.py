@@ -23,6 +23,7 @@ from .vines.interactable_vines import InteractableVines
 from .inorinoki import Inorinoki
 from .verve_tree import VerveTree
 from .lever.lever import Lever
+from .call_bell.call_bell import CallBell
 from .light_crystal import LightCrystal
 from .place_holder_interacatble import PlaceHolderInteracatble
 from .rhoutta_altar import RhouttaAltar
@@ -50,7 +51,6 @@ from .traps.spirit_spikes import SpiritSpikes
 from .uber_runestone import UberRunestone
 
 from .two_d_liquid.two_d_liquid import TwoDLiquid
-from .two_d_liquid.windmill_controlled_liquid import WindmillControlledLiquid
 from .two_d_liquid.water_relay_controlled_liquid import WaterRelayControlledLiquid
 from .up_stream import UpStream
 

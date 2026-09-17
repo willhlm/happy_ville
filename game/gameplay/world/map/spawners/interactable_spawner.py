@@ -118,4 +118,7 @@ class InteractableSpawner(c.SpawnerCommon):
                         sprite_path=props.get("sprite_path") or "assets/sprites/entities/interactables/gear_box/",
                     )
                 )
-                
+            elif local_id == 23:
+                self.game_objects.interactables.add(
+                    c.CallBell(object_position, self.game_objects, **c.props_list_to_dict(properties))
+                )

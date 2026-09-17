@@ -266,25 +266,7 @@
                          "width":16,
                          "x":2944,
                          "y":816
-                        }, 
-                        {
-                         "gid":15,
-                         "height":96,
-                         "id":404,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"direction",
-                                 "type":"string",
-                                 "value":"right"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":32,
-                         "x":3024,
-                         "y":864
-                        }, 
+                        },
                         {
                          "gid":11,
                          "height":96,
@@ -493,6 +475,35 @@
                  "visible":true,
                  "x":0,
                  "y":0
+                },
+                {
+                 "draworder":"topdown",
+                 "id":91,
+                 "name":"area_stamps",
+                 "objects":[
+                        {
+                         "gid":15,
+                         "height":96,
+                         "id":404,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"direction",
+                                 "type":"string",
+                                 "value":"right"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":3024,
+                         "y":864
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
+                 "x":0,
+                 "y":0
                 }],
          "name":"bg1",
          "opacity":1,
@@ -523,7 +534,7 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":91,
+ "nextlayerid":92,
  "nextobjectid":415,
  "orientation":"orthogonal",
  "renderorder":"right-down",

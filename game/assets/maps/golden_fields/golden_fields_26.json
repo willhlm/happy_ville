@@ -410,6 +410,45 @@
                 }, 
                 {
                  "draworder":"topdown",
+                 "id":106,
+                 "name":"platforms",
+                 "objects":[
+                        {
+                         "gid":31252,
+                         "height":16,
+                         "id":391,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"float_on_liquid",
+                                 "type":"bool",
+                                 "value":true
+                                }, 
+                                {
+                                 "name":"solid",
+                                 "type":"bool",
+                                 "value":true
+                                }, 
+                                {
+                                 "name":"sprite_path",
+                                 "type":"string",
+                                 "value":"floating\/plank"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":64,
+                         "x":2592,
+                         "y":736
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
+                 "x":0,
+                 "y":0
+                }, 
+                {
+                 "draworder":"topdown",
                  "id":105,
                  "name":"interactables",
                  "objects":[],
@@ -426,8 +465,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":106,
- "nextobjectid":391,
+ "nextlayerid":107,
+ "nextobjectid":392,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -535,6 +574,10 @@
         {
          "firstgid":31226,
          "source":"..\/_objects\/interactables.tsx"
+        }, 
+        {
+         "firstgid":31250,
+         "source":"..\/_objects\/platforms.tsx"
         }],
  "tilewidth":16,
  "type":"map",

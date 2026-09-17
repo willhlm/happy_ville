@@ -20,8 +20,6 @@ class IdleMain(PhaseBase):
         if not self.entity.has_ground_grace():
             self.enter_state("fall")
             self.entity.begin_coyote_time()
-        if self.entity.game_objects.input_manager.is_held("gameplay", "jump"):
-            self.enter_state("jump_wind")
 
     def handle_press_input(self, input):
         if input.name == "jump":
@@ -40,7 +38,7 @@ class IdleMain(PhaseBase):
                 elif direction == "up":
                     self.enter_state("smash_up")
             else:
-                self.swing_sword()
+                self.swing_sword("ground")
             input.processed()
         elif input.name == "ability":
             input.processed()
@@ -59,12 +57,3 @@ class IdleMain(PhaseBase):
             self.enter_state("run")
         elif abs(self.entity.acceleration[0]) > 0.1:
             self.enter_state("walk")
-
-    def swing_sword(self):
-        if not self.entity.flags["attack_able"]:
-            return
-        if self.entity.dir[1] == 0:
-            state = "sword_stand" + str(self.entity.combat_tracker.next_swing_index())
-            self.enter_state(state)
-        elif self.entity.dir[1] > 0:
-            self.enter_state("sword_up")

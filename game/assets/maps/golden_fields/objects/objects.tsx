@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.8" tiledversion="1.8.2" name="objects" tilewidth="320" tileheight="320" tilecount="12" columns="0">
+<tileset version="1.8" tiledversion="1.8.2" name="objects" tilewidth="320" tileheight="320" tilecount="10" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="2">
   <image width="224" height="48" source="../../../sprites/entities/platforms/bridge/erect/bridge.png"/>
@@ -15,15 +15,15 @@
  </tile>
  <tile id="5">
   <properties>
-   <property name="socket_id" value=""/>
-   <property name="item_id" value="gear"/>
    <property name="consume_item" type="bool" value="true"/>
-   <property name="signal_id" value=""/>
+   <property name="item_id" value="gear"/>
    <property name="signal_action" value="activate"/>
+   <property name="signal_id" value=""/>
    <property name="signal_value" value=""/>
+   <property name="socket_id" value=""/>
    <property name="sprite_path" value="assets/sprites/entities/interactables/gear_box/"/>
   </properties>
-  <image width="32" height="32" source="../../../sprites/entities/interactables/gear_box/idle/gearbox.png"/>
+  <image source="../../../sprites/entities/interactables/gear_box/idle/gearbox.png"/>
  </tile>
  <tile id="6">
   <properties>
@@ -36,7 +36,7 @@
  </tile>
  <tile id="7">
   <properties>
-   <property name="wind_network" value="golden_fields_liquid"/>
+   <property name="wind_network" value="golden_fields_windmills"/>
   </properties>
   <image width="32" height="32" source="../../../sprites/entities/platforms/piston/idle/rhoutta_encounter1.png"/>
  </tile>
@@ -45,8 +45,7 @@
    <property name="blade_count" value="4"/>
    <property name="radius" value="56"/>
    <property name="rotation_phase" value="0"/>
-   <property name="rotation_speed" value="2.5"/>
-   <property name="wind_network" value="golden_fields_liquid"/>
+   <property name="wind_network" value="golden_fields_windmills"/>
   </properties>
   <image width="320" height="320" source="../../../sprites/entities/visuals/environments/blade_rig/idle/idle.png"/>
  </tile>
@@ -57,12 +56,14 @@
    <property name="destination_lift_id" value=""/>
    <property name="destination_map" value=""/>
    <property name="destination_station" type="int" value="0"/>
+   <property name="initial_station" value=""/>
    <property name="lever_offset" value=""/>
    <property name="lift_id" value=""/>
    <property name="path" type="object" value="0"/>
    <property name="signal_id" value=""/>
    <property name="transition_direction" value=""/>
    <property name="transition_station" value=""/>
+   <property name="wind_network" value=""/>
   </properties>
   <image width="144" height="64" source="../../../sprites/entities/platforms/lifts/liftcar/body/idle/rhoutta_encounter1.png"/>
  </tile>
@@ -76,17 +77,18 @@
    <property name="lift_stations" value=""/>
    <property name="path" type="object" value="0"/>
    <property name="signal_id" value=""/>
+   <property name="wind_network" value=""/>
   </properties>
   <image width="112" height="64" source="../../../sprites/entities/platforms/lifts/lift/body/idle/rhoutta_encounter1.png"/>
  </tile>
  <tile id="11">
   <properties>
-   <property name="relay_id" value=""/>
-   <property name="state_level" value=""/>
-   <property name="wind_network" value="golden_fields_liquid"/>
    <property name="initial_angle" type="int" value="0"/>
    <property name="lever_signal_id" value=""/>
+   <property name="relay_id" value=""/>
+   <property name="state_level" value=""/>
    <property name="visual_angle_offset" type="int" value="0"/>
+   <property name="wind_network" value="golden_fields_windmills"/>
   </properties>
   <image width="144" height="64" source="../../../sprites/entities/visuals/environments/water_relay/idle/idle.png"/>
  </tile>

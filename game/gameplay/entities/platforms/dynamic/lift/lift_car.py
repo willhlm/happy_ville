@@ -24,6 +24,8 @@ class LiftCar(DynamicPlatform):
             where the car starts. Without it, the car begins at the path point
             closest to its placed Tiled position.
         speed: Travel speed in pixels per second; default 80.
+        wind_network: Windmill network powering the lift; defaults to
+            ``golden_fields_windmills``. Every windmill must be turning to move.
         arrival_epsilon: Distance within which a car is treated as docked;
             default 0.5 pixels.
         station_direction: Initial travel direction for a mounted lever:
@@ -42,6 +44,10 @@ class LiftCar(DynamicPlatform):
         self.props = props
         self.signal_id = str(props.get("signal_id", props.get("id", ""))).strip()
         self.lift_id = str(props.get("lift_id", "")).strip() or None
+        self.wind_network = str(props.get("wind_network", "golden_fields_windmills"))
+        controller = self.game_objects.world_controller.golden_fields
+        if not controller.is_registered_windmill_network(self.wind_network):
+            raise ValueError(f"Unknown wind network {self.wind_network!r} for lift {self.signal_id!r}")
         path_points = [tuple(point) for point in props.get("path_points") or ()]
         if not self.signal_id or len(path_points) < 2:
             raise ValueError("A lift requires signal_id and a path with at least two points")
@@ -98,6 +104,11 @@ class LiftCar(DynamicPlatform):
 
     def get_support_motion(self, entity):
         return entity.platform_collider.get_support_motion(self)
+
+    @property
+    def is_powered(self):
+        controller = self.game_objects.world_controller.golden_fields
+        return controller.windmill_turning_count(self.wind_network) == controller.windmill_network_size(self.wind_network)
 
     @property
     def is_travelling(self):
@@ -173,7 +184,7 @@ class LiftCar(DynamicPlatform):
         Explicit external station commands deliberately do nothing during a
         journey. Mounted controls use ``press_mounted_lever`` for reversal.
         """
-        if self.is_travelling or index == self.current_index:
+        if not self.is_powered or self.is_travelling or index == self.current_index:
             return False
         self.destination_index = index
         self._start_next_segment()
@@ -181,6 +192,8 @@ class LiftCar(DynamicPlatform):
 
     def press_mounted_lever(self):
         """Advance at a station; reverse toward the previous station in transit."""
+        if not self.is_powered:
+            return
         if self.is_travelling:
             self.travel_direction *= -1
             self.destination_index = self.current_index
@@ -216,7 +229,7 @@ class LiftCar(DynamicPlatform):
     def update_vel(self, dt):
         self.velocity[0] = 0.0
         self.velocity[1] = 0.0
-        if not self.is_travelling or self.speed <= 0 or dt <= 0:
+        if not self.is_powered or not self.is_travelling or self.speed <= 0 or dt <= 0:
             return
 
         target_x, target_y = self.points[self.segment_target_index]

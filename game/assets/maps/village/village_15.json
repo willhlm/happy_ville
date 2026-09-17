@@ -250,7 +250,7 @@
                                  "name":"image",
                                  "type":"string",
                                  "value":"None"
-                                }, 
+                                },
                                 {
                                  "name":"path_to",
                                  "type":"string",
@@ -569,7 +569,18 @@
                          "width":16,
                          "x":769,
                          "y":423
-                        }, 
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
+                 "x":0,
+                 "y":0
+                },
+                {
+                 "draworder":"topdown",
+                 "id":9,
+                 "name":"area_stamps",
+                 "objects":[
                         {
                          "gid":3715,
                          "height":137,
@@ -587,7 +598,7 @@
                          "width":16,
                          "x":897,
                          "y":484
-                        }, 
+                        },
                         {
                          "gid":3715,
                          "height":16,
@@ -605,7 +616,7 @@
                          "width":390,
                          "x":503,
                          "y":553
-                        }, 
+                        },
                         {
                          "gid":3715,
                          "height":211,
@@ -623,7 +634,7 @@
                          "width":16,
                          "x":110,
                          "y":372
-                        }, 
+                        },
                         {
                          "gid":3715,
                          "height":124,
@@ -655,7 +666,7 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":9,
+ "nextlayerid":10,
  "nextobjectid":28,
  "orientation":"orthogonal",
  "renderorder":"right-down",

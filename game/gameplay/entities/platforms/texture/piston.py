@@ -12,14 +12,14 @@ class Piston(TexturedPlatform):
 
     Tiled properties:
       wind_network: shared windmill-network ID (defaults to
-        ``golden_fields_liquid``)
+        ``golden_fields_windmills``)
       piston_profile: piston profile ID (defaults to
         ``golden_fields_default``)
     """
 
     def __init__(self, pos, game_objects, **props):
         super().__init__(pos, game_objects)
-        self.wind_network = str(props.get("wind_network", "golden_fields_liquid"))
+        self.wind_network = str(props.get("wind_network", "golden_fields_windmills"))
         self.piston_profile_id = str(props.get("piston_profile", "golden_fields_default"))
         self.sprites = read_files.load_sprites_dict("assets/sprites/entities/platforms/piston/", game_objects)
         self.image = self.sprites["idle"][0]

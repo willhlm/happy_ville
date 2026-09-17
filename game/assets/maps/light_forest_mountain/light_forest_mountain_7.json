@@ -48,25 +48,7 @@
                  "width":16,
                  "x":5264,
                  "y":1696
-                }, 
-                {
-                 "gid":15,
-                 "height":144,
-                 "id":302,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"direction",
-                         "type":"string",
-                         "value":"right"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":16,
-                 "x":5328,
-                 "y":1728
-                }, 
+                },
                 {
                  "gid":11,
                  "height":144,
@@ -177,7 +159,36 @@
          "visible":true,
          "x":0,
          "y":0
-        }, 
+        },
+        {
+         "draworder":"topdown",
+         "id":45,
+         "name":"area_stamps",
+         "objects":[
+                {
+                 "gid":15,
+                 "height":144,
+                 "id":302,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"direction",
+                         "type":"string",
+                         "value":"right"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":5328,
+                 "y":1728
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        },
         {
          "draworder":"topdown",
          "id":5,
@@ -873,7 +884,7 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":45,
+ "nextlayerid":46,
  "nextobjectid":343,
  "orientation":"orthogonal",
  "renderorder":"right-down",

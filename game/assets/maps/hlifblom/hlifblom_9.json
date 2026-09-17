@@ -263,7 +263,7 @@
                                  "name":"path_to",
                                  "type":"string",
                                  "value":"nordveden_27"
-                                }, 
+                                },
                                 {
                                  "name":"spawn",
                                  "type":"string",
@@ -293,24 +293,6 @@
                          "width":16,
                          "x":1248,
                          "y":800
-                        }, 
-                        {
-                         "gid":8207,
-                         "height":304,
-                         "id":1847,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"direction",
-                                 "type":"string",
-                                 "value":"left"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":1184,
-                         "y":1024
                         }, 
                         {
                          "gid":8200,
@@ -606,42 +588,6 @@
                          "y":1040
                         }, 
                         {
-                         "gid":8207,
-                         "height":592,
-                         "id":1892,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"direction",
-                                 "type":"string",
-                                 "value":"right"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":3360,
-                         "y":1264
-                        }, 
-                        {
-                         "gid":8207,
-                         "height":16,
-                         "id":1893,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"direction",
-                                 "type":"string",
-                                 "value":"bottom"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":400,
-                         "x":1056,
-                         "y":1008
-                        }, 
-                        {
                          "gid":8206,
                          "height":176,
                          "id":1894,
@@ -664,6 +610,71 @@
                          "width":80,
                          "x":1984,
                          "y":928
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
+                 "x":0,
+                 "y":0
+                },
+                {
+                 "draworder":"topdown",
+                 "id":42,
+                 "name":"area_stamps",
+                 "objects":[
+                        {
+                         "gid":8207,
+                         "height":304,
+                         "id":1847,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"direction",
+                                 "type":"string",
+                                 "value":"left"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1184,
+                         "y":1024
+                        },
+                        {
+                         "gid":8207,
+                         "height":592,
+                         "id":1892,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"direction",
+                                 "type":"string",
+                                 "value":"right"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":3360,
+                         "y":1264
+                        },
+                        {
+                         "gid":8207,
+                         "height":16,
+                         "id":1893,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"direction",
+                                 "type":"string",
+                                 "value":"bottom"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":400,
+                         "x":1056,
+                         "y":1008
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -723,7 +734,7 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":42,
+ "nextlayerid":43,
  "nextobjectid":1896,
  "orientation":"orthogonal",
  "renderorder":"right-down",

@@ -5,3 +5,4 @@ from .navigation import PathCollision, PathInteract, SafeSpawn
 from .spawners import AreaSpawner
 from .triggers import LayerTrigger, WorldTextTrigger, ZoomCollision
 from .area_manager import AreaManager
+from .camera.stop import CameraStop

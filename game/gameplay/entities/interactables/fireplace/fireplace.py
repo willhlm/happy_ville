@@ -24,11 +24,11 @@ class Fireplace(Interactables):
         self.currentstate.handle_input('Interact')  # goes to interacted after transform
 
     def turn_on(self):#called from sttes
-        self.light_sources.append(self.game_objects.lights.create(self, colour=[255, 175, 100, 255], radius=100, components=["flicker"]))
-        self.light_sources.append(self.game_objects.lights.create(self, radius=50, components=["flicker"]))
-        self.light_sources.append(self.game_objects.lights.create(self, colour=[255, 175, 100, 255], radius=100))
+        self.light_sources.append(self.game_objects.lights.create(self, colour=[255, 175, 100, 255], radius=100, components=["flicker"],normal_interact = True))
+        self.light_sources.append(self.game_objects.lights.create(self, radius=50, components=["flicker"],normal_interact = True))
+        self.light_sources.append(self.game_objects.lights.create(self, colour=[255, 175, 100, 255], radius=100,normal_interact = True))
 
-        self.spatial_emitter_id = self.game_objects.sound.register_spatial_point(self.sounds['idle'][0], get_point=lambda: self.hitbox.center, base_volume=1, loops=-1, min_dist=48, max_dist=500)        
+        self.spatial_emitter_id = self.game_objects.sound.register_spatial_point(self.sounds['idle'][0], get_point = lambda: self.hitbox.center, base_volume=1, loops=-1, min_dist=48, max_dist=500)        
 
     def turn_off(self):#called from sttes
         for light in self.light_sources:

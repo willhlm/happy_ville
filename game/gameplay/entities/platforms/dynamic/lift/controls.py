@@ -105,7 +105,8 @@ def attach_controls(lift, props):
         lever_offset: Optional ``x,y`` position of a mounted lever relative
             to the car's top-left. It defaults to the car centre.
         boarding_offset / boarding_size: Optional ``x,y`` and ``width,height``
-            of the enter-to-go trigger. They default to the full car.
+            of the enter-to-go trigger, relative to the car's top-left.
+            Defaults match the platform hitbox with its top extended 16 pixels.
         destination_map / destination_lift_id: Required for ``map_transition``.
             They identify the map to load and the matching destination car.
         destination_station: Station where that destination car is docked.
@@ -139,10 +140,15 @@ def attach_controls(lift, props):
     if mode == "enter_to_go":
         if len(lift.points) != 2:
             raise ValueError("An enter_to_go lift requires exactly two path points")
+        default_offset = (
+            lift.hitbox.left - lift.rect.left,
+            lift.hitbox.top - lift.rect.top - 16,
+        )
+        default_size = (lift.hitbox.width, lift.hitbox.height + 16)
         trigger = LiftBoardingTrigger(
             lift,
-            parse_pair(props.get("boarding_offset"), (0, 0)),
-            parse_pair(props.get("boarding_size"), (lift.rect.width, lift.rect.height)),
+            parse_pair(props.get("boarding_offset"), default_offset),
+            parse_pair(props.get("boarding_size"), default_size),
         )
         lift.game_objects.interactables.add(trigger)
         lift.attach(trigger)

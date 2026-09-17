@@ -8,7 +8,7 @@ from .sprint_movement import SprintMovement
 class MovementController:
     def __init__(self, entity):
         self.entity = entity
-        # self.horizontal = HorizontalMovement(entity)
+        self.horizontal = HorizontalMovement(entity)
         self.jump = JumpMovement(entity)
         # self.sprint = SprintMovement(entity)
 
@@ -30,13 +30,11 @@ class MovementController:
         self.interrupt_jump()
         # self.sprint.reset()
 
-    def apply_ground_movement(self, axes, allow_facing_update=True):
-        self.horizontal.apply_ground_input(
-            axes, allow_facing_update=allow_facing_update
-        )
+    def apply_ground_movement(self, axes):
+        self.horizontal.apply_ground_input(axes)
 
-    def apply_air_movement(self, axes, allow_facing_update=True):
-        self.horizontal.apply_air_input(axes, allow_facing_update=allow_facing_update)
+    def apply_air_movement(self, axes):
+        self.horizontal.apply_air_input(axes)
 
     def has_horizontal_intent(self):
         return self.horizontal.has_intent()

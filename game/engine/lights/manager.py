@@ -5,7 +5,7 @@ from engine.lights.source import LightSource
 class LightManager:
     def __init__(self, game_objects):
         self.game_objects = game_objects
-        self.set_ambient_light([0, 0, 0, 0])
+        self.set_ambient_light([0.7, 0.7, 0.7, 1.0])
         # Policy:
         # - only active lights count against max_light_sources
         # - sleeping lights stay registered under their owner and can wake later
@@ -22,8 +22,9 @@ class LightManager:
         self.shaders['light']['resolution'] = self.game_objects.game.window_size
 
         self.layer1 = game_objects.game.display.make_layer(game_objects.game.window_size)
-        self.layer2 = game_objects.game.display.make_layer(game_objects.game.window_size)
-        self.layer3 = game_objects.game.display.make_layer(game_objects.game.window_size)
+        # Keep overlapping light energy until the final composite applies it.
+        self.layer2 = game_objects.game.display.make_layer(game_objects.game.window_size, dtype="f4")
+        self.layer3 = game_objects.game.display.make_layer(game_objects.game.window_size, dtype="f4")
         self.screen_copy = game_objects.game.display.make_layer(game_objects.game.display_size)
 
         self.normal_map = game_objects.game.display.make_layer(game_objects.game.window_size)
@@ -42,7 +43,7 @@ class LightManager:
 
     def new_map(self):
         self.clear_lights()
-        self.set_ambient_light([0, 0, 0, 0])
+        self.set_ambient_light([0.7, 0.7, 0.7, 1.0])
 
     def clear_normal_map(self):
         self.normal_map.clear(0, 0, 0, 0)
@@ -52,6 +53,7 @@ class LightManager:
 
     def _init_render_buffers(self):
         self.normal_interact = [0] * self.max_light_sources
+        self.visibility_fill = [0] * self.max_light_sources
         self.num_rectangle = [0] * self.max_light_sources
         self.occluder_start_index = [0] * self.max_light_sources
         self.positions = [[0, 0] for _ in range(self.max_light_sources)]
@@ -65,6 +67,7 @@ class LightManager:
     def _reset_render_buffers(self):
         for index in range(self.max_light_sources):
             self.normal_interact[index] = 0
+            self.visibility_fill[index] = 0
             self.num_rectangle[index] = 0
             self.occluder_start_index[index] = 0
             self.positions[index][0] = 0
@@ -105,6 +108,7 @@ class LightManager:
             self.end_angle[active_light_count] = light.end_angle
             self.min_radius[active_light_count] = light.min_radius
             self.normal_interact[active_light_count] = light.normal_interact
+            self.visibility_fill[active_light_count] = float(light.visibility_fill)
             rectangle_cursor = self.list_points(light, active_light_count, rectangle_cursor)
             active_light_count += 1
 
@@ -310,22 +314,23 @@ class LightManager:
         self.shaders['light']['lightPositions'] = self.positions
         self.shaders['light']['lightRadii'] = self.radius
         self.shaders['light']['colour'] = self.colour
-        self.shaders['light']['ambient'] = self.ambient
+        self.shaders['blend']['ambient'] = self.ambient
         self.shaders['light']['angleStart'] = self.start_angle
         self.shaders['light']['angleEnd'] = self.end_angle
         self.shaders['light']['min_radius'] = self.min_radius
         self.shaders['light']['num_rectangle'] = self.num_rectangle
         self.shaders['light']['normal_interact'] = self.normal_interact
+        self.shaders['light']['visibility_fill'] = self.visibility_fill
         self.shaders['light']['normal_map'] = self.normal_map.texture
 
+        self.game_objects.game.display.use_alpha_blending(False)
         self.game_objects.game.display.render(target.texture, self.screen_copy)
         self.shaders['blend']['background'] = self.screen_copy.texture
         self.shaders['blur']['r'] = self._blur_r_int
         self.shaders['blur']['weights'] = self._blur_weights
 
 
-        self.game_objects.game.display.use_alpha_blending(False)
         self.game_objects.game.display.render(self.layer1.texture, self.layer2, shader=self.shaders['light'])
         self.game_objects.game.display.render(self.layer2.texture, self.layer3, shader=self.shaders['blur'])
-        self.game_objects.game.display.use_alpha_blending(True)
         self.game_objects.game.display.render(self.layer3.texture, target, scale=self.game_objects.game.scale, shader=self.shaders['blend'])
+        self.game_objects.game.display.use_alpha_blending(True)

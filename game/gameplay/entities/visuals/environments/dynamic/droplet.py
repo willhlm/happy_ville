@@ -12,7 +12,7 @@ class BackgroundDroplet(BaseDynamic):#cosmetic droplet
         self.lifetime = 100
         self.shader_state = EntityShaderManager(self)
 
-        if game_objects.world_state.narrative.events.get('tjasolmai', False):#if water boss (golden fields) is dead            
+        if game_objects.world_controller.is_enabled(game_objects.world_controller.WATER_POISONED):
             self.original_colour = [[46, 74,132, 255]]#can append more to replace more
             self.replace_colour = [[70, 210, 33, 255]]#new oclour. can append more to replace more       
             self.shader_state.add_shader(

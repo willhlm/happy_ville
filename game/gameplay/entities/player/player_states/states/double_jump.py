@@ -4,19 +4,19 @@ from engine import constants as C
 from gameplay.entities.visuals.cosmetics import Dusts
 
 
-class JumpWindState(CompositeState):
+class DoubleJumpState(CompositeState):
     def __init__(self, entity):
         super().__init__(entity)
-        self.phases = {"main": JumpWindMain(entity),"post": JumpWindPost(entity)}
+        self.phases = {"main": DoubleJumpMain(entity), "post": DoubleJumpPost(entity)}
 
-class JumpWindMain(PhaseAirBase):
+
+class DoubleJumpMain(PhaseAirBase):
     def __init__(self, entity):
         super().__init__(entity)
 
     def enter(self, **kwarg):
-        self.entity.animation.play("jump_wind_main")
-        if kwarg.get("double_jump", False):
-            self.entity.flags["double_jump_available"] = False
+        self.entity.animation.play("double_jump_main")
+        self.entity.flags["double_jump_available"] = False
         self.entity.audio.play("jump")
         self.entity.animation.frame = kwarg.get("frame", 0)
         self.jump_dash_timer = C.jump_dash_timer
@@ -38,7 +38,7 @@ class JumpWindMain(PhaseAirBase):
                 self.enter_state("dash_air")
         elif input.name == "attack":
             input.processed()
-            self.swing_sword()
+            self.swing_sword("air")
         elif input.name == "ability":
             input.processed()
             self.do_ability()
@@ -53,17 +53,6 @@ class JumpWindMain(PhaseAirBase):
         if input.name == "jump":
             input.processed()
 
-    def swing_sword(self):
-        if not self.entity.flags["attack_able"]:
-            return
-        if self.entity.dir[1] > C.down_angle:
-            self.enter_state("sword_up")
-        elif self.entity.dir[1] < C.down_angle * -1:
-            self.enter_state("sword_down")
-        else:
-            state = "sword_air" + str(self.entity.combat_tracker.next_swing_index())
-            self.enter_state(state)
-
     def consume_contact_state(self):
         if self.entity.has_collision_kind("belt"):
             self.entity.movement_controller.interrupt_jump()
@@ -72,12 +61,13 @@ class JumpWindMain(PhaseAirBase):
     def increase_phase(self):
         self.enter_phase("post")
 
-class JumpWindPost(PhaseAirBase):
+
+class DoubleJumpPost(PhaseAirBase):
     def __init__(self, entity):
         super().__init__(entity)
 
     def enter(self, **kwarg):
-        self.entity.animation.play("jump_wind_post")
+        self.entity.animation.play("double_jump_post")
         self.entity.audio.play("jump")
         self.entity.animation.frame = kwarg.get("frame", 0)
         self.jump_dash_timer = C.jump_dash_timer
@@ -98,7 +88,7 @@ class JumpWindPost(PhaseAirBase):
                 self.enter_state("dash_air")
         elif input.name == "attack":
             input.processed()
-            self.swing_sword()
+            self.swing_sword("air")
         elif input.name == "ability":
             input.processed()
             self.do_ability()
@@ -112,17 +102,6 @@ class JumpWindPost(PhaseAirBase):
     def handle_release_input(self, input):
         if input.name == "jump":
             input.processed()
-
-    def swing_sword(self):
-        if not self.entity.flags["attack_able"]:
-            return
-        if self.entity.dir[1] > C.down_angle:
-            self.enter_state("sword_up")
-        elif self.entity.dir[1] < C.down_angle * -1:
-            self.enter_state("sword_down")
-        else:
-            state = "sword_air" + str(self.entity.combat_tracker.next_swing_index())
-            self.enter_state(state)
 
     def consume_contact_state(self):
         if self.entity.has_collision_kind("belt"):

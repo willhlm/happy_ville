@@ -34,16 +34,11 @@ class Camera_manager():
 
     def camera_shake(self, **kwarg):#shake dat ass
         settings = self.game_objects.game.settings
-        self.game_objects.controller.rumble(
-            duration=10 * kwarg.get('duration', 100),
-            amplitude=settings.controller_rumble / 100,
-        )
-        if settings.camera_shake == 0:
-            return
+        self.game_objects.controller.rumble(duration=10 * kwarg.get('duration', 100), amplitude=settings.controller_rumble / 100)
+        if settings.camera_shake == 0: return
+            
         shake_kwargs = dict(kwarg)
-        shake_kwargs["amplitude"] = (
-            shake_kwargs.get("amplitude", 10) * settings.camera_shake / 100
-        )
+        shake_kwargs["amplitude"] = shake_kwargs.get("amplitude", 10) * settings.camera_shake / 100
         self.add_decorator(Camera_shake_decorator(self.camera, **shake_kwargs))
 
     def reset_player_center(self):#called when loading a map in maploader
@@ -208,7 +203,7 @@ class Camera_shake_decorator():
         self.scale = kwarg.get('scale', 0.98)
 
     def update(self, dt):
-        self.amp = (self.original_amp - (1 - self.duration/self.length))*dt#need to be this compicated one to respect any time freeze
+        self.amp *= self.scale#need to be this compicated one to respect any time freeze
         self.current_camera.true_scroll[0] += random.uniform(-self.amp, self.amp)#only stuff relying on scroll will be affected, true scroll like player is not
         self.current_camera.true_scroll[1] += random.uniform(-self.amp, self.amp)
         

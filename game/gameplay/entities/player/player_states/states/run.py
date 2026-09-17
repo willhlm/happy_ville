@@ -53,7 +53,7 @@ class RunPre(PhaseBase):
                 elif direction == "up":
                     self.enter_state("smash_up")
             else:
-                self.swing_sword()
+                self.swing_sword("ground")
             input.processed()
         elif input.name == "ability":
             input.processed()
@@ -67,16 +67,6 @@ class RunPre(PhaseBase):
         super().handle_movement(axes)
         if self.entity.acceleration[0] == 0:
             self.entity.currentstate.composite_state.enter_phase("post")
-
-    def swing_sword(self):
-        if not self.entity.flags["attack_able"]:
-            return
-        if abs(self.entity.dir[1]) < 0.8:
-            state = "sword_stand" + str(self.entity.combat_tracker.next_swing_index())
-            self.enter_state(state)
-        elif self.entity.dir[1] > 0.8:
-            self.enter_state("sword_up")
-
 
 class RunMain(PhaseBase):
     def __init__(self, entity):
@@ -117,7 +107,7 @@ class RunMain(PhaseBase):
             self.enter_state("dash_ground")
         elif input.name == "attack":
             input.processed()
-            self.swing_sword()
+            self.swing_sword("ground")
         elif input.name == "ability":
             input.processed()
             self.do_ability()
@@ -132,16 +122,6 @@ class RunMain(PhaseBase):
             self.entity.currentstate.composite_state.enter_phase("post")
         elif abs(self.entity.acceleration[0]) < 0.3:
             self.enter_state("walk", phase="main")
-
-    def swing_sword(self):
-        if not self.entity.flags["attack_able"]:
-            return
-        if abs(self.entity.dir[1]) < 0.8:
-            state = "sword_stand" + str(self.entity.combat_tracker.next_swing_index())
-            self.enter_state(state)
-        elif self.entity.dir[1] > 0.8:
-            self.enter_state("sword_up")
-
 
 class RunPost(PhaseBase):
     def __init__(self, entity):
@@ -172,7 +152,7 @@ class RunPost(PhaseBase):
                 elif direction == "up":
                     self.enter_state("smash_up")
             else:
-                self.swing_sword()
+                self.swing_sword("ground")
             input.processed()
         elif input.name == "ability":
             input.processed()
@@ -186,15 +166,6 @@ class RunPost(PhaseBase):
     def handle_release_input(self, input):
         if input.name == "jump":
             input.processed()
-
-    def swing_sword(self):
-        if not self.entity.flags["attack_able"]:
-            return
-        if self.entity.dir[1] == 0:
-            state = "sword_stand" + str(self.entity.combat_tracker.next_swing_index())
-            self.enter_state(state)
-        elif self.entity.dir[1] > 0:
-            self.enter_state("sword_up")
 
     def increase_phase(self):
         self.enter_state("idle")

@@ -823,6 +823,60 @@
                          "width":64,
                          "x":816,
                          "y":1280
+                        }, 
+                        {
+                         "gid":1,
+                         "height":16,
+                         "id":364,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"spawn",
+                                 "type":"string",
+                                 "value":"3"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1152,
+                         "y":416
+                        }, 
+                        {
+                         "gid":8,
+                         "height":112,
+                         "id":365,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":96,
+                         "x":1008,
+                         "y":432
+                        }, 
+                        {
+                         "gid":8,
+                         "height":112,
+                         "id":366,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":112,
+                         "x":1104,
+                         "y":352
+                        }, 
+                        {
+                         "gid":8,
+                         "height":112,
+                         "id":367,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":96,
+                         "x":1216,
+                         "y":432
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -836,7 +890,7 @@
                  "name":"platforms",
                  "objects":[
                         {
-                         "gid":34798,
+                         "gid":34802,
                          "height":64,
                          "id":355,
                          "name":"",
@@ -868,7 +922,35 @@
                  "draworder":"topdown",
                  "id":105,
                  "name":"interactables",
-                 "objects":[],
+                 "objects":[
+                        {
+                         "gid":31249,
+                         "height":32,
+                         "id":363,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"action",
+                                 "type":"string",
+                                 "value":"request_station"
+                                }, 
+                                {
+                                 "name":"signal_id",
+                                 "type":"string",
+                                 "value":"lift_golden_5"
+                                }, 
+                                {
+                                 "name":"value",
+                                 "type":"string",
+                                 "value":"1"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":1216,
+                         "y":1232
+                        }],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -910,6 +992,11 @@
                                  "name":"destination_station",
                                  "type":"int",
                                  "value":1
+                                }, 
+                                {
+                                 "name":"initial_station",
+                                 "type":"string",
+                                 "value":"1"
                                 }, 
                                 {
                                  "name":"lever_offset",
@@ -962,7 +1049,7 @@
          "y":0
         }],
  "nextlayerid":109,
- "nextobjectid":362,
+ "nextobjectid":368,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -1068,12 +1155,12 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":31224,
+         "firstgid":31226,
          "source":"..\/_objects\/interactables.tsx"
         }, 
         {
          "columns":74,
-         "firstgid":31246,
+         "firstgid":31250,
          "image":"tilesets\/VP2_Main.png",
          "imageheight":768,
          "imagewidth":1184,
@@ -1085,7 +1172,7 @@
          "tilewidth":16
         }, 
         {
-         "firstgid":34798,
+         "firstgid":34802,
          "source":"..\/_objects\/platforms.tsx"
         }],
  "tilewidth":16,

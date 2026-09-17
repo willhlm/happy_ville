@@ -5,6 +5,7 @@ DEFAULT_ROOM_CONFIG = RoomConfig(
         music_track("assets/audio/music/maps/nordveden/", "music", 1, 0.1),
         music_track("assets/audio/music/maps/nordveden/", "ambient", 2, 0.2),
     ],
+    player_lights=[{"colour": [255, 255, 255, 255], "normal_interact": False}],
     weather={
         "wind": {
             "layers": {
@@ -42,7 +43,7 @@ DEFAULT_ROOM_CONFIG = RoomConfig(
 ROOM_CONFIGS = {
     room: RoomConfig(
         ambient_light=[100 / 255, 100 / 255, 100 / 255, 255 / 255],
-        player_lights=[{"colour": [200, 200, 200, 200], "normal_interact": False}],
+        player_lights=[{"colour": [255, 255, 255, 255], "normal_interact": False}],
     )
     for room in ("11", "8", "7", "6", "5")
 }

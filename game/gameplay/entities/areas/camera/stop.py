@@ -1,7 +1,7 @@
 import pygame
 from gameplay.entities.base.static_entity import StaticEntity
 
-class Stop(StaticEntity):
+class CameraStop(StaticEntity):
     def __init__(self, game_objects, size, pos, mode, offset=0, priority=0):
         super().__init__(pos, game_objects)
         self.size = size

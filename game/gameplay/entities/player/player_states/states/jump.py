@@ -48,7 +48,7 @@ class JumpMain(PhaseAirBase):
                 self.enter_state("dash_air")
         elif input.name == "attack":
             input.processed()
-            self.swing_sword()
+            self.swing_sword("air")
         elif input.name == "ability":
             input.processed()
             self.do_ability()
@@ -64,17 +64,6 @@ class JumpMain(PhaseAirBase):
             input.processed()
             self.entity.movement_controller.release_jump()
             self.enter_state("fall")
-
-    def swing_sword(self):
-        if not self.entity.flags["attack_able"]:
-            return
-        if self.entity.dir[1] > C.down_angle:
-            self.enter_state("sword_up")
-        elif self.entity.dir[1] < C.down_angle * -1:
-            self.enter_state("sword_down")
-        else:
-            state = "sword_air" + str(self.entity.combat_tracker.next_swing_index())
-            self.enter_state(state)
 
     def consume_contact_state(self):
         if self.entity.has_collision_kind("belt"):

@@ -82,7 +82,10 @@ class Biome:
             self.level.game_objects.lights.set_ambient_light(config.ambient_light)
 
         for light_kwargs in config.player_lights or []:
-            self.level.game_objects.lights.create(self.level.game_objects.player, **light_kwargs)
+            self.level.game_objects.lights.create(
+                self.level.game_objects.player,
+                **{"visibility_fill": True, **light_kwargs},
+            )
 
         self.on_room_loaded(room_id, config)
 

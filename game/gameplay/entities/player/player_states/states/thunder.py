@@ -5,7 +5,6 @@ from .base_state import PhaseBase
 from gameplay.entities.visuals.effects.fade_effect import FadeEffect
 from gameplay.entities.visuals.cosmetics import ThunderSpark
 
-
 class ThunderState(CompositeState):
     def __init__(self, entity):
         super().__init__(entity)
@@ -97,10 +96,8 @@ class ThunderMain(PhaseBase):
         pass
 
     def consume_contact_state(self):
-        if any(c.normal[0] * self.dir[0] + c.normal[1] * self.dir[1] < 0
-               for c in self.entity.contact_state.collisions):
+        if any(c.normal[0] * self.dir[0] + c.normal[1] * self.dir[1] < 0 for c in self.entity.contact_state.collisions):
             self.exit_state()
-
 
 class ThunderPost(PhaseBase):
     def __init__(self, entity):
@@ -109,13 +106,7 @@ class ThunderPost(PhaseBase):
     def enter(self, **kwarg):
         self.entity.animation.play("thunder_post")
         self.entity.flags["invincibility"] = True
-        self.entity.game_objects.time_manager.modify_time(
-            time_scale=0,
-            duration=7,
-            callback=lambda: self.entity.game_objects.camera_manager.camera_shake(
-                amplitude=30, duration=30, scale=0.9
-            ),
-        )
+        self.entity.game_objects.time_manager.modify_time(time_scale = 0, duration =7, callback =lambda: self.entity.game_objects.camera_manager.camera_shake(amplitude=20, duration=30, scale=0.96))
         sparks = ThunderSpark(self.entity.rect.topleft, self.entity.game_objects)
         sparks.rect.midbottom = [
             self.entity.hitbox.midbottom[0],

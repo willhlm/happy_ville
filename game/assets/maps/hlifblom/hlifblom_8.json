@@ -168,7 +168,7 @@
          "visible":true,
          "x":0,
          "y":0
-        }, 
+        },
         {
          "id":28,
          "layers":[
@@ -421,24 +421,6 @@
                          "width":16,
                          "x":512,
                          "y":960
-                        }, 
-                        {
-                         "gid":8207,
-                         "height":336,
-                         "id":1847,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"direction",
-                                 "type":"string",
-                                 "value":"left"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":432,
-                         "y":1200
                         }, 
                         {
                          "gid":8200,
@@ -746,24 +728,6 @@
                          "y":848
                         }, 
                         {
-                         "gid":8207,
-                         "height":192,
-                         "id":2010,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"direction",
-                                 "type":"string",
-                                 "value":"right"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":2368,
-                         "y":960
-                        }, 
-                        {
                          "gid":8200,
                          "height":288,
                          "id":2011,
@@ -894,6 +858,53 @@
                  "visible":true,
                  "x":0,
                  "y":0
+                },
+                {
+                 "draworder":"topdown",
+                 "id":46,
+                 "name":"area_stamps",
+                 "objects":[
+                        {
+                         "gid":8207,
+                         "height":336,
+                         "id":1847,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"direction",
+                                 "type":"string",
+                                 "value":"left"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":432,
+                         "y":1200
+                        },
+                        {
+                         "gid":8207,
+                         "height":192,
+                         "id":2010,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"direction",
+                                 "type":"string",
+                                 "value":"right"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":2368,
+                         "y":960
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
+                 "x":0,
+                 "y":0
                 }],
          "name":"bg1",
          "opacity":1,
@@ -935,7 +946,7 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":46,
+ "nextlayerid":47,
  "nextobjectid":2035,
  "orientation":"orthogonal",
  "renderorder":"right-down",

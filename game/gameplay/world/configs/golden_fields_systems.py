@@ -4,14 +4,14 @@
 WATER_RELAY_ANGLES = (0, 90, 180, 270)
 
 WINDMILL_NETWORKS = {
-    "golden_fields_liquid": {
+    "golden_fields_windmills": {
         "windmill_level": "golden_fields_2",
         "windmill_ids": ("windmill_1", "windmill_2", "windmill_3"),
         # These are world-state defaults, rather than map-load defaults.
         # Consumers can therefore be loaded before the windmill map is visited.
         "windmill_initial_states": {
-            "windmill_1": "stuck",
-            "windmill_2": "idle",
+            "windmill_1": "idle",
+            "windmill_2": "stuck",
             "windmill_3": "active",
         },
     },
@@ -26,10 +26,20 @@ PISTON_PROFILES = {
     },
 }
 
+ROTATING_RIG_PROFILES = {
+    "golden_fields_default": {
+        # Rotation speed uses the rig's existing degrees per game-time unit.
+        0: {"rotation_speed": 0.0},
+        1: {"rotation_speed": 0},
+        2: {"rotation_speed": 0},
+        "all": {"rotation_speed": 1.0},
+    },
+}
+
 WATER_RELAYS = {
     "water_relay_1": {
         "state_level": "golden_fields_14",
-        "wind_network": "golden_fields_liquid",
+        "wind_network": "golden_fields_windmills",
         "initial_angle": 0,
     },
 }

@@ -257,24 +257,6 @@
                  "name":"statics",
                  "objects":[
                         {
-                         "gid":15,
-                         "height":608,
-                         "id":454,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"direction",
-                                 "type":"string",
-                                 "value":"right"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":2816,
-                         "y":816
-                        }, 
-                        {
                          "gid":11,
                          "height":16,
                          "id":455,
@@ -284,7 +266,7 @@
                                  "name":"path_to",
                                  "type":"string",
                                  "value":"golden_fields_13"
-                                }, 
+                                },
                                 {
                                  "name":"spawn",
                                  "type":"string",
@@ -792,7 +774,36 @@
                  "visible":true,
                  "x":0,
                  "y":0
-                }, 
+                },
+                {
+                 "draworder":"topdown",
+                 "id":106,
+                 "name":"area_stamps",
+                 "objects":[
+                        {
+                         "gid":15,
+                         "height":608,
+                         "id":454,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"direction",
+                                 "type":"string",
+                                 "value":"right"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":2816,
+                         "y":816
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
+                 "x":0,
+                 "y":0
+                },
                 {
                  "draworder":"topdown",
                  "id":104,
@@ -852,7 +863,7 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":106,
+ "nextlayerid":107,
  "nextobjectid":582,
  "orientation":"orthogonal",
  "renderorder":"right-down",

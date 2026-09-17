@@ -48,23 +48,12 @@ class AirGlidePre(PhaseAirBase):
                 self.enter_state("dash_air")
         elif input.name == "attack":
             input.processed()
-            self.swing_sword()
+            self.swing_sword("air")
 
     def handle_release_input(self, input):
         if input.name == "jump":
             input.processed()
             self.enter_state("fall")
-
-    def swing_sword(self):
-        if not self.entity.flags["attack_able"]:
-            return
-        if self.entity.dir[1] > C.down_angle:
-            self.enter_state("sword_up")
-        elif self.entity.dir[1] < C.down_angle * -1:
-            self.enter_state("sword_down")
-        else:
-            state = "sword_air" + str(self.entity.combat_tracker.next_swing_index())
-            self.enter_state(state)
 
     def increase_phase(self):
         self.enter_phase("main")

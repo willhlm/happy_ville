@@ -27,11 +27,8 @@ class TwoDLiquid(StaticEntity):
         self.shader['u_resolution'] = self.game_objects.game.window_size
         self.shader['darkerRegionHeightPixels'] = self.darker_region_height_pixels
         self.set_height_percent(self.height_percent)
-        if game_objects.world_state.narrative.events.get('tjasolmai', False):#if water boss (golden fields) is dead
-            if not properties.get('vertical', False):
-                self.behavior = liquid_behaviors.PoisonBehavior(self, **properties)
-            else:#vertical scroller -> golden fields
-                self.behavior = liquid_behaviors.VerticalPoisonBehavior(self, **properties)
+        if game_objects.world_controller.is_enabled(game_objects.world_controller.WATER_POISONED):
+            self.behavior = liquid_behaviors.PoisonBehavior(self, **properties)
         else:
             self.behavior = liquid_behaviors.WaterBehavior(self, **properties)
 

@@ -122,19 +122,6 @@ class StaticSpawner(c.SpawnerCommon):
                         spawn_position = [int(item) for item in property["value"].split(",")]
                 self.game_objects.interactables.add(c.SafeSpawn(object_position, self.game_objects, object_size, spawn_position))
 
-            elif local_id == 14:
-                mode = "center"
-                camera_offset = 0
-                priority = 0
-                for property in properties:
-                    if property["name"] in ("direction", "mode"):
-                        mode = property["value"]
-                    elif property["name"] == "offset":
-                        camera_offset = property["value"]
-                    elif property["name"] == "priority":
-                        priority = property["value"]
-                self.game_objects.camera_blocks.add(c.Stop(self.game_objects, object_size, object_position, mode, camera_offset, priority))
-
             elif local_id == 15:
                 self.game_objects.interactables.add(
                     c.WorldTextTrigger(
@@ -266,7 +253,7 @@ class StaticSpawner(c.SpawnerCommon):
                         kwargs[name] = [colour[1] / 255, colour[2] / 255, colour[3] / 255, colour[0] / 255]
                     else:
                         kwargs.pop(name, None)
-                for name in ("height", "height_per_active", "relay_height"):
+                for name in ("height", "relay_height"):
                     if name in kwargs and kwargs[name] != "":
                         kwargs[name] = float(kwargs[name])
                     else:
@@ -274,18 +261,8 @@ class StaticSpawner(c.SpawnerCommon):
 
                 if kwargs.get("relay_id"):
                     liquid_cls = c.WaterRelayControlledLiquid
-                elif kwargs.get("wind_network"):
-                    liquid_cls = c.WindmillControlledLiquid
                 else:
                     liquid_cls = c.TwoDLiquid
-                if liquid_cls is c.WindmillControlledLiquid:
-                    if not self.game_objects.world_controller.golden_fields.is_registered_windmill_network(
-                        kwargs["wind_network"]
-                    ):
-                        raise ValueError(
-                            f"Unknown Golden Fields wind network '{kwargs['wind_network']}'. "
-                            "Add it to world.configs.golden_fields_systems.WINDMILL_NETWORKS."
-                        )
                 self.game_objects.interactables_fg.add(
                     liquid_cls(object_position, self.game_objects, object_size, layer_name, **kwargs)
                 )

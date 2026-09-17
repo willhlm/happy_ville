@@ -276,7 +276,7 @@ class DashJump(MovementModifier):
         context.velocity[0] += self.dash_vel * self.entity.dir[0]
         context.velocity[1] += self.dash_jump_vel        
 
-class Transport(MovementModifier):
+class Transport(MovementModifier):#thunder use it
     """Travel at a fixed speed, shortening the last step at a surface."""
     def __init__(self, priority, entity, direction, speed, distance):
         super().__init__(priority)

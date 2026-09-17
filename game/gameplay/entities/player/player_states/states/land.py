@@ -1,6 +1,5 @@
 from .base_composite import CompositeState
 from .base_state import PhaseBase
-from engine import constants as C
 
 
 class LandState(CompositeState):
@@ -35,7 +34,7 @@ class LandSoftMain(PhaseBase):
             self.enter_state("dash_ground")
         elif input.name == "attack":
             input.processed()
-            self.swing_sword()
+            self.swing_sword("ground")
 
     def handle_release_input(self, input):
         if input.name == "jump":
@@ -43,18 +42,6 @@ class LandSoftMain(PhaseBase):
 
     def increase_phase(self):
         self.enter_state("idle")
-
-    def swing_sword(self):
-        if not self.entity.flags["attack_able"]:
-            return
-        if self.entity.dir[1] > C.down_angle:
-            self.enter_state("sword_up")
-        elif self.entity.dir[1] < C.down_angle * -1:
-            self.enter_state("sword_down")
-        else:
-            state = "sword_stand" + str(self.entity.combat_tracker.next_swing_index())
-            self.enter_state(state)
-
 
 class LandHardMain(PhaseBase):
     def __init__(self, entity):

@@ -20,8 +20,10 @@ class WorldController:
 
     SIGNAL_PREFIX = "world_condition:"
     WIND_AVAILABLE = "wind_available"
+    WATER_POISONED = "water_poisoned"
     # This is the persistent boss ID, not necessarily the Python class name.
     WIND_BOSS_ID = "bieggs"
+    WATER_BOSS_ID = "tjasolmai"
 
     def __init__(self, game_objects):
         self.game_objects = game_objects
@@ -29,6 +31,7 @@ class WorldController:
         self._states = {}
         self._region_controllers = []
         self.configure_global_wind(self.WIND_BOSS_ID)
+        self.configure_poisoned_water(self.WATER_BOSS_ID)
         self.golden_fields = GoldenFieldsController(game_objects, self)
         self.water_relays = WaterRelayController(game_objects, self)
 
@@ -110,6 +113,15 @@ class WorldController:
             self.WIND_AVAILABLE,
             lambda: not self.game_objects.world_state.narrative.is_boss_defeated(self.wind_boss_id),
             replace=self.is_registered(self.WIND_AVAILABLE),
+        )
+
+    def configure_poisoned_water(self, water_boss_id):
+        """Set the boss whose defeat permanently poisons affected water."""
+        self.water_boss_id = str(water_boss_id)
+        self.register(
+            self.WATER_POISONED,
+            lambda: self.game_objects.world_state.narrative.is_boss_defeated(self.water_boss_id),
+            replace=self.is_registered(self.WATER_POISONED),
         )
 
     def subscribe(self, condition_id, listener):

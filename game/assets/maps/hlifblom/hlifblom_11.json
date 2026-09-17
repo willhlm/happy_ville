@@ -275,7 +275,7 @@
                                  "name":"path_to",
                                  "type":"string",
                                  "value":"nordveden_18"
-                                }, 
+                                },
                                 {
                                  "name":"spawn",
                                  "type":"string",
@@ -305,24 +305,6 @@
                          "width":16,
                          "x":4480,
                          "y":1312
-                        }, 
-                        {
-                         "gid":8207,
-                         "height":208,
-                         "id":1843,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"direction",
-                                 "type":"string",
-                                 "value":"right"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":4592,
-                         "y":1392
                         }, 
                         {
                          "height":0,
@@ -732,24 +714,6 @@
                          "y":2096
                         }, 
                         {
-                         "gid":8207,
-                         "height":96,
-                         "id":1865,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"direction",
-                                 "type":"string",
-                                 "value":"right"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":4048,
-                         "y":2096
-                        }, 
-                        {
                          "height":0,
                          "id":1866,
                          "name":"",
@@ -861,24 +825,6 @@
                          "width":16,
                          "x":2096,
                          "y":1840
-                        }, 
-                        {
-                         "gid":8207,
-                         "height":400,
-                         "id":1876,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"direction",
-                                 "type":"string",
-                                 "value":"left"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":2080,
-                         "y":2080
                         }, 
                         {
                          "gid":8193,
@@ -1227,7 +1173,72 @@
                  "visible":true,
                  "x":0,
                  "y":0
-                }, 
+                },
+                {
+                 "draworder":"topdown",
+                 "id":40,
+                 "name":"area_stamps",
+                 "objects":[
+                        {
+                         "gid":8207,
+                         "height":208,
+                         "id":1843,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"direction",
+                                 "type":"string",
+                                 "value":"right"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":4592,
+                         "y":1392
+                        },
+                        {
+                         "gid":8207,
+                         "height":96,
+                         "id":1865,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"direction",
+                                 "type":"string",
+                                 "value":"right"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":4048,
+                         "y":2096
+                        },
+                        {
+                         "gid":8207,
+                         "height":400,
+                         "id":1876,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"direction",
+                                 "type":"string",
+                                 "value":"left"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":2080,
+                         "y":2080
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
+                 "x":0,
+                 "y":0
+                },
                 {
                  "draworder":"topdown",
                  "id":39,
@@ -1318,7 +1329,7 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":40,
+ "nextlayerid":41,
  "nextobjectid":1954,
  "orientation":"orthogonal",
  "renderorder":"right-down",

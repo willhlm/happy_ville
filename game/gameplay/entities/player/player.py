@@ -2,7 +2,7 @@ import pygame
 
 from gameplay.entities.base.character import Character
 from engine.utils import read_files
-from gameplay.entities.player.combat_tracker import CombatTracker
+from gameplay.entities.player.combat_controller import CombatController
 from gameplay.entities.player.death_manager import DeathManager
 from gameplay.entities.player.hazard_resolver import PlayerHazardResolver
 from gameplay.entities.player.movement import MovementController
@@ -35,7 +35,7 @@ class Player(Character):
         self.vitals.set_health(20)
         self.vitals.set_spirit(2)
 
-        self.combat_tracker = CombatTracker()
+        self.combat_controller = CombatController(self)
         self.sword = Sword(self)
 
         self._reset_flags()

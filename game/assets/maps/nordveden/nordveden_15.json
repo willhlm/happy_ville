@@ -194,7 +194,7 @@
          "visible":true,
          "x":0,
          "y":0
-        }, 
+        },
         {
          "id":78,
          "layers":[
@@ -362,24 +362,6 @@
                          "y":1664
                         }, 
                         {
-                         "gid":15,
-                         "height":96,
-                         "id":453,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"direction",
-                                 "type":"string",
-                                 "value":"right"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":4352,
-                         "y":1664
-                        }, 
-                        {
                          "gid":11,
                          "height":112,
                          "id":463,
@@ -400,24 +382,6 @@
                          "visible":true,
                          "width":16,
                          "x":3248,
-                         "y":1696
-                        }, 
-                        {
-                         "gid":15,
-                         "height":256,
-                         "id":464,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"direction",
-                                 "type":"string",
-                                 "value":"left"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":3232,
                          "y":1696
                         }, 
                         {
@@ -515,6 +479,53 @@
                  "visible":true,
                  "x":0,
                  "y":0
+                },
+                {
+                 "draworder":"topdown",
+                 "id":98,
+                 "name":"area_stamps",
+                 "objects":[
+                        {
+                         "gid":15,
+                         "height":96,
+                         "id":453,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"direction",
+                                 "type":"string",
+                                 "value":"right"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":4352,
+                         "y":1664
+                        },
+                        {
+                         "gid":15,
+                         "height":256,
+                         "id":464,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"direction",
+                                 "type":"string",
+                                 "value":"left"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":3232,
+                         "y":1696
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
+                 "x":0,
+                 "y":0
                 }],
          "name":"bg1",
          "opacity":1,
@@ -523,7 +534,7 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":98,
+ "nextlayerid":99,
  "nextobjectid":512,
  "orientation":"orthogonal",
  "renderorder":"right-down",
