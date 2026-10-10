@@ -69,7 +69,7 @@ class Bat(FlyingEnemy):
             colour=tuple(attack_cfg['shockwave_colour']),
             sine_scale=attack_cfg['shockwave_sine_scale'],
         )
-        self.game_objects.cosmetics.add(self.scream_wave)
+        self.game_objects.cosmetics_fg.add(self.scream_wave)
 
     def stop_scream_effects(self):
         self.scream_wave.stop_emitting()

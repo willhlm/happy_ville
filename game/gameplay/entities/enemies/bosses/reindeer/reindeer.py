@@ -41,7 +41,7 @@ class Reindeer(Boss):
         pass
 
     def slam_attack(self):#called from states, attack main
-        self.game_objects.cosmetics.add(ChainProjectile(self.rect.center, self.game_objects, SlamAttack, direction = self.dir, distance = 50, number = 5, frequency = 20))
+        self.game_objects.cosmetics_fg.add(ChainProjectile(self.rect.center, self.game_objects, SlamAttack, direction = self.dir, distance = 50, number = 5, frequency = 20))
 
     def dead(self):#called when death animation is finished
         super().dead()

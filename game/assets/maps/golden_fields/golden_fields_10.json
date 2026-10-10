@@ -446,7 +446,7 @@
                                  "value":"lift_golden_10"
                                 }, 
                                 {
-                                 "name":"wind_network",
+                                 "name":"power_source",
                                  "type":"string",
                                  "value":"golden_fields_windmills"
                                 }],

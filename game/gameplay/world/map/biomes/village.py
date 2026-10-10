@@ -54,7 +54,7 @@ class Village(Biome):
                 door = RightDoorPlatform(object_position, self.level.game_objects, **kwarg)
                 door_i = DoorInteract(object_position, self.level.game_objects, door)
                 self.level.game_objects.platforms.add(door)
-                self.level.game_objects.interactables.add(door_i)
+                self.level.game_objects.interactables_bg.add(door_i)
 
             elif id == 3:
                 new_tree = BoulderPlatform(object_position, self.level.game_objects)

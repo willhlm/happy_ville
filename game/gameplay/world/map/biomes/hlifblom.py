@@ -26,7 +26,7 @@ class Hlifblom(Biome):
             if id == 0:
                 if parallax == [1, 1]:
                     new_grass = InteractableCaveGrass(object_position, self.level.game_objects)
-                    self.level.game_objects.interactables.add(new_grass)
+                    self.level.game_objects.interactables_bg.add(new_grass)
                 else:
                     new_grass = BackgroundCaveGrass(object_position, self.level.game_objects, parallax, layer_name)
                     if layer_name.startswith("fg"):
@@ -79,11 +79,11 @@ class Hlifblom(Biome):
                         state = property["value"]
 
                 bubble_source = BubbleSource(object_position, self.level.game_objects, **prop)
-                self.level.game_objects.interactables.add(bubble_source)
+                self.level.game_objects.interactables_bg.add(bubble_source)
 
             elif id == 6:
                 spikes = Spikes(object_position, self.level.game_objects)
-                self.level.game_objects.interactables.add(spikes)
+                self.level.game_objects.interactables_bg.add(spikes)
 
             elif id == 7:
                 prop = {}
@@ -96,7 +96,7 @@ class Hlifblom(Biome):
 
             elif id == 8:
                 new = Bloomer(object_position, self.level.game_objects)
-                self.level.game_objects.interactables.add(new)
+                self.level.game_objects.interactables_bg.add(new)
 
             elif id == 9:#flower platform
                 new_flower = FlowerPlatform(object_position, self.level.game_objects)

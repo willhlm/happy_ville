@@ -5,9 +5,8 @@ into named, runtime conditions (for example, whether the Golden Fields wind is
 currently blowing) and broadcasts only when the derived result changes.
 """
 
-from .golden_fields_controller import GoldenFieldsController
-from .water_relay_controller import WaterRelayController
-
+from .golden_fields import GoldenFieldsController
+from .power_controller import PowerController
 
 class WorldController:
     """Registry and notifier for named, derived world conditions.
@@ -32,8 +31,8 @@ class WorldController:
         self._region_controllers = []
         self.configure_global_wind(self.WIND_BOSS_ID)
         self.configure_poisoned_water(self.WATER_BOSS_ID)
-        self.golden_fields = GoldenFieldsController(game_objects, self)
-        self.water_relays = WaterRelayController(game_objects, self)
+        self.power = PowerController()
+        self.golden_fields = GoldenFieldsController(game_objects, self, self.power)
 
     @classmethod
     def signal_name(cls, condition_id):

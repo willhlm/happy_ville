@@ -282,7 +282,7 @@
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"2"
+                                 "value":"3"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -407,8 +407,8 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":1712,
-                         "x":928,
+                         "width":1568,
+                         "x":1072,
                          "y":400
                         }, 
                         {
@@ -454,60 +454,6 @@
                          "y":864
                         }, 
                         {
-                         "gid":3,
-                         "height":16,
-                         "id":643,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"class",
-                                 "type":"string",
-                                 "value":"sandrew"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":1088,
-                         "y":528
-                        }, 
-                        {
-                         "gid":3,
-                         "height":16,
-                         "id":644,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"class",
-                                 "type":"string",
-                                 "value":"larv_poison"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":2112,
-                         "y":512
-                        }, 
-                        {
-                         "gid":3,
-                         "height":16,
-                         "id":645,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"class",
-                                 "type":"string",
-                                 "value":"mygga"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":1632,
-                         "y":544
-                        }, 
-                        {
                          "gid":11,
                          "height":96,
                          "id":646,
@@ -539,7 +485,7 @@
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"3"
+                                 "value":"2"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -580,7 +526,7 @@
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"2"
+                                 "value":"4"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -588,6 +534,47 @@
                          "width":16,
                          "x":1952,
                          "y":720
+                        }, 
+                        {
+                         "gid":11,
+                         "height":16,
+                         "id":650,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"path_to",
+                                 "type":"string",
+                                 "value":"golden_fields_14"
+                                }, 
+                                {
+                                 "name":"spawn",
+                                 "type":"string",
+                                 "value":"3"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":144,
+                         "x":928,
+                         "y":400
+                        }, 
+                        {
+                         "gid":1,
+                         "height":16,
+                         "id":651,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"spawn",
+                                 "type":"string",
+                                 "value":"3"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":992,
+                         "y":464
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -614,7 +601,7 @@
          "y":0
         }],
  "nextlayerid":105,
- "nextobjectid":650,
+ "nextobjectid":652,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -720,7 +707,7 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":31221,
+         "firstgid":31226,
          "source":"..\/_objects\/interactables.tsx"
         }],
  "tilewidth":16,

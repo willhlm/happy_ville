@@ -22,8 +22,8 @@ class Sign(Interactables):
         self.currentstate.handle_input('Idle')
 
     def interact(self, player=None):#when player press t/y
-        if self.symbols in self.game_objects.cosmetics:
+        if self.symbols in self.game_objects.cosmetics_fg:
             self.symbols.finish()
         else:
             self.symbols.init()
-            self.game_objects.cosmetics.add(self.symbols)
+            self.game_objects.cosmetics_fg.add(self.symbols)

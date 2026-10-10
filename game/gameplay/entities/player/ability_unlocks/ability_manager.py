@@ -25,8 +25,8 @@ class AbilityManager():#Player movement abilities, handles them. Contains also s
         self.unlock('thunder')
         self.unlock('bow')
         self.unlock('slow_motion')
-        self.unlock('wind')
-        self.unlock('shield')
+        self.unlock('wind')#diube jump
+        self.unlock('shield')#slow fall
 
     @property
     def equip(self):

@@ -10,36 +10,52 @@ WINDMILL_NETWORKS = {
         # These are world-state defaults, rather than map-load defaults.
         # Consumers can therefore be loaded before the windmill map is visited.
         "windmill_initial_states": {
-            "windmill_1": "idle",
-            "windmill_2": "stuck",
-            "windmill_3": "active",
+            "windmill_1": "idle",#idle#z
+            "windmill_2": "stuck",#stuck
+            "windmill_3": "active",#active
         },
     },
 }
 
 PISTON_PROFILES = {
     "golden_fields_default": {
-        0: {"visible_time": 30, "hidden_time": 180, "warning_time": 0},
-        1: {"visible_time": 30, "hidden_time": 180, "warning_time": 0},
-        2: {"visible_time": 75, "hidden_time": 90, "warning_time": 0},
-        "all": {"mode": "always_visible"},
+        "off": {"visible_time": 30, "hidden_time": 180, "warning_time": 0},
+        "on": {"mode": "always_visible"},
     },
 }
 
 ROTATING_RIG_PROFILES = {
     "golden_fields_default": {
         # Rotation speed uses the rig's existing degrees per game-time unit.
-        0: {"rotation_speed": 0.0},
-        1: {"rotation_speed": 0},
-        2: {"rotation_speed": 0},
-        "all": {"rotation_speed": 1.0},
+        "off": {"rotation_speed": 0.0},
+        "on": {"rotation_speed": 1.0},
     },
 }
 
 WATER_RELAYS = {
     "water_relay_1": {
-        "state_level": "golden_fields_14",
-        "wind_network": "golden_fields_windmills",
+        "state_level": "golden_fields_27",
+        "power_source": "golden_fields_windmills",
         "initial_angle": 0,
     },
 }
+
+
+def piston_profile(profile_id, powered):
+    """Return the authored piston behavior for a binary power state."""
+    try:
+        profiles = PISTON_PROFILES[profile_id]
+    except KeyError as error:
+        raise KeyError(f"Unknown Golden Fields piston profile '{profile_id}'.") from error
+    return profiles["on" if powered else "off"]
+
+
+def rotating_rig_profile(profile_id, powered):
+    """Return the authored rig behavior for a binary power state."""
+    try:
+        profiles = ROTATING_RIG_PROFILES[profile_id]
+    except KeyError as error:
+        raise KeyError(
+            f"Unknown Golden Fields rotating rig profile '{profile_id}'."
+        ) from error
+    return profiles["on" if powered else "off"]

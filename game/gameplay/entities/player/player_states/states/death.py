@@ -20,7 +20,7 @@ class DeathPre(PhaseBase):
 
     def enter(self, **kwarg):
         self.entity.animation.play("death_pre")
-        self.entity.game_objects.cosmetics.add(
+        self.entity.game_objects.cosmetics_fg.add(
             PlayerSoul(
                 [self.entity.rect[0], self.entity.rect[1]], self.entity.game_objects
             )

@@ -13,7 +13,7 @@ class BallRoom(Tasks):#the room with ball in light forest cavee
     def initiate_quest(self):#called when interact with monument
         self.game_objects.world_state.narrative.set_quest_status(type(self).__name__.lower(), self.game_objects.world_state.QUEST_ACTIVE)
         self.timer = Timer(self, self.time)
-        self.game_objects.cosmetics.add(self.timer)
+        self.game_objects.cosmetics_fg.add(self.timer)
         pos = self.monument.rect.center
         self.number = 5#number of balls
         self.spawn_balls(pos)

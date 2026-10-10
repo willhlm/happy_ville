@@ -37,19 +37,21 @@ class PhysicsManager:
     def dispatch_overlaps(self, dt=None):
         enemy_projectiles = self.game_objects.projectiles.all_enemy()
         friendly_projectiles = self.game_objects.projectiles.all_friendly()
-        players_enemies_loot = (
+        players_enemies_loot_npcs = (
             self.game_objects.players.sprites()
             + self.game_objects.enemies.sprites()
             + self.game_objects.loot.sprites()
+            + self.game_objects.npcs.sprites()
         )
-        interactables = self.game_objects.interactables.sprites() + self.game_objects.interactables_fg.sprites()
+        interactables = self.game_objects.interactables_bg.sprites() + self.game_objects.interactables_fg.sprites()
 
         self.overlap_dispatcher.dispatch_simple(self.game_objects.players, self.game_objects.enemies, callback_name='player_collision')
         self.overlap_dispatcher.dispatch_simple(self.game_objects.players, self.game_objects.bg_fade, callback_name='player_collision')
 
         self.overlap_dispatcher.dispatch_overlap_events(self.game_objects.players, self.game_objects.loot)
-        self.overlap_dispatcher.dispatch_overlap_events(self.game_objects.players, self.game_objects.interactables)#only players
-        self.overlap_dispatcher.dispatch_overlap_events(players_enemies_loot, self.game_objects.interactables_fg)
+        self.overlap_dispatcher.dispatch_overlap_events(self.game_objects.players, self.game_objects.interactables_bg)#only players
+        self.overlap_dispatcher.dispatch_overlap_events(players_enemies_loot_npcs, self.game_objects.interactables_fg)
+        self.overlap_dispatcher.dispatch_overlap_events(players_enemies_loot_npcs, self.game_objects.entity_overlaps)#remporary overlaps
         self.overlap_dispatcher.dispatch_overlap_events(self.game_objects.players, self.game_objects.npcs)
 
         self.overlap_dispatcher.dispatch_simple(enemy_projectiles, friendly_projectiles, callback_name='collision_projectile')

@@ -39,3 +39,6 @@ class OverlapDispatcher:
 
     def clear_state(self):
         self._collision_state.clear()
+
+    def forget_target(self, target):
+        self._collision_state.pop(target, None)

@@ -16,5 +16,5 @@ def spawn_pending_boss_reward(game_objects, boss_id, boss_class, fallback_positi
 
     position = narrative.get_boss_reward_position(boss_id) or fallback_position
     ball = BossRewardBall(position, game_objects, reward, boss_id)
-    game_objects.interactables.add(ball)
+    game_objects.interactables_bg.add(ball)
     return ball

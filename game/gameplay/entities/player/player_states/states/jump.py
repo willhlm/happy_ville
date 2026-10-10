@@ -23,7 +23,7 @@ class JumpMain(PhaseAirBase):
             jump_boost=kwarg.get("jump_boost", 1),
             air_timer=kwarg.get("air_timer", C.air_timer),
         )
-        self.entity.game_objects.cosmetics.add(
+        self.entity.game_objects.cosmetics_fg.add(
             Dusts(
                 self.entity.hitbox.center,
                 self.entity.game_objects,

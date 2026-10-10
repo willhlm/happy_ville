@@ -15,7 +15,7 @@ class PopUpTextTrigger(EventTrigger):
         kwargs = {'text': self.key,
                   'non_col': True,
                   'kill_con': 'drop_down'}
-        self.game_objects.interactables.add(
+        self.game_objects.interactables_bg.add(
             WorldTextTrigger(
                 self.pos,
                 self.game_objects,

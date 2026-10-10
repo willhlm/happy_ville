@@ -2,6 +2,9 @@ import pygame
 from engine import constants as C
 from engine.utils import read_files
 from engine.system import animation
+from gameplay.entities.platforms.components.surface_collision import (
+    OneWayUpSurfaceCollisionComponent,
+)
 from gameplay.entities.platforms.texture.textured_platform import TexturedPlatform
 from . import states_basic
 
@@ -12,6 +15,7 @@ class FlowerPlatform(TexturedPlatform):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = self.rect.copy()
+        self.surface_collision = OneWayUpSurfaceCollisionComponent(self)
 
         self.animation = animation.Animation(self)        
         self.currentstate = states_basic.Idle(self)

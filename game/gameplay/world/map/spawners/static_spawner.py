@@ -85,45 +85,29 @@ class StaticSpawner(c.SpawnerCommon):
                 self.game_objects.platforms.add(c.HazardPlatform(object_position, size=object_size, damage=1, knockback_x=10, knockback_y=10))
 
             elif local_id == 9:
-                destination = spawn = None
-                entry_action = "idle"
-                for property in properties:
-                    if property["name"] == "path_to":
-                        destination = property["value"]
-                    elif property["name"] == "spawn":
-                        spawn = property["value"]
-                    elif property["name"] == "entry_action":
-                        entry_action = property["value"]
-                self.game_objects.interactables.add(c.PathInteract(object_position, self.game_objects, object_size, destination, spawn, entry_action))
+                path_props = c.props_list_to_dict(properties)
+                self.game_objects.interactables_bg.add(c.PathInteract(object_position, self.game_objects, object_size, **path_props))
 
             elif local_id == 10:
-                destination = spawn = None
-                entry_action = "idle"
-                for property in properties:
-                    if property["name"] == "path_to":
-                        destination = property["value"]
-                    elif property["name"] == "spawn":
-                        spawn = property["value"]
-                    elif property["name"] == "entry_action":
-                        entry_action = property["value"]
-                self.game_objects.interactables.add(c.PathCollision(object_position, self.game_objects, object_size, destination, spawn, entry_action))
+                path_props = c.props_list_to_dict(properties)
+                self.game_objects.interactables_bg.add(c.PathCollision(object_position, self.game_objects, object_size, **path_props))
 
             elif local_id == 11:
                 particle_type = next((property["value"] for property in properties if property["name"] == "particles"), "dust")
                 self.game_objects.platforms.add(c.OneWayUpPlatform(object_position, size=object_size, run_particle=particle_type))
 
             elif local_id == 12:
-                self.game_objects.interactables.add(c.Hole(object_position, self.game_objects, object_size))
+                self.game_objects.interactables_bg.add(c.Hole(object_position, self.game_objects, object_size))
 
             elif local_id == 13:
                 spawn_position = [object_position[0] + object_size[0] * 0.5, object_position[1] + object_size[1] * 0.5]
                 for property in properties:
                     if property["name"] == "position":
                         spawn_position = [int(item) for item in property["value"].split(",")]
-                self.game_objects.interactables.add(c.SafeSpawn(object_position, self.game_objects, object_size, spawn_position))
+                self.game_objects.interactables_bg.add(c.SafeSpawn(object_position, self.game_objects, object_size, spawn_position))
 
             elif local_id == 15:
-                self.game_objects.interactables.add(
+                self.game_objects.interactables_bg.add(
                     c.WorldTextTrigger(
                         object_position,
                         self.game_objects,
@@ -171,7 +155,7 @@ class StaticSpawner(c.SpawnerCommon):
                     event_completion_key = trigger_cls.get_event_completion_key(kwargs)
                     if self.game_objects.world_state.narrative.is_event_complete(event_completion_key):
                         continue
-                self.game_objects.interactables.add(trigger_cls(object_position, self.game_objects, object_size, **kwargs))
+                self.game_objects.interactables_bg.add(trigger_cls(object_position, self.game_objects, object_size, **kwargs))
 
             elif local_id == 20:
                 kwargs = {}
@@ -197,7 +181,7 @@ class StaticSpawner(c.SpawnerCommon):
                         kwargs["rate"] = float(property["value"])
                     elif property["name"] == "scale":
                         kwargs["scale"] = float(property["value"])
-                self.game_objects.interactables.add(c.ZoomCollision(object_position, self.game_objects, object_size, **kwargs))
+                self.game_objects.interactables_bg.add(c.ZoomCollision(object_position, self.game_objects, object_size, **kwargs))
 
             elif local_id == 22:
                 c.AreaSpawner(object_position, self.game_objects, object_size, **c.props_list_to_dict(properties))
@@ -214,10 +198,10 @@ class StaticSpawner(c.SpawnerCommon):
                         kwargs["scale"] = property["value"]
                     elif property["name"] == "shader":
                         kwargs["shader"] = property["value"]
-                self.game_objects.interactables.add(c.LayerTrigger(object_position, self.game_objects, object_size, **kwargs))
+                self.game_objects.interactables_bg.add(c.LayerTrigger(object_position, self.game_objects, object_size, **kwargs))
 
             elif local_id == 24:
-                self.game_objects.cosmetics.add(c.DeathFog(object_position, self.game_objects, object_size))
+                self.game_objects.cosmetics_fg.add(c.DeathFog(object_position, self.game_objects, object_size))
 
             elif local_id == 25:
                 kwargs = {"parallax": parallax}
@@ -259,7 +243,7 @@ class StaticSpawner(c.SpawnerCommon):
                     else:
                         kwargs.pop(name, None)
 
-                if kwargs.get("relay_id"):
+                if kwargs.get("power_source"):
                     liquid_cls = c.WaterRelayControlledLiquid
                 else:
                     liquid_cls = c.TwoDLiquid
@@ -273,7 +257,7 @@ class StaticSpawner(c.SpawnerCommon):
                 target_groups.add(layer_name, sky)
 
             elif local_id == 28:
-                self.game_objects.cosmetics.add(c.ShadowLight_1(object_position, self.game_objects, object_size))
+                self.game_objects.cosmetics_fg.add(c.ShadowLight_1(object_position, self.game_objects, object_size))
 
             elif local_id == 30:
                 pass
@@ -299,7 +283,7 @@ class StaticSpawner(c.SpawnerCommon):
                         kwargs["lifetime"] = property["value"]
                     elif property["name"] == "spawn_position" and property["value"]:
                         kwargs["spawn_position"] = [float(item) for item in property["value"].strip("()").split(",")]
-                self.game_objects.cosmetics.add(c.Smoke(object_position, self.game_objects, object_size, **kwargs))
+                self.game_objects.cosmetics_fg.add(c.Smoke(object_position, self.game_objects, object_size, **kwargs))
 
             elif local_id == 33:
                 vertical = horizontal = 0

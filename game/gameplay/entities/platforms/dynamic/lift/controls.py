@@ -123,7 +123,7 @@ def attach_controls(lift, props):
     if mode == "mounted_lever":
         default = (lift.rect.width // 2, lift.rect.height // 2)
         lever = LiftMountedLever(lift, parse_pair(props.get("lever_offset"), default))
-        lift.game_objects.interactables.add(lever)
+        lift.game_objects.interactables_bg.add(lever)
         lift.attach(lever)
         return
     if mode == "map_transition":
@@ -133,7 +133,7 @@ def attach_controls(lift, props):
             raise ValueError(f"A map_transition lift requires: {', '.join(missing)}")
         default = (lift.rect.width // 2, lift.rect.height // 2)
         lever = LiftMountedLever(lift, parse_pair(props.get("lever_offset"), default))
-        lift.game_objects.interactables.add(lever)
+        lift.game_objects.interactables_bg.add(lever)
         lift.attach(lever)
         LiftMapTransitionControl(lift, props)
         return
@@ -150,7 +150,7 @@ def attach_controls(lift, props):
             parse_pair(props.get("boarding_offset"), default_offset),
             parse_pair(props.get("boarding_size"), default_size),
         )
-        lift.game_objects.interactables.add(trigger)
+        lift.game_objects.interactables_bg.add(trigger)
         lift.attach(trigger)
         return
     raise ValueError(f"Unknown lift control_mode: {mode!r}")

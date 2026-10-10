@@ -33,7 +33,7 @@ class NPC(Character):
         
     def on_collision(self, entity):        
         self.indicator = InteractableIndicator(self.rect.topright, self.game_objects)
-        self.game_objects.cosmetics.add(self.indicator)
+        self.game_objects.cosmetics_fg.add(self.indicator)
 
     def load_sprites(self, name):
         self.name = name
@@ -49,7 +49,7 @@ class NPC(Character):
 
     def random_conversation(self, text):#can say stuff through a text bubble           
         random_conv = ConversationBubbles(self.rect.topright,self.game_objects, text)
-        self.game_objects.cosmetics.add(random_conv)
+        self.game_objects.cosmetics_fg.add(random_conv)
         self.active_comment_bubble = random_conv
         return random_conv
 

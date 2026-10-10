@@ -12,6 +12,13 @@ class DashJumpState(CompositeState):
     def allowed(self):
         return self.entity.flags["grounddash"]
 
+    def exit(self):
+        """Remove dash-jump effects even when another system changes state."""
+        super().exit()
+        self.entity.acceleration[1] = C.acceleration[1]
+        self.entity.movement_modifier.remove_modifier("dash_jump")
+        self.entity.shader_state.remove_shader("mb")
+
 
 class DashJumpPre(PhaseBase):
     def __init__(self, entity, **kwarg):
@@ -49,7 +56,7 @@ class DashJumpPre(PhaseBase):
         self.entity.game_objects.particles.emit(
             "spirit_aura", pos=self.entity.hitbox.center, n=1, colour=C.spirit_colour
         )
-        self.entity.game_objects.cosmetics.add(FadeEffect(self.entity, alpha=100))
+        self.entity.game_objects.cosmetics_fg.add(FadeEffect(self.entity, alpha=100))
         self.buffer_time -= dt
         self.dash_length -= dt
         self.exit_state()

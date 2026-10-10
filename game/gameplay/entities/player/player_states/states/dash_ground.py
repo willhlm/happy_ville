@@ -37,7 +37,7 @@ class DashGroundPre(PhaseBase):
         if int(self.entity.velocity[0]) == 0:
             self.dash_length += 1
         self.entity.shader_state.add_shader("mb")
-        self.entity.game_objects.cosmetics.add(
+        self.entity.game_objects.cosmetics_fg.add(
             Dusts(
                 self.entity.hitbox.center,
                 self.entity.game_objects,
@@ -59,7 +59,7 @@ class DashGroundPre(PhaseBase):
 
     def update(self, dt):
         self.jump_dash_timer -= dt
-        self.entity.game_objects.cosmetics.add(FadeEffect(self.entity, alpha=100))
+        self.entity.game_objects.cosmetics_fg.add(FadeEffect(self.entity, alpha=100))
         self.dash_length -= dt
         self.entity.game_objects.particles.emit(
             "spirit_aura", pos=self.entity.hitbox.center, n=1, colour=C.spirit_colour

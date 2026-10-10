@@ -24,7 +24,7 @@ class Weather():#initialied in game_objects: a container of weather objects
         self.snow.empty()    
 
     def flash(self):
-        self.game_objects.cosmetics.add(FlashFX(self.game_objects))     
+        self.game_objects.cosmetics_fg.add(FlashFX(self.game_objects))
 
 class WeatherManagers():
     def __init__(self, game_objects):

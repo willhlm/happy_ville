@@ -8,4 +8,4 @@ class ParticleSystem:
         preset_fn = PRESETS[preset_name]
         for _ in range(n):
             p = preset_fn(pos, self.game_objects,  **overrides)  # returns a Particle
-            self.game_objects.cosmetics.add(p)
+            self.game_objects.cosmetics_fg.add(p)

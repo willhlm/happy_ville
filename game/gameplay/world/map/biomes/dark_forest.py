@@ -36,7 +36,7 @@ class Dark_forest(Biome):
 
             elif id == 11:
                 new_block = DarkForest_1(object_position, self.level.game_objects)
-                self.level.game_objects.cosmetics.add(new_block)
+                self.level.game_objects.cosmetics_fg.add(new_block)
 
             elif id == 12:
                 kwarg = {}
@@ -44,4 +44,4 @@ class Dark_forest(Biome):
                     if property["name"] == "on":
                         kwarg["on"] = property["value"]
                 new_lantern = ShadowLightLantern(object_position, self.level.game_objects, **kwarg)
-                self.level.game_objects.interactables.add(new_lantern)
+                self.level.game_objects.interactables_bg.add(new_lantern)

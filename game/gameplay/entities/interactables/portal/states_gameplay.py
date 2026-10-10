@@ -27,7 +27,7 @@ class Portal(Basic_states):
         self.portal.bg_grey_layer.clear(0,0,0,0)
 
         self.game_objects.all_bgs.draw(self.portal.bg_distort_layer)
-        self.game_objects.interactables.draw(self.portal.bg_distort_layer)#should be before bg_interact
+        self.game_objects.interactables_bg.draw(self.portal.bg_distort_layer)#should be before bg_interact
         self.game_objects.bg_interact.draw(self.portal.bg_distort_layer)
         #we want the stuff above to be distored and grey 
         
@@ -40,7 +40,7 @@ class Portal(Basic_states):
         self.game_objects.loot.draw(self.portal.bg_grey_layer)
         self.game_objects.platforms.draw(self.portal.bg_grey_layer)
         self.game_objects.players.draw(self.portal.bg_grey_layer)
-        self.game_objects.cosmetics.draw(self.portal.bg_grey_layer)#Should be before fgs
+        self.game_objects.cosmetics_fg.draw(self.portal.bg_grey_layer)#Should be before fgs
         #we want these ones to be spirit affected with no distotion
 
         self.game_objects.special_shaders.draw(None)#portal inside this group will draws the layers properly onto the screen

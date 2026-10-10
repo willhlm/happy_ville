@@ -22,7 +22,7 @@ class CocoonBoss(Boss):#boss cocoon in light forest
     def particle_release(self):
         for i in range(0,30):
             obj1 = getattr(particles, 'Circle')(self.rect.center,self.game_objects,distance=0,lifetime=55,vel={'linear':[7,14]},dir='isotropic',scale=0.5,colour = [255,255,255,255])
-            self.game_objects.cosmetics.add(obj1)
+            self.game_objects.cosmetics_fg.add(obj1)
 
     def take_dmg(self,projectile):
         if self.flags['invincibility']: return

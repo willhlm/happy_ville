@@ -27,7 +27,7 @@ class SoulEssence(CollisionWorldItem):#genkidama
         super().update(dt)
         self.game_objects.particles.emit('spark_scatter',self.rect.center, colour = [255,255,255,255] )
         #obj1 = getattr(particles, 'Spark')(self.rect.center, self.game_objects, distance = 100, lifetime=20, vel={'linear':[2,4]}, fade_scale = 10)
-        #self.game_objects.cosmetics.add(obj1)
+        #self.game_objects.cosmetics_fg.add(obj1)
 
     def update_vel(self, dt):
         pass

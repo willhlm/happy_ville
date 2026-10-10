@@ -1,4 +1,4 @@
-"""Persistent, wind-powered water relay puzzles."""
+"""Golden Fields water relay puzzle state and power-source provider."""
 
 from gameplay.world.configs.golden_fields_systems import (
     WATER_RELAY_ANGLES,
@@ -7,20 +7,22 @@ from gameplay.world.configs.golden_fields_systems import (
 
 
 class WaterRelayController:
-    """Own relay state and publish the water currently available at each outlet.
-
-    Relay visuals and water-reactive map objects are deliberately passive: they
-    query this controller when they spawn and subscribe to its signal for later
-    changes.  This keeps room reloads deterministic and avoids simulating water
-    every frame.
-    """
+    """Own persistent relay state and publish each directed water outlet."""
 
     SIGNAL_PREFIX = "water_relay:"
     WORLD_STATE_GROUP = "water_relay"
 
-    def __init__(self, game_objects, world_controller):
+    def __init__(
+        self,
+        game_objects,
+        world_controller,
+        power_controller,
+        windmill_controller,
+    ):
         self.game_objects = game_objects
         self.world_controller = world_controller
+        self.power_controller = power_controller
+        self.windmill_controller = windmill_controller
         self._relays = {}
         for relay_id, config in WATER_RELAYS.items():
             self.register(relay_id, **config)
@@ -34,47 +36,69 @@ class WaterRelayController:
         relay_id,
         *,
         state_level,
-        wind_network,
+        power_source,
         initial_angle=0,
         lever_signal_id=None,
     ):
-        """Register a map-authored relay and return its current state.
-
-        Multiple visuals for the same relay are allowed, but their puzzle
-        configuration must be identical.
-        """
+        """Register a wind-powered relay and return its current state."""
         relay_id = str(relay_id)
         initial_angle = self._normalise_angle(initial_angle)
         config = {
             "state_level": str(state_level),
-            "wind_network": str(wind_network),
+            "power_source": str(power_source),
             "initial_angle": initial_angle,
             "lever_signal_id": str(lever_signal_id or relay_id),
         }
-        if not self.world_controller.golden_fields.is_registered_windmill_network(
-            config["wind_network"]
-        ):
+        if not self.windmill_controller.is_registered(config["power_source"]):
             raise ValueError(
-                f"Unknown wind network '{config['wind_network']}' for water relay '{relay_id}'."
+                f"Unknown windmill power source '{config['power_source']}' "
+                f"for water relay '{relay_id}'."
             )
 
         previous = self._relays.get(relay_id)
         if previous is not None:
             if previous != config:
-                raise ValueError(f"Water relay '{relay_id}' was registered with different settings.")
+                raise ValueError(
+                    f"Water relay '{relay_id}' was registered with different settings."
+                )
             return self.get_state(relay_id)
 
         self._relays[relay_id] = config
         objects = self.game_objects.world_state.objects
         if not objects.has_level(config["state_level"]):
             objects.init_level(config["state_level"])
-        objects.load_bool(config["state_level"], self.WORLD_STATE_GROUP, relay_id, initial=False)
-        objects.load_value(
-            config["state_level"], self.WORLD_STATE_GROUP, self._angle_key(relay_id), initial=initial_angle
+        objects.load_bool(
+            config["state_level"],
+            self.WORLD_STATE_GROUP,
+            relay_id,
+            initial=False,
         )
-        self.game_objects.signals.subscribe(config["lever_signal_id"], self._make_lever_listener(relay_id))
-        self.world_controller.golden_fields.subscribe_windmill_network(
-            config["wind_network"], self._make_wind_listener(relay_id)
+        objects.load_value(
+            config["state_level"],
+            self.WORLD_STATE_GROUP,
+            self._angle_key(relay_id),
+            initial=initial_angle,
+        )
+        self.game_objects.signals.subscribe(
+            config["lever_signal_id"],
+            self._make_lever_listener(relay_id),
+        )
+        self.power_controller.subscribe(
+            config["power_source"],
+            self._make_power_listener(relay_id),
+        )
+        self.power_controller.register_source(
+            relay_id,
+            lambda relay_id=relay_id, **requirements: self._resolve_power(
+                relay_id,
+                **requirements,
+            ),
+            subscribe=lambda listener, relay_id=relay_id: self.subscribe(
+                relay_id, listener
+            ),
+            unsubscribe=lambda listener, relay_id=relay_id: self.unsubscribe(
+                relay_id, listener
+            ),
         )
         return self.get_state(relay_id)
 
@@ -82,21 +106,47 @@ class WaterRelayController:
         relay_id = str(relay_id)
         config = self._config(relay_id)
         objects = self.game_objects.world_state.objects
-        enabled = objects.load_bool(config["state_level"], self.WORLD_STATE_GROUP, relay_id)
-        angle = self._normalise_angle(objects.load_value(
-            config["state_level"], self.WORLD_STATE_GROUP, self._angle_key(relay_id), initial=config["initial_angle"]
-        ))
-        return {"relay_id": relay_id, "enabled": enabled, "angle": angle, "flowing": enabled and self._all_windmills_active(config)}
+        enabled = objects.load_bool(
+            config["state_level"],
+            self.WORLD_STATE_GROUP,
+            relay_id,
+        )
+        angle = self._normalise_angle(
+            objects.load_value(
+                config["state_level"],
+                self.WORLD_STATE_GROUP,
+                self._angle_key(relay_id),
+                initial=config["initial_angle"],
+            )
+        )
+        return {
+            "relay_id": relay_id,
+            "enabled": enabled,
+            "angle": angle,
+            "flowing": enabled
+            and self.power_controller.is_powered(config["power_source"]),
+        }
+
+    def is_registered(self, relay_id):
+        return str(relay_id) in self._relays
+
+    def is_flowing_to(self, relay_id, angle):
+        state = self.get_state(relay_id)
+        return state["flowing"] and state["angle"] == self._normalise_angle(angle)
 
     def enable(self, relay_id):
-        """Make a relay eligible to carry water after its ItemSocket is filled."""
         relay_id = str(relay_id)
         config = self._config(relay_id)
         state = self.get_state(relay_id)
         if state["enabled"]:
             return True
 
-        self.game_objects.world_state.objects.set_bool(config["state_level"], self.WORLD_STATE_GROUP, relay_id, True)
+        self.game_objects.world_state.objects.set_bool(
+            config["state_level"],
+            self.WORLD_STATE_GROUP,
+            relay_id,
+            True,
+        )
         self._emit_state(relay_id)
         return True
 
@@ -107,9 +157,14 @@ class WaterRelayController:
         if not state["enabled"]:
             return False
         angle_index = WATER_RELAY_ANGLES.index(state["angle"])
-        angle = WATER_RELAY_ANGLES[(angle_index + int(steps)) % len(WATER_RELAY_ANGLES)]
+        angle = WATER_RELAY_ANGLES[
+            (angle_index + int(steps)) % len(WATER_RELAY_ANGLES)
+        ]
         self.game_objects.world_state.objects.set_value(
-            config["state_level"], self.WORLD_STATE_GROUP, self._angle_key(relay_id), angle
+            config["state_level"],
+            self.WORLD_STATE_GROUP,
+            self._angle_key(relay_id),
+            angle,
         )
         self._emit_state(relay_id)
         return True
@@ -121,6 +176,13 @@ class WaterRelayController:
     def unsubscribe(self, relay_id, listener):
         self.game_objects.signals.unsubscribe(self.signal_name(relay_id), listener)
 
+    def _resolve_power(self, relay_id, *, relay_angle=None, **requirements):
+        if relay_angle is None:
+            raise ValueError(
+                f"Water relay power source '{relay_id}' requires relay_angle."
+            )
+        return self.is_flowing_to(relay_id, relay_angle)
+
     def _make_lever_listener(self, relay_id):
         def listener(*, action="toggle", **kwargs):
             if action == "enable":
@@ -129,21 +191,19 @@ class WaterRelayController:
                 self.rotate(relay_id)
             elif action == "rotate_counterclockwise":
                 self.rotate(relay_id, steps=-1)
+
         return listener
 
-    def _make_wind_listener(self, relay_id):
+    def _make_power_listener(self, relay_id):
         def listener(**kwargs):
             self._emit_state(relay_id)
+
         return listener
 
     def _emit_state(self, relay_id):
-        self.game_objects.signals.emit(self.signal_name(relay_id), **self.get_state(relay_id))
-
-    def _all_windmills_active(self, config):
-        controller = self.world_controller.golden_fields
-        return (
-            controller.windmill_turning_count(config["wind_network"])
-            == controller.windmill_network_size(config["wind_network"])
+        self.game_objects.signals.emit(
+            self.signal_name(relay_id),
+            **self.get_state(relay_id),
         )
 
     def _config(self, relay_id):

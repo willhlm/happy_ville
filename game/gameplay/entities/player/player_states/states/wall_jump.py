@@ -46,7 +46,7 @@ class WallJumpMain(JumpMain):
 
         self.start_dir = -kwarg.get("wall_dir", [1, 0])[0]
         self.entity.dir[0] = self.start_dir
-        self.entity.game_objects.cosmetics.add(
+        self.entity.game_objects.cosmetics_fg.add(
             Dusts(
                 self.entity.hitbox.center,
                 self.entity.game_objects,

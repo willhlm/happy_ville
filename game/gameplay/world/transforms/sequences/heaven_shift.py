@@ -14,7 +14,7 @@ class HeavenIntro():
 
     def _begin(self):
         player = self.game_objects.player
-        self.game_objects.cosmetics.add(Portal(self.source_pos, self.game_objects))
+        self.game_objects.cosmetics_fg.add(Portal(self.source_pos, self.game_objects))
         #player.lock_input(duration=0.3)
 
         #self.game_objects.game.screen_manager.append_shader('Vignette', ['bg1'], vignette_opacity=0, colour=[1, 1, 1, 1])

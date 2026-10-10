@@ -1,4 +1,4 @@
-"""Windmill-network-powered piston platform."""
+"""Power-source-driven piston platform."""
 
 import pygame
 
@@ -6,20 +6,25 @@ from engine.system import animation
 from engine.utils import read_files
 from gameplay.entities.platforms.components.states_time_collision import Gone, Idle
 from gameplay.entities.platforms.texture.textured_platform import TexturedPlatform
+from gameplay.world.configs.golden_fields_systems import piston_profile
 
 class Piston(TexturedPlatform):
-    """A standalone piston with a cycle driven by a windmill network.
+    """A standalone piston with a cycle driven by a named power source.
 
     Tiled properties:
-      wind_network: shared windmill-network ID (defaults to
+      power_source: registered power-source ID (defaults to
         ``golden_fields_windmills``)
+      relay_angle: required direction when power_source is a water relay
       piston_profile: piston profile ID (defaults to
         ``golden_fields_default``)
     """
 
     def __init__(self, pos, game_objects, **props):
         super().__init__(pos, game_objects)
-        self.wind_network = str(props.get("wind_network", "golden_fields_windmills"))
+        self.power_source = str(
+            props.get("power_source", "golden_fields_windmills")
+        ).strip()
+        self.relay_angle = int(props.get("relay_angle", 90)) % 360
         self.piston_profile_id = str(props.get("piston_profile", "golden_fields_default"))
         self.sprites = read_files.load_sprites_dict("assets/sprites/entities/platforms/piston/", game_objects)
         self.image = self.sprites["idle"][0]
@@ -34,23 +39,41 @@ class Piston(TexturedPlatform):
         self._timer_id = f"piston:{id(self)}"
         self.periodic_phase = float(props.get("periodic_phase", 0.0)) % 1.0
 
-        controller = game_objects.world_controller.golden_fields
-        self._set_turning_count(controller.windmill_turning_count(self.wind_network))
-        controller.subscribe_windmill_network(self.wind_network, self._on_network_changed)
+        controller = game_objects.world_controller.power
+        self._set_powered(controller.is_powered(
+            self.power_source, relay_angle=self.relay_angle
+        ))
+        controller.subscribe(
+            self.power_source,
+            self._on_power_source_changed,
+            relay_angle=self.relay_angle,
+        )
+        self._power_subscribed = True
 
     def kill(self):
-        self.game_objects.world_controller.golden_fields.unsubscribe_windmill_network(
-            self.wind_network, self._on_network_changed
-        )
-        self.timers.remove_ID_timer(self._timer_id)
+        self._dispose()
         super().kill()
 
-    def _on_network_changed(self, *, turning_count, **kwargs):
-        self._set_turning_count(turning_count)
+    def release_texture(self):
+        self._dispose()
+        super().release_texture()
 
-    def _set_turning_count(self, turning_count):
-        profile = self.game_objects.world_controller.golden_fields.piston_profile(
-            self.piston_profile_id, self.wind_network, turning_count
+    def _dispose(self):
+        if self._power_subscribed:
+            self.game_objects.world_controller.power.unsubscribe(
+                self.power_source,
+                self._on_power_source_changed,
+                relay_angle=self.relay_angle,
+            )
+            self._power_subscribed = False
+        self.timers.remove_ID_timer(self._timer_id)
+
+    def _on_power_source_changed(self, *, powered, **kwargs):
+        self._set_powered(powered)
+
+    def _set_powered(self, powered):
+        profile = piston_profile(
+            self.piston_profile_id, powered
         )
         if profile.get("mode") == "always_visible":
             self.timers.remove_ID_timer(self._timer_id)

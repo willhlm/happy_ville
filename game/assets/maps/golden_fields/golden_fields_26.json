@@ -383,7 +383,7 @@
                                 {
                                  "name":"relay_angle",
                                  "type":"int",
-                                 "value":90
+                                 "value":0
                                 }, 
                                 {
                                  "name":"relay_height",
@@ -391,7 +391,7 @@
                                  "value":100
                                 }, 
                                 {
-                                 "name":"relay_id",
+                                 "name":"power_source",
                                  "type":"string",
                                  "value":"water_relay_1"
                                 }],

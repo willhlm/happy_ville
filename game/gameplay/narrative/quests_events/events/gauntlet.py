@@ -190,7 +190,7 @@ class Gauntlet(Tasks):
 
         effect_cls = self._resolve_spawn_effect_class(effect_name)
         effect_pos = self._randomize_effect_position(spawn_pos, offset, position_jitter)
-        self.game_objects.cosmetics.add(effect_cls(effect_pos, self.game_objects, **effect_kwargs))
+        self.game_objects.cosmetics_fg.add(effect_cls(effect_pos, self.game_objects, **effect_kwargs))
 
     def _randomize_effect_position(self, spawn_pos, offset, position_jitter):
         jitter_x = random.uniform(-position_jitter[0], position_jitter[0])

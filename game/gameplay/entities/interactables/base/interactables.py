@@ -5,7 +5,7 @@ from gameplay.entities.base.animated_entity import AnimatedEntity
 class Interactables(AnimatedEntity):#interactables
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
-        self.group = game_objects.interactables
+        self.group = game_objects.interactables_bg
         self.pause_group = game_objects.entity_pause
         self.true_pos = self.rect.topleft
 

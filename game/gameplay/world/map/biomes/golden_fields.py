@@ -1,5 +1,5 @@
-from gameplay.entities.interactables import DropletSource, Valve
-from gameplay.entities.platforms import BridgePlatform, LiftCar, Piston
+from gameplay.entities.interactables import Battery, DropletSource, JetBurst, Valve
+from gameplay.entities.platforms import BridgePlatform, LiftCar, Piston, PowerPlant
 from gameplay.entities.platforms.dynamic.lift.controls import attach_controls
 
 from ..helpers import calculate_object_position, props_list_to_dict, resolve_tileset
@@ -49,10 +49,12 @@ class Golden_fields(Biome):
                     self.level.game_objects.all_bgs.add(layer_name, new_mill)
 
             elif id == 5:
-                pass
+                self.level.game_objects.interactables_bg.add(
+                    JetBurst(object_position, self.level.game_objects, **props_list_to_dict(properties))
+                )
 
             elif id == 6:
-                self.level.game_objects.interactables.add(
+                self.level.game_objects.interactables_bg.add(
                     Valve(object_position, self.level.game_objects, **props_list_to_dict(properties))
                 )
 
@@ -111,3 +113,15 @@ class Golden_fields(Biome):
                     self.level.game_objects.all_fgs.add(layer_name, water)
                 else:
                     self.level.game_objects.all_bgs.add(layer_name, water)
+
+            elif id == 12:
+                props = props_list_to_dict(properties)
+                game_objects = self.level.game_objects
+                game_objects.platforms.add(PowerPlant(object_position, game_objects, **props))
+
+            elif id == 13:
+                props = props_list_to_dict(properties)
+                game_objects = self.level.game_objects
+                game_objects.interactables_bg.add(
+                    Battery(object_position, game_objects, **props)
+                )

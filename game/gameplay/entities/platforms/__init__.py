@@ -20,3 +20,4 @@ from .actors.gate.gate_platform_alt import GatePlatformAlt
 from .actors.gate.evil_gate_platform import EvilGatePlatform
 from .component_platform import ComponentPlatform
 from .texture.piston import Piston
+from .texture.power_plant.power_plant import PowerPlant

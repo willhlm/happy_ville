@@ -24,8 +24,9 @@ class LiftCar(DynamicPlatform):
             where the car starts. Without it, the car begins at the path point
             closest to its placed Tiled position.
         speed: Travel speed in pixels per second; default 80.
-        wind_network: Windmill network powering the lift; defaults to
-            ``golden_fields_windmills``. Every windmill must be turning to move.
+        power_source: Registered source powering the lift; defaults to
+            ``golden_fields_windmills``.
+        relay_angle: Required direction when power_source is a water relay.
         arrival_epsilon: Distance within which a car is treated as docked;
             default 0.5 pixels.
         station_direction: Initial travel direction for a mounted lever:
@@ -44,10 +45,11 @@ class LiftCar(DynamicPlatform):
         self.props = props
         self.signal_id = str(props.get("signal_id", props.get("id", ""))).strip()
         self.lift_id = str(props.get("lift_id", "")).strip() or None
-        self.wind_network = str(props.get("wind_network", "golden_fields_windmills"))
-        controller = self.game_objects.world_controller.golden_fields
-        if not controller.is_registered_windmill_network(self.wind_network):
-            raise ValueError(f"Unknown wind network {self.wind_network!r} for lift {self.signal_id!r}")
+        self.power_source = str(props.get("power_source", "golden_fields_windmills")).strip()
+        self.relay_angle = int(props.get("relay_angle", 90)) % 360
+        controller = self.game_objects.world_controller.power
+        if not controller.is_registered(self.power_source):
+            raise ValueError(f"Unknown power source {self.power_source!r} for lift {self.signal_id!r}")
         path_points = [tuple(point) for point in props.get("path_points") or ()]
         if not self.signal_id or len(path_points) < 2:
             raise ValueError("A lift requires signal_id and a path with at least two points")
@@ -107,8 +109,11 @@ class LiftCar(DynamicPlatform):
 
     @property
     def is_powered(self):
-        controller = self.game_objects.world_controller.golden_fields
-        return controller.windmill_turning_count(self.wind_network) == controller.windmill_network_size(self.wind_network)
+        controller = self.game_objects.world_controller.power
+        return controller.is_powered(
+            self.power_source,
+            relay_angle=self.relay_angle,
+        )
 
     @property
     def is_travelling(self):

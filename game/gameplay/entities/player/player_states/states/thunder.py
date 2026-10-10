@@ -75,7 +75,7 @@ class ThunderMain(PhaseBase):
         self.entity.shader_state.add_shader("mb")
 
     def update(self, dt):
-        self.entity.game_objects.cosmetics.add(FadeEffect(self.entity, alpha=100))
+        self.entity.game_objects.cosmetics_fg.add(FadeEffect(self.entity, alpha=100))
         self.time -= dt
         if self.time <= 0:
             self.enter_state("idle" if self.entity.is_on_floor() else "fall")
@@ -112,7 +112,7 @@ class ThunderPost(PhaseBase):
             self.entity.hitbox.midbottom[0],
             self.entity.hitbox.midbottom[1] + 16,
         ]
-        self.entity.game_objects.cosmetics.add(sparks)
+        self.entity.game_objects.cosmetics_fg.add(sparks)
 
     def update(self, dt):
         self.entity.velocity = [0, 0]

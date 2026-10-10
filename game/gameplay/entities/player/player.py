@@ -78,7 +78,7 @@ class Player(Character):
             effect.defender_callbacks.pop('particles', None)#remove any partitlce effect set by the projectile
             self.game_objects.particles.emit("burst", pos = self.hitbox.center, n=60, colour = [0, 0, 0, 255])
             #self.emit_particles(lifetime = 40, scale = 3, colour=[0,0,0,255], fade_scale = 7,  number_particles = 60 )
-            self.game_objects.cosmetics.add(Slash(self.hitbox.center,self.game_objects))#make a slash animation
+            self.game_objects.cosmetics_fg.add(Slash(self.hitbox.center,self.game_objects))#make a slash animation
 
             self.game_objects.time_manager.modify_time(time_scale = 0, duration = 20)
             self.game_objects.camera_manager.camera_shake(amplitude = 10, duration = 20, scale = 0.9)

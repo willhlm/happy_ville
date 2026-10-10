@@ -32,6 +32,7 @@ class MovementManager:
             'dash_jump': DashJump,
             'dash': Dash,
             'up_stream': UpStream,
+            'jet_burst_launch': JetBurstLaunch,
             'shield_glide': ShieldGlide,
             'air_boost': AirBoost,
             'contained': Contained,
@@ -240,6 +241,31 @@ class UpStreamVertical(UpStream):
 class UpStreamHorizontal(UpStream):
     """Horizontal"""
     pass
+
+
+class JetBurstLaunch(MovementModifier):
+    """Applies a JetBurst impulse and allows it through the velocity cap."""
+
+    def __init__(self, priority, **kwargs):
+        super().__init__(priority)
+        self.entity = kwargs['entity']
+        self.launch_speed = abs(float(kwargs['launch_speed']))
+        self.entity.velocity[1] = -self.launch_speed
+
+    def runs_with_authoritative(self) -> bool:
+        return True
+
+    def apply(self, context):
+        context.max_vel[1] = max(context.max_vel[1], self.launch_speed)
+
+    def update(self, dt):
+        if self.entity.velocity[1] >= 0:
+            self.entity.movement_modifier.remove_modifier('jet_burst_launch')
+
+    def consume_contact_state(self, contact_state):
+        if contact_state.is_on_ceiling():
+            self.entity.movement_modifier.remove_modifier('jet_burst_launch')
+
 
 class ShieldGlide(MovementModifier):
     def __init__(self, priority, **kwargs):

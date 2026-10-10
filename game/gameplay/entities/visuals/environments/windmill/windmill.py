@@ -13,7 +13,7 @@ class Windmill(LayeredObjects):
         self.init_sprites("assets/sprites/entities/visuals/environments/windmill/")
         state = self.game_objects.world_state.objects.load_value(self.game_objects.map.biome_room_name, self.WORLD_STATE_GROUP, self.id, initial=initial_state)
         # Loading a map-provided initial state can change Golden Fields'
-        # derived windmill-network counts before any interactable is used.
+        # derived windmill-network power before any interactable is used.
         self.game_objects.world_controller.refresh_all()
         self.image = self.sprites['idle'][0]
         self.animation.play('idle')

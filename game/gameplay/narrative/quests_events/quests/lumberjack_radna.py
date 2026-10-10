@@ -16,7 +16,7 @@ class LumberjackRadna(Tasks):#called from monument, #TODO need to make so that t
     def initiate_quest(self):#called when radna is picked up
         self.game_objects.world_state.narrative.set_quest_status('lumberjack_radna', self.game_objects.world_state.QUEST_ACTIVE)
         self.timer = Timer(self, self.time)
-        self.game_objects.cosmetics.add(self.timer)
+        self.game_objects.cosmetics_fg.add(self.timer)
 
     def complete(self):#called when talking to lumberjack within the timer limit
         self.timer.kill()

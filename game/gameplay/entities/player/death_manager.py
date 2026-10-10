@@ -28,6 +28,6 @@ class DeathManager:
 
     def _start_death_effects(self):
         #self.animation.update()#make sure you get the new animation
-        self.entity.game_objects.cosmetics.add(Blood(self.entity.hitbox.center, self.entity.game_objects, dir = self.entity.dir))#pause first, then slow motion
+        self.entity.game_objects.cosmetics_fg.add(Blood(self.entity.hitbox.center, self.entity.game_objects, dir = self.entity.dir))#pause first, then slow motion
         self.entity.game_objects.time_manager.modify_time(time_scale = 0.4, duration = 100)#sow motion
         self.entity.game_objects.time_manager.modify_time(time_scale = 0, duration = 50)#freeze

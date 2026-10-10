@@ -22,7 +22,7 @@ class Counter(Ability):#just a counter abilty
         self.game_objects.time_manager.modify_time(time_scale = 0, duration = 20)#freeze
         self.entity.game_objects.camera_manager.camera_shake(amplitude = 10, duration = 20, scale = 0.9)
         self.entity.emit_particles(lifetime = 40, scale=3, colour=C.spirit_colour, fade_scale = 7, number_particles = 60 , gradient = 1)
-        self.entity.game_objects.cosmetics.add(Slash(self.entity.hitbox.center,self.game_objects))#make a slash animation
+        self.entity.game_objects.cosmetics_fg.add(Slash(self.entity.hitbox.center,self.game_objects))#make a slash animation
 
         self.entity.currentstate.enter_state('Air_dash_pre')#what should the player do?
         self.game_objects.shader_render.append_shader('white_balance', temperature = 0.2)#change the tone of screen

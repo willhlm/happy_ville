@@ -55,7 +55,7 @@ class DeathSequence(Sequence):
         spawneffect = PlayerSpawnEffect((0, 0), self.game_objects)
         spawneffect.rect.midbottom = self.game_objects.player.rect.midbottom
         spawneffect.rect.bottom += 100
-        self.game_objects.cosmetics.add(spawneffect)
+        self.game_objects.cosmetics_fg.add(spawneffect)
         self.stage = 2
 
     def cleanup(self):

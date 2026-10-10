@@ -17,7 +17,7 @@ class UberRunestone(Interactables):
             for runestoneID in self.game_objects.world_state.objects.get_bucket(level, 'runestone').keys():
                 if self.game_objects.world_state.objects.get_bucket(level, 'runestone')[runestoneID]:
                     pos = [self.rect.x+int(runestoneID)*16,self.rect.y]
-                    self.game_objects.cosmetics.add(Rune_symbol(pos,runestoneID))
+                    self.game_objects.cosmetics_fg.add(Rune_symbol(pos,runestoneID))
                     self.runestone_number += 1
 
     def interact(self, player=None):#when player press T

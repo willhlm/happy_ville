@@ -44,4 +44,4 @@ class Wolfies(Boss):
         self.game_objects.projectiles.add_enemy(attack)#add to group but in main phase
 
     def slam_attack(self):#called from states, attack main
-        self.game_objects.cosmetics.add(ChainSpawner(self.rect.center, self.game_objects, SlamAttack, direction = self.dir, distance = 50, number = 5, frequency = 20))
+        self.game_objects.cosmetics_fg.add(ChainSpawner(self.rect.center, self.game_objects, SlamAttack, direction = self.dir, distance = 50, number = 5, frequency = 20))

@@ -6,13 +6,13 @@ from gameplay.entities.platforms.texture.rotating_blade import (
     RotatingBlade,
 )
 from gameplay.entities.visuals.environments.base.layered_objects import LayeredObjects
-
+from gameplay.world.configs.golden_fields_systems import rotating_rig_profile
 
 class RotatingRig(LayeredObjects):
     """A layered environment visual that owns rotating blade platforms.
 
-    Tiled property wind_network (default golden_fields_windmills) selects its
-    power source. The default rotation profile is sampled once at map load.
+    Tiled property power_source (default golden_fields_windmills) selects its
+    windmill network or water relay. relay_angle qualifies relay output only.
     Radius, blade_count, and rotation_phase configure its geometry and pose.
     """
 
@@ -20,8 +20,8 @@ class RotatingRig(LayeredObjects):
 
     def __init__(self, pos, game_objects, parallax, layer_name, **props):
         super().__init__(pos, game_objects, parallax, layer_name)
-        self.wind_network = str(props.get("wind_network", "golden_fields_windmills"))
-        controller = game_objects.world_controller.golden_fields
+        self.power_source = str(props.get("power_source", "golden_fields_windmills")).strip()
+        self.relay_angle = int(props.get("relay_angle", 90)) % 360
         self.init_sprites("assets/sprites/entities/visuals/environments/blade_rig/")
         self.image = self.sprites["idle"][0]
         self.rect = pygame.Rect(pos, (self.image.width, self.image.height))
@@ -31,7 +31,15 @@ class RotatingRig(LayeredObjects):
         self.blade_count = max(1, int(props.get("blade_count", 4)))
         self.angle = float(props.get("rotation_phase", 0.0)) % 360.0
         self.prev_angle = self.angle
-        profile = controller.rotating_rig_profile("golden_fields_default", self.wind_network, controller.windmill_turning_count(self.wind_network))
+
+        powered = self.game_objects.world_controller.power.is_powered(
+            self.power_source,
+            relay_angle=self.relay_angle,
+        )
+        profile = rotating_rig_profile(
+            "golden_fields_default",
+            powered,
+        )
         self.rotation_speed = float(profile["rotation_speed"])
         self.turning = self.rotation_speed != 0
 

@@ -101,34 +101,19 @@ class GameObjects:
         self.platforms = groups.Group()  # platforms, including ramps
         self.all_bgs = groups.LayeredGroup()  # []
         self.all_fgs = groups.LayeredGroup()  # []
-        self.bg_interact = (
-            groups.Group()
-        )  # small grass stuff so that interactables blends with BG
-        self.bg_fade = (
-            groups.Group()
-        )  # fg stuff that should dissapear when player comes: this should not blit or update. it will just run collision checks
+        self.bg_interact = (groups.Group())  # small grass stuff so that interactables blends with BG
+        self.bg_fade = (groups.Group())  # fg stuff that should dissapear when player comes: this should not blit or update. it will just run collision checks
         self.projectiles = groups.ProjectileGroups()
-        self.loot = (
-            groups.Group()
-        )  # enemy drops and things player cn pickup upon collision
+        self.loot = (groups.Group())  # enemy drops and things player cn pickup upon collision
         self.entity_pause = groups.PauseGroup()  # all Entities that are far away
-        self.cosmetics = (
-            groups.Group()
-        )  # things we just want to blit after the player layer
-        self.cosmetics_bg = (
-            groups.Group()
-        )  # things we just want to blit before player layer
-        self.interactables_fg = (
-            groups.Group()
-        )  # interacrables but are blitted after the player layer
+        self.cosmetics_fg = groups.Group()  # cosmetics rendered after the player layer
+        self.cosmetics_bg = groups.Group()  # cosmetics rendered before the player layer
+        self.interactables_fg = groups.Group()  # interactables rendered after the player layer
+        self.entity_overlaps = groups.Group()  # invisible volumes affecting dynamic entities
 
         self.camera_blocks = groups.Group()  # camera blocks
-        self.interactables = (
-            groups.Group()
-        )  # player collisions, when pressing T/Y and projectile collisions: chest, bushes, collision path, sign post, save point
-        self.layer_pause = (
-            groups.PauseLayer()
-        )  # like eneitty pause but for those at different parallax layers
+        self.interactables_bg = groups.Group()  # interactables rendered behind the player layer
+        self.layer_pause = (groups.PauseLayer())  # like eneitty pause but for those at different parallax layers
 
         # initiate player
         self.player = player.Player([0, 0], self)
@@ -142,7 +127,7 @@ class GameObjects:
         self.ui.overlay.clear_map_assets()
         self.npcs.empty()
         self.enemies.empty()
-        self.interactables.empty()
+        self.interactables_bg.empty()
         self.platforms.empty()
         self.loot.empty()
         self.entity_pause.empty()
@@ -150,13 +135,14 @@ class GameObjects:
         self.all_fgs.empty()
         self.camera_blocks.empty()
         self.bg_interact.empty()
-        self.cosmetics.empty()
+        self.cosmetics_fg.empty()
         self.cosmetics_bg.empty()
         self.layer_pause.empty()
         self.map_resources.release_all()
         self.bg_fade.empty()
         self.projectiles.empty()
         self.interactables_fg.empty()
+        self.entity_overlaps.empty()
         self.stimuli.clear_world()
         self.timer_manager.clear_timers()
         self.weather.empty()
@@ -193,6 +179,8 @@ class GameObjects:
         self.physics.simulate_group(self.projectiles.friendly_platform, dt)
         self.physics.simulate_group(self.loot, dt)
 
+        self.entity_overlaps.update(dt)
+
         # check non-platform collisions after motion has been resolved
         self.collide_all(dt)
 
@@ -206,9 +194,9 @@ class GameObjects:
         self.bg_interact.update(dt)
         self.all_fgs.update(dt)
         self.areas.update(dt)
-        self.cosmetics.update(dt)
+        self.cosmetics_fg.update(dt)
         self.cosmetics_bg.update(dt)
-        self.interactables.update(dt)
+        self.interactables_bg.update(dt)
         self.weather.update(dt)
         self.interactables_fg.update(dt)  # twoD water use it
         self.sequence_manager.update(dt)
@@ -222,17 +210,15 @@ class GameObjects:
         self.all_bgs.update_render(dt)
         self.bg_interact.update_render(dt)
         self.all_fgs.update_render(dt)
-        self.sound.update_render(
-            self.player.hitbox.center
-        )  # for emitters and tracking distance for sound
+        self.sound.update_render(self.player.hitbox.center)  # for emitters and tracking distance for sound
         self.players.update_render(dt)
         self.enemies.update_render(dt)
         self.npcs.update_render(dt)
         self.projectiles.update_render(dt)
         self.loot.update_render(dt)
-        self.cosmetics.update_render(dt)
+        self.cosmetics_fg.update_render(dt)
         self.cosmetics_bg.update_render(dt)
-        self.interactables.update_render(dt)
+        self.interactables_bg.update_render(dt)
         self.interactables_fg.update_render(dt)  # twoD water use it
         self.sequence_manager.update_render(dt)
 
@@ -247,7 +233,7 @@ class GameObjects:
 
         self.platforms.draw(last_bg_screen)
 
-        self.interactables.draw(last_bg_screen)  # should be before bg_interact
+        self.interactables_bg.draw(last_bg_screen)  # should be before bg_interact
 
         self.bg_interact.draw(
             last_bg_screen
@@ -272,7 +258,7 @@ class GameObjects:
             player_fg_screen
         )  # shoud be after the player -> upstream, 2D water
 
-        self.cosmetics.draw(player_fg_screen)
+        self.cosmetics_fg.draw(player_fg_screen)
 
         self._draw_hitboxes(player_fg_screen)
 
@@ -436,7 +422,7 @@ class GameObjects:
                     ],
                     2,
                 )  # draw hitbox
-            for cos in self.interactables.sprites():  # go through the group
+            for cos in self.interactables_bg.sprites():  # go through the group
                 pygame.draw.rect(
                     image,
                     (0, 0, 255),
@@ -665,7 +651,7 @@ class GameObjects:
                             1,
                         )  # draw hitbox
 
-            for reflect in self.cosmetics:
+            for reflect in self.cosmetics_fg:
                 if type(reflect).__name__ == "River":
                     pygame.draw.rect(
                         image,

@@ -29,7 +29,7 @@ class InteractionHintComponent:
             self._emit_particle()
 
     def _emit_flash(self):
-        self.entity.game_objects.cosmetics.add(
+        self.entity.game_objects.cosmetics_fg.add(
             SpiritFlash(
                 self.entity.hitbox.center,
                 self.entity.game_objects,

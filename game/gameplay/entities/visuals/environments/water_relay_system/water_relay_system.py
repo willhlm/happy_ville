@@ -16,11 +16,11 @@ class WaterRelaySystem(LayeredObjects):
         self.rect = pygame.Rect(0, 0, self.image.width, self.image.height)
         self.rect.topleft = pos
         self.true_pos = self.rect.topleft
-        controller = self.game_objects.world_controller.water_relays
+        controller = self.game_objects.world_controller.golden_fields.water_relays
         state = controller.register(
             self.relay_id,
             state_level=props.get("state_level") or self.game_objects.map.biome_room_name,
-            wind_network=props.get("wind_network", "golden_fields_windmills"),
+            power_source=props.get("power_source", "golden_fields_windmills"),
             initial_angle=props.get("initial_angle", 0),
             lever_signal_id=props.get("lever_signal_id"),
         )
@@ -28,7 +28,7 @@ class WaterRelaySystem(LayeredObjects):
         controller.subscribe(self.relay_id, self._on_relay_changed)
 
     def release_texture(self):
-        self.game_objects.world_controller.water_relays.unsubscribe(
+        self.game_objects.world_controller.golden_fields.water_relays.unsubscribe(
             self.relay_id, self._on_relay_changed
         )
 

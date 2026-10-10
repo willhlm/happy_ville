@@ -57,7 +57,7 @@ class Nordveden(Biome):
                         kwarg["speed"] = property["value"]
 
                 new_grind = Grind(object_position, self.level.game_objects, **kwarg)
-                self.level.game_objects.interactables.add(new_grind)
+                self.level.game_objects.interactables_bg.add(new_grind)
 
             elif id == 6:
                 kwarg = {}
@@ -68,12 +68,12 @@ class Nordveden(Biome):
                         kwarg["item"] = property["value"]
 
                 new_stone_wood = StoneWood(object_position, self.level.game_objects, **kwarg)
-                self.level.game_objects.interactables.add(new_stone_wood)
+                self.level.game_objects.interactables_bg.add(new_stone_wood)
 
             elif id == 7:
                 if parallax == [1, 1]:
                     new_cocoon = EnemyCocoon(object_position, self.level.game_objects)
-                    self.level.game_objects.interactables.add(new_cocoon)
+                    self.level.game_objects.interactables_bg.add(new_cocoon)
                 else:
                     new_cocoon = BackgroundCocoon(object_position, self.level.game_objects, parallax)
                     if layer_name.startswith("fg"):
@@ -83,7 +83,7 @@ class Nordveden(Biome):
 
             elif id == 8:
                 new_boss = self.level.game_objects.registry.fetch("enemies", "cocoon_boss")(object_position, self.level.game_objects)
-                self.level.game_objects.interactables.add(new_boss)
+                self.level.game_objects.interactables_bg.add(new_boss)
 
             elif id == 9:
                 sprite_path = 'nordveden/vines_1/'

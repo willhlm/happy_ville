@@ -60,7 +60,7 @@ class Crystal_mines(Biome):
                         kwarg["frequency"] = int(property["value"])
                 
                 new_emitter = CrystalSource(object_position, self.level.game_objects, **kwarg)
-                self.level.game_objects.interactables.add(new_emitter)
+                self.level.game_objects.interactables_bg.add(new_emitter)
 
             elif id == 11:
                 new_crystal = Crystals(object_position, self.level.game_objects, parallax, layer_name, "crystal_1")

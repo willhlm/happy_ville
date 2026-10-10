@@ -10,22 +10,34 @@ class MapTraversalSequence(Sequence):
     blocks_gameplay_movement = True
 
     ACTIONS = {"idle", "run_left", "run_right", "jump", "fall"}
-    # Keep the forced action visible after the destination map is ready.
-    # Collision paths can extend this further until the player leaves them.
-    MIN_ENTRY_TIME = 45
-
-    def __init__(self, game_objects, manager, key, *, destination, spawn, entry_action,
-                 previous_state):
+    def __init__(
+        self,
+        game_objects,
+        manager,
+        key,
+        *,
+        destination,
+        spawn,
+        departure_action,
+        arrival_action,
+        arrival_lock_time,
+        wait_for_arrival_path_clear,
+        previous_state,
+    ):
         super().__init__(game_objects, manager, key)
-        if entry_action not in self.ACTIONS:
-            raise ValueError(f"Unknown path entry_action: {entry_action!r}")
+        self._validate_action("departure_action", departure_action)
+        self._validate_action("arrival_action", arrival_action)
 
-        self.entry_action = entry_action
+        self.departure_action = departure_action
+        self.arrival_action = arrival_action
+        self.arrival_lock_time = max(0, int(arrival_lock_time))
+        self.wait_for_arrival_path_clear = wait_for_arrival_path_clear
+        self.action = departure_action
         self.phase = "departure"
         self.entry_time = 0
         self.arrival_paths = set()
 
-        self._apply_action()
+        self._apply_action(self.departure_action)
         self.game_objects.map.load_map(
             previous_state,
             destination,
@@ -49,34 +61,40 @@ class MapTraversalSequence(Sequence):
 
     def _arrive(self):
         self.phase = "arrival"
-        self.entry_time = self.MIN_ENTRY_TIME
-        self._apply_action()
-        self.arrival_paths = {
-            path
-            for path in self.game_objects.interactables
-            if getattr(path, "is_path_collision", False)
-            and path.hitbox.colliderect(self.game_objects.player.hitbox)
-        }
+        self.action = self.arrival_action
+        self.entry_time = self.arrival_lock_time
+        self._apply_action(self.arrival_action)
+        if self.wait_for_arrival_path_clear:
+            self.arrival_paths = {
+                path
+                for path in self.game_objects.interactables_bg
+                if getattr(path, "is_path_collision", False)
+                and path.hitbox.colliderect(self.game_objects.player.hitbox)
+            }
         self._finish_if_ready()
 
-    def _apply_action(self):
+    def _apply_action(self, action):
         player = self.game_objects.player
-        if self.entry_action == "run_left":
+        if action == "run_left":
             self._start_run(-1)
-        elif self.entry_action == "run_right":
+        elif action == "run_right":
             self._start_run(1)
-        elif self.entry_action == "jump":
+        elif action == "jump":
             player.currentstate.enter_state("jump")
-        elif self.entry_action == "fall":
+        elif action == "fall":
             player.currentstate.enter_state("fall")
         else:
             player.currentstate.enter_state("idle")
 
     def _maintain_action(self):
-        if self.entry_action == "run_left":
+        if self.action == "run_left":
             self._maintain_run(-1)
-        elif self.entry_action == "run_right":
+        elif self.action == "run_right":
             self._maintain_run(1)
+
+    def _validate_action(self, property_name, action):
+        if action not in self.ACTIONS:
+            raise ValueError(f"Unknown path {property_name}: {action!r}")
 
     def _start_run(self, direction):
         player = self.game_objects.player

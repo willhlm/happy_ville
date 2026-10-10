@@ -19,4 +19,4 @@ class BeaivisTime(Ability):#slow motion -> sun god: Beaiviáigi in sami
 
     def initiate(self):#called when using the ability from player states
         position = self.entity.hitbox.center
-        self.entity.game_objects.cosmetics.add(SlowmotionField(position, self.entity.game_objects))           
+        self.entity.game_objects.cosmetics_fg.add(SlowmotionField(position, self.entity.game_objects))

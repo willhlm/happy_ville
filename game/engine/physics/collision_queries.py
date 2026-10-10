@@ -82,7 +82,7 @@ class CollisionQueries:
     def check_player_interaction(self):
         player = self.game_objects.player
         npc = pygame.sprite.spritecollideany(player, self.game_objects.npcs, self.collided)
-        interactable = pygame.sprite.spritecollideany(player, self.game_objects.interactables, self.collided)
+        interactable = pygame.sprite.spritecollideany(player, self.game_objects.interactables_bg, self.collided)
         loot = pygame.sprite.spritecollideany(player, self.game_objects.loot, self.collided)
 
         if npc:

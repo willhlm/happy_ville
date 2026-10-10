@@ -339,10 +339,15 @@
                          "name":"",
                          "properties":[
                                 {
-                                 "name":"entry_action",
+                                 "name":"departure_action",
                                  "type":"string",
                                  "value":"run_left"
-                                }, 
+                                },
+                                {
+                                 "name":"arrival_action",
+                                 "type":"string",
+                                 "value":"run_left"
+                                },
                                 {
                                  "name":"path_to",
                                  "type":"string",

@@ -16,6 +16,12 @@ class DashAirState(CompositeState):
             "post": DashAirPost(entity),
         }
 
+    def exit(self):
+        """Remove dash-owned effects even when another system changes state."""
+        super().exit()
+        self.entity.movement_modifier.remove_modifier("dash")
+        self.entity.shader_state.remove_shader("mb")
+
 
 class DashAirPre(PhaseBase):
     def __init__(self, entity, **kwarg):
@@ -28,7 +34,7 @@ class DashAirPre(PhaseBase):
 
         self.dash_length = C.dash_length
         self.entity.shader_state.add_shader("mb")
-        self.entity.game_objects.cosmetics.add(
+        self.entity.game_objects.cosmetics_fg.add(
             Dusts(
                 self.entity.hitbox.center,
                 self.entity.game_objects,
@@ -52,7 +58,7 @@ class DashAirPre(PhaseBase):
 
     def update(self, dt):
         self.jump_dash_timer -= dt
-        self.entity.game_objects.cosmetics.add(FadeEffect(self.entity, alpha=100))
+        self.entity.game_objects.cosmetics_fg.add(FadeEffect(self.entity, alpha=100))
         self.dash_length -= dt
         self.entity.game_objects.particles.emit(
             "spirit_aura", pos=self.entity.hitbox.center, n=1, colour=C.spirit_colour

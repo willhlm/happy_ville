@@ -21,6 +21,8 @@ from .grass.bloomer.bloomer import Bloomer
 from .vines.interactable_vines import InteractableVines
 
 from .inorinoki import Inorinoki
+from .battery.battery import Battery
+from .jet_burst import JetBurst
 from .verve_tree import VerveTree
 from .lever.lever import Lever
 from .call_bell.call_bell import CallBell

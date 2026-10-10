@@ -48,7 +48,7 @@ class Boss(Enemy):
         if reward is not None:
             position = self.reward_spawn_position or [self.hitbox.centerx, self.hitbox.centery - 50]
             self.game_objects.world_state.narrative.set_boss_reward_position(self.ID, position)
-            self.game_objects.interactables.add(BossRewardBall(position, self.game_objects, reward, self.ID))
+            self.game_objects.interactables_bg.add(BossRewardBall(position, self.game_objects, reward, self.ID))
 
             self.game_objects.sequence_manager.start_sequence('defeated_boss', boss=self)
 

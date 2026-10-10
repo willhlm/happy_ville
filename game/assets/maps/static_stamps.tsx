@@ -41,16 +41,18 @@
  </tile>
  <tile id="9">
   <properties>
-   <property name="entry_action" value="idle"/>
-   <property name="image" value=""/>
+   <property name="arrival_action" value="idle"/>
+   <property name="arrival_lock_time" value=""/>
+   <property name="departure_action" value="idle"/>
    <property name="path_to" value=""/>
-   <property name="sfx" value=""/>
    <property name="spawn" value=""/>
   </properties>
  </tile>
  <tile id="10">
   <properties>
-   <property name="entry_action" value="idle"/>
+   <property name="arrival_action" value="idle"/>
+   <property name="arrival_lock_time" value=""/>
+   <property name="departure_action" value="idle"/>
    <property name="path_to" value=""/>
    <property name="spawn" value=""/>
   </properties>
@@ -146,9 +148,9 @@
    <property name="darker_color" value=""/>
    <property name="height" value=""/>
    <property name="line_color" value=""/>
+   <property name="power_source" value=""/>
    <property name="relay_angle" type="int" value="0"/>
    <property name="relay_height" type="float" value="100"/>
-   <property name="relay_id" value=""/>
    <property name="water_tint" value=""/>
   </properties>
  </tile>
