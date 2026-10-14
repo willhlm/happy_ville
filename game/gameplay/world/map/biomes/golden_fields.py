@@ -122,6 +122,14 @@ class Golden_fields(Biome):
             elif id == 13:
                 props = props_list_to_dict(properties)
                 game_objects = self.level.game_objects
-                game_objects.interactables_bg.add(
-                    Battery(object_position, game_objects, **props)
-                )
+                game_objects.interactables_bg.add(Battery(object_position, game_objects, **props))
+
+            elif id == 14:
+                props = props_list_to_dict(properties)
+                game_objects = self.level.game_objects
+                props['surface_anchor'] = [
+                    object_position[0] + object_size[0] * 0.5,
+                    object_position[1] + object_size[1],
+                ]
+                mucchi_cls = game_objects.registry.fetch('enemies', 'mucchi')
+                game_objects.enemies.add(mucchi_cls(object_position, game_objects, **props))

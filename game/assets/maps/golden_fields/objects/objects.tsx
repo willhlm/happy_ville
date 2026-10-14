@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.8" tiledversion="1.8.2" name="objects" tilewidth="320" tileheight="320" tilecount="12" columns="0">
+<tileset version="1.8" tiledversion="1.8.2" name="objects" tilewidth="320" tileheight="320" tilecount="13" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="2">
   <image width="224" height="48" source="../../../sprites/entities/platforms/bridge/erect/bridge.png"/>
@@ -105,5 +105,11 @@
    <property name="wind_network" value="golden_fields_windmills"/>
   </properties>
   <image width="64" height="64" source="../../../sprites/entities/interactables/battery/idle/idle.png"/>
+ </tile>
+ <tile id="14">
+  <properties>
+   <property name="surface_side" value="bottom"/>
+  </properties>
+  <image width="64" height="112" source="../../../sprites/entities/enemies/common/ground/mucchi/attack_main/idle2.png"/>
  </tile>
 </tileset>

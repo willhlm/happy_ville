@@ -8,6 +8,8 @@ class MeleeBody(EntityBody):
         super().__init__(entity)
         self.direction_mapping = {
             (0, 0): ('center', 'center'),
+            (0, 1): ('midbottom', 'midtop'),
+            (0, -1): ('midtop', 'midbottom'),
             (1, 1): ('midbottom', 'midtop'),
             (-1, 1): ('midbottom', 'midtop'),
             (1, -1): ('midtop', 'midbottom'),
@@ -21,6 +23,7 @@ class MeleeBody(EntityBody):
         hitbox_attr, entity_attr = self.direction_mapping[rounded_dir]
         setattr(self.entity.hitbox, hitbox_attr, getattr(self.entity.entity.hitbox, entity_attr))
         self.entity.rect.center = self.entity.hitbox.center
+
 
 class SwordBody(MeleeBody):
     def update_hitbox(self):
