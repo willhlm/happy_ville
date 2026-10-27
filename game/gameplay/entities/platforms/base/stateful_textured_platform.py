@@ -43,8 +43,23 @@ class WorldStateDrivenPlatform(StatefulTexturedPlatform):
         initial_state = "erect" if initial_erect else "down"
         super().__init__(pos, game_objects, initial_state=initial_state)
 
+        self._signal_subscribed = False
         if self.signal_key is not None:
             self.game_objects.signals.subscribe(self.signal_key, self.handle_signal)
+            self._signal_subscribed = True
+
+    def _unsubscribe_signal(self):
+        if not self._signal_subscribed:
+            return
+        self.game_objects.signals.unsubscribe(self.signal_key, self.handle_signal)
+        self._signal_subscribed = False
+
+    def on_map_unload(self):
+        self._unsubscribe_signal()
+
+    def kill(self):
+        self._unsubscribe_signal()
+        super().kill()
 
     def _set_erect_state(self, erect):
         self.game_objects.world_state.objects.set_bool(

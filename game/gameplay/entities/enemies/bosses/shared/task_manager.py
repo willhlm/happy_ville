@@ -22,6 +22,7 @@ class TaskManager():#manager
     def start_next_task(self):#start when state is finished        
         kwarg = self.task_queue.pop(0)        
         task_name = kwarg.pop("task")
+        self._exit_state()
         self.state = self.state_registry[task_name.lower()](self.entity, **kwarg)
 
         if kwarg.pop("repeat", False):
@@ -52,6 +53,11 @@ class TaskManager():#manager
         self.queue_task(task = newstate)
         self.start_next_task()    
 
+    def _exit_state(self):
+        exit_state = getattr(self.state, "exit", None)
+        if exit_state is not None:
+            exit_state()
+
     def die(self):
         self.entity.flags['aggro'] = False
         death_cls = self.state_registry['death']
@@ -59,6 +65,7 @@ class TaskManager():#manager
         if isinstance(self.state, death_cls) or isinstance(self.state, dead_cls):
             return
 
+        self._exit_state()
         self.entity.killed()
         self.clear_tasks()
         self.state = death_cls(self.entity)

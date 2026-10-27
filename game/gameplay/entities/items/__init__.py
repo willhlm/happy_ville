@@ -20,6 +20,7 @@ from .dyes.dyes import Dyes
 from .soul_essence import SoulEssence
 
 from .memory_shard import MemoryShard
+from .sejte_stone import SejteStone
 
 from .keys.gear import Gear
 from .keys.water_relay_key import WaterRelayKey

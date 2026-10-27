@@ -1,10 +1,22 @@
 from . import common as c
 from gameplay.entities.interactables.ability_ball.boss_reward_spawner import spawn_pending_boss_reward
 from gameplay.entities.interactables import ItemSocket
+from gameplay.entities.platforms.dynamic.lift.map_transition_lift_car import (
+    MapTransitionLiftCar,
+)
 
 
 class InteractableSpawner(c.SpawnerCommon):
-    def load_interactables(self, data, parallax, offset, map_def: c.MapDefinition, layer_name: str, viewport_center):
+    def load_interactables(
+        self,
+        data,
+        parallax,
+        offset,
+        ctx: c.LoadContext,
+        map_def: c.MapDefinition,
+        layer_name: str,
+        viewport_center,
+    ):
         loot_container_index = 1
         soul_essence_index = 1
         biome_room_name = self.game_objects.map.biome_room_name
@@ -18,7 +30,16 @@ class InteractableSpawner(c.SpawnerCommon):
                 continue
 
             if local_id == 2:
-                self.game_objects.interactables_bg.add(c.SavePoint(object_position, self.game_objects, biome_room_name))
+                obj_props = c.props_list_to_dict(properties)
+                save_point_id = obj_props.get('save_point_id') or obj_props.get('marker_id')
+                self.game_objects.interactables_bg.add(
+                    c.SavePoint(
+                        object_position,
+                        self.game_objects,
+                        biome_room_name,
+                        save_point_id=save_point_id,
+                    )
+                )
 
             elif local_id == 3:
                 runestone_id = next(property["value"] for property in properties if property["name"] == "ID")
@@ -40,9 +61,6 @@ class InteractableSpawner(c.SpawnerCommon):
                     if property["name"] in ("left", "up", "right", "down"):
                         values[property["name"]] = property["value"]
                 self.game_objects.interactables_bg.add(c.Sign(object_position, self.game_objects, values))
-
-            elif local_id == 7:
-                self.game_objects.interactables_bg.add(c.FastTravel(object_position, self.game_objects, biome_room_name))
 
             elif local_id == 8:
                 self.game_objects.interactables_bg.add(c.Inorinoki(object_position, self.game_objects))
@@ -122,3 +140,20 @@ class InteractableSpawner(c.SpawnerCommon):
                 self.game_objects.interactables_bg.add(
                     c.CallBell(object_position, self.game_objects, **c.props_list_to_dict(properties))
                 )
+
+            elif local_id == 24:  # map-transition lift
+                props = c.props_list_to_dict(properties)
+                path_ref = props.get("path")
+                path_data = ctx.references.get("paths_by_id", {}).get(int(path_ref)) if path_ref else None
+                if path_data is None:
+                    lift_id = props.get("signal_id", props.get("id", ""))
+                    raise ValueError(
+                        f"Lift {lift_id!r} references unknown path {path_ref!r}"
+                    )
+                props["path_points"] = path_data["points"]
+                lift = MapTransitionLiftCar(
+                    object_position,
+                    self.game_objects,
+                    **props,
+                )
+                self.game_objects.platforms.add(lift)

@@ -4,47 +4,67 @@ from gameplay.entities.platforms.base.dynamic_platform import DynamicPlatform
 from gameplay.entities.platforms.pathing import centre_path_to_topleft
 
 class LiftCar(DynamicPlatform):
-    """A solid, switch-operated lift car that follows an ordered Tiled path.
+    """A solid lift car that follows an ordered Tiled polyline.
 
-    Cabin walls, doors, sounds, and cross-map choreography belong on this
-    dedicated object as the lift grows.
+    Required Tiled properties:
+        path:
+            Object reference to an open polyline in the map's ``paths``
+            layer. Its points become lift stations in their authored order and
+            represent the centre of the car.
+        signal_id:
+            Unique signal channel for this car. Signal-controlled lifts react
+            to ``action="request_station"`` with a station name or index in
+            ``value``.
 
-    Tiled properties:
-        signal_id: Signal channel the lift listens on. A lever with the same
-            ``signal_id`` can command this lift.
-        lift_id: Optional identity for matching this car with a car in another
-            map during a ``map_transition`` ride.
-        path: Object ID of an open polyline in the map's ``paths`` layer. Each
-            polyline point is a possible station, in route order, and marks
-            the centre of the lift car.
-        lift_stations: Optional comma-separated names for those path points,
-            in exactly the same order. For example, ``lower,middle,upper``.
-            A lever sends one of these names as its ``value``.
-        initial_station: Optional station name (or numeric path-point index)
-            where the car starts. Without it, the car begins at the path point
-            closest to its placed Tiled position.
-        speed: Travel speed in pixels per second; default 80.
-        power_source: Registered source powering the lift; defaults to
+    Movement properties:
+        initial_station:
+            Optional station name or zero-based index. If omitted, the car
+            starts at the path point closest to its placed Tiled position.
+        lift_stations:
+            Optional comma-separated station names matching the path-point
+            order, for example ``lower,middle,upper``. Without names, numeric
+            indexes work; two-station lifts also accept ``upper``, ``lower``,
+            ``left``, and ``right``.
+        speed:
+            Travel speed in pixels per second. Default: ``80``.
+        arrival_epsilon:
+            Distance in pixels at which the car snaps to a station. Default:
+            ``0.5``.
+        power_source:
+            Registered power-source ID. Default:
             ``golden_fields_windmills``.
-        relay_angle: Required direction when power_source is a water relay.
-        arrival_epsilon: Distance within which a car is treated as docked;
-            default 0.5 pixels.
-        station_direction: Initial travel direction for a mounted lever:
-            ``1``/forward (default) or ``-1``/reverse.
-        Control properties are interpreted by the map-level lift assembler,
-        rather than by this platform class. This keeps travel physics separate
-        from interactable and area dependencies.
+        relay_angle:
+            Required outlet angle when ``power_source`` is a water relay.
+            Default: ``90``.
+        station_direction:
+            Initial mounted-lever direction: ``1``/forward or
+            ``-1``/reverse. Default: ``1``.
 
-    If ``lift_stations`` is omitted, station indexes (``0``, ``1``, ...) work,
-    and two-stop convenience names such as ``upper``/``lower`` and
-    ``left``/``right`` select the relevant endpoint.
+    Control properties:
+        control_mode:
+            ``signal`` creates no attached control; external signals move the
+            car. ``mounted_lever`` attaches a hit-operated lever.
+            ``enter_to_go`` attaches a boarding area and starts a two-station
+            lift when the player enters. Inputs are ignored while travelling.
+            Default: ``signal``.
+        lever_offset:
+            Optional ``x,y`` offset of the mounted lever from the car's
+            top-left. Defaults to the car's centre.
+        boarding_offset:
+            Optional ``x,y`` offset of the ``enter_to_go`` boarding area from
+            the car's top-left.
+        boarding_size:
+            Optional ``width,height`` of the boarding area. By default it
+            matches the car hitbox and extends 16 pixels above it.
+
+    Control properties are interpreted by the map-level lift assembler so
+    that this class remains focused on platform movement.
     """
 
     def __init__(self, pos, game_objects, sprite_path, **props):
         super().__init__(pos, game_objects)
         self.props = props
         self.signal_id = str(props.get("signal_id", props.get("id", ""))).strip()
-        self.lift_id = str(props.get("lift_id", "")).strip() or None
         self.power_source = str(props.get("power_source", "golden_fields_windmills")).strip()
         self.relay_angle = int(props.get("relay_angle", 90)) % 360
         controller = self.game_objects.world_controller.power

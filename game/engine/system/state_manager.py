@@ -73,6 +73,7 @@ REGISTERY = {
     "ability_select": AbilitySelect,
     "blit_image_text": BlitImageText,
     "conversation": Conversation,
+    "confirmation": ConfirmationDialog,
     "screen_fade": ScreenFadeState,
     "backpack_ui": BackpackUIState,
 
@@ -80,8 +81,6 @@ REGISTERY = {
     "bank_deposite": BankDeposite,
     "bank_widthdraw": BankWidthdraw,
     "bank": Bank,
-    "fast_travel_menu": FastTravelMenu,
-    "fast_travel_unlock": FastTravelUnlock,
     "smith": Smith,
     "soul_essence": SoulEssence,
     "vendor_2": Vendor_2,

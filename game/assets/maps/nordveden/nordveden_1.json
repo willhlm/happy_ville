@@ -284,6 +284,36 @@
                          "width":64,
                          "x":2896,
                          "y":752
+                        }, 
+                        {
+                         "gid":30989,
+                         "height":96,
+                         "id":1215,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":144,
+                         "x":1328,
+                         "y":736
+                        }, 
+                        {
+                         "gid":31001,
+                         "height":16,
+                         "id":1216,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"interactable_item",
+                                 "type":"string",
+                                 "value":"sejte_stone"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1248,
+                         "y":784
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -306,7 +336,7 @@
                                  "name":"path_to",
                                  "type":"string",
                                  "value":"village_1"
-                                },
+                                }, 
                                 {
                                  "name":"spawn",
                                  "type":"string",
@@ -659,7 +689,7 @@
                  "visible":true,
                  "x":0,
                  "y":0
-                },
+                }, 
                 {
                  "draworder":"topdown",
                  "id":112,
@@ -675,7 +705,7 @@
                                  "name":"direction",
                                  "type":"string",
                                  "value":"right"
-                                },
+                                }, 
                                 {
                                  "name":"offset",
                                  "type":"string",
@@ -687,7 +717,7 @@
                          "width":368,
                          "x":3840,
                          "y":976
-                        },
+                        }, 
                         {
                          "gid":15,
                          "height":240,
@@ -765,7 +795,7 @@
          "y":0
         }],
  "nextlayerid":113,
- "nextobjectid":1215,
+ "nextobjectid":1221,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -928,7 +958,7 @@
         }, 
         {
          "columns":52,
-         "firstgid":31006,
+         "firstgid":31011,
          "image":"tilesets\/ground.png",
          "imageheight":320,
          "imagewidth":832,
@@ -940,7 +970,7 @@
          "tilewidth":16
         }, 
         {
-         "firstgid":32046,
+         "firstgid":32051,
          "source":"..\/_objects\/platforms.tsx"
         }],
  "tilewidth":16,

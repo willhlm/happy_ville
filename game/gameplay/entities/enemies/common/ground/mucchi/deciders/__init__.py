@@ -1,1 +1,2 @@
 from .directional_attack import DirectionalAttackDecider
+from .directional_range import DirectionalRangeDecider

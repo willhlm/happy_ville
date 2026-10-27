@@ -1,6 +1,6 @@
 import pygame
 
-from .group_utils import apply_activation
+from .group_utils import apply_activation, unload_sprite
 
 
 class Group(pygame.sprite.Group):
@@ -22,7 +22,7 @@ class Group(pygame.sprite.Group):
 
     def empty(self):
         for sprite in self.sprites():
-            sprite.release_texture()
+            unload_sprite(sprite)
         super().empty()
 
 

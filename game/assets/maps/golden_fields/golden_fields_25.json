@@ -536,9 +536,58 @@
                  "name":"back",
                  "objects":[
                         {
-                         "gid":31249,
+                         "gid":31224,
+                         "height":64,
+                         "id":670,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"control_mode",
+                                 "type":"string",
+                                 "value":"enter_to_go"
+                                }, 
+                                {
+                                 "name":"initial_station",
+                                 "type":"string",
+                                 "value":"0"
+                                }, 
+                                {
+                                 "name":"path",
+                                 "type":"object",
+                                 "value":671
+                                }, 
+                                {
+                                 "name":"power_source",
+                                 "type":"string",
+                                 "value":"golden_fields_windmills"
+                                }, 
+                                {
+                                 "name":"signal_id",
+                                 "type":"string",
+                                 "value":"lift_golden_25"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":112,
+                         "x":1056,
+                         "y":752
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
+                 "x":0,
+                 "y":0
+                }, 
+                {
+                 "draworder":"topdown",
+                 "id":104,
+                 "name":"interactables",
+                 "objects":[
+                        {
+                         "gid":31252,
                          "height":32,
-                         "id":669,
+                         "id":678,
                          "name":"",
                          "properties":[
                                 {
@@ -560,51 +609,13 @@
                          "type":"",
                          "visible":true,
                          "width":32,
-                         "x":976,
+                         "x":992,
                          "y":720
                         }, 
                         {
-                         "gid":31224,
-                         "height":64,
-                         "id":670,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"control_mode",
-                                 "type":"string",
-                                 "value":"signal"
-                                }, 
-                                {
-                                 "name":"initial_station",
-                                 "type":"string",
-                                 "value":"0"
-                                }, 
-                                {
-                                 "name":"path",
-                                 "type":"object",
-                                 "value":443
-                                }, 
-                                {
-                                 "name":"signal_id",
-                                 "type":"string",
-                                 "value":"lift_golden_25"
-                                }, 
-                                {
-                                 "name":"power_source",
-                                 "type":"string",
-                                 "value":"golden_fields_windmills"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":112,
-                         "x":1056,
-                         "y":752
-                        }, 
-                        {
-                         "gid":31249,
+                         "gid":31252,
                          "height":32,
-                         "id":672,
+                         "id":679,
                          "name":"",
                          "properties":[
                                 {
@@ -626,20 +637,9 @@
                          "type":"",
                          "visible":true,
                          "width":32,
-                         "x":2208,
+                         "x":2192,
                          "y":688
                         }],
-                 "opacity":1,
-                 "type":"objectgroup",
-                 "visible":true,
-                 "x":0,
-                 "y":0
-                }, 
-                {
-                 "draworder":"topdown",
-                 "id":104,
-                 "name":"interactables",
-                 "objects":[],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -654,7 +654,7 @@
          "y":0
         }],
  "nextlayerid":108,
- "nextobjectid":678,
+ "nextobjectid":680,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -760,11 +760,11 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":31226,
+         "firstgid":31229,
          "source":"..\/_objects\/interactables.tsx"
         }, 
         {
-         "firstgid":31250,
+         "firstgid":31253,
          "source":"..\/_objects\/platforms.tsx"
         }],
  "tilewidth":16,

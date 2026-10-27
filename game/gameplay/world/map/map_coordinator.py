@@ -65,6 +65,7 @@ class MapCoordinator:
 
         self.map_def = self.data_loader.load(biome_room_name)
         self.game_objects.world_state.map_state.visit_area(self.map_def.biome_name, self.map_def.biome_room_name)
+        self.game_objects.world_state.map_state.reveal_area('worldmap', self.map_def.biome_name)
 
         self.scene_builder.build(self.map_def, self.ctx, self.biome_mgr)
         self.biome_mgr.set_camera(self.ctx)

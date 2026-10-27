@@ -277,7 +277,35 @@
                  "draworder":"topdown",
                  "id":107,
                  "name":"platforms",
-                 "objects":[],
+                 "objects":[
+                        {
+                         "gid":34805,
+                         "height":64,
+                         "id":476,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"breakable",
+                                 "type":"bool",
+                                 "value":true
+                                }, 
+                                {
+                                 "name":"sprite_path",
+                                 "type":"string",
+                                 "value":"generic\/rock1"
+                                }, 
+                                {
+                                 "name":"vulnerable_sides",
+                                 "type":"string",
+                                 "value":"left"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":112,
+                         "x":1488,
+                         "y":1280
+                        }],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -409,7 +437,7 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":1200,
+                         "x":1280,
                          "y":1456
                         }, 
                         {
@@ -581,18 +609,6 @@
                          "y":576
                         }, 
                         {
-                         "gid":12,
-                         "height":16,
-                         "id":410,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":112,
-                         "x":1600,
-                         "y":1392
-                        }, 
-                        {
                          "gid":8,
                          "height":96,
                          "id":413,
@@ -678,7 +694,7 @@
                         }, 
                         {
                          "gid":8,
-                         "height":512,
+                         "height":544,
                          "id":423,
                          "name":"",
                          "rotation":0,
@@ -686,7 +702,7 @@
                          "visible":true,
                          "width":192,
                          "x":1520,
-                         "y":1184
+                         "y":1216
                         }, 
                         {
                          "gid":8,
@@ -917,18 +933,6 @@
                          "y":1344
                         }, 
                         {
-                         "gid":12,
-                         "height":16,
-                         "id":447,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":112,
-                         "x":1600,
-                         "y":1312
-                        }, 
-                        {
                          "gid":8,
                          "height":224,
                          "id":448,
@@ -1119,6 +1123,30 @@
                          "width":256,
                          "x":1408,
                          "y":560
+                        }, 
+                        {
+                         "gid":12,
+                         "height":16,
+                         "id":477,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":112,
+                         "x":1600,
+                         "y":1328
+                        }, 
+                        {
+                         "gid":12,
+                         "height":16,
+                         "id":478,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":112,
+                         "x":1600,
+                         "y":1392
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -1130,48 +1158,7 @@
                  "draworder":"topdown",
                  "id":105,
                  "name":"interactables",
-                 "objects":[
-                        {
-                         "gid":31237,
-                         "height":144,
-                         "id":465,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"erect",
-                                 "type":"bool",
-                                 "value":true
-                                }, 
-                                {
-                                 "name":"signal_id",
-                                 "type":"string",
-                                 "value":"golden_fields_8"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":32,
-                         "x":1568,
-                         "y":672
-                        }, 
-                        {
-                         "gid":31236,
-                         "height":32,
-                         "id":466,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"ID",
-                                 "type":"string",
-                                 "value":"golden_fields_8"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":32,
-                         "x":1664,
-                         "y":672
-                        }],
+                 "objects":[],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -1182,7 +1169,169 @@
                  "draworder":"topdown",
                  "id":104,
                  "name":"front",
-                 "objects":[],
+                 "objects":[
+                        {
+                         "gid":31228,
+                         "height":112,
+                         "id":467,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"surface_side",
+                                 "type":"string",
+                                 "value":"left"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":64,
+                         "x":1840,
+                         "y":1344
+                        }, 
+                        {
+                         "gid":31228,
+                         "height":112,
+                         "id":468,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"surface_side",
+                                 "type":"string",
+                                 "value":"right"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":64,
+                         "x":2128,
+                         "y":1248
+                        }, 
+                        {
+                         "gid":31228,
+                         "height":112,
+                         "id":469,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"surface_side",
+                                 "type":"string",
+                                 "value":"left"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":64,
+                         "x":1840,
+                         "y":1152
+                        }, 
+                        {
+                         "gid":31228,
+                         "height":112,
+                         "id":470,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"surface_side",
+                                 "type":"string",
+                                 "value":"right"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":64,
+                         "x":2128,
+                         "y":1072
+                        }, 
+                        {
+                         "gid":31228,
+                         "height":112,
+                         "id":471,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"surface_side",
+                                 "type":"string",
+                                 "value":"left"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":64,
+                         "x":1840,
+                         "y":992
+                        }, 
+                        {
+                         "gid":31228,
+                         "height":112,
+                         "id":472,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"surface_side",
+                                 "type":"string",
+                                 "value":"right"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":64,
+                         "x":2704,
+                         "y":816
+                        }, 
+                        {
+                         "gid":31228,
+                         "height":112,
+                         "id":473,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"surface_side",
+                                 "type":"string",
+                                 "value":"left"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":64,
+                         "x":2512,
+                         "y":912
+                        }, 
+                        {
+                         "gid":31228,
+                         "height":112,
+                         "id":474,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"surface_side",
+                                 "type":"string",
+                                 "value":"right"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":64,
+                         "x":2704,
+                         "y":1024
+                        }, 
+                        {
+                         "gid":31228,
+                         "height":112,
+                         "id":475,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"surface_side",
+                                 "type":"string",
+                                 "value":"top"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":64,
+                         "x":2432,
+                         "y":608
+                        }],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -1197,7 +1346,7 @@
          "y":0
         }],
  "nextlayerid":109,
- "nextobjectid":467,
+ "nextobjectid":479,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -1303,12 +1452,12 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":31226,
+         "firstgid":31229,
          "source":"..\/_objects\/interactables.tsx"
         }, 
         {
          "columns":74,
-         "firstgid":31250,
+         "firstgid":31253,
          "image":"tilesets\/VP2_Main.png",
          "imageheight":768,
          "imagewidth":1184,
@@ -1320,7 +1469,7 @@
          "tilewidth":16
         }, 
         {
-         "firstgid":34802,
+         "firstgid":34805,
          "source":"..\/_objects\/platforms.tsx"
         }],
  "tilewidth":16,

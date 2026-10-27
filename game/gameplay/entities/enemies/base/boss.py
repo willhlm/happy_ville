@@ -1,6 +1,7 @@
 from gameplay.entities.enemies.base.enemy import Enemy
 from gameplay.entities.interactables import BossRewardBall
 from gameplay.entities.shared.boss_rewards import ProgressionUnlockReward
+from gameplay.entities.shared.components.roar_effect import RoarEffect
 
 class Boss(Enemy):
     reward_progress_key = None
@@ -13,6 +14,7 @@ class Boss(Enemy):
         self.encounter_sequence_key = 'boss_encounter'
         self.reward = None
         self.reward_spawn_position = None
+        self.roar_effect = RoarEffect(self)
 
     def start_aggro(self, delay = 0):
         self.currentstate.clear_tasks()
@@ -35,6 +37,10 @@ class Boss(Enemy):
         if self.game_objects.sequence_manager.is_active(self.encounter_sequence_key):
             return
         self.game_objects.sequence_manager.start_sequence(self.encounter_sequence_key, encounter=self.ID)
+
+    def on_kill_cleanup(self):
+        self.roar_effect.stop()
+        super().on_kill_cleanup()
 
     def dead(self):#called when death animation is finished
         self.flags['aggro'] = False

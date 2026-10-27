@@ -275,6 +275,26 @@
                          "width":0,
                          "x":1520,
                          "y":880
+                        }, 
+                        {
+                         "height":0,
+                         "id":809,
+                         "name":"",
+                         "polyline":[
+                                {
+                                 "x":0,
+                                 "y":0
+                                }, 
+                                {
+                                 "x":0,
+                                 "y":576
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":0,
+                         "x":1024,
+                         "y":1408
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -288,20 +308,35 @@
                  "name":"platforms",
                  "objects":[
                         {
-                         "gid":31252,
+                         "gid":31253,
                          "height":64,
                          "id":788,
                          "name":"",
                          "properties":[
                                 {
-                                 "name":"paths",
+                                 "name":"move",
+                                 "type":"bool",
+                                 "value":true
+                                }, 
+                                {
+                                 "name":"path",
                                  "type":"object",
                                  "value":792
+                                }, 
+                                {
+                                 "name":"power_source",
+                                 "type":"string",
+                                 "value":"golden_fields_windmills"
                                 }, 
                                 {
                                  "name":"solid",
                                  "type":"bool",
                                  "value":true
+                                }, 
+                                {
+                                 "name":"sprite_path",
+                                 "type":"string",
+                                 "value":"generic\/rock1"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -311,7 +346,7 @@
                          "y":912
                         }, 
                         {
-                         "gid":31252,
+                         "gid":31253,
                          "height":64,
                          "id":805,
                          "name":"",
@@ -320,6 +355,11 @@
                                  "name":"breakable",
                                  "type":"bool",
                                  "value":true
+                                }, 
+                                {
+                                 "name":"sprite_path",
+                                 "type":"string",
+                                 "value":"generic\/rock1"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -327,6 +367,44 @@
                          "width":112,
                          "x":848,
                          "y":1984
+                        }, 
+                        {
+                         "gid":31253,
+                         "height":64,
+                         "id":810,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"move",
+                                 "type":"bool",
+                                 "value":true
+                                }, 
+                                {
+                                 "name":"path",
+                                 "type":"object",
+                                 "value":809
+                                }, 
+                                {
+                                 "name":"power_source",
+                                 "type":"string",
+                                 "value":"golden_fields_windmills"
+                                }, 
+                                {
+                                 "name":"solid",
+                                 "type":"bool",
+                                 "value":true
+                                }, 
+                                {
+                                 "name":"sprite_path",
+                                 "type":"string",
+                                 "value":"generic\/rock1"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":112,
+                         "x":976,
+                         "y":1440
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -502,7 +580,7 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"golden_fields_20"
+                                 "value":"golden_fields_21"
                                 }, 
                                 {
                                  "name":"spawn",
@@ -619,49 +697,6 @@
                          "y":1328
                         }, 
                         {
-                         "height":0,
-                         "id":798,
-                         "name":"",
-                         "polyline":[
-                                {
-                                 "x":0,
-                                 "y":0
-                                }, 
-                                {
-                                 "x":0,
-                                 "y":576
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":0,
-                         "x":1024,
-                         "y":1424
-                        }, 
-                        {
-                         "gid":31252,
-                         "height":64,
-                         "id":799,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"paths",
-                                 "type":"object",
-                                 "value":798
-                                }, 
-                                {
-                                 "name":"solid",
-                                 "type":"bool",
-                                 "value":true
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":112,
-                         "x":976,
-                         "y":1456
-                        }, 
-                        {
                          "gid":8,
                          "height":352,
                          "id":800,
@@ -758,7 +793,7 @@
          "y":0
         }],
  "nextlayerid":108,
- "nextobjectid":809,
+ "nextobjectid":811,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -864,11 +899,11 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":31228,
+         "firstgid":31229,
          "source":"..\/_objects\/interactables.tsx"
         }, 
         {
-         "firstgid":31252,
+         "firstgid":31253,
          "source":"..\/_objects\/platforms.tsx"
         }],
  "tilewidth":16,

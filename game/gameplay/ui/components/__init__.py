@@ -1,5 +1,8 @@
 from .menus.map.banner import Banner
 from .menus.map.map_arrow import MapArrow
+from .menus.map.map_cursor import MapCursor
+from .menus.map.map_pin import MapPin
+from .menus.map.player_marker import PlayerMapMarker
 from .menus.map.rooms import Rooms
 
 from .menus.inventory.inventory_pointer import InventoryPointer

@@ -287,26 +287,6 @@
                  "objects":[
                         {
                          "height":0,
-                         "id":349,
-                         "name":"",
-                         "polyline":[
-                                {
-                                 "x":0,
-                                 "y":0
-                                }, 
-                                {
-                                 "x":0,
-                                 "y":208
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":0,
-                         "x":2016,
-                         "y":672
-                        }, 
-                        {
-                         "height":0,
                          "id":357,
                          "name":"",
                          "polyline":[
@@ -413,7 +393,7 @@
                         }, 
                         {
                          "gid":8,
-                         "height":272,
+                         "height":128,
                          "id":291,
                          "name":"",
                          "rotation":0,
@@ -421,7 +401,7 @@
                          "visible":true,
                          "width":384,
                          "x":2080,
-                         "y":864
+                         "y":720
                         }, 
                         {
                          "gid":8,
@@ -443,7 +423,7 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":576,
+                         "width":848,
                          "x":1376,
                          "y":864
                         }, 
@@ -578,25 +558,13 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":96,
-                         "x":1840,
-                         "y":800
-                        }, 
-                        {
-                         "gid":8,
-                         "height":208,
-                         "id":332,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":48,
+                         "width":144,
                          "x":1936,
-                         "y":864
+                         "y":720
                         }, 
                         {
                          "gid":11,
-                         "height":16,
+                         "height":80,
                          "id":362,
                          "name":"",
                          "properties":[
@@ -613,9 +581,27 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":96,
-                         "x":1984,
-                         "y":816
+                         "width":16,
+                         "x":2016,
+                         "y":800
+                        }, 
+                        {
+                         "gid":1,
+                         "height":16,
+                         "id":376,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"spawn",
+                                 "type":"string",
+                                 "value":"2"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1968,
+                         "y":752
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -673,34 +659,6 @@
                  "id":105,
                  "name":"interactables",
                  "objects":[
-                        {
-                         "gid":31252,
-                         "height":32,
-                         "id":358,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"action",
-                                 "type":"string",
-                                 "value":"request_station"
-                                }, 
-                                {
-                                 "name":"signal_id",
-                                 "type":"string",
-                                 "value":"lift_golden_1"
-                                }, 
-                                {
-                                 "name":"value",
-                                 "type":"string",
-                                 "value":"0"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":32,
-                         "x":2080,
-                         "y":592
-                        }, 
                         {
                          "gid":31252,
                          "height":32,
@@ -858,79 +816,6 @@
                          "y":608
                         }, 
                         {
-                         "gid":31223,
-                         "height":64,
-                         "id":338,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"control_mode",
-                                 "type":"string",
-                                 "value":"map_transition"
-                                }, 
-                                {
-                                 "name":"destination_continue_to",
-                                 "type":"int",
-                                 "value":1
-                                }, 
-                                {
-                                 "name":"destination_lift_id",
-                                 "type":"string",
-                                 "value":"golden_fields_elevator"
-                                }, 
-                                {
-                                 "name":"destination_map",
-                                 "type":"string",
-                                 "value":"golden_fields_5"
-                                }, 
-                                {
-                                 "name":"destination_station",
-                                 "type":"int",
-                                 "value":0
-                                }, 
-                                {
-                                 "name":"initial_station",
-                                 "type":"string",
-                                 "value":"1"
-                                }, 
-                                {
-                                 "name":"lever_offset",
-                                 "type":"string",
-                                 "value":"56,-16"
-                                }, 
-                                {
-                                 "name":"lift_id",
-                                 "type":"string",
-                                 "value":"golden_fields_elevator"
-                                }, 
-                                {
-                                 "name":"path",
-                                 "type":"object",
-                                 "value":349
-                                }, 
-                                {
-                                 "name":"power_source",
-                                 "type":"string",
-                                 "value":"golden_fields_windmills"
-                                }, 
-                                {
-                                 "name":"signal_id",
-                                 "type":"string",
-                                 "value":"lift_golden_1"
-                                }, 
-                                {
-                                 "name":"transition_station",
-                                 "type":"int",
-                                 "value":1
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":144,
-                         "x":1952,
-                         "y":704
-                        }, 
-                        {
                          "gid":31227,
                          "height":64,
                          "id":363,
@@ -941,18 +826,6 @@
                          "width":64,
                          "x":2144,
                          "y":592
-                        }, 
-                        {
-                         "gid":31228,
-                         "height":112,
-                         "id":364,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":64,
-                         "x":1680,
-                         "y":800
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -968,7 +841,7 @@
          "y":0
         }],
  "nextlayerid":110,
- "nextobjectid":365,
+ "nextobjectid":377,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

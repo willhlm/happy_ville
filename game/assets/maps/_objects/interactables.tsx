@@ -3,6 +3,9 @@
  <grid orientation="orthogonal" width="1" height="1"/>
  <transformations hflip="1" vflip="0" rotate="0" preferuntransformed="0"/>
  <tile id="2">
+  <properties>
+   <property name="save_point_id" value=""/>
+  </properties>
   <image width="144" height="96" source="../../sprites/entities/interactables/savepoint/idle/site2.png"/>
  </tile>
  <tile id="3">
@@ -29,9 +32,6 @@
    <property name="up" value=""/>
   </properties>
   <image width="80" height="64" source="../../sprites/entities/interactables/sign/idle/sign1.png"/>
- </tile>
- <tile id="7">
-  <image width="80" height="80" source="../../sprites/entities/interactables/fast_travel/idle/altar1.png"/>
  </tile>
  <tile id="8">
   <image width="224" height="160" source="../../sprites/entities/interactables/inorinoki/idle/tree01.png"/>
@@ -123,5 +123,19 @@
    <property name="value" value=""/>
   </properties>
   <image width="32" height="32" source="../../sprites/entities/interactables/call_bell/idle/lever1.png"/>
+ </tile>
+ <tile id="24">
+  <properties>
+   <property name="boarding_offset" value=""/>
+   <property name="boarding_size" value=""/>
+   <property name="destination_lift_id" value=""/>
+   <property name="destination_map" value=""/>
+   <property name="initial_station" value=""/>
+   <property name="lift_id" value=""/>
+   <property name="path" type="object" value="0"/>
+   <property name="power_source" value=""/>
+   <property name="signal_id" value=""/>
+  </properties>
+  <image width="144" height="64" source="../../sprites/entities/platforms/lifts/liftcar/body/idle/rhoutta_encounter1.png"/>
  </tile>
 </tileset>

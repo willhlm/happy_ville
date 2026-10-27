@@ -6,11 +6,12 @@ from gameplay.entities.enemies.common.shared.state_machine import StateManager
 from gameplay.entities.shared.components.collision.surface_side import SURFACE_ANGLE_BY_SIDE, SURFACE_BODY_ANCHOR_BY_SIDE
 from gameplay.entities.projectiles import HurtBox
 from .config import ENEMY_CONFIG as MUCCHI_CONFIG
-from .deciders import DirectionalAttackDecider
-from .states import AttackMain, AttackPost, AttackPre, Hurt, Idle
+from .deciders import DirectionalAttackDecider, DirectionalRangeDecider
+from .states import AttackMain, AttackPost, AttackPre, Hurt, Idle, Ready
 
 MUCCHI_STATES = {
     'idle': Idle,
+    'ready': Ready,
     'hurt': Hurt,
     'attack_pre': AttackPre,
     'attack_main': AttackMain,
@@ -19,6 +20,8 @@ MUCCHI_STATES = {
 
 MUCCHI_DECIDERS = {
     'directional_attack': DirectionalAttackDecider,
+    'directional_ready': DirectionalRangeDecider,
+    'directional_idle': DirectionalRangeDecider,
 }
 
 class Mucchi(Enemy):

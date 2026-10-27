@@ -276,7 +276,7 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":160,
+                         "width":624,
                          "x":1920,
                          "y":1632
                         }, 
@@ -378,7 +378,7 @@
                          "type":"",
                          "visible":true,
                          "width":208,
-                         "x":1872,
+                         "x":2336,
                          "y":528
                         }, 
                         {
@@ -401,8 +401,8 @@
                          "type":"",
                          "visible":true,
                          "width":96,
-                         "x":1776,
-                         "y":512
+                         "x":2240,
+                         "y":416
                         }, 
                         {
                          "gid":1,
@@ -419,44 +419,8 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":1824,
-                         "y":592
-                        }, 
-                        {
-                         "gid":31219,
-                         "height":32,
-                         "id":735,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"power_source",
-                                 "type":"string",
-                                 "value":"golden_fields_windmills"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":32,
-                         "x":1296,
-                         "y":1536
-                        }, 
-                        {
-                         "gid":31219,
-                         "height":32,
-                         "id":736,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"power_source",
-                                 "type":"string",
-                                 "value":"golden_fields_windmills"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":32,
-                         "x":1824,
-                         "y":688
+                         "x":2288,
+                         "y":480
                         }, 
                         {
                          "gid":8,
@@ -519,24 +483,6 @@
                          "y":944
                         }, 
                         {
-                         "gid":31219,
-                         "height":32,
-                         "id":745,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"power_source",
-                                 "type":"string",
-                                 "value":"golden_fields_windmills"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":32,
-                         "x":1696,
-                         "y":912
-                        }, 
-                        {
                          "gid":8,
                          "height":32,
                          "id":746,
@@ -547,24 +493,6 @@
                          "width":112,
                          "x":1808,
                          "y":1136
-                        }, 
-                        {
-                         "gid":31219,
-                         "height":32,
-                         "id":747,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"power_source",
-                                 "type":"string",
-                                 "value":"golden_fields_windmills"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":32,
-                         "x":1824,
-                         "y":1104
                         }, 
                         {
                          "gid":8,
@@ -579,24 +507,6 @@
                          "y":1328
                         }, 
                         {
-                         "gid":31219,
-                         "height":32,
-                         "id":749,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"power_source",
-                                 "type":"string",
-                                 "value":"golden_fields_windmills"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":32,
-                         "x":1696,
-                         "y":1296
-                        }, 
-                        {
                          "gid":8,
                          "height":32,
                          "id":750,
@@ -607,60 +517,6 @@
                          "width":112,
                          "x":1808,
                          "y":1472
-                        }, 
-                        {
-                         "gid":31219,
-                         "height":32,
-                         "id":751,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"power_source",
-                                 "type":"string",
-                                 "value":"golden_fields_windmills"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":32,
-                         "x":1824,
-                         "y":1440
-                        }, 
-                        {
-                         "gid":31219,
-                         "height":32,
-                         "id":752,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"power_source",
-                                 "type":"string",
-                                 "value":"golden_fields_windmills"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":32,
-                         "x":1712,
-                         "y":1584
-                        }, 
-                        {
-                         "gid":31219,
-                         "height":32,
-                         "id":753,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"power_source",
-                                 "type":"string",
-                                 "value":"golden_fields_windmills"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":32,
-                         "x":1472,
-                         "y":1312
                         }, 
                         {
                          "gid":8,
@@ -687,24 +543,6 @@
                          "y":1152
                         }, 
                         {
-                         "gid":31219,
-                         "height":32,
-                         "id":758,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"power_source",
-                                 "type":"string",
-                                 "value":"golden_fields_windmills"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":32,
-                         "x":1264,
-                         "y":1104
-                        }, 
-                        {
                          "gid":8,
                          "height":48,
                          "id":761,
@@ -729,42 +567,6 @@
                          "y":816
                         }, 
                         {
-                         "gid":31219,
-                         "height":32,
-                         "id":764,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"power_source",
-                                 "type":"string",
-                                 "value":"golden_fields_windmills"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":32,
-                         "x":1424,
-                         "y":864
-                        }, 
-                        {
-                         "gid":31219,
-                         "height":32,
-                         "id":767,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"power_source",
-                                 "type":"string",
-                                 "value":"golden_fields_windmills"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":32,
-                         "x":1584,
-                         "y":560
-                        }, 
-                        {
                          "gid":8,
                          "height":240,
                          "id":770,
@@ -787,6 +589,54 @@
                          "width":528,
                          "x":1104,
                          "y":160
+                        }, 
+                        {
+                         "gid":8,
+                         "height":256,
+                         "id":794,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":96,
+                         "x":2144,
+                         "y":432
+                        }, 
+                        {
+                         "gid":8,
+                         "height":224,
+                         "id":796,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":128,
+                         "x":1920,
+                         "y":528
+                        }, 
+                        {
+                         "gid":8,
+                         "height":64,
+                         "id":797,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":464,
+                         "x":1776,
+                         "y":176
+                        }, 
+                        {
+                         "gid":8,
+                         "height":32,
+                         "id":798,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":64,
+                         "x":1776,
+                         "y":448
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -800,199 +650,7 @@
                  "name":"platforms",
                  "objects":[
                         {
-                         "gid":31252,
-                         "height":64,
-                         "id":737,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"damage",
-                                 "type":"bool",
-                                 "value":true
-                                }, 
-                                {
-                                 "name":"move",
-                                 "type":"bool",
-                                 "value":true
-                                }, 
-                                {
-                                 "name":"paths",
-                                 "type":"object",
-                                 "value":738
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":112,
-                         "x":1248,
-                         "y":1440
-                        }, 
-                        {
-                         "height":0,
-                         "id":738,
-                         "name":"",
-                         "polyline":[
-                                {
-                                 "x":0,
-                                 "y":0
-                                }, 
-                                {
-                                 "x":272,
-                                 "y":0
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":0,
-                         "x":1248,
-                         "y":1408
-                        }, 
-                        {
-                         "gid":31252,
-                         "height":64,
-                         "id":754,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"damage",
-                                 "type":"bool",
-                                 "value":true
-                                }, 
-                                {
-                                 "name":"move",
-                                 "type":"bool",
-                                 "value":true
-                                }, 
-                                {
-                                 "name":"paths",
-                                 "type":"object",
-                                 "value":755
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":112,
-                         "x":1248,
-                         "y":1200
-                        }, 
-                        {
-                         "height":0,
-                         "id":755,
-                         "name":"",
-                         "polyline":[
-                                {
-                                 "x":0,
-                                 "y":0
-                                }, 
-                                {
-                                 "x":272,
-                                 "y":0
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":0,
-                         "x":1264,
-                         "y":1168
-                        }, 
-                        {
-                         "gid":31252,
-                         "height":64,
-                         "id":759,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"damage",
-                                 "type":"bool",
-                                 "value":true
-                                }, 
-                                {
-                                 "name":"move",
-                                 "type":"bool",
-                                 "value":true
-                                }, 
-                                {
-                                 "name":"paths",
-                                 "type":"object",
-                                 "value":760
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":112,
-                         "x":1248,
-                         "y":976
-                        }, 
-                        {
-                         "height":0,
-                         "id":760,
-                         "name":"",
-                         "polyline":[
-                                {
-                                 "x":0,
-                                 "y":0
-                                }, 
-                                {
-                                 "x":272,
-                                 "y":0
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":0,
-                         "x":1264,
-                         "y":944
-                        }, 
-                        {
-                         "gid":31252,
-                         "height":64,
-                         "id":765,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"move",
-                                 "type":"bool",
-                                 "value":true
-                                }, 
-                                {
-                                 "name":"paths",
-                                 "type":"object",
-                                 "value":766
-                                }, 
-                                {
-                                 "name":"solid",
-                                 "type":"bool",
-                                 "value":true
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":112,
-                         "x":1248,
-                         "y":672
-                        }, 
-                        {
-                         "height":0,
-                         "id":766,
-                         "name":"",
-                         "polyline":[
-                                {
-                                 "x":0,
-                                 "y":0
-                                }, 
-                                {
-                                 "x":272,
-                                 "y":0
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":0,
-                         "x":1264,
-                         "y":640
-                        }, 
-                        {
-                         "gid":31252,
+                         "gid":31253,
                          "height":64,
                          "id":768,
                          "name":"",
@@ -1003,25 +661,198 @@
                                  "value":true
                                 }, 
                                 {
-                                 "name":"paths",
+                                 "name":"path",
                                  "type":"object",
-                                 "value":769
+                                 "value":777
+                                }, 
+                                {
+                                 "name":"power_source",
+                                 "type":"string",
+                                 "value":"golden_fields_windmills"
                                 }, 
                                 {
                                  "name":"solid",
                                  "type":"bool",
                                  "value":true
+                                }, 
+                                {
+                                 "name":"sprite_path",
+                                 "type":"string",
+                                 "value":"generic\/rock1"
                                 }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":112,
-                         "x":1264,
-                         "y":432
+                         "x":1248,
+                         "y":464
                         }, 
                         {
+                         "gid":31253,
+                         "height":64,
+                         "id":773,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"move",
+                                 "type":"bool",
+                                 "value":true
+                                }, 
+                                {
+                                 "name":"path",
+                                 "type":"object",
+                                 "value":778
+                                }, 
+                                {
+                                 "name":"power_source",
+                                 "type":"string",
+                                 "value":"golden_fields_windmills"
+                                }, 
+                                {
+                                 "name":"solid",
+                                 "type":"bool",
+                                 "value":true
+                                }, 
+                                {
+                                 "name":"sprite_path",
+                                 "type":"string",
+                                 "value":"generic\/rock1"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":112,
+                         "x":1232,
+                         "y":688
+                        }, 
+                        {
+                         "gid":31253,
+                         "height":64,
+                         "id":774,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"move",
+                                 "type":"bool",
+                                 "value":true
+                                }, 
+                                {
+                                 "name":"path",
+                                 "type":"object",
+                                 "value":779
+                                }, 
+                                {
+                                 "name":"power_source",
+                                 "type":"string",
+                                 "value":"golden_fields_windmills"
+                                }, 
+                                {
+                                 "name":"solid",
+                                 "type":"bool",
+                                 "value":true
+                                }, 
+                                {
+                                 "name":"sprite_path",
+                                 "type":"string",
+                                 "value":"generic\/rock1"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":112,
+                         "x":1248,
+                         "y":992
+                        }, 
+                        {
+                         "gid":31253,
+                         "height":64,
+                         "id":775,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"move",
+                                 "type":"bool",
+                                 "value":true
+                                }, 
+                                {
+                                 "name":"path",
+                                 "type":"object",
+                                 "value":780
+                                }, 
+                                {
+                                 "name":"power_source",
+                                 "type":"string",
+                                 "value":"golden_fields_windmills"
+                                }, 
+                                {
+                                 "name":"solid",
+                                 "type":"bool",
+                                 "value":true
+                                }, 
+                                {
+                                 "name":"sprite_path",
+                                 "type":"string",
+                                 "value":"generic\/rock1"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":112,
+                         "x":1248,
+                         "y":1216
+                        }, 
+                        {
+                         "gid":31253,
+                         "height":64,
+                         "id":776,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"move",
+                                 "type":"bool",
+                                 "value":true
+                                }, 
+                                {
+                                 "name":"path",
+                                 "type":"object",
+                                 "value":781
+                                }, 
+                                {
+                                 "name":"power_source",
+                                 "type":"string",
+                                 "value":"golden_fields_windmills"
+                                }, 
+                                {
+                                 "name":"solid",
+                                 "type":"bool",
+                                 "value":true
+                                }, 
+                                {
+                                 "name":"sprite_path",
+                                 "type":"string",
+                                 "value":"generic\/rock1"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":112,
+                         "x":1248,
+                         "y":1440
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
+                 "x":0,
+                 "y":0
+                }, 
+                {
+                 "draworder":"topdown",
+                 "id":107,
+                 "name":"paths",
+                 "objects":[
+                        {
                          "height":0,
-                         "id":769,
+                         "id":777,
                          "name":"",
                          "polyline":[
                                 {
@@ -1036,20 +867,89 @@
                          "type":"",
                          "visible":true,
                          "width":0,
+                         "x":1264,
+                         "y":432
+                        }, 
+                        {
+                         "height":0,
+                         "id":778,
+                         "name":"",
+                         "polyline":[
+                                {
+                                 "x":0,
+                                 "y":0
+                                }, 
+                                {
+                                 "x":272,
+                                 "y":0
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":0,
+                         "x":1264,
+                         "y":656
+                        }, 
+                        {
+                         "height":0,
+                         "id":779,
+                         "name":"",
+                         "polyline":[
+                                {
+                                 "x":0,
+                                 "y":0
+                                }, 
+                                {
+                                 "x":272,
+                                 "y":0
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":0,
                          "x":1280,
-                         "y":400
+                         "y":960
+                        }, 
+                        {
+                         "height":0,
+                         "id":780,
+                         "name":"",
+                         "polyline":[
+                                {
+                                 "x":0,
+                                 "y":0
+                                }, 
+                                {
+                                 "x":272,
+                                 "y":0
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":0,
+                         "x":1296,
+                         "y":1184
+                        }, 
+                        {
+                         "height":0,
+                         "id":781,
+                         "name":"",
+                         "polyline":[
+                                {
+                                 "x":0,
+                                 "y":0
+                                }, 
+                                {
+                                 "x":272,
+                                 "y":0
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":0,
+                         "x":1264,
+                         "y":1408
                         }],
-                 "opacity":1,
-                 "type":"objectgroup",
-                 "visible":true,
-                 "x":0,
-                 "y":0
-                }, 
-                {
-                 "draworder":"topdown",
-                 "id":107,
-                 "name":"paths",
-                 "objects":[],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -1060,7 +960,241 @@
                  "draworder":"topdown",
                  "id":105,
                  "name":"front",
-                 "objects":[],
+                 "objects":[
+                        {
+                         "gid":31219,
+                         "height":32,
+                         "id":782,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"power_source",
+                                 "type":"string",
+                                 "value":"golden_fields_windmills"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":1872,
+                         "y":688
+                        }, 
+                        {
+                         "gid":31219,
+                         "height":32,
+                         "id":783,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"power_source",
+                                 "type":"string",
+                                 "value":"golden_fields_windmills"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":1696,
+                         "y":912
+                        }, 
+                        {
+                         "gid":31219,
+                         "height":32,
+                         "id":784,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"power_source",
+                                 "type":"string",
+                                 "value":"golden_fields_windmills"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":1840,
+                         "y":1104
+                        }, 
+                        {
+                         "gid":31219,
+                         "height":32,
+                         "id":785,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"power_source",
+                                 "type":"string",
+                                 "value":"golden_fields_windmills"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":1696,
+                         "y":1296
+                        }, 
+                        {
+                         "gid":31219,
+                         "height":32,
+                         "id":786,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"power_source",
+                                 "type":"string",
+                                 "value":"golden_fields_windmills"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":1824,
+                         "y":1440
+                        }, 
+                        {
+                         "gid":31219,
+                         "height":32,
+                         "id":787,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"power_source",
+                                 "type":"string",
+                                 "value":"golden_fields_windmills"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":1712,
+                         "y":1584
+                        }, 
+                        {
+                         "gid":31219,
+                         "height":32,
+                         "id":788,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"power_source",
+                                 "type":"string",
+                                 "value":"golden_fields_windmills"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":1296,
+                         "y":1536
+                        }, 
+                        {
+                         "gid":31219,
+                         "height":32,
+                         "id":789,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"power_source",
+                                 "type":"string",
+                                 "value":"golden_fields_windmills"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":1472,
+                         "y":1312
+                        }, 
+                        {
+                         "gid":31219,
+                         "height":32,
+                         "id":790,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"power_source",
+                                 "type":"string",
+                                 "value":"golden_fields_windmills"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":1280,
+                         "y":1104
+                        }, 
+                        {
+                         "gid":31219,
+                         "height":32,
+                         "id":791,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"power_source",
+                                 "type":"string",
+                                 "value":"golden_fields_windmills"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":1440,
+                         "y":864
+                        }, 
+                        {
+                         "gid":31219,
+                         "height":32,
+                         "id":792,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"power_source",
+                                 "type":"string",
+                                 "value":"golden_fields_windmills"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":1584,
+                         "y":560
+                        }, 
+                        {
+                         "gid":31219,
+                         "height":32,
+                         "id":795,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"power_source",
+                                 "type":"string",
+                                 "value":"golden_fields_windmills"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":2064,
+                         "y":528
+                        }, 
+                        {
+                         "gid":31219,
+                         "height":32,
+                         "id":799,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"power_source",
+                                 "type":"string",
+                                 "value":"golden_fields_windmills"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":1792,
+                         "y":416
+                        }],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -1073,7 +1207,7 @@
                  "name":"interactables",
                  "objects":[
                         {
-                         "gid":31232,
+                         "gid":31233,
                          "height":32,
                          "id":772,
                          "name":"",
@@ -1098,7 +1232,7 @@
          "y":0
         }],
  "nextlayerid":108,
- "nextobjectid":773,
+ "nextobjectid":800,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -1204,11 +1338,11 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":31228,
+         "firstgid":31229,
          "source":"..\/_objects\/interactables.tsx"
         }, 
         {
-         "firstgid":31252,
+         "firstgid":31253,
          "source":"..\/_objects\/platforms.tsx"
         }],
  "tilewidth":16,

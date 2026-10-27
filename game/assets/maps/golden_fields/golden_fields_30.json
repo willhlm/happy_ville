@@ -648,6 +648,11 @@
                                  "value":"20"
                                 }, 
                                 {
+                                 "name":"power_source",
+                                 "type":"string",
+                                 "value":"water_relay_1"
+                                }, 
+                                {
                                  "name":"relay_angle",
                                  "type":"int",
                                  "value":180
@@ -655,12 +660,7 @@
                                 {
                                  "name":"relay_height",
                                  "type":"float",
-                                 "value":0
-                                }, 
-                                {
-                                 "name":"power_source",
-                                 "type":"string",
-                                 "value":"water_relay_1"
+                                 "value":100
                                 }],
                          "rotation":0,
                          "type":"",
@@ -873,7 +873,7 @@
                  "name":"platforms",
                  "objects":[
                         {
-                         "gid":31252,
+                         "gid":31255,
                          "height":16,
                          "id":587,
                          "name":"",
@@ -896,7 +896,7 @@
                          "y":960
                         }, 
                         {
-                         "gid":31252,
+                         "gid":31255,
                          "height":16,
                          "id":603,
                          "name":"",
@@ -919,7 +919,7 @@
                          "y":960
                         }, 
                         {
-                         "gid":31252,
+                         "gid":31255,
                          "height":16,
                          "id":604,
                          "name":"",
@@ -982,35 +982,7 @@
                  "name":"interactables",
                  "objects":[
                         {
-                         "gid":31237,
-                         "height":144,
-                         "id":584,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"erect",
-                                 "type":"bool",
-                                 "value":true
-                                }, 
-                                {
-                                 "name":"id",
-                                 "type":"string",
-                                 "value":"gate_1"
-                                }, 
-                                {
-                                 "name":"signal_id",
-                                 "type":"string",
-                                 "value":"gate_1"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":32,
-                         "x":2272,
-                         "y":640
-                        }, 
-                        {
-                         "gid":31236,
+                         "gid":31239,
                          "height":32,
                          "id":585,
                          "name":"",
@@ -1031,6 +1003,29 @@
                          "width":32,
                          "x":2176,
                          "y":688
+                        }, 
+                        {
+                         "gid":31240,
+                         "height":144,
+                         "id":607,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"erect",
+                                 "type":"bool",
+                                 "value":true
+                                }, 
+                                {
+                                 "name":"id",
+                                 "type":"string",
+                                 "value":"gate_1"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":2272,
+                         "y":640
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -1057,7 +1052,7 @@
          "y":0
         }],
  "nextlayerid":108,
- "nextobjectid":607,
+ "nextobjectid":608,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -1163,11 +1158,11 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":31226,
+         "firstgid":31229,
          "source":"..\/_objects\/interactables.tsx"
         }, 
         {
-         "firstgid":31250,
+         "firstgid":31253,
          "source":"..\/_objects\/platforms.tsx"
         }],
  "tilewidth":16,

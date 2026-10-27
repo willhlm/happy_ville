@@ -8,6 +8,7 @@ class Backpack():#Ailas back pack. Can append new things such as journal, if pic
     def __init__(self, entity):
         self.holdings = {'map': MapState(), 'inventory': Inventory(entity.game_objects), 'radna': RadnaLoadout()}
         self._registery = {'journal': Journal}
+        self.discovered_items = set()
 
     @property
     def inventory(self):
@@ -27,3 +28,9 @@ class Backpack():#Ailas back pack. Can append new things such as journal, if pic
 
     def add_holding(self, name):
         self.holdings[name] = self._registery[name]()
+
+    def has_discovered_item(self, item_id):
+        return item_id in self.discovered_items
+
+    def discover_item(self, item_id):
+        self.discovered_items.add(item_id)

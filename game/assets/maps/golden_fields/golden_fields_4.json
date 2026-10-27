@@ -304,15 +304,15 @@
                          "name":"",
                          "properties":[
                                 {
-                                 "name":"departure_action",
-                                 "type":"string",
-                                 "value":"run_left"
-                                },
-                                {
                                  "name":"arrival_action",
                                  "type":"string",
                                  "value":"run_left"
-                                },
+                                }, 
+                                {
+                                 "name":"departure_action",
+                                 "type":"string",
+                                 "value":"run_left"
+                                }, 
                                 {
                                  "name":"path_to",
                                  "type":"string",
@@ -405,7 +405,7 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":944,
+                         "x":912,
                          "y":800
                         }, 
                         {
@@ -415,15 +415,15 @@
                          "name":"",
                          "properties":[
                                 {
-                                 "name":"departure_action",
-                                 "type":"string",
-                                 "value":"idle"
-                                },
-                                {
                                  "name":"arrival_action",
                                  "type":"string",
                                  "value":"idle"
-                                },
+                                }, 
+                                {
+                                 "name":"departure_action",
+                                 "type":"string",
+                                 "value":"idle"
+                                }, 
                                 {
                                  "name":"path_to",
                                  "type":"string",
@@ -432,7 +432,7 @@
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"5"
+                                 "value":"4"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -536,6 +536,29 @@
                          "width":112,
                          "x":960,
                          "y":352
+                        }, 
+                        {
+                         "gid":20,
+                         "height":64,
+                         "id":332,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"key",
+                                 "type":"string",
+                                 "value":"plantis_boss"
+                                }, 
+                                {
+                                 "name":"trigger",
+                                 "type":"string",
+                                 "value":"boss_encounter"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":176,
+                         "x":688,
+                         "y":848
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -549,7 +572,7 @@
                  "name":"platforms",
                  "objects":[
                         {
-                         "gid":34797,
+                         "gid":34805,
                          "height":64,
                          "id":329,
                          "name":"",
@@ -583,10 +606,26 @@
                  "name":"interactables",
                  "objects":[
                         {
-                         "gid":31238,
+                         "gid":31244,
                          "height":32,
                          "id":322,
                          "name":"",
+                         "properties":[
+                                {
+                                 "name":"erect",
+                                 "type":"bool",
+                                 "value":false
+                                }, 
+                                {
+                                 "name":"id",
+                                 "type":"string",
+                                 "value":"gate_below"
+                                }, 
+                                {
+                                 "name":"signal_id",
+                                 "type":"string",
+                                 "value":"plantis_boss"
+                                }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
@@ -595,10 +634,26 @@
                          "y":880
                         }, 
                         {
-                         "gid":31234,
+                         "gid":31240,
                          "height":144,
                          "id":331,
                          "name":"",
+                         "properties":[
+                                {
+                                 "name":"erect",
+                                 "type":"bool",
+                                 "value":true
+                                }, 
+                                {
+                                 "name":"id",
+                                 "type":"string",
+                                 "value":"gate_right"
+                                }, 
+                                {
+                                 "name":"signal_id",
+                                 "type":"string",
+                                 "value":"plantis_boss"
+                                }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
@@ -631,7 +686,7 @@
          "y":0
         }],
  "nextlayerid":108,
- "nextobjectid":332,
+ "nextobjectid":333,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -737,12 +792,12 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":31223,
+         "firstgid":31229,
          "source":"..\/_objects\/interactables.tsx"
         }, 
         {
          "columns":74,
-         "firstgid":31245,
+         "firstgid":31253,
          "image":"tilesets\/VP2_Main.png",
          "imageheight":768,
          "imagewidth":1184,
@@ -754,7 +809,7 @@
          "tilewidth":16
         }, 
         {
-         "firstgid":34797,
+         "firstgid":34805,
          "source":"..\/_objects\/platforms.tsx"
         }],
  "tilewidth":16,

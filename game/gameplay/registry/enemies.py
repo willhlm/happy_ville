@@ -51,5 +51,6 @@ REGISTER_ENEMIES = {
     'moss': Moss,    
     'mucchi': Mucchi,
     'toadess': Toadess,
+    'plantis': Plantis,
     'bat': Bat,
 }

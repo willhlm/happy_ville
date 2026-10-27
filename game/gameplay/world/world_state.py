@@ -11,6 +11,7 @@ class WorldObjectState:
         'breakable_platform': {},
         'bg_fade': {},
         'item_socket': {},
+        'save_point': {},
         'valve': {},
         'windmill': {},
         'water_relay': {},
@@ -119,6 +120,7 @@ class MapState:
     DEFAULT_MAP_STATE = {
         'revealed_areas': {},
         'visited_areas': {},
+        'unlocked_markers': {},
     }
 
     def __init__(self, state):
@@ -146,9 +148,59 @@ class MapState:
         bucket = self.get_bucket(map_name)
         return bool(bucket['revealed_areas'].get(str(area_id), False))
 
+    def is_area_visited(self, map_name: str, area_id) -> bool:
+        bucket = self.get_bucket(map_name)
+        return bool(bucket['visited_areas'].get(str(area_id), False))
+
     def get_revealed_areas(self, map_name: str) -> set[str]:
         bucket = self.get_bucket(map_name)
         return {key for key, revealed in bucket['revealed_areas'].items() if revealed}
+
+    def get_visited_areas(self, map_name: str) -> set[str]:
+        bucket = self.get_bucket(map_name)
+        return {key for key, visited in bucket['visited_areas'].items() if visited}
+
+    def get_all_revealed_areas(self, *, exclude=()) -> set[str]:
+        excluded = set(exclude)
+        revealed_areas = set()
+        for map_name in list(self.state):
+            if map_name not in excluded:
+                revealed_areas.update(self.get_revealed_areas(map_name))
+        return revealed_areas
+
+    def get_all_visited_areas(self, *, exclude=()) -> set[str]:
+        excluded = set(exclude)
+        visited_areas = set()
+        for map_name in list(self.state):
+            if map_name not in excluded:
+                visited_areas.update(self.get_visited_areas(map_name))
+        return visited_areas
+
+    def unlock_marker(self, map_name: str, marker_id, **data) -> dict:
+        bucket = self.get_bucket(map_name)
+        marker_key = str(marker_id)
+        marker_data = bucket['unlocked_markers'].get(marker_key)
+        if not isinstance(marker_data, dict):
+            marker_data = {}
+            bucket['unlocked_markers'][marker_key] = marker_data
+        marker_data.update({key: value for key, value in data.items() if value is not None})
+        return marker_data
+
+    def is_marker_unlocked(self, map_name: str, marker_id) -> bool:
+        bucket = self.get_bucket(map_name)
+        return str(marker_id) in bucket['unlocked_markers']
+
+    def get_unlocked_markers(self, map_name: str) -> dict:
+        bucket = self.get_bucket(map_name)
+        return dict(bucket['unlocked_markers'])
+
+    def get_all_unlocked_markers(self, *, exclude=()) -> dict:
+        excluded = set(exclude)
+        unlocked_markers = {}
+        for map_name in list(self.state):
+            if map_name not in excluded:
+                unlocked_markers.update(self.get_unlocked_markers(map_name))
+        return unlocked_markers
 
 class NarrativeState:
     QUEST_INACTIVE = 'inactive'

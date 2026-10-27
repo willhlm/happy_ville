@@ -33,9 +33,13 @@ class ItemInteractComponent:
         self.item.image = self.item.sprites[animation_name][0]
         self.item.animation.play(animation_name)
 
-    def interact_with_pickup_text(self, player):
+    def interact_with_pickup_text(self, player, *, show_details=True):
         self._interacting_player = player
         self.start_pickup_feedback(player)
+        if not show_details:
+            self._complete_pickup()
+            return
+
         self.item.game_objects.game.state_manager.enter_state(
             state_name='dynamic_overlay',
             loader_key='default',
@@ -71,8 +75,12 @@ class ItemInteractComponent:
             )
 
     def on_pickup_text_exit(self):
-        self.item.on_pickup_interaction_complete(self._interacting_player)
-        self._interacting_player.currentstate.handle_input('pray_post')
+        self._complete_pickup()
+
+    def _complete_pickup(self):
+        player = self._interacting_player
+        self.item.on_pickup_interaction_complete(player)
+        player.currentstate.handle_input('pray_post')
 
     def on_kill(self):
         if hasattr(self.item, 'light'):

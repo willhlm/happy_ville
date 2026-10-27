@@ -76,18 +76,6 @@ class Golden_fields(Biome):
                 else:
                     self.level.game_objects.all_bgs.add(layer_name, rig)
 
-            elif id == 9:
-                props = props_list_to_dict(properties)
-                path_ref = props.get("path")
-                path_data = ctx.references.get("paths_by_id", {}).get(int(path_ref)) if path_ref else None
-                if path_data is None:
-                    raise ValueError(f"Lift {props.get('signal_id', props.get('id', ''))!r} references unknown path {path_ref!r}")
-                props["path_points"] = path_data["points"]
-                sprite_path = "assets/sprites/entities/platforms/lifts/liftcar/body/"
-                lift = LiftCar(object_position, self.level.game_objects, sprite_path, **props)
-                self.level.game_objects.platforms.add(lift)
-                attach_controls(lift, props)
-
             elif id == 10:
                 props = props_list_to_dict(properties)
                 path_ref = props.get("path")

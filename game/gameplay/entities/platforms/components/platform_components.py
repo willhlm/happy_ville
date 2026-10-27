@@ -366,7 +366,16 @@ class DamageOnLand(CollisionPlatformComponent):
 # ----------------------------
 
 class Move(PlatformComponent):#wrapper
-    def on_added(self):        
+    def on_added(self):
+        power_source = self.props.get("power_source")
+        self.power_source = str(power_source).strip() if power_source not in (None, "") else None
+        if self.power_source:
+            controller = self.p.game_objects.world_controller.power
+            if not controller.is_registered(self.power_source):
+                raise ValueError(
+                    f"Unknown power source {self.power_source!r} for moving platform"
+                )
+
         t = str(self.props.get("move_type", "direction_distance")).lower()
 
         variants = {
@@ -380,6 +389,12 @@ class Move(PlatformComponent):#wrapper
         self.impl.on_added()
 
     def update(self, dt):
+        if self.power_source and not self.p.game_objects.world_controller.power.is_powered(
+            self.power_source
+        ):
+            self.p.velocity[0] = 0.0
+            self.p.velocity[1] = 0.0
+            return
         self.impl.update(dt)
 
 class MovePath(PlatformComponent):

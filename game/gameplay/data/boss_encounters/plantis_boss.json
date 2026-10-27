@@ -1,0 +1,28 @@
+{
+  "boss": {
+    "mode": "spawned",
+    "class": "plantis",
+    "spawn_position": [912, 700]
+  },
+  "camera": "Deer_encounter",
+  "steps": [
+    {
+      "time": 0,
+      "actions": [
+        { "type": "emit_signal", "kwargs": { "action": "close" } },
+        { "type": "player_state", "state": "idle" },
+        { "type": "player_acceleration_x", "value": 0 },
+        { "type": "boss_method", "method": "start_encounter_intro" }
+      ]
+    },
+    {
+      "time": 120,
+      "actions": [
+        { "type": "boss_method", "method": "start_aggro" },
+        { "type": "mark_flow_complete" },
+        { "type": "camera_exit" },
+        { "type": "exit_state" }
+      ]
+    }
+  ]
+}

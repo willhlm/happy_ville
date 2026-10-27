@@ -30,13 +30,14 @@ class ScrollableWorldMapLoader(BaseScrollableMapLoader):
                 topleft_object_position = self.get_object_topleft(obj)
                 properties = self.get_object_properties(obj)
                 map_text = properties.get("text") or properties.get("map") or obj.get("name")
+                marker = Banner(
+                    topleft_object_position,
+                    self.game_objects,
+                    str(local_id + 1),
+                    map_text,
+                )
                 markers.append(
-                    Banner(
-                        topleft_object_position,
-                        self.game_objects,
-                        str(local_id + 1),
-                        map_text,
-                    )
+                    self.configure_marker(marker, properties)
                 )
 
         return markers

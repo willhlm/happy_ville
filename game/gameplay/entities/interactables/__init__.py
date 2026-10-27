@@ -11,7 +11,6 @@ from .doors.door_interact import DoorInteract
 from .doors.door import Door
 from .enemy_containers import EnemyCocoon, EnemyWeb
 
-from .fast_travel import FastTravel
 from .item_socket import ItemSocket
 from .valve import Valve
 from .fireplace.fireplace import Fireplace

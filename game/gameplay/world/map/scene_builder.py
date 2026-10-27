@@ -78,7 +78,15 @@ class SceneBuilder:
             self.spawner.load_area_stamps(data["area_stamps"], parallax, offset, map_def=map_def, viewport_center=viewport_center)
 
         if "interactables" in data:
-            self.spawner.load_interactables(data["interactables"], parallax, offset, map_def=map_def, layer_name=layer_name, viewport_center=viewport_center)
+            self.spawner.load_interactables(
+                data["interactables"],
+                parallax,
+                offset,
+                ctx=ctx,
+                map_def=map_def,
+                layer_name=layer_name,
+                viewport_center=viewport_center,
+            )
 
         if "platforms" in data:
             self.spawner.load_platforms(data["platforms"], parallax, offset, ctx=ctx, layer_name=layer_name, viewport_center=viewport_center)

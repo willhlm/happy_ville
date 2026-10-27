@@ -253,6 +253,55 @@
                 }, 
                 {
                  "draworder":"topdown",
+                 "id":109,
+                 "name":"back",
+                 "objects":[
+                        {
+                         "gid":31224,
+                         "height":64,
+                         "id":392,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"control_mode",
+                                 "type":"string",
+                                 "value":"enter_to_go"
+                                }, 
+                                {
+                                 "name":"initial_station",
+                                 "type":"string",
+                                 "value":"0"
+                                }, 
+                                {
+                                 "name":"path",
+                                 "type":"object",
+                                 "value":383
+                                }, 
+                                {
+                                 "name":"power_source",
+                                 "type":"string",
+                                 "value":"golden_fields_windmills"
+                                }, 
+                                {
+                                 "name":"signal_id",
+                                 "type":"string",
+                                 "value":"lift_golden_10"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":112,
+                         "x":1200,
+                         "y":752
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
+                 "x":0,
+                 "y":0
+                }, 
+                {
+                 "draworder":"topdown",
                  "id":106,
                  "name":"paths",
                  "objects":[
@@ -296,12 +345,12 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"golden_fields_5"
-                                },
+                                 "value":"nordveden_5"
+                                }, 
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"1"
+                                 "value":"5"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -430,103 +479,54 @@
                          "y":816
                         }, 
                         {
-                         "gid":31224,
-                         "height":64,
-                         "id":382,
+                         "gid":13,
+                         "height":16,
+                         "id":394,
                          "name":"",
-                         "properties":[
-                                {
-                                 "name":"path",
-                                 "type":"object",
-                                 "value":383
-                                }, 
-                                {
-                                 "name":"signal_id",
-                                 "type":"string",
-                                 "value":"lift_golden_10"
-                                }, 
-                                {
-                                 "name":"power_source",
-                                 "type":"string",
-                                 "value":"golden_fields_windmills"
-                                }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":112,
+                         "width":720,
                          "x":1200,
-                         "y":736
-                        }],
-                 "opacity":1,
-                 "type":"objectgroup",
-                 "visible":true,
-                 "x":0,
-                 "y":0
-                },
-                {
-                 "draworder":"topdown",
-                 "id":107,
-                 "name":"area_stamps",
-                 "objects":[
+                         "y":784
+                        }, 
                         {
-                         "gid":15,
-                         "height":480,
-                         "id":243,
+                         "gid":14,
+                         "height":128,
+                         "id":395,
                          "name":"",
-                         "properties":[
-                                {
-                                 "name":"direction",
-                                 "type":"string",
-                                 "value":"right"
-                                }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":19.6363636363636,
-                         "x":2222.18181818182,
-                         "y":816
+                         "width":128,
+                         "x":864,
+                         "y":704
+                        }, 
+                        {
+                         "gid":14,
+                         "height":112,
+                         "id":396,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":128,
+                         "x":1968,
+                         "y":688
                         }],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
                  "x":0,
                  "y":0
-                },
+                }, 
                 {
                  "draworder":"topdown",
                  "id":105,
                  "name":"interactables",
                  "objects":[
                         {
-                         "gid":31249,
-                         "height":32,
-                         "id":386,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"action",
-                                 "type":"string",
-                                 "value":"request_station"
-                                }, 
-                                {
-                                 "name":"signal_id",
-                                 "type":"string",
-                                 "value":"lift_golden_10"
-                                }, 
-                                {
-                                 "name":"value",
-                                 "type":"string",
-                                 "value":"1"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":32,
-                         "x":1952,
-                         "y":688
-                        }, 
-                        {
-                         "gid":31249,
+                         "gid":31252,
                          "height":32,
                          "id":388,
                          "name":"",
@@ -566,8 +566,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":108,
- "nextobjectid":390,
+ "nextlayerid":110,
+ "nextobjectid":397,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -673,7 +673,7 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":31226,
+         "firstgid":31229,
          "source":"..\/_objects\/interactables.tsx"
         }],
  "tilewidth":16,

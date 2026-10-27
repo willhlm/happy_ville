@@ -10,6 +10,7 @@ from gameplay.data.narration_configs import get_narration_config
 from gameplay.data.ui_overlay_configs import get_ui_overlay_config
 from gameplay.ui.components.overlay.base_overlay import BaseOverlay
 from gameplay.ui.components.overlay.animated_image_overlay import LogoLoadingOverlay
+from gameplay.ui.components.overlay.item_pickup_toast import ItemPickupToast
 from gameplay.ui.components.overlay.text_overlay import TextOverlay
 
 
@@ -204,6 +205,14 @@ class OverlayManager:
 
     def play_logo_loading(self, game_objects, **kwargs) -> None:
         self.add(LogoLoadingOverlay(game_objects, **kwargs))
+
+    def play_item_pickup(self, game_objects, *, image, item_name, **kwargs) -> None:
+        self.add(ItemPickupToast(
+            game_objects,
+            image,
+            item_name,
+            **kwargs,
+        ))
 
     def play_static_overlay(self, game_objects, overlay_key: str, *, state_name: str = "static_overlay", callback=None) -> None:
         game_objects.game.state_manager.enter_state(state_name,overlay_key=overlay_key, callback=callback)

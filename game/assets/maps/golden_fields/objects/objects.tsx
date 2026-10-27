@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.8" tiledversion="1.8.2" name="objects" tilewidth="320" tileheight="320" tilecount="13" columns="0">
+<tileset version="1.8" tiledversion="1.8.2" name="objects" tilewidth="320" tileheight="320" tilecount="12" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="2">
   <image width="224" height="48" source="../../../sprites/entities/platforms/bridge/erect/bridge.png"/>
@@ -47,25 +47,6 @@
    <property name="rotation_phase" value="0"/>
   </properties>
   <image width="320" height="320" source="../../../sprites/entities/visuals/environments/blade_rig/idle/idle.png"/>
- </tile>
- <tile id="9">
-  <properties>
-   <property name="control_mode" value="map_transition"/>
-   <property name="destination_continue_to" value=""/>
-   <property name="destination_lift_id" value=""/>
-   <property name="destination_map" value=""/>
-   <property name="destination_station" type="int" value="0"/>
-   <property name="initial_station" value=""/>
-   <property name="lever_offset" value=""/>
-   <property name="lift_id" value=""/>
-   <property name="path" type="object" value="0"/>
-   <property name="power_source" value=""/>
-   <property name="relay_angle" type="int" value="90"/>
-   <property name="signal_id" value=""/>
-   <property name="transition_direction" value=""/>
-   <property name="transition_station" value=""/>
-  </properties>
-  <image width="144" height="64" source="../../../sprites/entities/platforms/lifts/liftcar/body/idle/rhoutta_encounter1.png"/>
  </tile>
  <tile id="10">
   <properties>

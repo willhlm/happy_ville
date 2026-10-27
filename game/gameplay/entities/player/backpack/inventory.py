@@ -34,9 +34,7 @@ class Inventory:
     def remove(self, item_name, quantity=1):
         if item_name not in self.items:
             return
-        self.items[item_name]["quantity"] -= quantity
-        if self.items[item_name]["quantity"] <= 0:
-            del self.items[item_name]
+        self.items[item_name]["quantity"] = max(0, self.items[item_name]["quantity"] - quantity)
 
     def get_quantity(self, item_name):#return quantity. If item doesn't exist, return 0
         return self.items.get(item_name, {}).get("quantity", 0)

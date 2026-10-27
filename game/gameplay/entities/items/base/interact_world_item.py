@@ -59,6 +59,12 @@ class InteractWorldItem(WorldItem):
         path = self.get_pickup_ui_image_path()
         return InteractWorldItem._pickup_ui_image_cache[path]
 
+    def get_pickup_name(self):
+        title = self.get_pickup_title()
+        if title:
+            return title
+        return str(self.get_pickup_persistence_key()).replace('_', ' ').title()
+
     @classmethod
     def get_pickup_fx(cls):
         pickup_fx = {}
@@ -108,12 +114,24 @@ class InteractWorldItem(WorldItem):
         if self.consumed or self.is_interacting:
             return False
         self.is_interacting = True
-        self.interact_component.interact_with_pickup_text(player)
+        discovery_key = self.get_pickup_persistence_key()
+        show_details = not player.backpack.has_discovered_item(discovery_key)
+        self.interact_component.interact_with_pickup_text(
+            player,
+            show_details=show_details,
+        )
         return True
 
     def on_pickup_interaction_complete(self, player):
         self.is_interacting = False
         picked_up = self.try_pickup(player)
+        if picked_up:
+            player.backpack.discover_item(self.get_pickup_persistence_key())
+            self.game_objects.ui.overlay.play_item_pickup(
+                self.game_objects,
+                image=self.image,
+                item_name=self.get_pickup_name(),
+            )
         if picked_up and self.alive():
             self.kill()
         return picked_up

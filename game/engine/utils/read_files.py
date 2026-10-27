@@ -69,6 +69,10 @@ def format_tiled_json_group(map_data):#if we want static stamps with parallax ->
     formatted_map_data = {}
     formatted_map_data['groups'] = {}
     formatted_map_data['tilesets'] = map_data['tilesets']
+    # Preserve room dimensions for systems that translate room-local coordinates,
+    # such as the player marker on the illustrated map.
+    for key in ('width', 'height', 'tilewidth', 'tileheight'):
+        formatted_map_data[key] = map_data.get(key, 0)
 
     for gruop in map_data['layers']:#it will take from lowest position in tiled
         formatted_map_data['groups'][gruop['name']] = {}

@@ -30,6 +30,7 @@ from engine.physics import PhysicsManager
 
 from gameplay.world import world_state
 from gameplay.world.map.map_coordinator import MapCoordinator
+from gameplay.world.map.marker_manager import MapMarkerManager
 from gameplay.world.weather import weather
 from engine import constants as C
 from gameplay.ui.managers import ui
@@ -81,6 +82,7 @@ class GameObjects:
         self.world_state = world_state.World_state(
             self
         )  # save/handle all world state stuff here
+        self.map_marker_manager = MapMarkerManager(self)
         self.world_controller = WorldController(self)
         self.ui = ui.UiManager(self)
         self.save_load = save_load.Save_load(

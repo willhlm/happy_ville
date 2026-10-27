@@ -20,7 +20,7 @@
          "name":"shared",
          "objects":[
                 {
-                 "gid":883,
+                 "gid":884,
                  "height":16,
                  "id":76,
                  "name":"",
@@ -48,9 +48,9 @@
                  "name":"",
                  "properties":[
                         {
-                         "name":"id",
+                         "name":"room_id",
                          "type":"string",
-                         "value":"nordveden_1"
+                         "value":"nordveden_2"
                         }],
                  "rotation":0,
                  "type":"",
@@ -65,14 +65,14 @@
                  "name":"",
                  "properties":[
                         {
-                         "name":"id",
+                         "name":"room_id",
                          "type":"string",
                          "value":"nordveden_1"
                         }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":32,
+                 "width":16,
                  "x":320,
                  "y":192
                 }, 
@@ -82,9 +82,54 @@
                  "name":"",
                  "properties":[
                         {
-                         "name":"id",
+                         "name":"room_id",
                          "type":"string",
-                         "value":"nordveden_2"
+                         "value":"nordveden_1"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":240,
+                 "x":352,
+                 "y":96
+                }, 
+                {
+                 "height":16,
+                 "id":80,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"room_id",
+                         "type":"string",
+                         "value":"nordveden_1"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":336,
+                 "y":192
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":9,
+         "name":"locators",
+         "objects":[
+                {
+                 "height":192,
+                 "id":77,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"room_id",
+                         "type":"string",
+                         "value":"nordveden_1"
                         }],
                  "rotation":0,
                  "type":"",
@@ -121,6 +166,29 @@
                  "width":64,
                  "x":224,
                  "y":192
+                }, 
+                {
+                 "gid":883,
+                 "height":16,
+                 "id":79,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"room_id",
+                         "type":"string",
+                         "value":"nordveden_1"
+                        }, 
+                        {
+                         "name":"selectable",
+                         "type":"bool",
+                         "value":true
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":416,
+                 "y":224
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -128,8 +196,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":9,
- "nextobjectid":77,
+ "nextlayerid":10,
+ "nextobjectid":81,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -153,7 +221,7 @@
          "source":"map_markers.tsx"
         }, 
         {
-         "firstgid":883,
+         "firstgid":884,
          "source":"..\/..\/..\/shared.tsx"
         }],
  "tilewidth":16,

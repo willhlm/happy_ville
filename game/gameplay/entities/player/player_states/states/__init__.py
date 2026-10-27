@@ -14,6 +14,7 @@ from .jump_sprint import JumpSprintState
 from .land import LandState
 from .plant_bone import PlantBoneState
 from .respawn import ReSpawnState
+from .sejte_travel import SejteTravelState
 from .run import RunState
 from .shield import ShieldState
 from .slow_motion import SlowMotionState

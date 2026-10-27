@@ -10,8 +10,8 @@ WINDMILL_NETWORKS = {
         # These are world-state defaults, rather than map-load defaults.
         # Consumers can therefore be loaded before the windmill map is visited.
         "windmill_initial_states": {
-            "windmill_1": "idle",#idle#z
-            "windmill_2": "stuck",#stuck
+            "windmill_1": "active",#idle#z
+            "windmill_2": "active",#stuck
             "windmill_3": "active",#active
         },
     },

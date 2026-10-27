@@ -3,6 +3,7 @@ from .bosses.wolfies.wolfies import Wolfies
 from .bosses.butterfly.butterfly import Butterfly
 from .bosses.cocoon.cocoon_boss import CocoonBoss
 from .bosses.toadess.toadess import Toadess
+from .bosses.plantis.plantis import Plantis
 from .bosses.bjorn.bjorn import Bjorn
 from .bosses.lieaibolmmai.lieaibolmmai import Lieaibolmmai
 

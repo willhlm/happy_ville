@@ -39,6 +39,7 @@ class AssetPreloader:
                 Tungsten,
                 Dyes,
                 Journal,
+                SejteStone,
                 RedInfinityStone,
                 BlueInfinityStone,
                 GreenInfinityStone,

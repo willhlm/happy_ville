@@ -360,7 +360,7 @@
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"2"
+                                 "value":"1"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -413,7 +413,7 @@
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"1"
+                                 "value":"2"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -481,6 +481,24 @@
                          "width":128,
                          "x":272,
                          "y":736
+                        }, 
+                        {
+                         "gid":31250,
+                         "height":176,
+                         "id":656,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"boss",
+                                 "type":"string",
+                                 "value":"tjasolmai"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":80,
+                         "x":1552,
+                         "y":864
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -536,7 +554,7 @@
          "y":0
         }],
  "nextlayerid":106,
- "nextobjectid":656,
+ "nextobjectid":657,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -642,7 +660,7 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":31226,
+         "firstgid":31229,
          "source":"..\/_objects\/interactables.tsx"
         }],
  "tilewidth":16,

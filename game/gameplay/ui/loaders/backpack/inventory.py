@@ -38,3 +38,5 @@ class InventoryLoader(BaseLoader):
                 self.items["bone"] = topleft_object_position
             elif local_id == 13:
                 self.items["heal_item"] = topleft_object_position
+            elif local_id == 15:
+                self.items["sejte_stone"] = topleft_object_position

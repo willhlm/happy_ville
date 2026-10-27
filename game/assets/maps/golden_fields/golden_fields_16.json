@@ -293,7 +293,7 @@
                          "visible":true,
                          "width":320,
                          "x":1024,
-                         "y":1216
+                         "y":1248
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -1198,11 +1198,11 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":31226,
+         "firstgid":31229,
          "source":"..\/_objects\/interactables.tsx"
         }, 
         {
-         "firstgid":31250,
+         "firstgid":31253,
          "source":"..\/_objects\/platforms.tsx"
         }],
  "tilewidth":16,

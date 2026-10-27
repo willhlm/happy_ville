@@ -1,5 +1,7 @@
 import pygame
 
+from .group_utils import unload_sprite
+
 
 class PauseLayer(pygame.sprite.Group):
     def __init__(self):
@@ -11,7 +13,7 @@ class PauseLayer(pygame.sprite.Group):
 
     def empty(self):
         for sprite in self.sprites():
-            sprite.release_texture()
+            unload_sprite(sprite)
         super().empty()
 
     @staticmethod
@@ -31,7 +33,7 @@ class PauseGroup(pygame.sprite.Group):
 
     def empty(self):
         for sprite in self.sprites():
-            sprite.release_texture()
+            unload_sprite(sprite)
         super().empty()
 
     @staticmethod

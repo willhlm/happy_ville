@@ -24,6 +24,7 @@ phase: str
 speed: str
 pingpong: bool
 loop: bool
+power_source: str -> optional registered power source; movement pauses while unpowered
 path: int -> path object id
 path_closed: bool -> set automatically from a closed Tiled path
 snap_to_path: bool

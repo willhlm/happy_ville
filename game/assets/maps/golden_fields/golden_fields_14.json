@@ -522,7 +522,7 @@
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"4"
+                                 "value":"3"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -1336,7 +1336,7 @@
                  "name":"interactables",
                  "objects":[
                         {
-                         "gid":31237,
+                         "gid":31240,
                          "height":144,
                          "id":658,
                          "name":"",
@@ -1359,7 +1359,7 @@
                          "y":1744
                         }, 
                         {
-                         "gid":31236,
+                         "gid":31239,
                          "height":32,
                          "id":659,
                          "name":"",
@@ -1377,7 +1377,7 @@
                          "y":1568
                         }, 
                         {
-                         "gid":31230,
+                         "gid":31233,
                          "height":32,
                          "id":680,
                          "name":"",
@@ -1508,11 +1508,11 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":31226,
+         "firstgid":31229,
          "source":"..\/_objects\/interactables.tsx"
         }, 
         {
-         "firstgid":31250,
+         "firstgid":31253,
          "source":"..\/_objects\/platforms.tsx"
         }],
  "tilewidth":16,
